@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "preparation_id",
+    "source_lot_id",
+    "record_id",
+    "created_at",
+    "evidence_status",
+    "evidence_ref",
+    "crystal_id",
+    "carrier_class",
+    "physical_boundary_ref",
+    "learned_relation_ref",
+    "reader_contract_ref",
+    "molecular_state_ref",
+    "cell_lineage_ref",
+    "delayed_retention_ref",
+    "source_teaching_route_status",
+    "recipient_only_evaluation_ref",
+    "physical_transfer_demonstrated",
+    "installable"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "preparation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_lot_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "evidence_status": {
+      "enum": [
+        "DESIGN",
+        "PROPOSED",
+        "OBSERVED",
+        "ASSOCIATIONAL",
+        "CAUSAL_RESEARCH",
+        "UNRESOLVED",
+        "REJECTED"
+      ]
+    },
+    "evidence_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "crystal_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "carrier_class": {
+      "enum": [
+        "MATRIX_STABILIZED_RELATION",
+        "SYNAPTIC_ASSEMBLY",
+        "LIVING_MICROCIRCUIT",
+        "OTHER_RESEARCH",
+        "UNRESOLVED"
+      ]
+    },
+    "physical_boundary_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "learned_relation_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reader_contract_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "molecular_state_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "cell_lineage_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "delayed_retention_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source_teaching_route_status": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "recipient_only_evaluation_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "physical_transfer_demonstrated": {
+      "const": false
+    },
+    "installable": {
+      "const": false
+    }
+  }
+}

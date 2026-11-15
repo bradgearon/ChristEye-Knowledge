@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "preparation_id",
+    "source_lot_id",
+    "record_id",
+    "created_at",
+    "evidence_status",
+    "evidence_ref",
+    "cell_instance_id",
+    "cell_track_id",
+    "clone_lineage_id",
+    "lineage_method",
+    "cell_type_candidate",
+    "region_id",
+    "spatial_transform_ref",
+    "morphology_ref",
+    "barcode_readout_ref",
+    "identity_confidence",
+    "observed_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "preparation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_lot_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "evidence_status": {
+      "enum": [
+        "DESIGN",
+        "PROPOSED",
+        "OBSERVED",
+        "ASSOCIATIONAL",
+        "CAUSAL_RESEARCH",
+        "UNRESOLVED",
+        "REJECTED"
+      ]
+    },
+    "evidence_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "cell_instance_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cell_track_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "clone_lineage_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "lineage_method": {
+      "enum": [
+        "DIRECT_IMAGING",
+        "ASSAY_LINEAGE",
+        "GENETIC_BARCODE_RESEARCH",
+        "UNKNOWN"
+      ]
+    },
+    "cell_type_candidate": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "region_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "spatial_transform_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "morphology_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "barcode_readout_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "identity_confidence": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "observed_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

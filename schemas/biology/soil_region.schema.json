@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "preparation_id",
+    "source_lot_id",
+    "record_id",
+    "created_at",
+    "evidence_status",
+    "evidence_ref",
+    "soil_region_id",
+    "regional_phenotype_candidate",
+    "source_preparation_ref",
+    "spatial_transform_ref",
+    "volume_observation_ref",
+    "maturation_assay_refs",
+    "cell_population_observation_refs",
+    "axon_projection_refs",
+    "viability_observation_ref",
+    "instrument_depth_coverage_ref",
+    "unobserved_volume_note",
+    "review_state"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "preparation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_lot_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "evidence_status": {
+      "enum": [
+        "DESIGN",
+        "PROPOSED",
+        "OBSERVED",
+        "ASSOCIATIONAL",
+        "CAUSAL_RESEARCH",
+        "UNRESOLVED",
+        "REJECTED"
+      ]
+    },
+    "evidence_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "soil_region_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "regional_phenotype_candidate": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source_preparation_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "spatial_transform_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "volume_observation_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "maturation_assay_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "cell_population_observation_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "axon_projection_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "viability_observation_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "instrument_depth_coverage_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "unobserved_volume_note": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "review_state": {
+      "enum": [
+        "SOURCE_UNVERIFIED",
+        "FORMING",
+        "STRUCTURE_OBSERVED",
+        "FUNCTIONAL_BASELINE",
+        "ELIGIBLE_FOR_RESEARCH",
+        "HOLD"
+      ]
+    }
+  }
+}

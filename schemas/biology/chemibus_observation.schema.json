@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "preparation_id",
+    "source_lot_id",
+    "record_id",
+    "created_at",
+    "evidence_status",
+    "evidence_ref",
+    "sample_id",
+    "analyte_identity",
+    "molecular_form",
+    "unit",
+    "observed_value",
+    "quantitation_limit",
+    "sample_location",
+    "sample_time",
+    "assay_id",
+    "calibration_ref",
+    "sample_recovery_ref",
+    "instrument_id",
+    "interpretation",
+    "physical_actuation_allowed"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "preparation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_lot_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "evidence_status": {
+      "enum": [
+        "DESIGN",
+        "PROPOSED",
+        "OBSERVED",
+        "ASSOCIATIONAL",
+        "CAUSAL_RESEARCH",
+        "UNRESOLVED",
+        "REJECTED"
+      ]
+    },
+    "evidence_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "sample_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "analyte_identity": {
+      "type": "string",
+      "minLength": 1
+    },
+    "molecular_form": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "unit": {
+      "type": "string",
+      "minLength": 1
+    },
+    "observed_value": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "quantitation_limit": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "sample_location": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sample_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "assay_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "calibration_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "sample_recovery_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "instrument_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "interpretation": {
+      "enum": [
+        "NOT_MEASURED",
+        "MEASURED",
+        "BELOW_LIMIT",
+        "INTERFERED",
+        "UNRESOLVED"
+      ]
+    },
+    "physical_actuation_allowed": {
+      "const": false
+    }
+  }
+}
