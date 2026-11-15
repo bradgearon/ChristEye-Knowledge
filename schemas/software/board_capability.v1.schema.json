@@ -166,6 +166,40 @@
     "announcement_signature_ref": {
       "type": "string",
       "minLength": 1
+    },
+    "media_modules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "module_id",
+          "manifest_ref",
+          "verification_state"
+        ],
+        "properties": {
+          "module_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "manifest_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "verification_state": {
+            "enum": [
+              "UNTRUSTED",
+              "ENROLLED",
+              "AUTHORIZED",
+              "REVOKED"
+            ]
+          }
+        }
+      }
+    },
+    "media_inventory_epoch": {
+      "type": "integer",
+      "minimum": 0
     }
   }
 }
