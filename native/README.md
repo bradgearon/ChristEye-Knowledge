@@ -50,3 +50,20 @@ ctest --test-dir build/native -C Release --output-on-failure
 Additional `wind_media_tests` verify two-route audio fan-out, typed MIDI delivery, mismatched clocks/rates, malformed frames, stale route revision, unauthorized route, queue capacity and removal-induced muting. No timing benchmark or device validation is claimed.
 
 See [CE-SW-05](../docs/software/CE-SW-05_modular_audio_vision_midi_starchip.md) for the hardware-model and research-safety contract.
+
+## SIM1 — deterministic living-system research surrogate
+
+SIM1 implements a **synthetic digital simulator**, not a biologically validated life model. See [CE-SW-06](../docs/software/CE-SW-06_living_surrogate_instruction_simulator.md). It represents symbolic crest and neural progenitors, blood carriers, neuron/glia archetypes, runtime-defined molecular proxy classes, bounded 2D space, synthetic energy/growth/RNA/learning counters, and directed graph connections.
+
+The fixed-capacity C++20 core lives in `include/christeye/living/simulator.hpp` and the 32-byte little-endian instruction codec (CEIP/1) in `include/christeye/living/bytecode.hpp`. SPAWN, DEFINE_MOLECULE, SUPPLY, MOVE, DIFFERENTIATE, CONNECT, TEACH_SYMBOL, ADVANCE and OBSERVE are deterministic and explicitly reject invalid transitions. The simulator owns its journal, copyable checkpoints and FNV consistency hashes (**not cryptographic**).
+
+`tests/living_sim_tests.cpp` verifies replay, bytecode, illegal lineages, bounded capacities and the synthetic **observation → WindPacket encode → decode → weighted scheduler** route. The demo prints ten NDJSON frames of a moving synthetic carrier:
+
+```sh
+cmake -S native -B build/native -DCE_WIND_BUILD_TESTS=ON
+cmake --build build/native --config Release
+ctest --test-dir build/native -C Release --output-on-failure
+./build/native/ce_living_sim_demo
+```
+
+Each frame is tagged `SIM1_UNCALIBRATED_DIGITAL`. This work does **not** demonstrate an organoid, biological RNA motion, neuronal language learning, viability, a physical Crystal or experimental material delivery. Real instrument links, signed provenance and durable WindStore remain separate future work.
