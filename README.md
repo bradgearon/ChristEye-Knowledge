@@ -1,41 +1,87 @@
 # ChristEye Anaiero
-**WDS research and engineering knowledge base · 15 November 2026**
 
-[Documentation](docs/index.md) · [Architecture](docs/architecture.md) · [Hardware](docs/hardware.md) · [Research](docs/research.md) · [Phases](docs/roadmap.md) · [Licensing](LICENSE.md)
+**We Develop Software LLC · Scientific research and modular computer architecture · November 15, 2026**
 
-**ChristEye Anaiero** investigates modular computing, adaptive learning, digital CrystalPacks, specialized StarChips, supervised electronic instrumentation, and possible future living-computing systems.
+[**Phase 1**](docs/phase-1.md) · [Complete documents](docs/full-document-library.md) · [24 subsystem contracts](docs/module-contracts.md) · [Full schemas](docs/schema-reference.md) · [Scientific research](research/full-markdown/README.md) · [Website](docs/index.html)
 
-> **Evidence boundary:** The software concepts, design schemas, and scientific plans in this repository do **not** establish a working intelligent organoid, biological memory-transfer medium, autonomous cell production system, or clinical device.
+ChristEye Anaiero is a research and engineering program investigating modular developmental computing, supervised biological instrumentation, specialist StarChips, capability-bearing digital CrystalPacks, Roots and retained knowledge, and the possible future living embodiment of these systems.
 
-## Find your way
+> **Research status.** Software prototypes and documentation exist. The project has **not** demonstrated an intelligent organoid computer, biological transfer of arbitrary memories, a validated physical Crystal, or an autonomous cell-growth system.
 
-- [Project overview](docs/index.md)
-- [Public architecture and system boundaries](docs/architecture.md)
-- [Core data model and WindBus](docs/windbus.md)
-- [Supervisory boards and physical instrument interfaces](docs/hardware.md)
-- [Scientific team and responsibilities](docs/science.md)
-- [Multimodal measurements and Roots](docs/measurement.md)
-- [CrystalPack compilation, replay and research questions](docs/crystals.md)
-- [Phase roadmap and release gates](docs/roadmap.md)
-- [Experiment and source editions](docs/research.md)
-- [Testing, limitations and acceptance](docs/testing.md)
-- [Research governance](docs/governance.md)
-- [Public engineering decision history](docs/decisions.md)
-- [Module design/companion library](docs/modules/README.md)
-- [Project landing page source](docs/index.html)
+## Read the documentation as an engineer
 
-## Working distinctions
+| Need | Open this |
+|---|---|
+| First complete technical phase | [P01 physical reference and interface guide](docs/phase-1.md) |
+| All original Phase 1 design documents | [P01: six full Markdown specifications](phases/P01/README.md) |
+| Cell counts and module allocations | [Original physical composition plan](phases/P01/docs/01_Physical_Module_Composition_and_Counts.md) |
+| Molecular and structural research | [41-entry detailed inventory](docs/molecule-and-structure-inventory.md) |
+| Electrical interfaces and WindBus | [Phase 1 electrical companion](phases/P01/docs/03_Electrical_WindBus_and_Training_Companion.md) |
+| Feeding, sampling and care | [Daily care, qualification and assays](phases/P01/docs/04_Daily_Care_Quality_Gates_and_Assays.md) |
+| Mandatory design-document format | [20-section specification standard](docs/document-standard.md) |
+| Full JSON schema fields | [Schema dictionary](docs/schema-reference.md) and [original JSON](schemas/README.md) |
+| All 24 module data contracts | [Full module processing/data reference](docs/module-contracts.md) |
+| Current full design/companion pairs | [24 designs + 24 companions + master](specifications/v3/README.md) |
+| Cell-free P02 electronics | [14 full P02 documents](phases/P02/README.md) |
+| Supervisory electronics and scientific operations | [21 full P02B documents](phases/P02B/README.md) |
+| Full scientific background | [Research studies in Markdown](research/full-markdown/README.md) |
+| Historical source documents | [Superseded v2 archive](archive/v2/README.md) |
 
-Digital CrystalPacks preserve source-linked software state, curricula, replay episodes, retrieval indexes and assessments. **Physical** Crystals are a separate unvalidated hypothesis about a content-bearing biological carrier. A simulated learner's task performance is not evidence of living-neural learning.
+**180 original Word documents are represented as complete Markdown editions:** the six Phase 1 originals plus 174 additional specifications, companions, research documents, and archived prior editions. The five diagrams embedded in those additional Word files are stored with their corresponding Markdown.
 
-The **Lotus host** schedules and coordinates education. An **independent limit controller** owns hard physical vetoes. The **Soil** denotes the declared living organoid in the organoid research branch, rather than simply the surrounding culture medium. Named biological roles always include a specified physical carrier, scope and measurement.
+## Architecture
 
-## Release history
+```mermaid
+flowchart TD
+  USER[Authorized user, files and external services] --> ROUTER[Central Data Router]
+  ROUTER --> LOTUS[Lotus / developmental coordinator]
+  LOTUS --> BUS[WindBus: typed events + provenance]
+  BUS --> MEMORY[Memory and Roots]
+  BUS --> CRYSTAL[Digital Crystal Compiler + Replay]
+  BUS --> STAR[Specialist StarChips]
+  BUS --> ADAPTER[Qualified observation adapters]
+  ADAPTER --> SOIL[Experimental living Soil]
+  LIMIT[Independent Limit Controller] -. Hard physical veto .-> ADAPTER
+  EVAL[Independent evaluator] --> MEMORY
+```
 
-P01 documented reference biology and contracts; P02 built a cell-free WindBus/digital training environment; P02B developed a read-only supervisor digital twin and scientific governance. P02C hardware commissioning remains a future gated phase. Published findings and proposed mechanisms must be labeled separately.
+The diagram represents a **proposed control and information architecture**, not a demonstrated arrangement of functional neural tissue. See [full architecture](docs/architecture.md).
 
-## License and rights
+## Phase status and integrity
 
-© 2026 **We Develop Software LLC**. The experimental and research documentation is governed by the [WDS Public Research Reference License](LICENSE.md). **Patent drafts, patent claims and confidential patent material are withheld.** Publication does not grant rights beyond the license. Third-party research remains subject to its original terms.
+| Phase | Purpose | State |
+|---|---|---|
+| P01 | Supplier-specific cell-composition reference, molecular inventory, interfaces and measurement boundaries | **Documented, not constructed** |
+| P02 | Cell-free controller, acquisition, WindBus, reference learning tasks | **Software prototype** |
+| P02B | Scientific director, cell-foundry workflow, supervisory electronics, telemetry | **Software prototype** |
+| P02C | Physical boards and OEM integration | Not commissioned |
+| P03–P06 | Qualified living culture, retained learning, multiple modules and 3D Soil | Research planned |
+| P07–P08 | Physical Crystal carrier, replication, expansion and deployment | Research hypotheses |
 
-This repository does not contain raw personal conversation logs, private application logs or donor records.
+The original machine-readable P01 counts, molecule inventory, unknown parameters and bibliography are in [phases/P01/registers](phases/P01/registers/README.md). Schema and module registries are in [schemas](schemas/README.md) and [registries](registries/README.md).
+
+## Run the public digital reference
+
+Python 3.11+ is recommended; the reference uses the standard library.
+
+```bash
+python -m unittest discover -s tests -v
+python -m examples.run_digital_replay
+python -m examples.p02b_supervisor_demo
+```
+
+Software tests confirm digital contracts only. The reference runtime has no permission to dispense culture medium, modify tissue growth, inject biological materials or stimulate neural tissue.
+
+## Scientific source provenance
+
+Scientific proposals are labeled **F** (finding in a named study), **X** (cross-source interpretation), **H** (hypothesis), **D** (design decision), or **A** (analogy). A source reference does not itself demonstrate a new device. Read [source and equation audit](research/full-markdown/R03_03_Formal_Models_and_Reconciliation_1_.md) before using any older Crystal formula.
+
+## Ownership and publication
+
+**Copyright © 2026 We Develop Software LLC. All rights reserved except as expressly permitted by the [WDS Public Research Reference License](LICENSE.md).**
+
+The experimental research and complete non-patent technical design records are project property. The **physical patent document itself is not included** in this repository. Public research descriptions do not authorize clinical use or manufacture, and the WDS license does not grant patent rights. Historical naming is preserved in archived documents for traceability.
+
+## Website and GitHub Pages
+
+Readable Markdown works directly in GitHub without downloads. The responsive website source is at [docs/index.html](docs/index.html). To publish it via GitHub Pages, follow [the exact deployment steps](docs/DEPLOY.md); GitHub Pages must be enabled by the repository owner.

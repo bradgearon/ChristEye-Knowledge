@@ -1,6 +1,6 @@
 # Complete Anaiero technical document library
 
-**Release snapshot: 15 November 2026** · WDS Public Research Reference License.
+**Documentation baseline: November 15, 2026** · WDS Public Research Reference License.
 
 This index links **full Markdown conversions** of every available historical/current DOCX from the v6 public-release archive except documents already converted in Phase 1. The actual patent document is not included. Source SHA-256 values accompany every conversion.
 
@@ -15,3 +15,10 @@ This index links **full Markdown conversions** of every available historical/cur
 
 Original DOCX versions are preserved in the owner’s archive; GitHub Markdown is the primary accessible reading format. Conversion can be audited using [SHA-256 manifests](../specifications/conversion-manifest.json). Read the latest research first; legacy pages are labeled.
 
+
+## Core entry points
+
+- [Phase P01 professional reading guide](phase-1.md)
+- [Complete schema dictionary](schema-reference.md)
+- [24 data contract processing specifications](module-contracts.md)
+- [Scientific reference editions](research.md)

@@ -1,26 +1,35 @@
-# ChristEye Anaiero knowledge base
+# ChristEye Anaiero — documentation
 
-**Purpose:** traceable, accessible engineering documentation for a multi-module developmental-computing research program.
+**15 November 2026 · © 2026 We Develop Software LLC · WDS Public Research Reference License**
 
-| Explore | Documentation |
+The documentation is a **complete technical library**, not an index of promised future writing. Current and historical specifications are separated, and original experimental figures and machine-readable data are preserved.
+
+## Start here
+
+| Track | Documents |
 |---|---|
-| System | [Architecture](architecture.md), [WindBus & contracts](windbus.md), [Crystals](crystals.md) |
-| Physical planning | [Boards](hardware.md), [Science roles](science.md), [Measurements](measurement.md) |
-| Engineering | [Module specifications](modules/README.md), [Testing](testing.md), [Roadmap](roadmap.md) |
-| Research | [Source documents](research.md), [Governance](governance.md), [Decisions](decisions.md) |
+| **P01 — physical reference** | [Engineer overview](phase-1.md) · [Six complete Word-to-Markdown specifications](../phases/P01/README.md) |
+| **Module architecture** | [48 complete design/companion specifications](../specifications/v3/README.md) · [Original module contracts](module-contracts.md) |
+| **Schemas** | [Field-by-field reference](schema-reference.md) · [Original JSON schema files](../schemas/README.md) |
+| **Scientific research** | [Complete source editions](../research/full-markdown/README.md) · [Phase 1 citations](references-phase-1.md) |
+| **Hardware development** | [P02 cell-free electronic design](../phases/P02/README.md) · [P02B supervised electronics](../phases/P02B/README.md) |
+| **Historical versions** | [Superseded v2 documents](../archive/v2/README.md) · [Conversion provenance](../specifications/conversion-manifest.json) |
 
-### Evidence labels
+## Phase 1 detailed guides
 
-- **F — Finding:** demonstrated in a named published preparation.
-- **X — Synthesis:** cross-source interpretation requiring further test.
-- **H — Hypothesis:** unverified biological or system mechanism.
-- **D — Design:** an implementation decision, not empirical evidence.
-- **M — Mathematical statement:** valid only under its specified assumptions.
+- [Physical composition, measured versus planned](phase-1.md)
+- [Molecular and structural inventory](molecule-and-structure-inventory.md)
+- [Full design-document authoring standard](document-standard.md)
+- [Published scientific and vendor references](references-phase-1.md)
+- [All original system schemas](schema-reference.md)
+- [24 module data models and processing contracts](module-contracts.md)
 
-### Development boundary
+## System topics
 
-P02B is an offline, read-only supervisor *software prototype*. Physical sensors, custom PCBs, live tissue feeding, growth control and semantic peptide/Crystal installation are not demonstrated.
+[Architecture](architecture.md) · [WindBus and data transport](windbus.md) · [Digital Crystals and replay](crystals.md) · [Scientific direction](science.md) · [Instrumentation](hardware.md) · [Measurement](measurement.md) · [Governance](governance.md) · [Testing](testing.md) · [Development roadmap](roadmap.md)
 
-Open the [graphical project landing page](index.html) or start with the [architecture](architecture.md).
+## Evidence categories
 
-**WDS research property — © 2026 We Develop Software LLC.** See [LICENSE.md](../LICENSE.md).
+**F** published finding; **X** cross-study synthesis; **H** hypothesis; **D** design; **A** analogy. A digital software test cannot be counted as biological learning. All core specifications retain provenance and original SHA-256 hashes.
+
+[Open the visual site](index.html) · [GitHub repository home](../README.md)
