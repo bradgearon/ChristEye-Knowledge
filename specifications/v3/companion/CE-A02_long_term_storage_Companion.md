@@ -128,6 +128,58 @@ Additional anchors: [B01 functional organoid readings](https://www.nature.com/ar
 
 The original v3.0 text is preserved below as project provenance; a v3.0 proposal does not override a qualified v3.1 mechanism or the R03 mathematical reconciliation.
 
+## 15. A02-specific science audit and quantitative falsification packet
+
+### 15.1. Why digital archival and biological retention differ
+
+The ability to retrieve hashed file bytes on a new host is a test of *data integrity*. A biological population that responds differently because of its history is a candidate for *learning*. Preserved response under controlled delay demonstrates *bounded retention*. A physical structure retaining a specific relation is a further causal carrier hypothesis. A transferable knowledge Crystal is a further claim beyond all those.
+
+The project names spinal-derived matter as a physical Root, but the documented literature does not establish that such a spinal organoid is the location for arbitrary semantic long-term memory. Corticospinal connectoid research demonstrates axon growth and functional communication in a specific human in-vitro model [Gibbons et al. 2026](https://pubmed.ncbi.nlm.nih.gov/42201810/), not a general memory storage device.
+
+### 15.2. Mechanistic candidate table with actual inferential limits
+
+| Hypothesis | Named ordinary participants | Literature support | Negative or alternative reading |
+|---|---|---|---|
+| Task-linked synaptic maintenance | KIBRA/PKMζ | [Science Advances 2024](https://pmc.ncbi.nlm.nih.gov/articles/PMC11204205/), specific animal models | a general viability/kinase effect or different maintenance mechanism |
+| Local receiving structure | DLG4/PSD95, SynGAP, SHANK/HOMER | [Cell 2016 PSD assembly](https://pmc.ncbi.nlm.nih.gov/articles/PMC5564291/) | concentration/physical scaffold with no content discrimination |
+| Astrocytic metabolic support | MCT1/MCT4 (astrocytic), MCT2 (neuronal) | [Cell 2011 rat learning](https://pmc.ncbi.nlm.nih.gov/articles/PMC3073831/) | metabolism correlates with activity, not a specific stored fact |
+| History-sensitive receiving state | verified BDNF proteoforms/TrkB and receiver partners | [Science Advances 2025](https://pubmed.ncbi.nlm.nih.gov/40991708/) | generic receptor activation, not a portable Word or peptide-based installed curriculum |
+| Spinal axon organization | qualified cortical/spinal source, axon projections, terminal evidence | [Cell Reports 2026 connectoid](https://pubmed.ncbi.nlm.nih.gov/42201810/) | shared drive, bulk excitability and incidental contact |
+| Biological delayed task | independent organoid preparation with controlled task | [Cell Reports 2026](https://pubmed.ncbi.nlm.nih.gov/41720084/) | tested short-lasting adaptation rather than durable general learning |
+
+**Scientist's rule:** a positive molecular assay cannot replace a retained-task probe; a retained-task probe cannot by itself identify a molecular carrier.
+
+### 15.3. Models and unit checks
+
+For a valid 3-class task (X, Y, HOLD) with support in each class, macro recall is the arithmetic mean of the *three per-class recall values*. If \(n_c\) is the number of valid trials in class \(c\), \(r_c = TP_c/n_c\), and \(M=(r_X+r_Y+r_{HOLD})/3\). Separately report missing/invalid trial rate, task-class balance and preparation-level uncertainty. This metric is distinct from raw accuracy; a constant HOLD strategy can have deceptively high accuracy when HOLD is common.
+
+A chance-corrected ratio may be described by \(R=(P_{delayed}-P_{chance})/(P_{immediate}-P_{chance})\) only when the immediate numerator is meaningfully above the chance comparator. It may exceed 1 or be negative, and cannot be clamped without distorting evidence. Report absolute immediate/delayed scores first. [R03 corrected formal models](../../../research/full-markdown/R03_03_Formal_Models_and_Reconciliation_1_.md).
+
+The access hypothesis \(P_{observed}=P_{chance}+(K-P_{chance})A\) contains two latent variables, retained capacity \(K\) and momentary access \(A\). A single observed score cannot distinguish them. Alternative prior cues, source/decoder calibration, matched support and no re-teaching supply additional discriminating evidence, not certain anatomical localization.
+
+### 15.4. Assay constraints and false-positive avoidance
+
+A molecular study must declare **what is physically measured** (cell/region/molecule/compartment, actual assay, time/location/units) and whether the molecular readout is repeated or destructive. RNA dynamics require special observation and cannot continuously inventory every living cell; optical coverage and handling matter. Neurite extension and dendritic spine change are not birth events. Use separate source, tracer and time/geometry records [2025 long-term morphodynamics](https://www.nature.com/articles/s41586-025-09151-3).
+
+An "A02-spinal Root" claim requires both relevant spinal identity and evidence of a learned relation **attributable to that tissue**, beyond an adapted external decoder. A tissue might participate in a circuit without uniquely storing the relation.
+
+### 15.5. Falsification decisions
+
+1. **A02-D digital restore fails:** reject digital durability regardless of the biological experiment.
+2. **Biological task improves only with adaptive host/decoder:** classify **hybrid computational improvement**, not changed tissue.
+3. **Delayed task returns to control after matched interval:** bounded negative result for retention in the preparation and test horizon.
+4. **Structural candidate increases but function does not:** reject the claim that the measured expansion establishes new Understanding.
+5. **Biological candidate affects general health and all tasks equally:** no content-specific engram conclusion.
+6. **B improves only while joined:** report assisted use; do not infer independent recipient acquisition.
+7. **All five gates for portable carrier unpassed:** retain physical Crystal as a research hypothesis, not an installable file or peptide.
+
+### 15.6. Human governance and next experiments
+
+A scientific director defines one *primary* learned relation and predeclares a delayed endpoint with justified biological sample size. The cell foundry qualifies source line and spinal identity, electrophysiologist validates actual events, analyst maintains correct independent replicate units, and limit controller prevents any unreviewed care changes. Biological interventions require separately documented molecular form/target, qualified preparation SOP and oversight; no unpublished "ideal peptide feeding" algorithm can be inferred from current results.
+
+Source hierarchy: [P01 biology references](../../../phases/P01/references.md), [2026 evidence register](../../../research/evidence/anaiero-biology-2026-11.md), [A02 design](../design/CE-A02_long_term_storage_Design.md), [scientist workflow](../../../processes/SCIENTIST_WORKFLOW.md).
+
+
 ## Original v3.0 companion — full preserved source
 
 > Prior implementation edition retained for provenance and regression review. v3.1 sections above take precedence for scientific claims.

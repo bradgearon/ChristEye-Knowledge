@@ -194,6 +194,137 @@ Can CE-A02 provide delayed content-specific Root function and independently rest
 
 © 2026 We Develop Software LLC. [WDS Public Research Reference License](../../../LICENSE.md). The confidential physical patent document is excluded from this public research repository. This module revision replaces generic speculation with concrete data and scientific gate requirements, not a claimed laboratory SOP.
 
+## 21. A02-specific implementation blueprint: long-term memory versus proposed spinal Root
+
+This section is specific to **A02**, not the shared template. The digital storage engine is an actionable software component; the physiological pathway remains a testable biological research program.
+
+### 21.1. Two independent persistence systems
+
+| Tier | Persistent thing | Carrier | Truth source | Failure detector |
+|---|---|---|---|---|
+| Digital object | original source bytes, lessons, checkpoint, waveform or image | SHA-256 immutable CAS blob | hash-verified object and ACL | hash mismatch, absent blob, revoked source |
+| Digital retrieval | lexical/semantic retrieval path to a source | rebuildable index generation | source object + index provenance | restore retrieves source but index fails |
+| Functional Root | a declared task relation usable after a delay | trained digital learner or qualified biological preparation | independent delayed evaluator under frozen readout | loss of task-specific selective behavior at a declared horizon |
+| Physical spinal candidate | spinal-derived circuits conjectured to support a Root | region/cell/axon/glial tissue in Soil or independent module | approved spatial + physiology dataset, separate evidence type | uncertain source/axon field, failed connection controls |
+| Material Crystal candidate | a bounded physical state potentially carrying a specific learned relation | currently **unresolved** molecular/structural carrier | carrier-specific selective experimental evidence | generic concentration or excitability explains benefit |
+
+The **RootEvidence relation** can point to multiple proposed tissue substrates; the reverse can hold for multiple tasks. Do not force a one-Root/one-neuron or one-Root/one-synapse data schema.
+
+### 21.2. Digital normalized data model (SQLite WAL candidate)
+
+~~~sql
+CREATE TABLE IF NOT EXISTS digital_object (
+  sha256 TEXT PRIMARY KEY CHECK(length(sha256)=64),
+  media_type TEXT NOT NULL,
+  logical_length INTEGER NOT NULL CHECK(logical_length>=0),
+  origin_source_id TEXT NOT NULL,
+  owner_scope TEXT NOT NULL,
+  encryption_key_id TEXT,
+  created_at_utc TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS root_claim (
+  root_id TEXT PRIMARY KEY,
+  task_id TEXT NOT NULL,
+  substrate_kind TEXT NOT NULL,
+  claimant_module TEXT NOT NULL,
+  evidence_status TEXT NOT NULL,
+  source_preparation_id TEXT,
+  created_at_utc TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS root_probe (
+  probe_id TEXT PRIMARY KEY,
+  root_id TEXT NOT NULL REFERENCES root_claim(root_id),
+  task_split_digest TEXT NOT NULL,
+  reader_digest TEXT NOT NULL,
+  horizon_label TEXT NOT NULL,
+  macro_recall REAL,
+  validity TEXT NOT NULL,
+  sealed_evaluator_receipt TEXT,
+  observed_at_utc TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS scientific_edge (
+  edge_id TEXT PRIMARY KEY,
+  root_id TEXT NOT NULL REFERENCES root_claim(root_id),
+  candidate_spinal_substrate_id TEXT NOT NULL,
+  edge_kind TEXT NOT NULL CHECK(edge_kind IN
+     ('STRUCTURAL_CONTACT','STATISTICAL_ASSOCIATION',
+      'INTERVENTION_SUPPORTED_INFLUENCE','TASK_RELATION')),
+  source_dataset_sha256 TEXT NOT NULL,
+  status TEXT NOT NULL
+);
+~~~
+
+Write object blobs to temporary files, validate digest and owner scope, fsync/atomically rename, then commit metadata and an outbox transaction. Index workers operate on **committed** objects and can always rebuild. A snapshot restores these digital records, not physical neural state.
+
+### 21.3. Biological A02 tissue contract
+
+The candidate **spinal Root** is identified by a qualified spinal regional phenotype and source version. An A02-root physical record contains source lot; distinct neuronal/glial identities; observed axonal projections and terminal candidates; receiver/target regions; optical coverage; cell-track versus lineage IDs; sampled molecular forms; independent qualified care and viability; reproducible input/output readouts; and uncertainty. [BIO-02](../../../processes/BIO-02-axon-spinal-root.md).
+
+**Candidate assays:**
+
+- Functional and morphology: spinal phenotype evidence, registered candidate axons and dendritic synapses, pre/post task response, matched control, delayed retained function [2026 corticospinal connectoid](https://pubmed.ncbi.nlm.nih.gov/42201810/).
+- Scaffold/maintenance: DLG4/PSD95, SYNGAP, SHANK/HOMER, KIBRA/PKMζ as *hypotheses about selected structure or lasting synaptic change* [KIBRA mouse memory](https://pmc.ncbi.nlm.nih.gov/articles/PMC11204205/), [synaptic condensate study](https://pmc.ncbi.nlm.nih.gov/articles/PMC5564291/).
+- Receiving state: BDNF/mature forms, TrkB and associated receptor context, selected astrocyte activity, energy and selected lactate-transport pathways. The rat hippocampus evidence on MCT1/MCT4/MCT2 cannot be used to prescribe Anaiero feeding [2011 Cell study](https://pmc.ncbi.nlm.nih.gov/articles/PMC3073831/).
+
+These are **observation candidates** first, not recipes for growing an intelligent Root.
+
+### 21.4. A02 learning test battery
+
+~~~text
+TEST A02-D: hash -> commit -> index -> filesystem restart -> cold restore
+  expected: exact source bytes, versioned permission and index reconstruction
+TEST A02-R0: freeze baseline, cue codebook and decoder
+  expected: valid source/readout and chance/per-class baselines
+TEST A02-R1: declared relation with feedback-contingent learning
+  control: exposure-matched condition without target-answer information
+TEST A02-R2: delayed task after training information absent
+  expected: absolute macro recall, all class results, confidence and care state
+TEST A02-R3: alternative previously valid cue path with no re-teaching
+  question: access fault or possible retained capacity?
+TEST A02-R4: selected spine/axon/scaffold observation, source identity and exposure
+  question: added predictive value beyond maturation, bulk activity and health?
+TEST A02-R5: proposed physical Route C->Root->B, compared with source-only,
+             recipient-only and information-matched electronic replay
+  question: assisted use or independently retained recipient capability?
+~~~
+
+"R1 passed" does not mean A02 can store book paragraphs physically. "R2 passed" proves only a bounded relation at the tested horizon. "R4 passed" supports a scoped association until independently justified mechanistic intervention.
+
+### 21.5. Root maintenance and growth decision
+
+**Event:** delayed A02 performance drops. Sequence: (1) verify digital source digest and permissions; (2) probe with an unchanged old decoder and codebook; (3) inspect actual delivered cues and sample freshness; (4) compare health/medium/metabolite state and selected axon route; (5) test alternate cues with feedback off; (6) only then consider whether tissue maintenance or a developmental study is scientifically justified.
+
+A requested increase in Root capacity is not a request for unlimited neural progenitor division. The cell-foundry scientist must independently qualify the new source/lineage, contact with existing Soil, measured axonal organization and protected old skills; a genuinely new cell receives externally tracked source/lineage/observation identifiers, **not an automatic memory clone**.
+
+### 21.6. A02 food/peptide intervention review example
+
+~~~json
+{
+  "change_id": "a02-example",
+  "requesting_module_id": "CE-A02",
+  "change_class": "MOLECULAR_RESEARCH_PROPOSAL",
+  "trigger": "delayed task change accompanied by independently validated assay pattern",
+  "candidate_molecular_identity": "unselected — receptor and proteoform study required",
+  "assay_and_preparation_ref": null,
+  "historical_protected_root_tests": [],
+  "axon_mapping_controls": [],
+  "qualified_cell_sop": null,
+  "pi_approval": null,
+  "safety_approval": null,
+  "decision": "NOT_APPROVED",
+  "automated_physical_actuation": false
+}
+~~~
+
+The next correct operation is **collect evidence and review**. No new medium component, peptide, dose, growth stimulus or genetic cell ID is deployed by A02. Follow [BIO-09](../../../processes/BIO-09-growth-control.md), [BIO-10](../../../processes/BIO-10-care-health.md).
+
+### 21.7. Acceptance packet required from the scientist
+
+A02 submission must link: qualified source lot; actual Soil and spinal Root candidate identity; registered 3D axon tracks and morphological validity; measured tissue health and actual Milk/SustiBus state; Chemibus assay specificity; independent task/decoder evidence; delayed performance and old skills; molecular mechanism question and alternatives; sealed control/retention analysis; negative findings; signed release decision.
+
+**Final output statuses:** DIGITAL_STORAGE_VALID, DIGITAL_ROOT_VALID, BIOLOGICAL_RELATION_OBSERVED, BIOLOGICAL_ASSOCIATION_ONLY, PHYSICAL_ROOT_CONTRIBUTION_CANDIDATE, or UNRESOLVED. Never collapse them into one "Memory installed" badge.
+
+
 ## Original v3.0 design — full preserved source
 
 > Prior implementation edition retained for provenance and regression review. v3.1 sections above take precedence for scientific claims.
