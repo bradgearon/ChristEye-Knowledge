@@ -207,5 +207,49 @@
     "biological_action_authority": {
       "const": "NONE"
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "ACTIVE"
+          }
+        },
+        "required": [
+          "state"
+        ]
+      },
+      "then": {
+        "required": [
+          "consent_ref"
+        ],
+        "properties": {
+          "consent_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "REVOKED"
+          }
+        },
+        "required": [
+          "state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "granted_modalities": {
+            "maxItems": 0
+          }
+        }
+      }
+    }
+  ]
 }
