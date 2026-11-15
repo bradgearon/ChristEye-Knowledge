@@ -96,6 +96,16 @@ struct Action {
   std::int32_t amount = 0;
 };
 
+// VLM-level evidence is emitted AFTER both SIM1 and Soil updates commit.
+// All values are explicitly simulated, never measurements from a preparation.
+struct VirtualEvidence {
+  std::uint64_t sequence = 0;
+  std::uint64_t tick = 0;
+  std::uint64_t state_hash = 0;
+  std::uint64_t action_chain = 0;
+  bool field_deposit = false;
+};
+
 enum class Result : std::uint8_t {
   ok, invalid_setup, malformed_line, model_incompatible, invalid_action,
   kernel_rejected, full, checksum_mismatch, io_error
@@ -274,6 +284,9 @@ class VirtualMachine {
   std::vector<Action> journal_{};
   bool frozen_image_ = false;
   std::uint64_t action_chain_ = kFnvOffset; // VLM image + journal; synthetic only
+  using OnEvent = void (*)(void*, const VirtualEvidence&) noexcept;
+  OnEvent on_event_ = nullptr;
+  void* on_event_context_ = nullptr;
 
   Result apply_internal(const Action& action, bool image) {
     if (image && frozen_image_) return Result::invalid_setup;
@@ -306,6 +319,12 @@ class VirtualMachine {
     }
     (image ? image_ : journal_).push_back(action);
     if (!image) frozen_image_ = true;
+    if (on_event_) {
+      const VirtualEvidence record{
+          static_cast<std::uint64_t>(image_.size() + journal_.size()),
+          core_.tick(), state_hash(), action_chain_, action.is_deposit};
+      on_event_(on_event_context_, record);
+    }
     return Result::ok;
   }
 public:
@@ -317,6 +336,10 @@ public:
   }
   const std::string& name() const noexcept { return name_; }
   const Core& core() const noexcept { return core_; }
+  void set_event_callback(OnEvent handler, void* context) noexcept {
+    on_event_ = handler;
+    on_event_context_ = context;
+  }
   const FieldGrid& soil() const noexcept { return soil_; }
   std::uint64_t action_chain() const noexcept { return action_chain_; }
   const std::vector<Action>& image() const noexcept { return image_; }
