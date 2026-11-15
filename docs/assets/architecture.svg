@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 410" role="img" aria-label="Anaiero functional architecture">
+<style>text{font-family:system-ui,Segoe UI,sans-serif;fill:#e9f7ff} .box{fill:#152841;stroke:#3a5c79;stroke-width:1.6} .accent{stroke:#29cfba} .gold{stroke:#e0b86c} .sub{font-size:14px;fill:#a6bfd2}.head{font-size:18px;font-weight:700} .link{stroke:#739cb0;stroke-width:2;fill:none;stroke-dasharray:5 5}</style>
+<rect width="960" height="410" rx="20" fill="#0b1729"/>
+<rect x="30" y="25" width="900" height="66" rx="13" class="box"/><text x="480" y="51" text-anchor="middle" class="head">ChristEye Anaiero · Host and Lotus</text><text x="480" y="72" text-anchor="middle" class="sub">permissioned data routing · education scheduling · provenance · software decisions</text>
+<path d="M480 91V124" class="link"/>
+<rect x="185" y="124" width="590" height="57" rx="11" class="box accent"/><text x="480" y="150" text-anchor="middle" class="head">WindBus · typed communication</text><text x="480" y="168" text-anchor="middle" class="sub">source / recipient / codebook / freshness / rights / receipt</text>
+<path d="M480 181V205 M120 205H835 M120 205V223 M310 205V223 M525 205V223 M760 205V223" class="link"/>
+<g><rect x="33" y="223" width="175" height="85" rx="11" class="box"/><text x="120" y="248" text-anchor="middle" class="head">Memory &amp; Roots</text><text x="120" y="271" text-anchor="middle" class="sub">retention evidence</text></g>
+<g><rect x="224" y="223" width="175" height="85" rx="11" class="box"/><text x="311" y="248" text-anchor="middle" class="head">CrystalPacks</text><text x="311" y="271" text-anchor="middle" class="sub">digital replay</text></g>
+<g><rect x="415" y="223" width="215" height="85" rx="11" class="box"/><text x="522" y="248" text-anchor="middle" class="head">Science StarChips</text><text x="522" y="271" text-anchor="middle" class="sub">research assistants</text></g>
+<g><rect x="646" y="223" width="281" height="85" rx="11" class="box"/><text x="787" y="248" text-anchor="middle" class="head">Instrument adapters</text><text x="787" y="271" text-anchor="middle" class="sub">read-only supervisor / OEM MEA</text></g>
+<path d="M788 308V334" class="link"/><rect x="610" y="334" width="320" height="53" rx="12" class="box gold"/><text x="770" y="356" text-anchor="middle" class="head">Independent limits</text><text x="770" y="373" text-anchor="middle" class="sub">physical veto · external authority</text>
+<text x="30" y="384" class="sub">Research status: digital interface prototype; living-soil and physical-crystal work gated</text>
+</svg>
