@@ -65,7 +65,7 @@ seal <sim_hash> <event_hash> <soil_hash> <vm_hash> <tick>
 
 The included example `examples/vlm/crest-garden.avlm` is a fully editable **unsealed** image template. Commands that create/update instances write an integrity seal; loading a sealed file checks every component before accepting it. Four 64-bit hashes are deliberately **FNV reproducibility checks, not cryptographic signatures**. An attacker can forge them; production validation needs canonical binary records, SHA-256/BLAKE3 and authenticated authors from a future WindStore.
 
-A machine always retains original image instructions and accepted runtime journal entries. On load it **replays** them in declared order and checks the resulting state. Reject bad version, unknown opcode, invalid cell lineage, malformed numeric fields, unexpected tokens, excessive file size and wrong checksums without partially modifying the destination machine. A failed operation from an `execute` command does not overwrite the destination file.
+A machine always retains original image instructions and accepted runtime journal entries. The VLM action chain includes both SIM1 opcodes and VLM-only Soil deposits; the SIM1 event chain remains independently available. On load it **replays** them in declared order and checks the resulting state. Reject bad version, unknown opcode, invalid cell lineage, malformed numeric fields, unexpected tokens, excessive file size and wrong checksums without partially modifying the destination machine. A failed operation from an `execute` command does not overwrite the destination file.
 
 ## Synthetic Soil and molecular movement
 
@@ -112,7 +112,7 @@ Important: unlike an OCI/Linux container, VLM1 does not provide process virtuali
 
 ## Interface with WindBus and development evidence
 
-CE-SW-06 SIM1 tests already verify native `Evidence` callback -> `WindPacket` frame -> parser -> bounded `WindScheduler` delivery. VLM1 retains the same SIM1 internal events and adds the Soil field. A future `VLMStateDelta` should include `machine_id`, `image_digest`, `model_revision`, accepted instruction counter, synthetic tick, SIM1 state/event hashes, field hash, instrument source classification `SIMULATED`, and comparison/measurement policy. These records must be isolated from real SustiBus/ChemiBus or physical neural observations.
+CE-SW-06 SIM1 tests already verify native `Evidence` callback -> `WindPacket` frame -> parser -> bounded `WindScheduler` delivery. VLM1 retains SIM1 internal events and adds a separate **post-commit virtual evidence callback**, emitted after the Soil field and SIM1 state are both updated, including for field-only deposits. The integration test sends the combined state and action-chain digests through WindPacket and the bounded evidence scheduler. A future `VLMStateDelta` should include `machine_id`, `image_digest`, `model_revision`, accepted instruction counter, synthetic tick, SIM1 state/event hashes, field hash, instrument source classification `SIMULATED`, and comparison/measurement policy. These records must be isolated from real SustiBus/ChemiBus or physical neural observations.
 
 VLM1 does **not** implement secure WindBus networking or a persistent content-addressed WindStore. The `.avlm` file is a portable local deterministic snapshot; no claim is made about distributed durability or multi-host consensus. Changes to actual equipment, neural stimulation or chemical supply are categorically outside the instruction set.
 
