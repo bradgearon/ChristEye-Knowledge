@@ -1,0 +1,31 @@
+{
+  "schema_version": "ce.control.profile/1",
+  "profile_id": "client-demo-profile-1",
+  "scope": "CLIENT",
+  "target_id": "digital-client-demo-1",
+  "revision": 1,
+  "base_revision": 0,
+  "axis_definition_revision": 1,
+  "axes": {
+    "food_support": 500,
+    "knowledge": 650,
+    "growth": 500,
+    "understanding": 750,
+    "energy": 500,
+    "retention": 800,
+    "expressiveness": 600,
+    "creativity": 650,
+    "crystal_focus": 600,
+    "teacher_balance": 500,
+    "environment_adaptation": 600,
+    "evidence_rigor": 850
+  },
+  "strategy": "HYBRID",
+  "author_principal": "example-untrusted-operator",
+  "created_at": "2026-11-15T21:00:00Z",
+  "authority_scope": "DIGITAL_PLAN_ONLY",
+  "apply_mode": "REQUEST",
+  "policy_digest": null,
+  "signature_ref": null,
+  "reason": "Demonstration values; no authorized device action"
+}
