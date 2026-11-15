@@ -1,0 +1,49 @@
+{
+  "schema_version": "ce.board.capability/1",
+  "board_id": "example-board-a-b1-01",
+  "hardware_revision": "development-board-rev-a",
+  "firmware_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+  "boot_nonce": "example-nonce-not-for-production",
+  "device_identity_ref": "example-untrusted-device",
+  "verification_state": "UNTRUSTED",
+  "independent_limit_status": "OUT_OF_BAND",
+  "interfaces": [
+    {
+      "transport": "ETHERNET_1G",
+      "role": "UPLINK",
+      "port_ref": "eth0",
+      "measured_max_bytes_per_second": null
+    },
+    {
+      "transport": "USB_SERIAL",
+      "role": "DIAGNOSTIC",
+      "port_ref": "usb-cdc0",
+      "measured_max_bytes_per_second": null
+    }
+  ],
+  "readouts": [
+    {
+      "name": "board_temperature",
+      "scope": "DIAGNOSTIC",
+      "source": "mcu-internal-monitor",
+      "unit": "degC"
+    },
+    {
+      "name": "dma_overrun_count",
+      "scope": "DIAGNOSTIC",
+      "source": "acquisition-ring",
+      "unit": "count"
+    },
+    {
+      "name": "fault_latched",
+      "scope": "STATUS",
+      "source": "supervisor-firmware",
+      "unit": null
+    }
+  ],
+  "permissions": [
+    "PUBLISH_STATUS",
+    "PUBLISH_OBSERVATION"
+  ],
+  "capability_digest": null
+}
