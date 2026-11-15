@@ -64,21 +64,21 @@
 
 ### R13 — Brad Gearon, ChristEye Physical Learning Device Design v0.4 (provided)
 
-- **Source:** [research/source_documents/R04_ChristEye_Physical_Learning_Device_Design_v0_4_3_.docx](research/source_documents/R04_ChristEye_Physical_Learning_Device_Design_v0_4_3_.docx)
+- **Source:** [../../research/full-markdown/R04_ChristEye_Physical_Learning_Device_Design_v0_4_3_.md](../../research/full-markdown/R04_ChristEye_Physical_Learning_Device_Design_v0_4_3_.md)
 - **Scope:** Current reference device; C, O, S, B, H, L, E and R0-R3 sequence.
 
 ### R14 — ChristEye, Research and System Design, revised synthesis (provided)
 
-- **Source:** [research/source_documents/R02_02_Research_and_System_Design_1_.docx](research/source_documents/R02_02_Research_and_System_Design_1_.docx)
+- **Source:** [../../research/full-markdown/R02_02_Research_and_System_Design_1_.md](../../research/full-markdown/R02_02_Research_and_System_Design_1_.md)
 - **Scope:** Current device and Crystal research boundaries; experiments EX01-EX12.
 
 ### R15 — ChristEye, Formal Models and Reconciliation (provided)
 
-- **Source:** [research/source_documents/R03_03_Formal_Models_and_Reconciliation_1_.docx](research/source_documents/R03_03_Formal_Models_and_Reconciliation_1_.docx)
+- **Source:** [../../research/full-markdown/R03_03_Formal_Models_and_Reconciliation_1_.md](../../research/full-markdown/R03_03_Formal_Models_and_Reconciliation_1_.md)
 - **Scope:** Corrected equations, accounting, identifiability and unsupported analogies.
 
 ### R16 — ChristEye, Technical Companion (provided)
 
-- **Source:** [research/source_documents/R01_01_Technical_Companion_1_.docx](research/source_documents/R01_01_Technical_Companion_1_.docx)
+- **Source:** [../../research/full-markdown/R01_01_Technical_Companion_1_.md](../../research/full-markdown/R01_01_Technical_Companion_1_.md)
 - **Scope:** Biochemical and structural candidate roles and evidence labels.
 
