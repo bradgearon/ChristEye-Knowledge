@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:christeye:software:control_profile:v1",
+  "title": "Twelve-Axis Resource and Learning Control Profile v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "profile_id",
+    "scope",
+    "target_id",
+    "revision",
+    "axis_definition_revision",
+    "axes",
+    "strategy",
+    "author_principal",
+    "created_at",
+    "authority_scope",
+    "apply_mode"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "ce.control.profile/1"
+    },
+    "profile_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scope": {
+      "enum": [
+        "FLEET",
+        "HOST",
+        "COLONY",
+        "CLIENT",
+        "TEACHER_SESSION"
+      ]
+    },
+    "target_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "base_revision": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "axis_definition_revision": {
+      "const": 1
+    },
+    "axes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "food_support",
+        "knowledge",
+        "growth",
+        "understanding",
+        "energy",
+        "retention",
+        "expressiveness",
+        "creativity",
+        "crystal_focus",
+        "teacher_balance",
+        "environment_adaptation",
+        "evidence_rigor"
+      ],
+      "properties": {
+        "food_support": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "knowledge": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "growth": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "understanding": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "energy": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "retention": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "expressiveness": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "creativity": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "crystal_focus": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "teacher_balance": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "environment_adaptation": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "evidence_rigor": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        }
+      }
+    },
+    "strategy": {
+      "enum": [
+        "OBSERVE_ONLY",
+        "TEACHER_LED",
+        "DIGITAL_CRYSTAL_LED",
+        "HYBRID"
+      ]
+    },
+    "author_principal": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "authority_scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "apply_mode": {
+      "enum": [
+        "REQUEST",
+        "STAGED",
+        "APPLIED",
+        "REJECTED"
+      ]
+    },
+    "policy_digest": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "signature_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source_knob_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    }
+  }
+}
