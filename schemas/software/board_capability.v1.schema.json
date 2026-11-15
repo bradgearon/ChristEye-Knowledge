@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.christeye.example/software/board_capability.v1",
+  "title": "Participant Board Capability Announcement v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "board_id",
+    "hardware_revision",
+    "firmware_digest",
+    "boot_nonce",
+    "device_identity_ref",
+    "interfaces",
+    "readouts",
+    "permissions",
+    "independent_limit_status"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "ce.board.capability/1"
+    },
+    "board_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "hardware_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "firmware_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "boot_nonce": {
+      "type": "string",
+      "minLength": 1
+    },
+    "device_identity_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "verification_state": {
+      "enum": [
+        "UNTRUSTED",
+        "ENROLLED",
+        "AUTHORIZED",
+        "REVOKED"
+      ]
+    },
+    "independent_limit_status": {
+      "enum": [
+        "OUT_OF_BAND",
+        "UNAVAILABLE",
+        "UNKNOWN"
+      ]
+    },
+    "interfaces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "transport",
+          "role"
+        ],
+        "properties": {
+          "transport": {
+            "enum": [
+              "ETHERNET_1G",
+              "ETHERNET_MULTI_G",
+              "USB3",
+              "USB_SERIAL",
+              "UART_SERVICE",
+              "CAN_FD",
+              "RS485",
+              "SFP_PLUS",
+              "VENDOR_NATIVE"
+            ]
+          },
+          "role": {
+            "enum": [
+              "UPLINK",
+              "ACQUISITION",
+              "DIAGNOSTIC",
+              "FIELD_BUS"
+            ]
+          },
+          "port_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "measured_max_bytes_per_second": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "readouts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "scope",
+          "source"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "scope": {
+            "enum": [
+              "STATUS",
+              "DIAGNOSTIC",
+              "ACQUISITION_METADATA"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1
+          },
+          "unit": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "calibration_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "permissions": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "PUBLISH_STATUS",
+          "PUBLISH_OBSERVATION",
+          "SUBSCRIBE_STATE",
+          "SUBSCRIBE_EVIDENCE",
+          "STAGE_DIGITAL_CHANGE"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "capability_digest": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "announcement_signature_ref": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
