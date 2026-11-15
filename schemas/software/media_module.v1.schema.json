@@ -173,7 +173,8 @@
           "channels",
           "clock_domain",
           "state",
-          "access_scope"
+          "access_scope",
+          "flow_role"
         ],
         "properties": {
           "port_id": {
@@ -316,6 +317,13 @@
               "minLength": 1
             },
             "uniqueItems": true
+          },
+          "flow_role": {
+            "enum": [
+              "PRODUCER",
+              "CONSUMER",
+              "BIDIRECTIONAL"
+            ]
           }
         },
         "allOf": [
