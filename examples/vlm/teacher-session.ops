@@ -1,0 +1,7 @@
+# Digital-only lesson and synthetic nutrient-field scenario.
+advance 5
+supply 100 15
+teach 3 42 20
+deposit support 3 2 75
+observe
+advance 3
