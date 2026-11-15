@@ -1,0 +1,255 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.christeye.example/software/colony_state.v1",
+  "title": "ColonyState Snapshot v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "colony_id",
+    "preparation_id",
+    "epoch",
+    "revision",
+    "generated_at",
+    "connection_status",
+    "participants",
+    "metrics",
+    "evidence_refs"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "ce.colony.state/1"
+    },
+    "colony_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "preparation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "epoch": {
+      "type": "string",
+      "minLength": 1
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "connection_status": {
+      "enum": [
+        "CONNECTED",
+        "OFFLINE_CACHED",
+        "UNKNOWN"
+      ]
+    },
+    "state_freshness": {
+      "enum": [
+        "CURRENT",
+        "STALE",
+        "UNKNOWN"
+      ]
+    },
+    "source_event_digest": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "participants": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "participant_id",
+          "kind",
+          "quality",
+          "evidence_refs"
+        ],
+        "properties": {
+          "participant_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "kind": {
+            "enum": [
+              "DIGITAL_PRINCIPAL",
+              "BIOLOGICAL_MEMBER_CANDIDATE",
+              "INSTRUMENT_ENDPOINT",
+              "RESEARCH_ACTOR"
+            ]
+          },
+          "quality": {
+            "enum": [
+              "VALID",
+              "DEGRADED",
+              "UNRESOLVED",
+              "REJECTED"
+            ]
+          },
+          "last_observed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "evidence_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "metrics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "metric_id",
+          "quality",
+          "acquired_at",
+          "source_clock_domain",
+          "evidence_refs"
+        ],
+        "properties": {
+          "metric_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "value": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "unit": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "quality": {
+            "enum": [
+              "VALID",
+              "STALE",
+              "UNKNOWN",
+              "DEGRADED",
+              "REJECTED",
+              "NOT_MEASURED"
+            ]
+          },
+          "acquired_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "source_clock_domain": {
+            "type": "string",
+            "minLength": 1
+          },
+          "time_uncertainty_ns": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "valid_until": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "calibration_digest": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "uncertainty": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "evidence_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "needs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "category",
+          "evidence_refs"
+        ],
+        "properties": {
+          "category": {
+            "enum": [
+              "DIGITAL_LEARNING",
+              "EVIDENCE_REVIEW",
+              "SUPPORT_REVIEW",
+              "HARDWARE_SERVICE",
+              "SCIENTIFIC_HYPOTHESIS"
+            ]
+          },
+          "evidence_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "guidance_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}
