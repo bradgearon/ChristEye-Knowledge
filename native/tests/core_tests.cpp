@@ -109,21 +109,50 @@ static void scheduler_queues() {
   CHECK(calls == 2); // notification only on empty -> nonempty
 }
 
+static void packet_overlapping_buffers_rejected() {
+  Header h{};
+  h.payload_bytes = 4;
+  std::array<std::byte, 64> buffer{};
+  buffer[10] = std::byte{0x17};
+  std::size_t written = 7;
+  const auto input = std::span<const std::byte>(buffer.data() + 10, 4);
+  const auto output = std::span<std::byte>(buffer.data(), 64);
+  CHECK(encode(h, {}, input, output, written) == Error::overlapping_buffers);
+  CHECK(written == 0 && buffer[10] == std::byte{0x17});
+  std::array<std::byte, 4> separate{{std::byte{1}, std::byte{2}, std::byte{3}, std::byte{4}}};
+  CHECK(encode(h, {}, separate, output, written) == Error::ok);
+  CHECK(written == 60);
+  h.header_bytes = 60; h.payload_bytes = 0;
+  // A TLV borrowed from the output buffer must also be rejected.
+  const auto extension = std::span<const std::byte>(buffer.data() + 15, 4);
+  CHECK(encode(h, extension, {}, output, written) == Error::overlapping_buffers);
+  CHECK(written == 0);
+}
+
 static void scheduler_fairness() {
-  BoundedScheduler<100> q;
-  for (std::uint64_t i = 0; i < 40; ++i) {
-    CHECK(q.post(DeliveryClass::fault, {i, 0}) == PostResult::accepted);
+  BoundedScheduler<128> q;
+  for (std::uint64_t i = 0; i < 100; ++i) {
+    CHECK(q.post(DeliveryClass::decision, {i, 0}) == PostResult::accepted);
     CHECK(q.post(DeliveryClass::status, {100+i, 0}) == PostResult::accepted);
   }
   int status_seen = 0;
-  for (int i = 0; i < 36; ++i) {
+  for (int i = 0; i < 70; ++i) {
     auto r = q.next(1);
+    CHECK(r.status == TakeStatus::ready);
     if (r.delivery_class == DeliveryClass::status) ++status_seen;
   }
-  CHECK(status_seen == 4); // 8:1 when only fault+status lanes are populated
+  CHECK(status_seen == 10); // Interleaved 6:1 share across active lanes.
+  CHECK(q.post(DeliveryClass::fault, {999, 0}) == PostResult::accepted);
+  CHECK(q.next(1).delivery_class == DeliveryClass::fault);
+  CHECK(q.post(DeliveryClass::fault, {1000, 1}) == PostResult::accepted);
+  auto expired = q.next(1);
+  CHECK(expired.delivery_class == DeliveryClass::fault);
+  CHECK(expired.status == TakeStatus::expired);
 }
+
 int main() {
   packet_roundtrip(); malformed_tlvs(); random_input_never_crashes();
+  packet_overlapping_buffers_rejected();
   scheduler_queues(); scheduler_fairness();
   std::cout << "WindPacket/1 codec and bounded endpoint scheduling tests passed\n";
 }
