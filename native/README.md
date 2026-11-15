@@ -28,3 +28,25 @@ ctest --test-dir build/native -C Release --output-on-failure
 ### SW2 and SW3 follow-ups
 
 Implement a native read-only ledger, durable receipt state machine, hash-addressed immutable objects, synchronized connection handshake, authenticated identity and replay protection, with CPU/MCU performance tests and formal wire compatibility vectors. The Python reference remains supported during migration. This component has no proven worst-case interrupt or network latency and has not yet been compiled for a specific MCU toolchain.
+
+## SW1.1 hardening (this branch)
+
+- WindPacket encoding detects input/output buffer overlap and returns `overlapping_buffers` before modifying the output frame. Its decoded `View` remains a **borrowed**, synchronous reference; callers must keep the underlying input bytes alive until consumed or copy an owned frame into their bounded storage before asynchronous dispatch.
+- Fault notifications are dispatched ahead of weighted digital work. The other four queues use *smooth* weighted round robin (6:4:3:1), avoiding long consecutive bursts from grouped slot scheduling. This is **item-weighted**, not byte-cost fair scheduling; reliable byte-credit/bandwidth admission remains a future layer. Independent hardware A22 limits never depend on queue dispatch.
+- Callbacks and posting remain **single-owner**: real multithreaded/ISR producers need a separately synchronized bounded ingress ring. No raw ISR directly parses untrusted frames.
+
+## AVM1 virtual PCM and MIDI patchbay
+
+`include/christeye/wind/media_patchbay.hpp` adds a freestanding-compatible, fixed-capacity, digital-only software routing core. Ports have stable numeric IDs, PCM/MIDI media kind, producer or consumer role, exact clock domain/sample-rate/channel matching and an upstream `verified` flag. Route commits require an authorized caller and matching expected revision. The patchbay synchronously fans out **borrowed** PCM blocks (interleaved float samples) or UMP word arrays to pre-registered callbacks. Hot-unplug invalidates affected routes and increments muted-route receipts.
+
+It does **not** implement operating-system drivers, ringbuffer scheduling, converter/sample-rate conversion, real MIDI-CI device discovery, audio mixing, cryptographic verification, physical audio I/O, network media, neuronal speech, or biological actuation. Integrators must validate `verified` using actual signed installed-hardware manifests/ACLs; a user-provided boolean is not authentication. The callback is synchronous and must be nonblocking; the samples are invalid after the callback returns unless copied by the consumer.
+
+```sh
+cmake -S native -B build/native -DCE_WIND_BUILD_TESTS=ON
+cmake --build build/native --config Release
+ctest --test-dir build/native -C Release --output-on-failure
+```
+
+Additional `wind_media_tests` verify two-route audio fan-out, typed MIDI delivery, mismatched clocks/rates, malformed frames, stale route revision, unauthorized route, queue capacity and removal-induced muting. No timing benchmark or device validation is claimed.
+
+See [CE-SW-05](../docs/software/CE-SW-05_modular_audio_vision_midi_starchip.md) for the hardware-model and research-safety contract.
