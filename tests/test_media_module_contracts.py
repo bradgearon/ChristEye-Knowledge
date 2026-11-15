@@ -39,6 +39,8 @@ def working_pair():
         for card in m["opamp_cards"]:
             card["state"] = "VERIFIED"
             card["calibration_digest"] = DIGEST
+        for feature in m["feature_inventory"]:
+            feature["state"] = "VERIFIED"
     route = load_sample("avm_teacher_audio_route.sample.json")
     route["teacher_consent_ref"] = "consent-ok"
     manifests = {m["module_id"]: m for m in (voice, virtual)}
@@ -84,6 +86,12 @@ class MediaConfigurationTest(unittest.TestCase):
     def test_hardware_card_removed_disables_port(self):
         manifests, route = working_pair()
         manifests["example-avm-v1"]["opamp_cards"][0]["state"] = "REMOVED"
+        self.assertEqual(admit(manifests, route).reason, "PORT_NOT_VERIFIED")
+
+    def test_catalog_feature_alone_cannot_enable_port(self):
+        manifests, route = working_pair()
+        flags = manifests["example-avm-v1"]["feature_inventory"]
+        next(f for f in flags if f["feature_id"] == "MIC_CAPTURE")["state"] = "CATALOG_ONLY"
         self.assertEqual(admit(manifests, route).reason, "PORT_NOT_VERIFIED")
 
     def test_hardware_card_requires_calibration(self):
