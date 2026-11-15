@@ -1,8 +1,7 @@
 #pragma once
-// Bounded, allocation-free, single-owner weighted endpoint scheduler.
-// A transport callback/ISR-notified task calls post(); a notified consumer
-// drains next() until empty. No timed queue polling or hidden worker thread.
-// Not thread-safe: platform adapters must serialize ownership explicitly.
+// CE-SW-01 SW1.1: bounded, allocation-free, single-owner scheduler.
+// Fault *notifications* always preempt the weighted digital data lanes.
+// Physical safety does not depend on this software scheduler.
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -10,47 +9,58 @@
 
 namespace christeye::wind {
 struct WorkItem {
-  std::uint64_t token = 0;          // caller-owned immutable payload descriptor
-  std::uint64_t deadline_ns = 0;    // 0 means no deadline; monotonic clock domain
+  std::uint64_t token = 0;       // caller-owned immutable work descriptor
+  std::uint64_t deadline_ns = 0; // 0 means no deadline, monotonic clock domain
 };
-
 enum class PostResult : std::uint8_t { accepted, full, invalid_class };
 enum class TakeStatus : std::uint8_t { empty, ready, expired };
-struct TakeResult { TakeStatus status = TakeStatus::empty; WorkItem item{};
-                    DeliveryClass delivery_class = DeliveryClass::status; };
+struct TakeResult {
+  TakeStatus status = TakeStatus::empty;
+  WorkItem item{};
+  DeliveryClass delivery_class = DeliveryClass::status;
+};
 
-// Fixed weights are an INITIAL scheduling policy, not scientific evidence
-// scores and never an authorization decision. Each class has separate bounded
-// storage so UI floods cannot consume the fault lane's slots.
+// This scheduler is single-owner. Cross-thread/ISR producers MUST serialize
+// via a separate notification ring. Callbacks must be nonblocking; they may
+// synchronously drain the scheduler on the same owner.
 template<std::size_t PerClassCapacity>
 class BoundedScheduler {
   static_assert(PerClassCapacity > 0, "nonzero per-class capacity required");
-  static constexpr std::array<std::uint8_t, 5> weights_{{8, 6, 4, 3, 1}};
-  static constexpr std::size_t schedule_size_ = 22;
+  static constexpr std::array<std::uint8_t, 5> weights_{{0, 6, 4, 3, 1}};
   struct Ring {
     std::array<WorkItem, PerClassCapacity> slots{};
-    std::size_t read = 0, write = 0, count = 0;
+    std::size_t read = 0;
+    std::size_t write = 0;
+    std::size_t count = 0;
     bool push(WorkItem v) noexcept {
       if (count == PerClassCapacity) return false;
-      slots[write] = v; write = (write + 1) % PerClassCapacity; ++count; return true;
+      slots[write] = v;
+      write = (write + 1) % PerClassCapacity;
+      ++count;
+      return true;
     }
     WorkItem pop() noexcept {
-      const auto v = slots[read]; read = (read + 1) % PerClassCapacity; --count; return v;
+      const auto v = slots[read];
+      read = (read + 1) % PerClassCapacity;
+      --count;
+      return v;
     }
   };
   std::array<Ring, 5> rings_{};
-  std::size_t count_ = 0, cursor_ = 0;
+  std::array<std::int32_t, 5> credits_{};
+  std::size_t count_ = 0;
   void (*notify_)(void*) = nullptr;
   void* notify_context_ = nullptr;
 
-  static constexpr std::array<std::uint8_t, schedule_size_> make_schedule() noexcept {
-    std::array<std::uint8_t, schedule_size_> out{};
-    std::size_t index = 0;
-    for (std::uint8_t cls = 0; cls < weights_.size(); ++cls)
-      for (std::uint8_t i = 0; i < weights_[cls]; ++i) out[index++] = cls;
-    return out;
+  TakeResult pop_class(std::size_t index, std::uint64_t now_ns) noexcept {
+    const auto v = rings_[index].pop();
+    --count_;
+    if (rings_[index].count == 0) credits_[index] = 0;
+    const bool expired = v.deadline_ns != 0 && now_ns >= v.deadline_ns;
+    return {expired ? TakeStatus::expired : TakeStatus::ready,
+            v, static_cast<DeliveryClass>(index)};
   }
-  static constexpr auto schedule_ = make_schedule();
+
  public:
   explicit BoundedScheduler(void (*notify)(void*) = nullptr, void* ctx = nullptr) noexcept
       : notify_(notify), notify_context_(ctx) {}
@@ -58,33 +68,47 @@ class BoundedScheduler {
   BoundedScheduler& operator=(const BoundedScheduler&) = delete;
 
   PostResult post(DeliveryClass cls, WorkItem item) noexcept {
-    const auto idx = std::uint8_t(cls);
+    const auto idx = static_cast<std::uint8_t>(cls);
     if (idx >= rings_.size()) return PostResult::invalid_class;
     const bool was_empty = count_ == 0;
     if (!rings_[idx].push(item)) return PostResult::full;
     ++count_;
-    if (was_empty && notify_) notify_(notify_context_);
+    if (was_empty && notify_ != nullptr) notify_(notify_context_);
     return PostResult::accepted;
   }
+
   TakeResult next(std::uint64_t now_ns) noexcept {
     if (count_ == 0) return {};
-    // Every nonempty lane has at least one slot in the weighted schedule.
-    for (std::size_t attempts = 0; attempts < schedule_.size(); ++attempts) {
-      const std::size_t idx = schedule_[cursor_];
-      cursor_ = (cursor_ + 1) % schedule_.size();
-      if (rings_[idx].count == 0) continue;
-      const auto v = rings_[idx].pop(); --count_;
-      const bool expired = v.deadline_ns != 0 && now_ns >= v.deadline_ns;
-      return {expired ? TakeStatus::expired : TakeStatus::ready, v, DeliveryClass(idx)};
+    // Software fault reporting always preempts nonfault traffic; out-of-band
+    // hardware interlocks remain the sole physical safety authority.
+    if (rings_[0].count != 0) return pop_class(0, now_ns);
+
+    // Smooth weighted round robin across active nonfault lanes. Interleave
+    // service rather than emitting one large consecutive block per class.
+    std::int32_t active_weight = 0;
+    std::size_t selected = 0;
+    bool found = false;
+    for (std::size_t i = 1; i < rings_.size(); ++i) {
+      if (rings_[i].count == 0) { credits_[i] = 0; continue; }
+      const auto w = static_cast<std::int32_t>(weights_[i]);
+      credits_[i] += w;
+      active_weight += w;
+      if (!found || credits_[i] > credits_[selected]) {
+        selected = i;
+        found = true;
+      }
     }
-    return {}; // unreachable unless internal state corrupted
+    if (!found) return {};  // impossible unless internal counts corrupted
+    credits_[selected] -= active_weight;
+    return pop_class(selected, now_ns);
   }
+
   std::size_t pending() const noexcept { return count_; }
   std::size_t pending(DeliveryClass cls) const noexcept {
-    const auto idx = std::uint8_t(cls);
-    return idx < rings_.size() ? rings_[idx].count : 0;
+    const auto i = static_cast<std::uint8_t>(cls);
+    return i < rings_.size() ? rings_[i].count : 0;
   }
-  static constexpr std::size_t capacity() noexcept { return 5 * PerClassCapacity; }
+  static constexpr std::size_t capacity() noexcept { return PerClassCapacity * 5; }
   static constexpr std::array<std::uint8_t, 5> lane_weights() noexcept { return weights_; }
 };
-}  // namespace christeye::wind
+} // namespace christeye::wind
