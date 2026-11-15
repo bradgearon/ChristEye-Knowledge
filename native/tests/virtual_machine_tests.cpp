@@ -1,4 +1,8 @@
 #include "christeye/living/virtual_machine.hpp"
+#include "christeye/wind/packet.hpp"
+#include "christeye/wind/scheduler.hpp"
+#include <array>
+#include <span>
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
@@ -134,11 +138,68 @@ static void test_disk_io() {
   std::error_code ec;
   std::filesystem::remove(path, ec);
 }
+struct EventBridge {
+  christeye::wind::BoundedScheduler<32> queue{};
+  std::uint64_t last_hash = 0;
+  std::size_t count = 0;
+  std::size_t bad = 0;
+  static void emit(void* context, const vlm::VirtualEvidence& e) noexcept {
+    auto& bridge = *static_cast<EventBridge*>(context);
+    christeye::wind::Header header{};
+    header.kind = christeye::wind::Kind::observation;
+    header.delivery_class = christeye::wind::DeliveryClass::evidence;
+    header.stream_id = 91;
+    header.sequence = e.sequence;
+    header.schema_id = 0xCE600007u; // synthetic VLM/1 observation
+    header.payload_bytes = 16;
+    std::array<std::byte, 16> payload{};
+    for (unsigned i = 0; i < 8; ++i) {
+      payload[i] = std::byte((e.state_hash >> (8u * i)) & 0xffu);
+      payload[i + 8] = std::byte((e.action_chain >> (8u * i)) & 0xffu);
+    }
+    std::array<std::byte, 72> packet{};
+    std::size_t written = 0;
+    christeye::wind::View view{};
+    if (christeye::wind::encode(header, {}, payload, packet, written) != christeye::wind::Error::ok ||
+        christeye::wind::decode(std::span<const std::byte>(packet.data(), written), view) != christeye::wind::Error::ok ||
+        view.header.sequence != e.sequence || view.payload.size() != 16 ||
+        bridge.queue.post(christeye::wind::DeliveryClass::evidence,
+                          {e.sequence, 0}) != christeye::wind::PostResult::accepted) {
+      ++bridge.bad;
+      return;
+    }
+    bridge.last_hash = e.state_hash;
+    ++bridge.count;
+  }
+};
+static void test_vlm_evidence_on_all_changes() {
+  auto vm = make_vm();
+  EventBridge bridge;
+  vm.set_event_callback(EventBridge::emit, &bridge);
+  const auto old = vm.state_hash();
+  vlm::Action deposit;
+  REQUIRE(vlm::parse_action("deposit protein 1 2 40", deposit));
+  REQUIRE(vm.apply(deposit) == vlm::Result::ok);
+  REQUIRE(vm.advance(1) == vlm::Result::ok);
+  REQUIRE(bridge.bad == 0);
+  REQUIRE(bridge.count == 2);
+  REQUIRE(bridge.last_hash == vm.state_hash());
+  REQUIRE(vm.state_hash() != old);
+  REQUIRE(bridge.queue.pending() == 2);
+  REQUIRE(bridge.queue.next(1).item.token == vm.image().size() + 1);
+  REQUIRE(bridge.queue.next(1).item.token == vm.image().size() + 2);
+  REQUIRE(bridge.queue.pending() == 0);
+  auto old_hash = vm.state_hash();
+  REQUIRE(vlm::parse_action("deposit protein 20 2 40", deposit));
+  REQUIRE(vm.apply(deposit) == vlm::Result::invalid_action);
+  REQUIRE(vm.state_hash() == old_hash && bridge.count == 2);
+}
 int main() {
   test_round_trip_and_movement();
   test_clone_and_fork();
   test_negative_files_are_atomic();
   test_fields_are_conservative();
   test_disk_io();
+  test_vlm_evidence_on_all_changes();
   std::cout << "VLM1 image/journal/soil/clone/replay tests passed\n";
 }
