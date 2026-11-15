@@ -2,7 +2,7 @@
 
 **We Develop Software LLC · Scientific research and modular computer architecture · November 15, 2026**
 
-[**V3.1 scientific implementation**](specifications/v3/README.md) · [**Scientist workflow**](processes/SCIENTIST_WORKFLOW.md) · [**Molecules and axons**](processes/MOLECULAR_INDEX.md) · [**Biological schemas**](schemas/biology/README.md) · [**Phase 1**](docs/phase-1.md) · [Complete documents](docs/full-document-library.md) · [24 subsystem contracts](docs/module-contracts.md) · [Full schemas](docs/schema-reference.md) · [Scientific research](research/full-markdown/README.md) · [Website](docs/index.html)
+[**V3.1 scientific implementation**](specifications/v3/README.md) · [**Scientist workflow**](processes/SCIENTIST_WORKFLOW.md) · [**Molecules and axons**](processes/MOLECULAR_INDEX.md) · [**Biological schemas**](schemas/biology/README.md) · [**Native software mesh**](docs/software/README.md) · [**Phase 1**](docs/phase-1.md) · [Complete documents](docs/full-document-library.md) · [24 subsystem contracts](docs/module-contracts.md) · [Full schemas](docs/schema-reference.md) · [Scientific research](research/full-markdown/README.md) · [Website](docs/index.html)
 
 ChristEye Anaiero is a research and engineering program investigating modular developmental computing, supervised biological instrumentation, specialist StarChips, capability-bearing digital CrystalPacks, Roots and retained knowledge, and the possible future living embodiment of these systems.
 
@@ -17,6 +17,7 @@ ChristEye Anaiero is a research and engineering program investigating modular de
 | Cell counts and module allocations | [Original physical composition plan](phases/P01/docs/01_Physical_Module_Composition_and_Counts.md) |
 | Molecular and structural research | [41-entry detailed inventory](docs/molecule-and-structure-inventory.md) |
 | Electrical interfaces and WindBus | [Phase 1 electrical companion](phases/P01/docs/03_Electrical_WindBus_and_Training_Companion.md) |
+| Native distributed software architecture | [C++20 mesh + developmental WindBus proposals](docs/software/README.md) |
 | Feeding, sampling and care | [Daily care, qualification and assays](phases/P01/docs/04_Daily_Care_Quality_Gates_and_Assays.md) |
 | Mandatory design-document format | [20-section specification standard](docs/document-standard.md) |
 | Full JSON schema fields | [Schema dictionary](docs/schema-reference.md) and [original JSON](schemas/README.md) |
