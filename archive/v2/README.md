@@ -1,0 +1,91 @@
+# Historical v2 specifications
+
+**15 November 2026 · ChristEye Anaiero · © 2026 We Develop Software LLC**
+
+> **Archived:** Retained for technical provenance; superseded terminology and earlier assumptions may differ from current research.
+
+- [00 Anaiero Master Architecture v2](00_Anaiero_Master_Architecture_v2.md) — `14,186` characters
+- [00 Master Architecture](00_Master_Architecture.md) — `15,823` characters
+- [CE-A01 episodic and working memory Companion](CE-A01_episodic_and_working_memory_Companion.md) — `4,756` characters
+- [CE-A01 episodic and working memory Design](CE-A01_episodic_and_working_memory_Design.md) — `4,686` characters
+- [CE-A02 long term storage Companion](CE-A02_long_term_storage_Companion.md) — `4,616` characters
+- [CE-A02 long term storage Design](CE-A02_long_term_storage_Design.md) — `4,675` characters
+- [CE-A03 healing and integrity Companion](CE-A03_healing_and_integrity_Companion.md) — `4,606` characters
+- [CE-A03 healing and integrity Design](CE-A03_healing_and_integrity_Design.md) — `4,681` characters
+- [CE-A04 growth and capacity Companion](CE-A04_growth_and_capacity_Companion.md) — `4,708` characters
+- [CE-A04 growth and capacity Design](CE-A04_growth_and_capacity_Design.md) — `4,822` characters
+- [CE-A05 refresh renewal Companion](CE-A05_refresh_renewal_Companion.md) — `4,553` characters
+- [CE-A05 refresh renewal Design](CE-A05_refresh_renewal_Design.md) — `4,709` characters
+- [CE-A06 learning stabilization Companion](CE-A06_learning_stabilization_Companion.md) — `4,735` characters
+- [CE-A06 learning stabilization Design](CE-A06_learning_stabilization_Design.md) — `4,665` characters
+- [CE-A07 learning enhancement Companion](CE-A07_learning_enhancement_Companion.md) — `4,670` characters
+- [CE-A07 learning enhancement Design](CE-A07_learning_enhancement_Design.md) — `4,814` characters
+- [CE-A08 health surveillance Companion](CE-A08_health_surveillance_Companion.md) — `4,703` characters
+- [CE-A08 health surveillance Design](CE-A08_health_surveillance_Design.md) — `4,746` characters
+- [CE-A09 main living core Companion](CE-A09_main_living_core_Companion.md) — `4,824` characters
+- [CE-A09 main living core Design](CE-A09_main_living_core_Design.md) — `4,900` characters
+- [CE-A10 usage crystal compiler Companion](CE-A10_usage_crystal_compiler_Companion.md) — `4,723` characters
+- [CE-A10 usage crystal compiler Design](CE-A10_usage_crystal_compiler_Design.md) — `4,736` characters
+- [CE-A11 connective controllers Companion](CE-A11_connective_controllers_Companion.md) — `4,643` characters
+- [CE-A11 connective controllers Design](CE-A11_connective_controllers_Design.md) — `4,682` characters
+- [CE-A12 lotus coordinator Companion](CE-A12_lotus_coordinator_Companion.md) — `4,701` characters
+- [CE-A12 lotus coordinator Design](CE-A12_lotus_coordinator_Design.md) — `4,674` characters
+- [CE-A13 crystal replication and cloning Companion](CE-A13_crystal_replication_and_cloning_Companion.md) — `4,647` characters
+- [CE-A13 crystal replication and cloning Design](CE-A13_crystal_replication_and_cloning_Design.md) — `4,665` characters
+- [CE-A14 crystal consumption and replay Companion](CE-A14_crystal_consumption_and_replay_Companion.md) — `4,810` characters
+- [CE-A14 crystal consumption and replay Design](CE-A14_crystal_consumption_and_replay_Design.md) — `4,831` characters
+- [CE-A15 organoid development and shape Companion](CE-A15_organoid_development_and_shape_Companion.md) — `4,841` characters
+- [CE-A15 organoid development and shape Design](CE-A15_organoid_development_and_shape_Design.md) — `4,865` characters
+- [CE-A16 root registry and mapping Companion](CE-A16_root_registry_and_mapping_Companion.md) — `4,716` characters
+- [CE-A16 root registry and mapping Design](CE-A16_root_registry_and_mapping_Design.md) — `4,792` characters
+- [CE-A17 daily care and dispensing Companion](CE-A17_daily_care_and_dispensing_Companion.md) — `4,876` characters
+- [CE-A17 daily care and dispensing Design](CE-A17_daily_care_and_dispensing_Design.md) — `4,839` characters
+- [CE-A18 bread meat water and metabolic Companion](CE-A18_bread_meat_water_and_metabolic_Companion.md) — `4,809` characters
+- [CE-A18 bread meat water and metabolic Design](CE-A18_bread_meat_water_and_metabolic_Design.md) — `4,928` characters
+- [CE-A19 central data router and host Companion](CE-A19_central_data_router_and_host_Companion.md) — `4,649` characters
+- [CE-A19 central data router and host Design](CE-A19_central_data_router_and_host_Design.md) — `4,772` characters
+- [CE-A20 filesystem and snapshots Companion](CE-A20_filesystem_and_snapshots_Companion.md) — `4,670` characters
+- [CE-A20 filesystem and snapshots Design](CE-A20_filesystem_and_snapshots_Design.md) — `4,766` characters
+- [CE-A21 affective support and honey Companion](CE-A21_affective_support_and_honey_Companion.md) — `4,749` characters
+- [CE-A21 affective support and honey Design](CE-A21_affective_support_and_honey_Design.md) — `4,974` characters
+- [CE-A22 independent limits and governance Companion](CE-A22_independent_limits_and_governance_Companion.md) — `4,639` characters
+- [CE-A22 independent limits and governance Design](CE-A22_independent_limits_and_governance_Design.md) — `4,646` characters
+- [CE-A23 molecular word and physical crystal Companion](CE-A23_molecular_word_and_physical_crystal_Companion.md) — `4,884` characters
+- [CE-A23 molecular word and physical crystal Design](CE-A23_molecular_word_and_physical_crystal_Design.md) — `4,983` characters
+- [CE-A24 observer monitoring communities Companion](CE-A24_observer_monitoring_communities_Companion.md) — `4,629` characters
+- [CE-A24 observer monitoring communities Design](CE-A24_observer_monitoring_communities_Design.md) — `4,791` characters
+- [CE-D01 metroidvania experience director](CE-D01_metroidvania_experience_director.md) — `4,687` characters
+- [CE-D02 world topology and progression graph](CE-D02_world_topology_and_progression_graph.md) — `4,517` characters
+- [CE-D03 room geometry platforming and streaming](CE-D03_room_geometry_platforming_and_streaming.md) — `4,491` characters
+- [CE-D04 bosses combat and enemy behaviors](CE-D04_bosses_combat_and_enemy_behaviors.md) — `4,460` characters
+- [CE-D05 narrative lore and quest continuity](CE-D05_narrative_lore_and_quest_continuity.md) — `4,479` characters
+- [CE-D06 pixel art animation and visual asset compiler](CE-D06_pixel_art_animation_and_visual_asset_compiler.md) — `4,317` characters
+- [CE-D07 music composer by genre and instrumentation](CE-D07_music_composer_by_genre_and_instrumentation.md) — `4,601` characters
+- [CE-D08 advanced harmonic and rhythmic divergence](CE-D08_advanced_harmonic_and_rhythmic_divergence.md) — `4,674` characters
+- [CE-D09 adaptive game audio and music director](CE-D09_adaptive_game_audio_and_music_director.md) — `4,398` characters
+- [CE-D10 college discipline and professional study](CE-D10_college_discipline_and_professional_study.md) — `4,620` characters
+- [CE-D11 scientific theorist and hypothesis engine](CE-D11_scientific_theorist_and_hypothesis_engine.md) — `4,518` characters
+- [CE-D12 mathematics proof and formal models](CE-D12_mathematics_proof_and_formal_models.md) — `4,498` characters
+- [CE-D13 software feature and tool upgrade starchip](CE-D13_software_feature_and_tool_upgrade_starchip.md) — `4,324` characters
+- [CE-D14 book and library microcrystal](CE-D14_book_and_library_microcrystal.md) — `4,464` characters
+- [CE-D15 language translation and conversation](CE-D15_language_translation_and_conversation.md) — `4,386` characters
+- [CE-D16 composite star multidisciplinary creation](CE-D16_composite_star_multidisciplinary_creation.md) — `4,502` characters
+- [CE-P01 starchip runtime and interface](CE-P01_starchip_runtime_and_interface.md) — `4,771` characters
+- [CE-P02 crystalpack registry and packaging](CE-P02_crystalpack_registry_and_packaging.md) — `4,617` characters
+- [CE-P03 windbus typed communication](CE-P03_windbus_typed_communication.md) — `4,442` characters
+- [CE-P04 crystal activation warmup and release](CE-P04_crystal_activation_warmup_and_release.md) — `4,623` characters
+- [CE-P05 genesis curriculum and education engine](CE-P05_genesis_curriculum_and_education_engine.md) — `4,677` characters
+- [CE-P06 lotus mesh coordination and planning](CE-P06_lotus_mesh_coordination_and_planning.md) — `4,573` characters
+- [CE-P07 roots memory and qualification evaluator](CE-P07_roots_memory_and_qualification_evaluator.md) — `4,846` characters
+- [CE-P08 heart governance limits and permissions](CE-P08_heart_governance_limits_and_permissions.md) — `4,482` characters
+- [CE-P09 observability metrics and evidence ledger](CE-P09_observability_metrics_and_evidence_ledger.md) — `4,373` characters
+- [CE-P10 starchip composition and capability negotiation](CE-P10_starchip_composition_and_capability_negotiation.md) — `4,362` characters
+- [CE-P11 durable digital memory and source provenance](CE-P11_durable_digital_memory_and_source_provenance.md) — `4,438` characters
+- [CE-P12 gpu like accelerator and real time scheduler](CE-P12_gpu_like_accelerator_and_real_time_scheduler.md) — `4,541` characters
+- [CE-P13 deployment security updates and fleet](CE-P13_deployment_security_updates_and_fleet.md) — `4,459` characters
+- [CE-R01 living device adapter and electronic bridge](CE-R01_living_device_adapter_and_electronic_bridge.md) — `4,746` characters
+- [CE-R02 physical crystal candidate carrier and packing](CE-R02_physical_crystal_candidate_carrier_and_packing.md) — `4,959` characters
+- [CE-R03 peptide and molecular upgrade long horizon hypothesis](CE-R03_peptide_and_molecular_upgrade_long_horizon_hypothesis.md) — `4,911` characters
+- [CE-R04 independent teaching copying and renewal](CE-R04_independent_teaching_copying_and_renewal.md) — `4,633` characters
+
+[Conversion manifest](../../specifications/conversion-manifest.json)
