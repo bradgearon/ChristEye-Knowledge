@@ -1,0 +1,3 @@
+# Security and research boundary
+
+The reference code cannot operate pumps, electrical stimulation hardware, genetic interventions or culture systems. A hypothetical physical Crystal or peptide payload cannot be installed via a software package. Internet and user data ingestion require explicit scoped permission; untrusted files cannot be executed as code. Every Crystal export checks rights and references verifiable source hashes. Independent hardware limits and laboratory approvals are external and mandatory before any actual biological experiment. See `docs/00_Master_Architecture_v3.docx` and sources R01–R04.

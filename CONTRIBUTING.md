@@ -1,0 +1,3 @@
+# Contributions
+
+Open issues with: scoped change, module IDs, executable contract/trace, expected outcome, tests, evidence level (F/X/H/D/A) and source reference. Do not change a numerical operating limit or physical protocol by discussion alone. Pull requests that change an interface must update its schema and paired Design + Companion; tests must demonstrate protected behavior. Never introduce unreviewed physical actuation code.

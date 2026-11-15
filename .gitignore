@@ -1,0 +1,9 @@
+private_archive/
+**/private_archive/
+.env
+*.key
+*.pem
+__pycache__/
+.pytest_cache/
+.venv/
+.DS_Store
