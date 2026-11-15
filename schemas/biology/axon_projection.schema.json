@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "preparation_id",
+    "source_lot_id",
+    "record_id",
+    "created_at",
+    "evidence_status",
+    "evidence_ref",
+    "projection_id",
+    "source_region_id",
+    "target_region_id",
+    "observed_at",
+    "imaging_run_ref",
+    "axon_track_ids",
+    "spatial_registration_ref",
+    "functional_test_ref",
+    "shared_drive_control_ref",
+    "latency_ms",
+    "confidence",
+    "edge_type",
+    "validity"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "preparation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_lot_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "evidence_status": {
+      "enum": [
+        "DESIGN",
+        "PROPOSED",
+        "OBSERVED",
+        "ASSOCIATIONAL",
+        "CAUSAL_RESEARCH",
+        "UNRESOLVED",
+        "REJECTED"
+      ]
+    },
+    "evidence_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "projection_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_region_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_region_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "observed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "imaging_run_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "axon_track_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "spatial_registration_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "functional_test_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "shared_drive_control_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "latency_ms": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "confidence": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "edge_type": {
+      "enum": [
+        "STRUCTURAL_CONTACT",
+        "STATISTICAL_ASSOCIATION",
+        "INTERVENTION_SUPPORTED_INFLUENCE",
+        "TASK_RELATION"
+      ]
+    },
+    "validity": {
+      "enum": [
+        "VALID",
+        "PARTIAL_COVERAGE",
+        "UNRESOLVED",
+        "INVALID"
+      ]
+    }
+  }
+}

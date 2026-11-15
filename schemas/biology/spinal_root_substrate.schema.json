@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "preparation_id",
+    "source_lot_id",
+    "record_id",
+    "created_at",
+    "evidence_status",
+    "evidence_ref",
+    "substrate_id",
+    "regional_identity",
+    "tissue_class",
+    "neuron_lineage_assays",
+    "glia_lineage_assays",
+    "axon_projection_refs",
+    "functional_root_refs",
+    "geometry_ref",
+    "source_qualification_ref",
+    "independent_care_ref",
+    "release_gate"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "preparation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_lot_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "evidence_status": {
+      "enum": [
+        "DESIGN",
+        "PROPOSED",
+        "OBSERVED",
+        "ASSOCIATIONAL",
+        "CAUSAL_RESEARCH",
+        "UNRESOLVED",
+        "REJECTED"
+      ]
+    },
+    "evidence_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "substrate_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "regional_identity": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tissue_class": {
+      "enum": [
+        "SPINAL_DERIVED_ORGANOID",
+        "SPINAL_NEURAL_PREPARATION",
+        "SOIL_ASSOCIATED_SPINAL_COMPARTMENT",
+        "UNRESOLVED"
+      ]
+    },
+    "neuron_lineage_assays": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "glia_lineage_assays": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "axon_projection_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "functional_root_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "geometry_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source_qualification_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "independent_care_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "release_gate": {
+      "enum": [
+        "SOURCE_REVIEW",
+        "MORPHOLOGY_READY",
+        "ELECTRICAL_READY",
+        "TRAINING_RESEARCH",
+        "HELD"
+      ]
+    }
+  }
+}

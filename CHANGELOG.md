@@ -1,3 +1,12 @@
+## 2026-11-15 — v3.1 rigorous biological and digital systems documentation
+
+- Reworked all **24 design files and 24 companions**, preserving their original full v3.0 texts within revised documents.
+- Added twelve shared scientific/engineering process documents with an explicit *Soil = organoid* and *spinal Root tissue ≠ functional retained Root* distinction; axons and dendritic spines are neuronal structures, not cloned cells.
+- Added 12-stage scientist process workflow, 25-category molecular/structure crosswalk, and ten typed biology/approval schemas.
+- Separated WindBus, ChemiBus, SustiBus, Axon observations and BioBridge; every module has a controlled food/peptide change-review card.
+- Source-backed studies on connectoids, spinal organoids and lineage barcoding are linked; physical transfer and novel biological memory mechanisms remain unexecuted hypotheses.
+- Patent document remains excluded. © 2026 We Develop Software LLC.
+
 # Change history
 
 ## v6.0 · 2026-11-15 · Phase P02B

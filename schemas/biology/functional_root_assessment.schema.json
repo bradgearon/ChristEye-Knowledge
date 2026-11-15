@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "preparation_id",
+    "source_lot_id",
+    "record_id",
+    "created_at",
+    "evidence_status",
+    "evidence_ref",
+    "root_id",
+    "task_id",
+    "frozen_reader_sha256",
+    "immediate_score",
+    "delayed_score",
+    "delayed_horizon",
+    "training_delivery_refs",
+    "sealed_evaluation_ref",
+    "spinal_substrate_candidates",
+    "matched_control_refs",
+    "protected_task_deltas",
+    "interpretation"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "preparation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_lot_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "evidence_status": {
+      "enum": [
+        "DESIGN",
+        "PROPOSED",
+        "OBSERVED",
+        "ASSOCIATIONAL",
+        "CAUSAL_RESEARCH",
+        "UNRESOLVED",
+        "REJECTED"
+      ]
+    },
+    "evidence_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "root_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "frozen_reader_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "immediate_score": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "delayed_score": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "delayed_horizon": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "training_delivery_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "sealed_evaluation_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "spinal_substrate_candidates": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "matched_control_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "protected_task_deltas": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number"
+      }
+    },
+    "interpretation": {
+      "enum": [
+        "RETAINED_RELATION",
+        "ACCESS_CONFOUNDED",
+        "NO_RETENTION_DETECTED",
+        "UNRESOLVED"
+      ]
+    }
+  }
+}

@@ -57,3 +57,7 @@ The original JSON schemas from the project engineering release are preserved wit
 - [audit_entry.v1.schema.json](p02/audit_entry.v1.schema.json)
 - [instrument_capability.v1.schema.json](p02/instrument_capability.v1.schema.json)
 - [clock_anchor.v1.schema.json](p02/clock_anchor.v1.schema.json)
+
+### Biology and developmental engineering v3.1
+
+[Cell birth, cell identity, axon projections, spinal Root, Soil, Chemibus, Sustibus, change proposals and physical Crystal candidates](biology/README.md). These schemas validate research data, not biological truth or physical actuation.

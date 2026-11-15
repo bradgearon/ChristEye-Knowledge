@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "preparation_id",
+    "source_lot_id",
+    "record_id",
+    "created_at",
+    "evidence_status",
+    "evidence_ref",
+    "change_id",
+    "requesting_module_id",
+    "target_region_ref",
+    "change_class",
+    "trigger_evidence_refs",
+    "candidate_molecular_identity",
+    "candidate_receptor_context",
+    "qualified_sop_ref",
+    "comparison_plan_ref",
+    "protected_root_refs",
+    "protected_axon_refs",
+    "primary_endpoint_ref",
+    "pi_approval_ref",
+    "cell_lead_approval_ref",
+    "safety_approval_ref",
+    "decision",
+    "automated_physical_actuation"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "preparation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_lot_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "evidence_status": {
+      "enum": [
+        "DESIGN",
+        "PROPOSED",
+        "OBSERVED",
+        "ASSOCIATIONAL",
+        "CAUSAL_RESEARCH",
+        "UNRESOLVED",
+        "REJECTED"
+      ]
+    },
+    "evidence_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "change_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "requesting_module_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_region_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "change_class": {
+      "enum": [
+        "DIGITAL_CURRICULUM",
+        "DIGITAL_ROUTING",
+        "EXTERNAL_CARE_REVIEW",
+        "MOLECULAR_RESEARCH_PROPOSAL",
+        "CELL_PRODUCTION_RESEARCH",
+        "STRUCTURAL_RESEARCH"
+      ]
+    },
+    "trigger_evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "candidate_molecular_identity": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "candidate_receptor_context": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "qualified_sop_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "comparison_plan_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "protected_root_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "protected_axon_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "primary_endpoint_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "pi_approval_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "cell_lead_approval_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "safety_approval_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "decision": {
+      "enum": [
+        "DRAFT",
+        "HUMAN_REVIEW",
+        "INELIGIBLE",
+        "APPROVED_IN_LAB_SOP",
+        "EVALUATED",
+        "UNRESOLVED"
+      ]
+    },
+    "automated_physical_actuation": {
+      "const": false
+    }
+  }
+}
