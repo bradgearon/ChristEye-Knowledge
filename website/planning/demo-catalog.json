@@ -1,0 +1,191 @@
+{
+  "project": "ChristEye Anaiero",
+  "revision": "S01-2026-11-15",
+  "rights": "We Develop Software LLC",
+  "no_live_biological_interfaces": true,
+  "approval_needed_for_public_media": true,
+  "status_legend": {
+    "code-exists": "Python reference source already in repository; UI does not yet exist",
+    "specification-only": "manifest or design exists; no runnable demonstration in current source",
+    "reference-specification": "published engineering plan and calculations; browser simulation to be authored"
+  },
+  "demos": [
+    {
+      "id": "L01",
+      "title": "Crystal consumption and replay",
+      "state": "code-exists",
+      "currentSource": [
+        "anaiero/crystal.py",
+        "anaiero/memory.py",
+        "examples/run_digital_replay.py"
+      ],
+      "phase": "S04",
+      "chipIds": [
+        "CE-A10",
+        "CE-A14",
+        "CE-A02"
+      ],
+      "kind": "digital-reference",
+      "input": "A consented fictional usage episode and versioned manifest",
+      "output": "Hash verification, replay receipt, MemoryBank retrieval result and held-out question marker",
+      "proof": "Demo source and passing CI; no transfer to living neurons"
+    },
+    {
+      "id": "L02",
+      "title": "WindBus traffic inspector",
+      "state": "code-exists",
+      "currentSource": [
+        "anaiero/bus.py",
+        "anaiero/core.py"
+      ],
+      "phase": "S04",
+      "chipIds": [
+        "CE-A11",
+        "CE-A19"
+      ],
+      "kind": "digital-reference",
+      "input": "Timestamped, authenticated simulated task and observation events",
+      "output": "Routes, typed envelopes, rejected duplicates/expired events, audit log",
+      "proof": "Link a recorded or directly executed software test; no biological channel implied"
+    },
+    {
+      "id": "L03",
+      "title": "Lotus developmental decisions",
+      "state": "code-exists",
+      "currentSource": [
+        "anaiero/lotus.py",
+        "anaiero/roots.py"
+      ],
+      "phase": "S04",
+      "chipIds": [
+        "CE-A12",
+        "CE-A16",
+        "CE-A07"
+      ],
+      "kind": "digital-reference",
+      "input": "Expected performance, protected skill delta and proposed digital action",
+      "output": "STAGE_DIGITAL, HOLD, VETO or UNRESOLVED with reason",
+      "proof": "Digital decision only, no feed/chemical/stimulation controls"
+    },
+    {
+      "id": "L04",
+      "title": "Soil environmental observation console",
+      "state": "code-exists",
+      "currentSource": [
+        "anaiero_p02b/telemetry.py",
+        "anaiero_p02b/supervisor.py",
+        "examples/p02b_supervisor_demo.py"
+      ],
+      "phase": "S04",
+      "chipIds": [
+        "CE-A24",
+        "CE-A17",
+        "CE-A08"
+      ],
+      "kind": "synthetic-telemetry",
+      "input": "Synthetic timestamped temperature or fake sensor frame",
+      "output": "Freshness check, duplicate/authentication failure, fault state, review receipt",
+      "proof": "Always show SYNTHETIC, no real measurements/automated care"
+    },
+    {
+      "id": "L05",
+      "title": "The Last Cat: Metroidvania StarChip",
+      "state": "specification-only",
+      "currentSource": [
+        "registries/v6/module-manifests/CE-D01.json",
+        "registries/v6/module-manifests/CE-D02.json",
+        "registries/v6/module-manifests/CE-D03.json"
+      ],
+      "phase": "S05",
+      "chipIds": [
+        "CE-D01",
+        "CE-D02",
+        "CE-D03",
+        "CE-D04",
+        "CE-D05",
+        "CE-D06"
+      ],
+      "kind": "future-browser-simulation",
+      "input": "World seed, abilities, key/lock dependencies, room targets, difficulty profile",
+      "output": "Procedural map topology, path validity, room entry gates, alternative-seed comparison, nonplayable preview or playable engine when actually built",
+      "proof": "Must run a deterministic graph validator before declaring a seed playable"
+    },
+    {
+      "id": "L06",
+      "title": "Music by genre: AHD/ARD score explorer",
+      "state": "specification-only",
+      "currentSource": [
+        "registries/v6/module-manifests/CE-D07.json",
+        "registries/v6/module-manifests/CE-D08.json",
+        "registries/v6/module-manifests/CE-D09.json"
+      ],
+      "phase": "S05",
+      "chipIds": [
+        "CE-D07",
+        "CE-D08",
+        "CE-D09"
+      ],
+      "kind": "future-browser-simulation",
+      "input": "Genre, tempo, meter, key, tension curve, allowed instruments",
+      "output": "Original MIDI/score event model, tension/interruption trace, pattern relation, generated excerpt if properly owned",
+      "proof": "No playback of unlicensed music, no claim of learned biological composer"
+    },
+    {
+      "id": "L07",
+      "title": "Research Scientist: hypothesis and evidence",
+      "state": "specification-only",
+      "currentSource": [
+        "registries/v6/module-manifests/CE-D11.json",
+        "registries/v6/module-manifests/CE-D12.json",
+        "processes/SCIENTIST_WORKFLOW.md"
+      ],
+      "phase": "S05",
+      "chipIds": [
+        "CE-D11",
+        "CE-D12"
+      ],
+      "kind": "future-browser-simulation",
+      "input": "A narrow scientific question and named source evidence set",
+      "output": "Competing hypotheses, candidate metrics, falsifiers, source references, risk/extrapolation label",
+      "proof": "No inventing citations, no operational wet-lab recipe, no simulated experiment called real"
+    },
+    {
+      "id": "L08",
+      "title": "Book MicroCrystal to digital memory",
+      "state": "specification-only",
+      "currentSource": [
+        "registries/v6/module-manifests/CE-D14.json",
+        "anaiero/crystal.py",
+        "anaiero/curriculum.py"
+      ],
+      "phase": "S05",
+      "chipIds": [
+        "CE-D14",
+        "CE-D10"
+      ],
+      "kind": "future-browser-simulation",
+      "input": "Short public-domain or WDS-owned teaching text with rights",
+      "output": "Source-linked Bread lessons, recall questions, withheld exercise and digital replay/manifest",
+      "proof": "Accessed text vs trained knowledge clearly distinguished; never imply peptide education"
+    },
+    {
+      "id": "L09",
+      "title": "Power and supervisory bandwidth lab",
+      "state": "reference-specification",
+      "currentSource": [
+        "phases/P02/README.md",
+        "phases/P02B/README.md",
+        "docs/hardware.md"
+      ],
+      "phase": "S05",
+      "chipIds": [
+        "CE-A22",
+        "CE-A19"
+      ],
+      "kind": "future-static-interactive",
+      "input": "Explicitly hypothetical channel count, sample rate, bytes/sample and interface choice",
+      "output": "Data-rate and storage-budget computation with provenance and invalid-input warnings",
+      "proof": "No fabricated power draw, electrical energy not inferred from current-squared without voltage"
+    }
+  ]
+}
