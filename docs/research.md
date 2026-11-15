@@ -8,6 +8,7 @@ The following public text editions were derived from user-provided Word sources 
 4. [Physical Learning Device Design v0.4 (reviewed text edition)](../research/word-text/04_Physical_Learning_Device_Design_v0_4.txt)
 5. [Wind, Water and Crystal Research Program](../research/word-text/05_Wind_Water_and_Crystal_Research_Program.txt)
 6. [Wind, Water and Crystal Formal Supplement](../research/word-text/06_Wind_Water_and_Crystal_Formal_Supplement.txt)
+7. [ChristEye Equations with Explanations and Science v1.5](../research/word-text/07_ChristEye_Equations_Explained_v1_5.txt)
 
 ## Interpretation rules
 
