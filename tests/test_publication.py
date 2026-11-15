@@ -33,7 +33,7 @@ class PublicationIntegrityTests(unittest.TestCase):
         companions=list((ROOT/"specifications"/"v3"/"companion").glob("*.md"))
         self.assertEqual(len(designs),24)
         self.assertEqual(len(companions),24)
-        self.assertEqual(len(list((ROOT/"archive"/"v2").glob("CE-*.md"))),83)
+        self.assertEqual(len([p for p in (ROOT/"archive"/"v2").glob("*.md") if p.name!="README.md"]),83)
 
     def test_phase_specific_originals(self):
         phase2=list((ROOT/"phases"/"P02"/"docs").rglob("*.md"))
