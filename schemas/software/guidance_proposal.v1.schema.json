@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schemas.christeye.example/software/guidance_proposal.v1",
+  "$id": "urn:christeye:software:guidance_proposal:v1",
   "title": "Colony Guidance Proposal v1",
   "type": "object",
   "additionalProperties": false,
