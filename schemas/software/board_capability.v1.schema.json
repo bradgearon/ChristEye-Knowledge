@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schemas.christeye.example/software/board_capability.v1",
+  "$id": "urn:christeye:software:board_capability:v1",
   "title": "Participant Board Capability Announcement v1",
   "type": "object",
   "additionalProperties": false,
