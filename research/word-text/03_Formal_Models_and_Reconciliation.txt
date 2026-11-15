@@ -1,0 +1,471 @@
+CHRISTEYE ANAIERO — PLAIN-TEXT RESEARCH EDITION
+Source: 03_Formal_Models_and_Reconciliation, supplied November 2026
+Rights: © 2026 We Develop Software LLC; governed by repository LICENSE.md.
+Editorial status: source-derived text extracted from original DOCX; layout, inline images and some equations may not survive extraction. No biological work is claimed as performed by this conversion.
+Patent documents are not included; references to the confidential patent have been omitted.
+
+
+CHRISTEYE | CE CRYSTAL MATH 001 | Research edition 1.0
+
+
+
+
+CHRISTEYE RESEARCH SERIES
+
+
+Formal Models and Reconciliation
+Equation audit and corrected research models
+Prepared for Brad Gearon
+Framework and invention attributed to Brad Gearon
+AI-assisted synthesis of supplied records and primary literature
+Version 1.0 | 15 November 2026
+Research design and evidence review. Biological construction, packing and transfer remain unexecuted
+hypotheses.
+The full package preserves original sources, the stream conversation, machine-readable registers, templates
+and mathematical checks.
+
+
+
+
+
+
+CHRISTEYE | CE CRYSTAL MATH 001 | Research edition 1.0
+
+
+
+Reading guide
+Definitions and conflicts between supplied documents
+Equation-by-equation audit of the formal supplement
+Worked maintenance and mass-balance corrections
+Finite-horizon stabilization and molecular order
+Living-computer model audit
+Statistics, units and model selection
+Word navigation uses the heading hierarchy. Sources use stable S identifiers. The package START HERE file
+provides links to all deliverables and records.
+
+
+
+
+
+
+CHRISTEYE | CE CRYSTAL MATH 001 | Research edition 1.0
+
+
+
+Purpose and precedence
+This supplement audits the supplied Living Computer Theory Set, Equations Explained v1.5, Lotus Stream
+Research notes, Physical Learning Device Design v0.4, and the two Wind, Water and Crystal documents
+attributed by the user to Claude. Their originals remain unchanged. This edition supplies explicit dispositions so
+that an older equation is not accidentally reused with a corrected paragraph that contradicts it.
+Mathematical correctness, identifiability, empirical fit and biological interpretation are separate tests. A
+familiar equation can be mathematically valid and biologically inapplicable. A standard model's failure can
+reveal a violated assumption or missing process; it is not necessarily experimental error. All equations below
+are definitions or candidate models unless a narrower standard identity is explicitly identified. No fit or
+biological parameter was estimated for this package.
+
+
+Reconciliation of meanings
+ Source conflict              Current decision                               Consequence
+
+ Soil as culture variables,   Organoid Soil is the whole in this research    Rename environment z or e_env; do not
+ ECM, or organoid             branch; measured environment is one state      equate it with the whole
+                              block
+
+ Heart as hard veto or        Preserve biological Heart; L remains an        Different scoped role records
+ biological response          external limit controller
+ former
+
+ Honey as only a tag or       Preserve guidance, recruitment, gating and     Name the actual carrier and consequence in
+ only reward                  selection as distinct subroles                 each study
+
+ Crystal as archive,          P_crystal is the proposed physical             Stable performance is necessary evidence for
+ response or packed           embodiment; archive is a separate              some claims, not the whole definition
+ material                     reproducibility object
+
+ Wind as exclusively          Wind is expressed activity or influence at a   Input, internal and output Winds need
+ external drive               declared boundary                              separate records
+
+ Understanding requires       Require appropriate use within a declared      A bounded learned discrimination is a valid
+ an entirely novel            task and generalization claim                  first milestone
+ response
+
+ Wind, Water and Crystal Treat this as an unestablished analogy              It does not determine chemical identity or
+ are three states of one                                                     phase transitions
+ substance
+
+
+The v0.4 device already corrected several narrower definitions in the older theory set. Later user corrections
+govern the organoid Soil and physical Crystal proposal. A repeated term does not imply a single molecule,
+compartment or timescale. ChristEye supplies a question and role language; measurements decide which
+ordinary entities occupy those roles.
+
+
+
+
+
+
+CHRISTEYE | CE CRYSTAL MATH 001 | Research edition 1.0
+
+
+
+Audit of the Claude formal supplement
+ Item                        Disposition                 Reason and replacement
+
+ Tier I deviations are       Revise                      Standard laws and standard models have
+ experimental errors                                     different status; inspect assumptions and
+                                                         measurement before assigning cause
+
+ x is dimensionless firing   Qualify                     Raw rates have units; dimensionless state
+ rate                                                    requires a documented transform and
+                                                         calibration data
+
+ u in current or pulse       Revise                      These are distinct input quantities; a
+ frequency                                               waveform record must define both rather
+                                                         than interchange units
+
+ E equals integral of        Revise                      That integral is an exposure surrogate;
+ current squared                                         electrical energy is integral of voltage times
+                                                         current
+
+ W2 square-root              Hypothesis                  A norm bound or special linear model does
+ response law                                            not establish a universal equality for a
+                                                         nonlinear preparation
+
+ Order measured by           Redesign                    It can miss relational sequence structure or
+ identity-position mutual                                confound token occupancy with grammar; use
+ information                                             a declared task contrast
+
+ Off-manifold                Withdraw                    Displacement, learning and retention are
+ displacement defines                                    different observables; the cited study does not
+ teaching                                                establish necessity [S20]
+
+ W3 exponential delay        Hypothesis                  Delay responses may be nonmonotonic or
+ gain                                                    reflect other loop mechanisms; one fitted
+                                                         curve cannot identify phase locking
+
+ W4 long decay proves        Withdraw                    Adaptation, slow relaxation or residual input
+ teaching                                                can persist without acquired task content
+
+ W5 and W6 all rates         Not established             Depends on known inputs, units, excitation,
+ identifiable from one                                   compartments, sampling and independent
+ series                                                  parameter combinations
+
+ W7 deposition falls with    Open question               Neural variance is not fluid turbulence; the
+ neural variance                                         sign and carrier-specific dependence are
+                                                         unmeasured
+
+ W8 response ratio           Withdraw                    A functional response ratio is not a calibrated
+ estimates deposited                                     material assay and need not lie between zero
+ mass                                                    and one
+
+ G2 exponential              Conditional                 Valid for the named first-order model with no
+ clearance wait                                          continuing input; not a universal learning
+                                                         interval
+
+
+
+
+
+
+CHRISTEYE | CE CRYSTAL MATH 001 | Research edition 1.0
+
+
+ Item                        Disposition                 Reason and replacement
+
+ G3 selectivity only in      Withdraw as universal       Encoding, receptor specificity, timing,
+ deposition versus                                       connectivity and reader selection can also
+ clearance                                               distinguish relations
+
+ G4 shrinking volume         Revise boundary condition   Requires solute retention; draining well-mixed
+ concentrates all solute                                 fluid removes solute too
+
+ C1 classical nucleation     Analogy only                Geometry and units change; no free-energy
+ with radius as site count                               measurement or literal crystal is established
+
+ C2 sigmoid proves a         Withdraw                    Many mechanisms and observation thresholds
+ nucleation threshold                                    produce sigmoids; compare alternatives and
+                                                         measurement resolution
+
+ C3 logistic maintenance     Mathematically incorrect    The nonzero equilibrium is stable, not an
+ is bistable                                             unstable separatrix, when growth exceeds loss
+
+ C4 barrier lifetime         Unsupported application     No barrier or effective noise scale is
+ explains reproducibility                                measured; the explanation cannot be inferred
+                                                         from the formula
+
+ S1 inhibitor equilibrium    Not established             A one-to-one equilibrium model is not a local
+ equals matrix                                           ECM activity or whole-Soil model
+ permissivity
+
+ S2 infinite-horizon yield   Inconsistent as written     Sustained positive loss integrated to infinity
+ ranks three arms                                        forces the survival factor to zero
+
+ S3 one monotonic result Too broad                       It constrains the tested preparation, range,
+ kills all window models                                 intervention and timing, with uncertainty
+
+ P1 all processing routes    Conditional                 Compartmental processing and astrocytic
+ compete in one pool                                     recycling are not automatically one shared
+                                                         substrate pool
+
+ P2 no interaction means     Withdraw                    Complementary mechanisms can match a
+ unrelated cargo                                         reference model; positive interaction does not
+                                                         identify the mechanism [S22]
+
+ P3 about 36 wells           Not established             CV requires a mean, wells may be technical
+ means a powered study                                   replicates, and independent-unit variance is
+                                                         unknown
+
+ A1 scalar locality ratio    Redesign                    Near-zero denominators are unstable and the
+ proves selective repair                                 ratio hides absolute target and collateral
+                                                         outcomes
+
+ A3 diffusion length         Heuristic only              Binding, geometry, localization and response
+ decides possibility of                                  thresholds matter; a length comparison is
+ revision                                                neither necessary nor sufficient
+
+ A4 logarithmic              Analogy only                A convergence theorem for a specified
+ annealing guarantees                                    algorithm does not transfer to organoid
+ biology                                                 learning
+
+
+
+
+
+
+CHRISTEYE | CE CRYSTAL MATH 001 | Research edition 1.0
+
+
+The supplement's final review section already retracts the strongest stillness claim and questions the
+abundance ratio, sequence ranking and removal test. This audit applies those corrections to the earlier
+equations and tables rather than leaving both versions active. The assertion that nothing affects E0 is too
+strong: the assay's reference model, exposure comparison, receiver identity, inference and resource estimate
+all need revision.
+
+
+Worked correction of the maintenance equation
+The supplied C3 equation is:
+
+
+For nonnegative s and positive s_max, it can be written as s[(α − δ) − αs/s_max]. Its equilibria are zero and
+s_star = s_max(1 − δ/α), when the latter is positive. The derivative at zero is α − δ. The derivative at s_star is −
+(α − δ).
+When α exceeds δ, zero is unstable and the positive equilibrium is stable. Every sufficiently small positive state
+grows toward that equilibrium in this deterministic model. There is no positive unstable threshold below which
+the state must decay to zero. When α is below δ, every positive state decays; at equality the nonlinear term
+still drives positive states toward zero. The claimed bistability and separatrix therefore do not follow.
+A purely schematic model with a genuine threshold could instead be:
+
+
+Here zero and s_max are stable, and θ is unstable on the nonnegative state interval. If s is a concentration, k
+has units of inverse concentration per time. This equation is a mathematical example, not a model established
+by KIBRA, a proposed treatment, or evidence that a biological threshold exists. A threshold must be observed
+and compared with graded, stochastic and heterogeneous alternatives before choosing such a form. The
+included mathematical checks verify signs of the vector fields; they simulate no biological result.
+
+
+Corrected mass and exchange accounting
+Define amount N, volume V and concentration c = N/V for one named species. The identity is:
+
+
+If solvent leaves while the solute is retained and N stays constant, a fall in V raises c. If well-mixed liquid is
+drained at flow Q with no other process, dN/dt = −Qc and dV/dt = −Q, so the two terms cancel and
+concentration remains unchanged. The lost volume does not automatically create supersaturation. Selective
+retention, adsorption, secretion, uptake, evaporation and feed each require their own terms.
+For a minimal material model, use free amount n and bound amount b in the same amount units, with known
+input j. One possible linear model is:
+
+
+
+
+Adding the equations leaves j − k_clear n − k_deg b. Reversible unbinding returns material to the free
+compartment; degradation removes it from these measured pools. Amount can be converted to concentration
+only with the appropriate compartment volume. A washed image intensity needs its own calibration and
+recovery model before it estimates b.
+
+
+
+
+
+CHRISTEYE | CE CRYSTAL MATH 001 | Research edition 1.0
+
+
+This pair is an accounting model, not a claim that Knowledge sediments. Even if its rate parameters were
+estimable, bound material need not encode a task relation. Structural identifiability depends on which signals,
+inputs and volumes are observed; practical identifiability also depends on noise and sampling. Observing one
+monotonic relaxation rarely justifies declaring every parameter independently known.
+
+
+Finite observation windows for stabilization
+The supplied S2 integrates post-teaching permissivity to infinity. With a constant positive tail, the survival
+factor is zero. It cannot then place the open-throughout arm at a positive intermediate yield merely by naming
+that arm.
+A more interpretable finite-horizon hypothesis introduces a task-relevant latent state k_rel, a history-
+dependent acquisition term a, and a loss term d. For a test at t_test:
+
+
+Define the survival factor D(t,u); evaluate the solution at the declared test time t_test.
+
+
+
+
+The equation expresses accumulation and loss; it does not specify their biology. Matrix state, teaching, support
+and receptor context might influence either term. The observed task score requires a separate readout and
+access model. Constant acquisition, sharp closure, a universal optimal schedule and passive storage are not
+consequences of this formulation. Compare a small set of identifiable models before adding more free
+parameters.
+
+
+Word processing and receiver context
+A reaction rate depends on the identified substrate, enzyme state, compartment and conditions. The
+competing-enzyme fraction formula in P1 can be a useful approximation for a shared, low-substrate pool with
+suitable kinetics and negligible competing processes. It is not automatically applicable to intracellular furin
+processing, extracellular cleavage and astrocytic uptake and recycling together. Product interconversion and
+degradation also affect the measured fractions.
+The relevant molecular question is broader than termini. A receiver can distinguish availability, location,
+multimeric state, binding partners and sequence of exposure. Conversely, a measured chemical difference may
+have no task-relevant effect. The reported plasmin/furin boundary distinction motivates form identification; it
+does not establish a universal MMP-9-specific content code. [S03]
+For a fractional effect with an appropriate independence interpretation, Bliss uses E_AB = E_A + E_B − E_A E_B.
+Loewe instead asks about dose equivalence under its applicable response assumptions. Neither is simply the
+sum of two arbitrary readouts. Scaling any receptor signal to zero and one does not by itself justify
+independence. Report the model, endpoint, uncertainty and sensitivity to reasonable alternatives. [S22]
+Order sensitivity can arise from receptor preparation, adaptation, exposure duration, trafficking or residual
+compound. Demonstrating a proposed preparatory Word requires an observed intermediate state and
+evidence connecting that state to the later response. A null order difference can reflect rapid preparation
+during simultaneous exposure; it does not collapse every molecular Word into one. The number of comparison
+conditions must be counted explicitly: two orders, simultaneous, each-alone and vehicle conditions are not
+simply four arms.
+
+
+
+
+CHRISTEYE | CE CRYSTAL MATH 001 | Research edition 1.0
+
+
+
+Audit of the living computer equations
+ Item                                Correction or retained use
+
+ Network recurrence                  A candidate state-space model inspired by neural dynamics; not a validated literal
+                                     equation for this organoid
+
+ Milk product q                      An engineering adequacy score; if q is exactly one throughout all allowed bands, it
+                                     cannot represent graded differences inside them
+
+ Milk times Honey                    A hypothesis about interactions; separate support compliance from a measured
+                                     continuous support variable
+
+ Product of means                    Mean of m times q times e is generally not the product of the three means;
+                                     correlations matter
+
+ Pure interaction regression         Main effects depend on coding and reference levels; a product mechanism does
+                                     not require all main effects to vanish
+
+ Honey mutual information            Yoking does not guarantee zero information because stimulus and history can
+                                     remain shared
+
+ Capacity times access               One performance observation cannot separately identify latent capacity and access
+
+ Roots ratio                         May exceed one or be negative; report absolute scores and an applicability rule
+
+ Softmax confidence                  A transform of scores, not a guarantee of calibrated correctness probabilities
+
+ Partial correlation                 Does not identify direct causality or remove every common cause
+
+ Information synergy difference      The joint-minus-marginal expression mixes redundancy and synergy; use a
+                                     declared decomposition for stronger claims
+
+ Data-processing inequality          Applies to a specified Markov chain; history and feedback change it, and it does not
+                                     prove any finite software comparator must tie
+
+ Branch masking                      No detected task change can reflect redundancy, insufficient power, inaccessible
+                                     conditions or an insensitive assay
+
+ Lotus scalar score                  A vector benefit cannot be subtracted from scalar cost without an explicit
+                                     scalarization or constrained objective
+
+ Ensemble weighting                  Correlated experts can produce overconfidence; validate aggregation on held-out
+                                     data with matched resources
+
+ Recovery to an attractor            A dynamical result does not itself establish retention of the trained relation
+
+ Capacity replication                Independent acquisition can occur without superiority over a software teacher;
+                                     advantage is a separate comparison
+
+
+For the original plasticity model with decay rate λ, define Δw relative to baseline. Its exact linear solution is the
+decayed initial Δw plus η times the integral of m(u)q(u)e(u) weighted by exp[−λ(t−u)]. Replacing the integrand
+with the product of separate time averages needs assumptions about constancy or covariance. The claimed
+saturation value is an equilibrium under constant drive; it is not a universal training plateau.
+For observed performance P = P0 + (K − P0)A, both K and A are latent without extra measurements. Recovered
+performance after a context change supports some preserved capacity under the tested route, but does not
+
+
+
+
+CHRISTEYE | CE CRYSTAL MATH 001 | Research edition 1.0
+
+
+uniquely identify the old trace's location. Failure to recover does not prove erasure. This distinction is central
+to the Water test and must survive every statistical summary.
+
+
+Statistics and dimensional checks
+For an idealized independent two-arm normal comparison with known common standard deviation σ and
+target difference Δ, a planning approximation is n per arm approximately 2(z_alpha + z_power)²σ²/Δ². It is not
+the final design for clustered cultures, multiple contrasts, bounded scores or noninferiority. A coefficient of
+variation is σ divided by the mean; a CV of 15 percent does not supply σ without that mean and scale.
+Technical wells cannot substitute for independent biological units.
+Report target change and collateral change separately before calculating a locality ratio. When the target
+change is close to zero, division can produce unstable or misleading values. When comparing a diffusion length
+sqrt(D/k) with a site spacing, D must have length-squared per time units and k inverse-time units. A single
+decay length does not define a hard edge: thresholds, binding, geometry, localization and measured exposure
+matter.
+Electrical charge is the integral of current over time. Electrical energy is the integral of voltage times current
+over time. For a known constant resistance, current squared times resistance can recover energy; the neural
+interface is not assumed to be such a fixed resistor. Pulse counts, current, charge, impedance and energy are
+different records. Matching one does not imply the others are matched.
+
+
+Model selection and next use
+Start with a small model per question: a task-performance comparison for Roots, a defined receiver-state
+model for order sensitivity, and a carrier-specific accounting model for packing. Test identifiability and
+measurement adequacy before estimating parameters. Use discovery data to choose plausible forms and
+reserve confirmation for the declared contrasts. Avoid a single large equation in which enough adjustable rates
+can explain every outcome.
+The useful contribution of the formal work is the set of alternatives it makes distinguishable. If quiet does not
+help, remove that requirement. If a matrix timing effect does not appear, narrow that mechanism. If no
+physical carrier can be linked to content, retain the learning result without calling it a Crystal. If a carrier works
+only while joined, report compatible assisted use. These are informative outcomes that keep the plan
+connected to observable behavior.
+
+
+
+
+
+
+CHRISTEYE | CE CRYSTAL MATH 001 | Research edition 1.0
+
+
+
+Primary sources and scope
+These references support scoped findings or corrections. They do not establish the complete proposed
+biological sequence. S20 is a preprint. Supplied project files are identified in the package source inventory;
+their historical claims remain subject to the reconciliation.
+[S03] Gray & Ellis: Activation of pro-BDNF by the pericellular serine protease plasmin . FEBS Letters, 2008.
+Scope: a demonstrated cleavage-boundary distinction in the studied biochemical system.
+https://ueaeprints.uea.ac.uk/id/eprint/69069/1/Gray_and_Ellis_2008.pdf
+
+[S20] A foundation model for brain organoid network dynamics uncovers intrinsic computation and convergent
+disease phenotypes . bioRxiv preprint, October 2026, version 1. Scope: the cited 15.5×/4.4× latent-state shifts
+and reuse of spontaneous dimensions; not a demonstrated retention or crystallization protocol.
+https://www.biorxiv.org/content/10.64898/2026.10.11.758231v1.full
+
+[S22] MuSyC is a consensus framework that unifies multi-drug synergy metrics for combinatorial drug
+discovery . Nature Communications, 2021. Scope: combination reference models and distinct types of
+interaction.
+https://www.nature.com/articles/s41467-021-24789-z
+
+
+
+

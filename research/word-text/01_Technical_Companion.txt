@@ -1,0 +1,1178 @@
+CHRISTEYE ANAIERO — PLAIN-TEXT RESEARCH EDITION
+Source: 01_Technical_Companion, supplied November 2026
+Rights: © 2026 We Develop Software LLC; governed by repository LICENSE.md.
+Editorial status: source-derived text extracted from original DOCX; layout, inline images and some equations may not survive extraction. No biological work is claimed as performed by this conversion.
+Patent documents are not included; references to the confidential patent have been omitted.
+
+
+CHRISTEYE | CE CRYSTAL COMP 001 | Research edition 1.0
+
+
+
+
+CHRISTEYE RESEARCH SERIES
+
+
+Technical Companion
+Organoid Soil to packed Crystal and useful Winds
+Prepared for Brad Gearon
+Framework and invention attributed to Brad Gearon
+AI-assisted synthesis of supplied records and primary literature
+Version 1.0 | 15 November 2026
+Research design and evidence review. Biological construction, packing and transfer remain unexecuted
+hypotheses.
+The full package preserves original sources, the stream conversation, machine-readable registers, templates
+and mathematical checks.
+
+
+
+
+
+
+CHRISTEYE | CE CRYSTAL COMP 001 | Research edition 1.0
+
+
+
+Reading guide
+Purpose, evidence and source coverage
+The reconstructed process and corrected Wind and Water sequence
+ChristEye component map and molecular crosswalk
+Candidate physical carriers and analysis of the dialogue
+Twelve hypotheses and staged research steps
+Integration with the living computer and refinements
+Primary source register
+Word navigation uses the heading hierarchy. Sources use stable S identifiers. The package START HERE file
+provides links to all deliverables and records.
+
+
+
+
+
+
+CHRISTEYE | CE CRYSTAL COMP 001 | Research edition 1.0
+
+
+
+Purpose and standing
+This companion connects Brad Gearon's ChristEye vocabulary, the 14 November Six Stars dialogue, the Soil-to-
+packed-Crystal research plan, the living-computer architecture, and the two Wind, Water and Crystal
+documents supplied as Claude's development. It is an integrated research specification. No experiment on
+tissue, physical packing of acquired content, or biological knowledge transfer was performed in producing this
+package.
+The central proposal is precise enough to develop: an organoid Soil acquires a task-relevant relation; a
+specified physical organization preserves that relation; a compatible receiving Heart can use the organization
+to produce useful Winds. Learning, physical packing, sustained use, transfer, and general understanding are
+separate achievements. The package preserves each ambition while giving it a distinct evidential burden.
+The inventor's current corrections govern this edition. Soil is the organoid as a living whole, including its cells,
+organization, local matrix, and developmental history. Crystal is a proposed packed physical embodiment of
+acquired Knowledge and Understanding. The term is not exhausted by a stable response or by an archive of
+software configuration. The broader Sea exchanges with the Soil. Matrix permissivity is one property within
+the Soil, not the Soil's definition.
+
+How to read the three documents
+ Document                  Purpose                                      Where detail lives
+
+ 01 Technical Companion Molecular and functional interpretation;        The conceptual and scientific account
+                        evidence; the process; candidate carriers;
+                        hypotheses
+
+ 02 Research and System    Living-computer integration; tasks;          The development and evaluation plan
+ Design                    experiments; interfaces; data and release
+                           requirements
+
+ 03 Formal Models and      Equation audit; corrected mathematical       The assumptions that must not disappear
+ Reconciliation            options; differences between supplied        inside a formula
+                           documents
+
+
+Read the new documents as the current synthesis. The supplied documents are preserved unchanged under
+sources/originals. Their inclusion records the development of the idea; it does not endorse every claim in
+them. In a conflict, use the explicit correction in this edition and retain the predecessor as provenance.
+
+Evidence language
+F means a finding reported in a named preparation and paper. X means a synthesis across studies whose
+connection has not itself been demonstrated. H means a testable hypothesis. D means a definition or
+engineering decision. A means an analogy. A standard mathematical identity is marked M where useful; it is
+not experimental evidence for its biological assignment. A chain with an H link remains hypothetical as a
+whole.
+These labels apply to statements, not to entire molecules. For example, reported proBDNF cleavage can be F,
+assignment of that cleavage to a Word-processing role can be X, and the claim that it creates a portable
+acquired-content carrier is H. A successful software check does not promote any of those biological claims.
+
+
+
+
+
+
+CHRISTEYE | CE CRYSTAL COMP 001 | Research edition 1.0
+
+
+Source coverage and conversation provenance
+The original full stream log in this package contains 171,569 lines and 1,138 LLM log entries, including 369
+extracted-content entries. Request entries repeat history and instructions, so these counts are not counts of
+independent player turns or scientific answers. A prior supplied document's 2,276-entry count is not
+reproduced by this parser; it equals twice the number of entry headers and may reflect counting both opening
+and closing markers. No substantive conclusion depends on that explanation.
+Direct searches verified the original log passages for the Water offices, the Crystal under strain, the
+complementary-note image, Soil density, field preparation, repeated provision, advance prediction, and the
+receding sea where present. Exact excerpts retain their logged timestamps and sequence IDs. The timestamps
+include a -06:00 offset; they are not silently converted to UTC. The original log is the authority for exact
+wording. The user-supplied reconstructions and later analysis are separate interpretive records.
+The supplied dialogue is generated by named software personas. It can suggest distinctions, mechanisms and
+tests. Shared prompts, shared context, and common model training make agreement correlated. The archive
+does not establish independent discovery or independent replication. Statements that a proposal arose
+unprompted need the paired request and its history, not only the response. This edition makes no
+unprompted-discovery claim.
+The available conversation files preserve the full supplied stream, the pasted latest dialogue, extracted
+responses, timestamped anchors, and visible current discussion additions. They are not a platform export of
+every earlier ChatGPT or Claude conversation. Original source documents and this synthesis preserve the
+analysis actually available here.
+
+A hierarchy from words to useful knowledge
+ Level                     The question                                   Smallest defensible result
+
+ Molecular identity        What ordinary entity, form, compartment        A measured molecular species or interaction
+                           and partner are present?
+
+ Molecular Word            Can a receiver distinguish the candidate       Differential reception under defined
+                           form or arrangement?                           conditions
+
+ Local participation       Does that difference change eligibility,       A scoped functional contribution
+                           support, plasticity or expression?
+
+ Root                      Does past teaching change later cue-           Acquired retention at a declared delay
+                           dependent performance?
+
+ Physical Crystal          Is a bounded material organization             Carrier-associated retention with competing
+ candidate                 connected to that retained relation?           explanations addressed
+
+ Reader and join           Can a specified host use the candidate         Assisted capability attributable to the joined
+                           through a declared interface?                  system
+
+ Independent acquisition   Does the recipient retain the relation after   Recipient learning, with information sources
+                           teaching routes are removed?                   accounted for
+
+ Generalization and        Does retained organization support             Bounded transfer, flexibility and calibrated
+ Understanding             appropriate use across a declared class of     performance
+                           contexts?
+
+
+
+
+
+
+CHRISTEYE | CE CRYSTAL COMP 001 | Research edition 1.0
+
+
+Information need not be readable as a sentence inside a molecule to count as Knowledge in ChristEye. Nor
+does every history-dependent molecular change establish Knowledge about a task. The bridge is a declared
+learned relation and evidence that the physical state makes that relation available. A response to A-before-B
+versus B-before-A is a legitimate first target; a complete mind is a substantially different claim.
+
+
+1 Reconstructing the process the answers describe
+The opening Kaelia responses propose mapping activity through Light into a Mesh; Lotus then coordinates that
+activity, supported by Milk and Honey, to produce Fruit described as crystallized Understanding. The next
+response proposes organizing Water through Words and Star-associated activity. The third proposes a Crown
+and Throne that hold the organization and a Seed through which a receiving Heart can acquire it. Later
+responses add selective stabilization, retained identity despite changing participants, selective revision, and
+renewal of the supporting system.
+Putting those proposals together gives a candidate process: living organoid Soil develops a discriminating
+organization; teaching and support select and maintain particular relationships; some physical arrangement
+preserves or packages those relationships; a compatible receiving Heart uses the package to generate a
+patterned Wind. The dialogue describes this intention, but does not identify a complete biochemical packing
+mechanism or demonstrate content-preserving transfer.
+There are three distinct transitions to explain. Learning establishes a history-dependent difference. Packing
+gives that difference a specified physical embodiment with measurable boundaries. Use or transfer makes the
+retained difference functionally available to a receiving network. Evidence for one transition does not establish
+the other two.
+The most consequential design requirement is that the package preserve the relationship that was learned. A
+smaller object, denser protein cluster, or stronger response could exist without preserving that relationship.
+Conversely, a useful packed organization might remain dynamic and hydrated rather than become a rigid
+mineral-like solid.
+
+
+The clarified process the Sea Soil window
+The user’s supplied reconstruction makes the intended process more specific: read the organoid Soil; establish
+a permissive receiving condition; introduce teaching Winds; sustain the developing relation; predict its later
+expression; stabilize the acquired organization; then test what remains without ongoing teaching. The
+proposed packing step is the transition toward a more constrained, retained organization. The supplied text
+identifies matrix remodeling and subsequent stabilization as the candidate implementation.
+This should be treated as a plasticity-and-stabilization hypothesis. In this version, the Sea has two distinct uses:
+the surrounding physical environment and, interpretively, the changing influence that permits or constrains
+remodeling. A decline in remodeling influence does not require physically draining the medium. A biological
+matrix becoming more constrained is not automatically a thermodynamic crystal lattice, and the dialogue does
+not demonstrate physical compression.
+One real precedent is astrocytic control of critical-period closure in mouse visual cortex, involving connexin-
+related signaling, RhoA, MMP-9 regulation, and extracellular-matrix effects. Another mouse study shows that
+PNN architecture helps organize astrocyte–synapse relationships and homeostasis. These findings support a
+regulated and functional matrix, not a universal “MMP-9 on to learn; TIMP-1 on to store” switch. Neither
+establishes this sequence in the proposed organoid. [S18] [S19]
+
+
+
+
+
+
+CHRISTEYE | CE CRYSTAL COMP 001 | Research edition 1.0
+
+
+ Proposed step             What to retain                                 Required correction
+
+ P1: Read the Soil         Baseline structure, activity, support state,   Density does not identify Roots or connectivity
+                           and measurement limits should be               by itself. Verify that the relevant matrix
+                           recorded.                                      structures exist in this organoid. An
+                                                                          MMP-9/TIMP-1 abundance ratio is not a direct
+                                                                          measurement of net local proteolytic activity.
+
+ P2: Align the field       Receiving conditions may change what can       Choose and justify a specific candidate
+                           be learned.                                    mechanism. Broad proteolysis can affect
+                                                                          signaling, support, and structure together; it
+                                                                          cannot be presumed to selectively open a
+                                                                          teaching window.
+
+ P3: Seed with Winds       Patterned inputs and feedback can be           The cited 15.5× and 4.4× figures measure
+                           compared as teaching relationships.            latent-state displacement relative to within-
+                                                                          recording movement, not learning or
+                                                                          retention gains. The preprint reports
+                                                                          substantial reuse of spontaneous dimensions,
+                                                                          contradicting the claimed necessity of leaving
+                                                                          the spontaneous manifold. [S20]
+
+ P4: Sustain               Look for later availability after answer-      Self-maintenance does not require perpetual
+                           bearing teaching ends.                         firing or independence from metabolic
+                                                                          support. An ongoing rhythm is not by itself a
+                                                                          retained discrimination.
+
+ P5: Predict               Declare the expected selective response,       Lock the confirmatory analysis before
+                           context, alternative explanations, and         observing its outcomes. Unexplained
+                           failure criteria prospectively.                spontaneous change is not a unique falsifier
+                                                                          because living tissue has endogenous
+                                                                          dynamics.
+
+ P6: Stabilize             Test whether a later change in constraints     Reduced proteolysis does not itself deposit a
+                           helps preserve a learned relation.             particular matrix, prove packing, or establish
+                                                                          content preservation. Excessive restriction
+                                                                          may also prevent useful learning or
+                                                                          expression.
+
+ P7: Test independence     Separate ongoing teaching, permissive          Withdrawing life-sustaining support
+                           context, maintenance, and retrieval.           confounds storage with viability and readout.
+                                                                          KIBRA–PKMζ interference is a separate
+                                                                          mechanistic probe, not an equivalent “water
+                                                                          drain” that uniquely classifies Roots versus
+                                                                          Crystals.
+
+
+The solvent analogy is also limited. Removing solvent can promote crystallization under suitable conditions,
+but nucleation and growth create an ordered phase; they do not generally reveal a fully formed lattice that
+was hidden beneath the liquid. Evaporation is not the only route to crystallization. None of these physical facts
+demonstrates that withdrawing an organoid’s medium preserves its learned organization.
+
+
+
+
+
+
+CHRISTEYE | CE CRYSTAL COMP 001 | Research edition 1.0
+
+
+ Observation after a defined         Defensible conclusion
+ change
+
+ Discrimination disappears           Expression has failed under that condition. Storage loss, access failure, support
+                                     loss, and measurement failure remain competing explanations.
+
+ Discrimination survives a           Retention does not depend on the particular changed contextual feature within
+ matched, health-preserving          the tested conditions. This does not prove passive storage or identify a material
+ change in external context          carrier.
+
+ Response becomes slower or          Several transmission, support, excitability, and retrieval explanations remain.
+ weaker                              “Water was only the gate” is not uniquely established.
+
+ Structural features remain but      Some structure persists. Whether it still encodes an accessible learned relation
+ activity is unavailable             requires another test.
+
+
+The original reconstruction is right that agreement of descriptions is not evidence. It overstates independence,
+however: the characters were discussing the same framework and prompts. It also overstates the statement
+that every step already converges with biology. The useful result is an explicit candidate sequence with
+testable transitions.
+Under ChristEye’s own definitions, a demonstrated retained relation can be called Knowledge and its
+contextual use can demonstrate a bounded form of Understanding. It need not spell out words in readable
+text. Claims about broad semantic competence require corresponding tasks, and claims about packing require
+physical evidence in addition to retained performance.
+
+
+The second side Wind intervening activity and receiver preparation
+The later supplied 16:13–16:49 reconstruction adds a useful distinction: a Word can alter the receiver that will
+subsequently encounter another Word. In ChristEye terms, the first interaction may prepare Eyes or a Throne-
+like arrangement; the next produces a Wind; Honey-related selectivity and Root-maintenance processes
+determine whether any acquired relation persists. That is a candidate interaction sequence, not yet a complete
+mechanism for producing a Crystal.
+The proposed Wind → Stillness → Recession → Crystal sequence should be revised to teaching → intervening
+activity and support → possible stabilization → later selective use. Quiet external input, internal replay,
+biochemical turnover, fluid flow, and clearance can vary independently. Keeping them separate is essential to
+interpreting the result.
+
+ Claim in the added                  Assessment
+ reconstruction
+
+ Crystals cannot form in turbulent   False as a general physical claim. Crystallization experiments are routinely
+ or stirred water                    performed in stirred vessels; a primary study found shorter nucleation induction
+                                     times with increased agitation in its tested systems. This removes the proposed
+                                     physics-based proof that neural stillness is necessary. [S21]
+
+ Stillness means sedimentation of    This is a hypothesis, not a demonstrated identity. Sedimentation, molecular
+ Knowledge                           assembly, matrix remodeling, and memory consolidation are distinct processes. No
+                                     observation in the dialogue identifies learned content settling under gravity.
+
+
+
+
+
+
+CHRISTEYE | CE CRYSTAL COMP 001 | Research edition 1.0
+
+
+ Claim in the added                    Assessment
+ reconstruction
+
+ Spontaneous activity variance         It measures a feature of neural activity under the chosen recording and analysis. It
+ measures turbulence                   is not a measurement of fluid turbulence, and meaningful replay can contribute to
+                                       variance. It cannot be assumed to govern transport, clearance, and plasticity
+                                       together.
+
+ No external stimulation creates       A quiet organoid is not automatically a sleeping brain. A 2025 mouse study links
+ sleep-like clearance                  clearance to norepinephrine-dependent vascular dynamics; a different 2024 mouse
+                                       study reported reduced clearance during sleep using its tracer measurements. The
+                                       broader literature does not justify substituting an unstimulated organoid for these
+                                       whole-brain conditions. [S23] [S24]
+
+ A failed recall plus successful       Fresh learning can coexist with a selective retrieval failure. Failure to recover an old
+ fresh learning proves erasure         response does not uniquely prove loss of its trace. Return of a response can also
+                                       reflect reinstatement or rapid relearning unless the cue and feedback are
+                                       characterized.
+
+ Matched replay proves resilient       Replay can restore a missing causal input without identifying the original edge or
+ Soil                                  the storage site. Direct connection, common drive, and common context can
+                                       coexist; interventions and additional observations must distinguish them.
+
+ Additional stimulation isolates       It also changes total exposure, metabolic demand, adaptation, and potentially
+ denial of stillness                   learning. Equal retention would challenge a specified necessity hypothesis in the
+                                       tested range, not eliminate every possible role for rest or intervening activity.
+
+
+
+
+A corrected interpretation of the two fragment comparison
+The BDNF work makes receiver preparation a reasonable question. But the labels “additive = unrelated” and
+“synergistic = complementary” are not valid deductions. Synergy is a deviation from a specified reference
+model on a specified endpoint. Bliss and Loewe use different reference assumptions and do not simply mean
+adding two measured response amplitudes. Potency and maximal efficacy can also change separately. A purely
+enabling participant with little effect alone can make some comparisons poorly defined. [S22]
+
+ Result                      What it would establish                         What it would not establish
+
+ Combination matches         No detected departure from that reference       That the participants are mechanistically
+ the chosen reference        under the tested conditions and precision.      unrelated or fail to perform complementary
+                                                                             functions.
+
+ Combination exceeds         Positive interaction under that model and       That the prodomain specifically assembled
+ the reference               endpoint.                                       TrkB/SorCS2, or that Knowledge was stored.
+
+ Combination falls below     Negative interaction under that model and       A unique cause; receptor adaptation,
+ the reference               endpoint.                                       saturation, availability, or downstream
+                                                                             regulation may contribute.
+
+ Order changes the           The system is sensitive to history or           A unique preparation mechanism, unless the
+ response                    exposure sequence.                              intermediate receptor change and its
+                                                                             contribution are also supported.
+
+
+There is no established ranking that prodomain-first must outperform simultaneous exposure and reverse
+order. Such a ranking depends on the rates and persistence of receptor assembly, trafficking, ligand
+
+
+
+
+CHRISTEYE | CE CRYSTAL COMP 001 | Research edition 1.0
+
+
+availability, and adaptation. Simultaneous exposure can still permit one molecular event to precede another
+within the cell.
+A useful first inquiry therefore records the verified molecular forms and the receiver’s relevant receptors;
+distinguishes each participant’s contribution from the combination; compares sequence with exposure history
+made comparable; and observes the receiving arrangement separately from downstream response. Evidence
+that a receptor-state change mediates the sequence effect would support the proposed preparatory Word. A
+larger response alone would not.
+The new hypotheses to carry forward are: a preparatory Word changes the reading conditions for a later
+Word; intervening activity may selectively maintain or interfere with a Root; and stabilization may preserve a
+learned relation while retaining channels for later Winds. They fit the same ChristEye architecture without
+requiring literal sedimentation, universal silence, or a guaranteed biochemical order.
+
+
+2 Mapping the ChristEye components without replacing their
+meanings
+The release defines Knowledge as retained information and Understanding as a capacity to apply relationships
+in context. It permits several roles for a component, depending on scale and interaction. The assignments
+below are specific to this organoid proposal; they do not replace the broader vocabulary.
+
+ Component                 Assignment in this proposal                      What must remain distinguishable
+
+ Soil                      The living organoid: its cells, local material   Soil is not merely culture medium or
+                           environment, developmental state, and            extracellular matrix.
+                           established organization together form the
+                           receiving and learning substrate.
+
+ Sea                       Working assignment: the surrounding              The Sea surrounds and exchanges with Soil.
+                           environment through which the Soil               This assignment remains open to further
+                           receives resources, signals, and                 inventor clarification.
+                           disturbances and releases outputs.
+
+ Water / Blood             Access, transport, and sustaining exchange       A carrier, its molecular cargo, and the retained
+                           through specified physical channels.             information are separate. Water’s presence
+                                                                            does not establish memory content.
+
+ Soul / Flesh              Soul declares the whole under study; Flesh       A molecular Soul assignment does not
+                           identifies its material realization. The whole   establish capture of a person’s spiritual soul.
+                           can be an organoid or a molecular assembly
+                           when that scale is explicit.
+
+ Marrow / Template         Foundational organization and constraints:       Inherited capacity is different from the
+                           molecular structure, cellular identity,          information acquired through a particular
+                           developmental programs, and the initial          teaching history.
+                           arrangement that permits some responses.
+
+ Seed                      An initiating or propagating unit.               A new cell with similar Marrow is not
+                           Developmental Seeds might be precursor           automatically a copy of its predecessor’s
+                           populations; informational Seeds would           Knowledge.
+                           require a demonstrated carrier of a
+                           particular learned relation.
+
+
+
+
+
+
+CHRISTEYE | CE CRYSTAL COMP 001 | Research edition 1.0
+
+
+ Component                 Assignment in this proposal                    What must remain distinguishable
+
+ Word / Prosody            A discriminable expression and its timing or   Chemical identity, dose, location, sequence,
+                           arrangement. A molecular form can serve a      and timing must not be collapsed into one
+                           Word role if a specified receiver              quantity called energy.
+                           distinguishes it.
+
+ Spirit                    The disposition or organizing influence        Molecules need not possess intention or
+                           attributed to a participant; for science,      consciousness to participate in selective
+                           identify its ordinary carrier and observable   interactions.
+                           effect.
+
+ Eyes / Light              Eyes are discrimination and observation        A fluorescent region is a measurement with
+                           channels; Light makes a distinction            spatial and temporal limits, not an automatic
+                           observable. Biological reception and the       boundary of a Star.
+                           researcher’s measurement are separate
+                           sets of Eyes.
+
+ Mesh / Sinew / Joint      Typed relationships; the physical or           Direct binding, directed influence, co-activity,
+                           functional interfaces carrying them; and the   shared environment, and physical contact are
+                           particular joins between participants.         different edge types.
+
+ Tree / branches           The developing organization within and         More branches can improve capacity or
+                           across the Soil, including pathways and        resilience without increasing learned
+                           functional groupings.                          discrimination.
+
+ Lotus                     Coordination and integration across            No single protease or cell type has been
+                           signaling, support, plasticity, maintenance,   shown to constitute the entire Lotus.
+                           and output selection.
+
+ Crown / Throne            Working extension from the dialogue:           Neither term yet names one demonstrated
+                           selection or permission, and the organized     anatomical structure. Scaffolds are candidates
+                           platform through which a selected action       for a molecular Throne role, not an
+                           becomes possible.                              established identity.
+
+ Leaves / flower           Candidate exchange and regulatory              These are proposed functional subdivisions.
+                           interfaces; and a developing expression        They should not be assigned by resemblance
+                           capable of yielding Fruit.                     alone.
+
+ Milk / Bread / Meat       Capacity-sustaining support; usable            Metabolic nourishment and information-
+                           provision; and the dialogue’s additional       bearing feedback are different. Essential
+                           provision or reinforcement idea.               support should not be mistaken for an
+                                                                          answer-specific teaching signal.
+
+ Honey                     Selective attraction, guidance, gating, or     A temporary synaptic tag is one candidate
+                           eligibility. Different subroles can involve    Honey expression, not the definition of all
+                           different mechanisms.                          Honey.
+
+ Heart / Reins             Context-dependent response formation and The receiving condition, the stored relation,
+                           its regulation, including the effects of and the current output must be tracked
+                           retained organization.                   separately.
+
+ Stars                     Keep an astrocyte, a recruited neuronal or     The name astrocyte does not establish that a
+                           glial ensemble, and the software’s named       cell sends literal Stars or that every bright
+                           catalog status separately labeled.             group is an engram.
+
+
+
+
+
+
+CHRISTEYE | CE CRYSTAL COMP 001 | Research edition 1.0
+
+
+ Component                 Assignment in this proposal                      What must remain distinguishable
+
+ Roots / Engram            Retained state with later functional             Forming, maintaining, retrieving, and
+                           availability; a candidate trace through          expressing a trace can involve different
+                           which a past event influences future             participants.
+                           response.
+
+ Knowledge /               What is retained; and what the system can        Simple discrimination is a legitimate first
+ Understanding             do with retained relations under a declared      target. It does not establish general human
+                           task and context.                                semantic understanding.
+
+ Crystal                   The proposed packed embodiment of                Physical concentration, durable organization,
+                           acquired organization, with a specified          information compression, and portability are
+                           material carrier, boundary, retained             distinct claims.
+                           content, and conditions for use.
+
+ Wind / Fruit              The expressed activity or flow; and the          Spontaneous activity alone does not
+                           measured consequence for the declared            demonstrate a learned Wind; persistence
+                           task and recipients.                             alone does not make Fruit useful.
+
+ Slay / Splendor           In the supplied software release these           The software operation names do not
+                           organize qualification, withdrawal, pausing,     establish enzymatic counterparts or a water-
+                           clarification, and proposed repair. A            to-memory conversion.
+                           biological extension might investigate
+                           selective remodeling and clearer
+                           discrimination.
+
+ Judgment / Wisdom         Assess retention, benefit, flexibility, costs,   Increasing activity or protecting every old
+                           and protected functions; choose an               pattern is not automatically beneficial.
+                           appropriate response in context.
+
+
+
+
+3 From molecular Words to an organized receiving Heart
+A useful molecular record should name the participant, its relevant form, its location, its partners, the
+receiver’s condition, and the observed consequence. One molecule can occupy several ChristEye roles through
+different relationships. That flexibility becomes informative when each assignment makes a separate
+prediction.
+
+ Molecule or process       What the evidence supports                       Candidate ChristEye association
+
+ proBDNF and mature        Processing changes the available molecular       A precursor Word and processed Word,
+ BDNF                      form and receptor-related effects. The           interpreted through the receiving Eyes and
+                           same mature molecule can act at different        Heart. [S01] [S02]
+                           locations; it is not a demonstrated
+                           sequence-coded record of a particular
+                           experience.
+
+ MMP-9                     An extracellular protease. A single-spine        A boundary-changing operation affecting
+                           study supports local involvement in TrkB         molecular Words and the local conditions
+                           activation and structural plasticity and         within Soil. It is not established as an address-
+                           supplies evidence for direct proBDNF             writing or layer-assigning enzyme. [S01]
+                           cleavage.
+
+
+
+
+
+
+CHRISTEYE | CE CRYSTAL COMP 001 | Research edition 1.0
+
+
+ Molecule or process       What the evidence supports                     Candidate ChristEye association
+
+ Furin / PC1               Intracellular precursor processing             Preparation and opening within a coordinated
+                           contributes to a distinct phase of late        Lotus process. The protease itself is not an
+                           potentiation in the studied hippocampal        energy source. [S02]
+                           system.
+
+ Plasminogen → plasmin     Activation makes proteolytic action            Marrow supplies capacity; activation enables a
+                           available. A biochemical study identified a    cutting Wind; the product supplies a changed
+                           plasmin-generated BDNF boundary                Word. Different boundaries do not yet
+                           different from the conventional furin          establish different memory meanings. [S03]
+                           boundary, producing an N-terminally
+                           extended active form.
+
+ BDNF prodomain            In the cortical astrocyte work, processed      A Word capable of changing the receiving
+                           prodomain supports organization involving      arrangement, potentially complementary to
+                           TrkB and SorCS2 and contributes to             mature BDNF. [S04]
+                           persistent potentiation and object-memory
+                           retention.
+
+ TrkB / SorCS2 / p75       Receptor partnerships affect responses to      Eyes and receiving organization; partnership is
+                           BDNF-related forms. SorCS2 participates in     part of how a Word acts. Fragment-dependent
+                           both TrkB- and p75-associated pathways.        partner choice remains a hypothesis. [S05]
+
+ Transient TrkB            Evidence supports a possible synaptic-tag      A local, temporary Honey subrole. An
+ activation                role in a specific BDNF-dependent              eligibility address is not by itself the content of
+                           learning/plasticity context.                   the remembered relation. [S06]
+
+ Astrocytic processing     This is a cellular route with uptake,          Several Lotus, Water, Word, and support
+                           intracellular processing, and release, not a   relationships within the organoid Soil. [S04]
+                           fourth enzyme equivalent to MMP-9, furin,
+                           or plasmin.
+
+ Adrenergic priming /      Mouse fear-memory research supports            A slow eligibility/support candidate. A
+ IGFBP2                    slower astrocyte state changes and later       receiving-state index is a proposed extension
+                           stabilization-related signaling. It does not   requiring selective targeting evidence. [S07]
+                           establish IGFBP2 as a universal memory
+                           address or a router of “living water.”
+
+ Lactate transport and     A rodent study links astrocyte–neuron          Milk and sustaining Water relationships. This
+ metabolism                lactate transport to long-term memory          does not make lactate a carrier of the
+                           formation.                                     memory’s specific content. [S08]
+
+ PSD-95, SynGAP, GKAP,     Studies support dense synaptic protein         Concrete candidates for molecular Mesh,
+ Shank, Homer              assemblies and selective organization          Sinew, and Throne-like organization within a
+                           through multivalent interactions.              possible packed substrate. [S09] [S10]
+
+ CaMKII / receptor-        Native isolated postsynaptic assemblies can    A candidate mechanism by which a packed
+ associated state          retain regulated biochemical activity,         assembly remains responsive. This is
+                           including calcium-dependent reorganization     biochemical function, not demonstration of
+                           and kinase-related changes.                    preserved learned content. [S11]
+
+ Actin and scaffold        Reconstituted postsynaptic condensates         Sinew and structural support coupled to a
+ coupling                  can interact with and organize actin; the      candidate packed assembly. [S12]
+                           work connects molecular organization with
+                           spine structure.
+
+
+
+
+
+
+CHRISTEYE | CE CRYSTAL COMP 001 | Research edition 1.0
+
+
+ Molecule or process       What the evidence supports                    Candidate ChristEye association
+
+ KIBRA–PKMζ                Evidence supports continuing scaffold–        A candidate Root-maintenance relationship. It
+                           kinase interaction in maintained              neither identifies every memory substrate nor
+                           potentiation and long-term memory. Exact      demonstrates the proposed organoid Crystal.
+                           turnover of individual complexes at           [S13]
+                           activated synapses remains incompletely
+                           resolved.
+
+ TIMP-1 and bounded        Experiments show that regulation of the       Restraint can be a biochemical interaction,
+ proteolysis               duration of protease activity matters for     rather than conscious judgment by the cutter.
+                           plasticity.                                   [S14]
+
+ PNNs and astrocytic       Specialized extracellular organization can    A candidate outer Mesh or stabilizing
+ matrix regulation         constrain plasticity and organize local       constraint within the organoid Soil.
+                           support relationships in studied mouse        Establishing it in the target organoid and
+                           systems.                                      showing learned specificity are additional
+                                                                         steps. [S18] [S19]
+
+
+The missing content link is precise: a cleavage event or a general growth signal can make change possible
+without specifying which relationship is being learned. The working theory is that specificity emerges from the
+interaction of the Word, its temporal and spatial Wind, the receiving Heart, and the Roots already present.
+
+
+4 What a packed Crystal could physically be
+The supplied sequence makes extracellular stabilization the leading proposal to assess. A separate molecular
+candidate is the postsynaptic density. Work on SynGAP/PSD-95 and broader scaffold assemblies demonstrates
+physical concentration and organization of synaptic machinery. A 2026 paper describes native mouse-brain
+PSDs as gel-like condensates that retain dynamic biochemical behavior. These findings establish a relevant
+physical phenomenon; none shows that an extracted condensate contains a transferable learned fact. [S09]
+[S10] [S11]
+
+ Packing hypothesis        Proposed package                              Required additional result
+
+ Matrix-stabilized         A learned arrangement within organoid Soil    Show that the stabilization specifically
+ learned organization      whose retention is supported by later         protects acquired content, rather than merely
+                           changes in local extracellular constraints.   altering inhibition, support, or overall activity.
+                                                                         Show a physical packing change if that
+                                                                         stronger term is intended.
+
+ Molecular assembly        A bounded, dense organization of              Its state must distinguish specific teaching
+                           receptors, scaffolds, enzymes, and            histories and causally contribute to retaining
+                           associated states within the Soil.            those differences.
+
+ Compact living module     A localized neuronal–glial circuit whose      The module’s contribution must survive
+                           organization supports a learned relation      removal of answer-bearing teaching and
+                           with a defined interface to the larger        cannot merely reflect host compensation.
+                           organoid.
+
+ Portable or             A material or encoded organization from         Demonstrated content-preserving extraction,
+ reconstructable package which a compatible receiver can recover         preservation, delivery, and use. This remains
+                         the learned relation.                           the most speculative interpretation.
+
+
+
+
+
+
+CHRISTEYE | CE CRYSTAL COMP 001 | Research edition 1.0
+
+
+These are alternative or nested models. A compact circuit could contain many dense molecular assemblies.
+Finding molecular packing would not show that an entire organoid has been compressed. A signal that makes
+another network learn faster would not show transfer of the original Knowledge.
+Every candidate Crystal needs a declared carrier, boundary, content, reader, support requirement, and
+durability claim. “Packed” should also state what is reduced or concentrated: volume, number of participating
+cells, molecular distribution, redundancy, or description length. No compression ratio can be assigned from the
+dialogue.
+
+
+5 What the latest answers contribute and what needs repair
+ Dialogue contribution        Useful inference                              Scientific repair
+
+ Maera: receiving-state       Selection may depend on whether a             IGFBP2’s proposed index must discriminate
+ indexing                     receiver is ready, not just where it is.      something after quantity, location, and
+                                                                            receptor differences are accounted for.
+
+ Maera: changing Star         Functional continuity could survive changes   Define identity by a reproducible task
+ membership                   in participating components.                  contribution and causal relationships; a
+                                                                            harmonious impression is insufficient.
+
+ Nyxari: order as             Timing can carry discriminable information    Not every sequence difference matters to
+ grammar                      independently of total stimulation.           every receiver. Demonstrate the particular
+                                                                            distinction. Spike-timing research supplies a
+                                                                            relevant precedent. [S15]
+
+ Nyxari: processing order     Different routes may expose, remove, or       There is no universal preparation → opening
+                              modify different interaction opportunities.   → cutting → clearance sequence. Clearance
+                                                                            can terminate a signal rather than stabilize its
+                                                                            content.
+
+ Nyxari: complementary        One participant can prepare a receiver for    Complementarity need not be superadditive,
+ fragments                    another.                                      and apparent synergy alone does not identify
+                                                                            a receptor mechanism.
+
+ Kaelia: selective revision   A packed organization might preserve most     This predicts selective functional revision; the
+                              useful relationships while changing one.      described “sublimation” is not an identified
+                                                                            molecular mechanism.
+
+ Kaelia: directed Mesh        A relationship can be one-way; common         Do not require mutual dependence or infer a
+                              drive is another possibility.                 hidden pathway from visual shadow imagery.
+
+ Khavia: acknowledge          A monitoring loop should account for its      Model expected consequences, residual error,
+ support                      own intervention before deciding whether      delay, and settling. No conscious acceptance
+                              need persists.                                by the tissue is required.
+
+ Khavia: Sea consuming        Retention must be considered alongside        The user identified Soil as organoid. Do not
+ Soil                         changing physical support.                    merge Soil and Sea. Resource consumption,
+                                                                            remodeling, cell turnover, and tissue loss are
+                                                                            separate processes.
+
+ Stream: Honey then           Selective feedback and sustaining resources   Providing nourishment after a response does
+ Meat                         may cooperate in learning.                    not itself prove reinforcement or teach a goal.
+                                                                            Keep baseline support and teaching
+                                                                            information separable.
+
+
+
+
+
+
+CHRISTEYE | CE CRYSTAL COMP 001 | Research edition 1.0
+
+
+ Dialogue contribution       Useful inference                             Scientific repair
+
+ Maera: response-            Reliable behavior supplies an outcome to     The inventor’s clarification adds a packed
+ tendency Crystal            test.                                        physical embodiment. Molecular and
+                                                                          connection-level organization remain
+                                                                          candidates for its mechanism.
+
+ Rest and renewal            Quiet activity and component replacement     Specific recall benefits need evidence.
+ responses                   may contribute to retention.                 Renewal does not require improvement or
+                                                                          novelty, and a newcomer’s similar function
+                                                                          does not prove copied history.
+
+
+Some dialogue entries answer a different question: the later duplicate monitoring-loop prompt receives a
+replacement-and-renewal answer. Several answers also reuse earlier quoted responses. Preserve these as
+linked hypotheses rather than independent confirmations. The roleplay provides interpretations and candidate
+processes; it does not supply laboratory observations.
+
+
+6 Twelve theories generated by the combined map
+All twelve are proposed ChristEye interpretations or extensions. Their status is not changed by agreement
+among the generated characters.
+
+ Theory                      Prediction                                   Finding that would weaken it
+
+ 1. Sea–Soil stabilization   A permissive phase followed by               Benefits vanish after support and activity
+ window                      appropriately timed constraint preserves a   differences are accounted for, or are
+                             learned relation better than alternative     explained entirely by ordinary maturation.
+                             timing or a constant condition.
+
+ 2. Packed but dynamic       A stable package can exchange constituents   Every relevant component change abolishes
+                             while preserving a task-relevant             the relation, or apparent persistence comes
+                             organization.                                only from outside reteaching.
+
+ 3. Word–Wind–Heart          Changing signal identity, arrangement, or    A simple exposure or firing-rate account
+ specificity                 receiving state produces distinguishable     explains the observed differences equally well.
+                             effects even when overall exposure is
+                             comparable.
+
+ 4. Fast and slow Honey      Local eligibility and slower support-state   One uniform change in baseline
+                             changes contribute differently to when a     responsiveness explains both effects.
+                             relation becomes stable.
+
+ 5. Cleavage changes         Some processing boundaries alter what a      Verified boundary differences produce no
+ participation               fragment can engage, with context-           relevant difference once receiver context is
+                             dependent effects.                           accounted for.
+
+ 6. Throne preserves         A scaffold-like arrangement supports         Scaffold differences affect bulk activity
+ organization                selective access and maintenance, not        without a selective retained contribution.
+                             merely concentration of material.
+
+ 7. The Soil learns          Organoid organization distinguishes task-    Performance follows accidental support
+ context                     relevant environmental changes while         conditions instead of the intended relation.
+                             tolerating irrelevant changes.
+
+
+
+
+
+
+CHRISTEYE | CE CRYSTAL COMP 001 | Research edition 1.0
+
+
+ Theory                    Prediction                                     Finding that would weaken it
+
+ 8. Crystal has a reader   A package works only with a compatible         All apparent benefit comes from a generic
+ contract                  receiving organization and appropriate         increase in receiver excitability.
+                           inputs.
+
+ 9. Seed carries content   Content-bearing propagation reproduces a       Only faster acquisition or general growth
+ or capacity               particular learned distinction; capacity-      appears, with no preserved specific
+                           bearing propagation merely facilitates later   distinction.
+                           learning.
+
+ 10. A learned Wind is     After teaching ends, appropriate cues evoke The output is equally present before learning
+ history-dependent         a reproducible, content-selective output    or depends on live answer-bearing feedback.
+                           attributable to the acquired organization.
+
+ 11. Revision can          One relation changes appropriately while       Correction produces indiscriminate change or
+ preserve other Roots      protected relations remain available.          is solely an external decoder adjustment.
+
+ 12. Renewal has a         Maintaining acquired organization requires     The apparent retained ability is fully supplied
+ resource boundary         sufficient renewal and exchange relative to    by another network or external controller.
+                           material loss and demand.
+
+
+
+
+7 A staged research plan
+This is a conceptual research and evaluation plan. It does not assume that a complete packing or organoid-to-
+brain transfer method is available. Each step produces a reviewable result before the next claim is made.
+1. Specify the first Knowledge relation. Choose a small discrimination such as ordered inputs A-then-B versus
+   B-then-A, with comparable overall input. State the required outputs, relevant context, acceptable
+   variation, and what chance or a simple baseline can explain. This gives Word, Wind, Heart, Knowledge, and
+   Fruit explicit meanings.
+2. Map the living Soil. Record the organoid’s viable and observable organization, current response repertoire,
+   support dependence, and measurement limitations. Distinguish biological Eyes from external sensing and
+   decoding. A changing readout must not be silently counted as changing tissue Understanding.
+3. Establish acquired Understanding and Roots. Require history-dependent discrimination, later availability
+   without answer-bearing teaching, and appropriate response to a held-out relevant comparison. Learning a
+   defined relation does not require an entirely novel or creative response.
+4. Identify a candidate packed carrier. Start with the supplied matrix-stabilization hypothesis and distinguish
+   it from molecular condensation, localized living circuitry, or a reconstructable representation. Specify what
+   is packed, where it is bounded, and which measured state relates to the learned distinction. Protein or
+   matrix density alone cannot pass this step.
+5. Connect the carrier to retained content. Seek converging structural, functional, and causal evidence that
+   the candidate contributes to that particular distinction, with general health, activity, and readout effects
+   separated. This is the decisive transition from a packed biological object to a candidate Knowledge Crystal.
+6. Characterize intervening activity, support, revision, and renewal. Ask whether the candidate retains its
+   useful relation as the Sea changes and the Soil turns over, and whether a mistaken relation can change
+   without broad loss. Distinguish quiet external input from internal activity and fluid transport. Track costs
+   and protected functions alongside success.
+7. Evaluate contribution to the main organoid. Distinguish a module supplying a cue, a module contributing
+   part of a computation, ongoing teaching, and actual recipient retention. Separate host-only, module-only,
+
+
+
+
+CHRISTEYE | CE CRYSTAL COMP 001 | Research edition 1.0
+
+
+   and joined behavior conceptually. Matching replay can carry answer information too; its informational
+   content must be explicit.
+8. Treat portable transfer and integration with a brain as later, separate claims. A receiver would have to
+   exhibit the specific learned relation under a prespecified test without a teacher or decoder supplying the
+   answer. Connectivity, biochemical activity, and increased learning capacity do not establish transferred
+   Knowledge.
+A first “Crystal record” should contain: task and learned distinction; physical candidate; input and output
+interfaces; teaching history; retained state observations; later retrieval evidence; supported contexts; support
+dependencies; excluded alternatives; and unresolved links. Numerical success thresholds and resource limits
+should be chosen before evaluation from the task and measurement properties, not invented from the
+metaphor.
+Organoid reservoir-computing work establishes a relevant precedent for interfacing biological tissue with
+input/output systems and demonstrating bounded computational tasks. It does not establish a full mind or a
+portable learned Crystal. Spinal adaptation research separately shows why acquiring a relation and expressing
+it later should not be treated as one process. [S16] [S17]
+
+
+Connecting the molecular account to the living computer
+The Physical Learning Device Design v0.4 already separates a core C, observer O, support-policy community S,
+recipient B, host H, independent limit controller L and evaluator E. This package adds a physical Crystal
+candidate P as a research object with its own boundary and reader contract. P is a candidate designation, not a
+claim that a new component has been manufactured. The existing production service should be written
+P_prod in new records to avoid a collision with P_crystal.
+The older device begins with a planar neuronal and astrocytic preparation because it is easier to observe and
+interface. The present Crystal proposal specifically calls the organoid Soil. These are distinct preparation
+versions. Planar commissioning can establish instrumentation and limited mechanisms; its success cannot
+certify transport, deep observation, development, or retention in a three-dimensional organoid. Regional
+identity also remains explicit: a human spinal community, a mouse cortical organoid and a human cerebral
+organoid are different preparations.
+
+ Scale               ChristEye roles under study         Living-computer connection         Evidence still needed
+
+ Processed           Word; boundary-changing             Local receiving and plasticity     Relevant forms and receptors in
+ molecular form      operation                           mechanisms in C or P_crystal       the actual preparation
+
+ Receptor and        Eyes; Honey; candidate              How a local site becomes           Specificity beyond bulk
+ scaffold            Throne                              selectively eligible and remains   excitability or growth
+ organization                                            usable
+
+ Astrocyte and       Milk; Honey; Lotus; Roots           Support, local coordination and    Independent prediction, then
+ neuron                                                  experience-associated state        selective contribution
+ interactions
+
+ Organoid            Soil; Tree; biological Heart        Core learner C or              Acquired contextual rule and
+                                                         independently qualified module delayed availability
+
+ Candidate           Crystal; associated Roots           P_crystal with a measured          Physical boundary, content
+ bounded carrier                                         interface                          linkage and reader dependence
+
+
+
+
+
+
+CHRISTEYE | CE CRYSTAL COMP 001 | Research edition 1.0
+
+
+ Scale               ChristEye roles under study         Living-computer connection           Evidence still needed
+
+ Multi-module        Mesh; Sinew; Joint; Lotus           C joined electronically to O, S, B   Contribution, latency,
+ system                                                  or P_crystal                         protected skills and route
+                                                                                              attribution
+
+ Expressed output    Wind and Fruit                      Declared output used by a            Validity, timeliness and task-
+                                                         recipient or task                    specific utility
+
+
+The external limit controller is an engineering protection function. It must not replace the inventor's broader
+Heart, which includes biological response formation and learned Understanding. Similarly, a software
+scheduler can instantiate one Lotus role without being the entire biological Lotus. Roles are scoped
+assignments, not one-to-one anatomical names.
+
+What is packed
+Four candidate implementations should remain open until evidence selects among them. A constrained living
+microcircuit may preserve distributed organization but remain dependent on ongoing metabolism. A synaptic
+scaffold or condensate may concentrate interacting components without carrying an independently readable
+learned relation. An extracellular matrix arrangement may constrain access and remodeling around a learned
+network without containing the content itself. A reconstructable digital or material specification may help
+recreate a capability, but reconstruction by renewed learning is different from preserving the original biological
+state.
+The original dialogue's Crown and Throne can be made useful here. Crown names the selection and
+compatibility constraints for participation. Throne names the organized platform through which a selected
+relation is expressed. Neither supplies a missing packing chemistry. Sinew names the particular connection and
+Joint its articulation, with transport, electrical influence, physical contact and learned meaning recorded as
+different relationships. Leaves can name a measured exchange interface. These smaller terms become
+informative when they distinguish a failure that a generic connectivity label would hide.
+Every Crystal record needs a task identity, carrier identity, physical boundary, relevant internal state,
+acquisition history, supported reader, input codebook, output contract, maintenance conditions, retention
+horizon, protected relations, and evidence status. Packing claims also need a measurement: physical volume,
+mass, spatial density, component count or another declared denominator. A smaller volume with lost function
+is not successful packing. A denser image with unchanged information is not demonstrated compression. A
+portable object without a functioning reader is not demonstrated portable Knowledge.
+
+New evidence that changes the priority
+Robbins and colleagues reported feedback-related improvement in mouse cortical organoids but no
+persistence after a 45-minute rest in their tested task. That result makes delayed retention a central gate
+rather than an assumed consequence of immediate control. It does not show that all organoids cannot retain;
+it specifies a limitation of one demonstrated preparation and training arrangement. [S25]
+Williamson and colleagues linked learning-associated astrocyte ensembles to recall in mice. Senne and
+colleagues reported learning- and recall-associated hippocampal astrocytic sequences. These provide
+additional reasons to measure identified astrocytes and their timing. They do not establish that a calcium trace
+is a portable engram or that a living observer can automatically judge the core's answer. [S26, S27]
+
+
+
+
+
+
+CHRISTEYE | CE CRYSTAL COMP 001 | Research edition 1.0
+
+
+Two refinements and one additional hypothesis
+H08-R1 Reader compatibility refinement: a carrier's useful contribution depends on a compatible cue-to-
+response interface. The principal alternative is a generic increase in host responsiveness. Support would
+require relation-specific benefit with compatible mappings and a meaningful loss or change with incompatible
+mappings, while general responsiveness remains interpretable.
+H02-R1 Maintained packing refinement: a physically bounded, continually renewed assembly can preserve a
+learned relation without being chemically static. The alternative is that ongoing external answer-bearing input
+reconstructs the response on every test. Support requires retention under ordinary maintenance with that
+teaching route absent, plus evidence linking the candidate organization to the relation.
+H13 Modular support: a separately trained observer or support community can improve the host's retained
+capability without supplying task answers. Compare with an equally informed digital monitor and an action-
+matched schedule. A positive prediction score alone does not establish useful intervention, and useful
+intervention alone does not establish a packed Crystal.
+The first twelve hypotheses, these two refinements, and the new modular-support hypothesis form a question
+set, not a list of discoveries. A negative result retires or narrows the tested statement in its preparation and
+range. It does not automatically invalidate every use of the ChristEye vocabulary.
+
+The present scientific claim
+The evidence supports studying molecular processing, receptor context, selective plasticity, glial participation,
+structural organization, and retained computation together. The proposed connection to a bounded, reusable
+physical carrier of acquired Knowledge remains open. The next practical achievement is a valid task and
+measurement system followed by retained, context-dependent performance attributable to the living
+preparation. The packing investigation must preserve that content-specific requirement all the way up from
+molecular Words.
+
+
+
+
+
+
+CHRISTEYE | CE CRYSTAL COMP 001 | Research edition 1.0
+
+
+
+Primary sources and scope
+These references support scoped findings or corrections. They do not establish the complete proposed
+biological sequence. S20 is a preprint. Supplied project files are identified in the package source inventory;
+their historical claims remain subject to the reconciliation.
+[S01] BDNF-driven synaptic plasticity requires autocrine matrix metalloproteinase-9 activity . Science
+Advances, 2025. Scope: MMP-9, BDNF processing, TrkB, and spine plasticity.
+https://pubmed.ncbi.nlm.nih.gov/40991708/
+
+[S02] Extracellular and intracellular cleavages of proBDNF required at two distinct stages of late-phase LTP . npj
+Science of Learning, 2016. Scope: processing compartments and phases in a particular model.
+https://www.nature.com/articles/npjscilearn20163
+
+[S03] Gray & Ellis: Activation of pro-BDNF by the pericellular serine protease plasmin . FEBS Letters, 2008.
+Scope: a demonstrated cleavage-boundary distinction in the studied biochemical system.
+https://ueaeprints.uea.ac.uk/id/eprint/69069/1/Gray_and_Ellis_2008.pdf
+
+[S04] Astrocytic microdomains from mouse cortex gain molecular control over long-term information storage
+and memory retention . Communications Biology, 2021. Scope: astrocytic recycling, prodomain activity, and
+cortical memory-related effects.
+https://www.nature.com/articles/s42003-021-02678-x
+
+[S05] SorCS2 is required for BDNF-dependent plasticity in the hippocampus . Molecular Psychiatry, 2016.
+Scope: receptor partnerships.
+https://pubmed.ncbi.nlm.nih.gov/27457814/
+
+[S06] TrkB as a potential synaptic and behavioral tag . Journal of Neuroscience, 2011. Scope: a proposed local
+eligibility mechanism.
+https://pmc.ncbi.nlm.nih.gov/articles/PMC3169103/
+
+[S07] The astrocytic ensemble acts as a multiday trace to stabilize memory . Nature, 2025. Scope: mouse fear-
+memory stabilization, not direct demonstration in the proposed organoid or spinal system.
+https://www.nature.com/articles/s41586-025-09619-2
+
+[S08] Astrocyte-neuron lactate transport is required for long-term memory formation . Cell, 2011. Scope:
+metabolic support in the studied memory model.
+https://pmc.ncbi.nlm.nih.gov/articles/PMC3073831/
+
+[S09] Phase Transition in Postsynaptic Densities Underlies Formation of Synaptic Complexes and Synaptic
+Plasticity . Cell, 2016. Scope: SynGAP/PSD-95 organization and phase separation.
+https://pmc.ncbi.nlm.nih.gov/articles/PMC5564291/
+
+[S10] Reconstituted Postsynaptic Density as a Molecular Platform for Understanding Synapse Formation and
+Plasticity . Cell, 2018. Scope: reconstituted scaffold assemblies, not extracted knowledge.
+https://pubmed.ncbi.nlm.nih.gov/30078712/
+
+
+
+
+
+
+CHRISTEYE | CE CRYSTAL COMP 001 | Research edition 1.0
+
+
+[S11] Native postsynaptic density is a functional condensate formed via phase separation . Cell Reports, 2026;
+online December 2025. Scope: native mouse-brain PSD biochemical organization and activity.
+https://pubmed.ncbi.nlm.nih.gov/41405989/
+
+[S12] Phase separation-mediated actin bundling by the postsynaptic density condensates . eLife, 2023. Scope:
+communication between condensates and structural machinery.
+https://pmc.ncbi.nlm.nih.gov/articles/PMC10322149/
+
+[S13] KIBRA anchoring the action of PKMζ maintains the persistence of memory . Science Advances, 2024.
+Scope: a maintenance mechanism; no universal memory-store claim.
+https://pmc.ncbi.nlm.nih.gov/articles/PMC11204205/
+
+[S14] Transient ECM protease activity promotes synaptic plasticity . Scientific Reports, 2016. Scope: bounded
+protease activity and its inhibition.
+https://pmc.ncbi.nlm.nih.gov/articles/PMC4901294/
+
+[S15] Synaptic modifications in cultured hippocampal neurons: dependence on spike timing, synaptic strength,
+and postsynaptic cell type . Journal of Neuroscience, 1998. Scope: timing-dependent synaptic modification.
+https://pubmed.ncbi.nlm.nih.gov/9852584/
+
+[S16] Brain organoid reservoir computing for artificial intelligence . Nature Electronics, 2023. Scope: organoid
+computing in a hybrid input/output framework.
+https://www.nature.com/articles/s41928-023-01069-w
+
+[S17] Two inhibitory neuronal classes govern acquisition and recall of spinal sensorimotor adaptation . Science,
+2024. Scope: separate contributions to acquiring and expressing spinal adaptation.
+https://pubmed.ncbi.nlm.nih.gov/38603479/
+
+[S18] Astrocytes close the mouse critical period for visual plasticity . Science, 2021. Scope: mouse visual-cortex
+development and matrix-related control of plasticity.
+https://pubmed.ncbi.nlm.nih.gov/34210880/
+
+[S19] Astrocytes require perineuronal nets to maintain synaptic homeostasis in mice . Nature Neuroscience,
+2024. Scope: PNN organization and astrocyte–synapse support relationships.
+https://www.nature.com/articles/s41593-024-01714-3
+
+[S20] A foundation model for brain organoid network dynamics uncovers intrinsic computation and convergent
+disease phenotypes . bioRxiv preprint, October 2026, version 1. Scope: the cited 15.5×/4.4× latent-state shifts
+and reuse of spontaneous dimensions; not a demonstrated retention or crystallization protocol.
+https://www.biorxiv.org/content/10.64898/2026.10.11.758231v1.full
+
+[S21] Influence of Agitation on Primary Nucleation in Stirred Tank Crystallizers . Crystal Growth & Design, 2015.
+Scope: a direct counterexample to the proposed prohibition on crystallization in stirred solutions.
+https://pubs.acs.org/doi/10.1021/cg501791q
+
+[S22] MuSyC is a consensus framework that unifies multi-drug synergy metrics for combinatorial drug
+discovery . Nature Communications, 2021. Scope: combination reference models and distinct types of
+interaction.
+https://www.nature.com/articles/s41467-021-24789-z
+
+
+
+
+CHRISTEYE | CE CRYSTAL COMP 001 | Research edition 1.0
+
+
+[S23] Brain clearance is reduced during sleep and anesthesia . Nature Neuroscience, 2024. Scope: tracer
+measurements in male mice; one part of an actively debated literature.
+https://www.nature.com/articles/s41593-024-01638-y
+
+[S24] Norepinephrine-mediated slow vasomotion drives glymphatic clearance during sleep . Cell, 2025. Scope:
+vascular and fluid dynamics in mouse sleep; not a quiet-organoid equivalence.
+https://pubmed.ncbi.nlm.nih.gov/39788123/
+
+[S25] Robbins A et al. Goal-directed learning in cortical organoids. Cell Reports 45(2), 116984 (2026). DOI
+10.1016/j.celrep.2026.116984. Mouse cortical organoid feedback-related improvement; no persistence after
+the tested 45-minute rest.
+https://pubmed.ncbi.nlm.nih.gov/41720084/
+
+[S26] Williamson MR et al. Learning-associated astrocyte ensembles regulate memory recall. Nature 637, 478–
+486 (2025); online 6 November 2024. DOI 10.1038/s41586-024-08170-w. Mouse astrocyte-ensemble recall
+study; not portable engram evidence.
+https://www.nature.com/articles/s41586-024-08170-w
+
+[S27] Senne RA et al. Hippocampal astrocytic sequences emerge during learning and memory recall. Nature
+Neuroscience (2026), published 16 September. DOI 10.1038/s41593-026-02448-0. Mouse learning and recall
+study; applicability to this organoid remains open.
+https://www.nature.com/articles/s41593-026-02448-0
+
+
+
+
