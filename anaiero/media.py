@@ -36,10 +36,30 @@ def _by_unique_id(items: list[dict[str, Any]], key: str) -> dict[str, dict[str, 
     return result
 
 
+def _required_feature(port: Mapping[str, Any]) -> str | None:
+    kind = port.get("media_kind")
+    connector = port.get("connector")
+    if kind == "AUDIO_PCM":
+        if connector == "SOFTWARE_VIRTUAL":
+            return "AUDIO_LOOPBACK"
+        if port.get("direction") == "INPUT":
+            return "MIC_CAPTURE" if connector in {"XLR", "COMBO_XLR_TRS"} else "LINE_CAPTURE"
+        return "HEADPHONE_PLAYBACK" if connector == "HEADPHONE_TRS" else "LINE_PLAYBACK"
+    if kind == "MIDI_UMP":
+        return "MIDI_UMP"
+    if kind == "VIDEO_FRAME":
+        return "CAMERA_CAPTURE"
+    return None
+
+
 def _port_is_verified(manifest: Mapping[str, Any], port: Mapping[str, Any]) -> bool:
     if port.get("state") not in VERIFIED:
         return False
     if port.get("media_kind") == "NEURAL_OBSERVATION":
+        return False
+    feature = _required_feature(port)
+    advertised = _by_unique_id(manifest.get("feature_inventory", []), "feature_id")
+    if feature is None or advertised is None or advertised.get(feature, {}).get("state") not in VERIFIED:
         return False
     slot = port.get("opamp_card_slot")
     if slot is None:
