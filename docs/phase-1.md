@@ -117,3 +117,8 @@ Each open variable requires a vendor/laboratory evidence record. A missing value
 ## 9. Source notes
 
 All P01 source IDs and scope limitations are preserved in the [annotated source register](../phases/P01/references.md). The [Phase P01 baseline](../phases/P01/README.md) links the original full specifications and machine registers.
+
+
+### Revision v3.1: tissue/axon and scientific process specifications
+
+Read the [complete 24 design/companion pairs](../specifications/v3/README.md) with the [12-stage scientist workflow](../processes/SCIENTIST_WORKFLOW.md), [SustiBus/ChemiBus](../processes/BIO-04-sustibus-chemibus.md), [molecular index](../processes/MOLECULAR_INDEX.md) and [typed biological schemas](../schemas/biology/README.md). These are detailed source-linked research requirements, **not an automatically executable culture recipe**.

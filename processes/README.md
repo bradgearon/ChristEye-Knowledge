@@ -17,6 +17,9 @@
 | [SYS-11: Software module training and infrastructure](SYS-11-module-training.md) | Digital specialist StarChips, storage and CI |
 | [SYS-12: Identity, cloning and parentage](SYS-12-lineage-ids.md) | UUIDs, experimental lineage and reproducibility |
 
+- [**Complete Scientist Workflow**](SCIENTIST_WORKFLOW.md) — 12-stage source-to-Root-to-Crystal handoffs
+- [**Molecular and Structure Crosswalk**](MOLECULAR_INDEX.md) — roles, candidate targets, assays and evidence states
+
 ## Common vocabulary and interpretation
 
 **Soil** = the proposed living organoid as a whole, including cells, matrix, neural/axonal structures and history. The surrounding **Sea** is the exchange environment; **Water** is transport and access *in a declared context*.

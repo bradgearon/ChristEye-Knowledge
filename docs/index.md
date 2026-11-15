@@ -4,6 +4,14 @@
 
 The documentation is a **complete technical library**, not an index of promised future writing. Current and historical specifications are separated, and original experimental figures and machine-readable data are preserved.
 
+## V3.1 full scientific engineering
+
+- [24 detailed designs and their scientific companions](../specifications/v3/README.md)
+- [12-stage scientist workflow](../processes/SCIENTIST_WORKFLOW.md)
+- [12 living/software process specifications](../processes/README.md)
+- [Biological cell/axon/Chemibus/Sustibus/change schemas](../schemas/biology/README.md)
+- [2026 research evidence register](../research/evidence/anaiero-biology-2026-11.md)
+
 ## Start here
 
 | Track | Documents |

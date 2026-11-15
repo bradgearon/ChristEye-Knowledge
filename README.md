@@ -2,7 +2,7 @@
 
 **We Develop Software LLC · Scientific research and modular computer architecture · November 15, 2026**
 
-[**Phase 1**](docs/phase-1.md) · [Complete documents](docs/full-document-library.md) · [24 subsystem contracts](docs/module-contracts.md) · [Full schemas](docs/schema-reference.md) · [Scientific research](research/full-markdown/README.md) · [Website](docs/index.html)
+[**V3.1 scientific implementation**](specifications/v3/README.md) · [**Scientist workflow**](processes/SCIENTIST_WORKFLOW.md) · [**Molecules and axons**](processes/MOLECULAR_INDEX.md) · [**Biological schemas**](schemas/biology/README.md) · [**Phase 1**](docs/phase-1.md) · [Complete documents](docs/full-document-library.md) · [24 subsystem contracts](docs/module-contracts.md) · [Full schemas](docs/schema-reference.md) · [Scientific research](research/full-markdown/README.md) · [Website](docs/index.html)
 
 ChristEye Anaiero is a research and engineering program investigating modular developmental computing, supervised biological instrumentation, specialist StarChips, capability-bearing digital CrystalPacks, Roots and retained knowledge, and the possible future living embodiment of these systems.
 
