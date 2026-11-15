@@ -1,0 +1,42 @@
+group,molecular_entity_or_material,candidate_role,use_class,required_observation,default_allowed_as_automatic_feed,quantitative_dose_in_P01,sources
+Exchange and metabolic support,Water (H2O),fluid medium and transport,environment,"volume, osmolality, sample provenance",False,,R01;R13;R16
+Exchange and metabolic support,Dissolved oxygen / CO2,respiration and buffer equilibration,environment,local sensors/qualified incubator measures,False,,R01;R13;R16
+Exchange and metabolic support,"Na+, K+, Ca2+, Mg2+, Cl-, HCO3-","excitation, membrane gradients and buffering",qualified medium,analytical chemistry/medium specification,False,,R01;R13;R16
+Exchange and metabolic support,Glucose,"energy substrate, not a semantic learning label",qualified medium,medium lot and measured in/out samples,False,,R01;R13;R16
+Exchange and metabolic support,Pyruvate,metabolic substrate and redox context,qualified medium,assay or supplier-defined formulation,False,,R01;R13;R16
+Exchange and metabolic support,Lactate,metabolic product / potential shuttle; not a stored fact,observation/support,paired flux with volume and time,False,,R01;R13;R16
+Exchange and metabolic support,Amino acids / glutamine / GlutaMAX,protein building and metabolic substrates,qualified medium,"formulation, identity and stability",False,,R01;R13;R16
+Exchange and metabolic support,Lipids / vitamins,structural and cofactor supply,qualified medium,supplier lot and complete formulation,False,,R01;R13;R16
+Exchange and metabolic support,Insulin/transferrin/selenium,defined nutrient-support components,qualified medium,supplier supplement composition,False,,R01;R13;R16
+Exchange and metabolic support,DMEM/F12 / Neurobasal,base media formulations; not one molecule,reference candidate,formulation revision and total compatibility,False,,R01;R13;R16
+Exchange and metabolic support,B27 / N2 / BrainFast supplements,formulation packages; avoid duplicate kits,reference candidate,source composition and culture SOP,False,,R01;R13;R16
+Surface and physical structure,PDL / PLO,adhesion substrate candidate,preparation,coating identity and compatible supplier SOP,False,,R01;R13;R16
+Surface and physical structure,Laminin / fibronectin,ECM / attachment receptor engagement,preparation,"lot, distribution, cell attachment",False,,R01;R13;R16
+Surface and physical structure,Cultrex / Geltrex,complex matrix candidate; variable composition,reference candidate,lot and assay of matrix effect,False,,R01;R13;R16
+Surface and physical structure,Hevin / glypicans,candidate synapse-organizing factors,mechanism study,localization and actual functional response,False,,R01;R13;R16
+Surface and physical structure,Perineuronal net components,candidate restrictive ECM organization,later maturation,verify structures actually exist in chosen Soil,False,,R01;R13;R16
+Surface and physical structure,MMP-9 / TIMP-1,matrix remodelling + inhibition candidates,research only,"local activity, not abundance-only ratio",False,,R01;R13;R16
+Regional specification and growth,Retinoic acid / SHH signaling,candidate developmental regional specification,qualified production only,lineage and fate characterization,False,,R01;R13;R16
+Regional specification and growth,SMAD / WNT signals,candidate cell-state patterning,qualified production only,source partner SOP and residual proliferation checks,False,,R01;R13;R16
+Regional specification and growth,BDNF / TrkB,trophic signaling; selective plasticity candidate,supplier reference or research,receptor availability and functional outcome,False,,R01;R13;R16
+Regional specification and growth,GDNF,stage-dependent trophic function,supplier reference,supplier/cell-pair compatibility,False,,R01;R13;R16
+Regional specification and growth,TGF-beta1,reference growth/maturation signaling,supplier reference,supplier documented co-culture scope,False,,R01;R13;R16
+Regional specification and growth,IGFBP2 / adrenergic receptors,slow astrocytic state candidate (mouse evidence),research only,independent prediction; no memory packet assumed,False,,R01;R13;R16
+Identity and circuit structure,MAP2 / TUBB3 / RBFOX3,neuronal identification (maturation-dependent),assay only,identity panel and subtype evidence,False,,R01;R13;R16
+Identity and circuit structure,MNX1(HB9) / ISL1/2 / FOXP1 / CHAT,spinal motor phenotype candidates,assay only,"region, morphology and appropriate transmitter",False,,R01;R13;R16
+Identity and circuit structure,VSX2(CHX10),V2a excitatory spinal candidate,later subtype study,"lineage and function, not a marker alone",False,,R01;R13;R16
+Identity and circuit structure,GAD1 / GAD2 / SLC6A5,GABAergic/glycinergic inhibitory candidates,later subtype study,net inhibition and chloride state,False,,R01;R13;R16
+Identity and circuit structure,KCC2(SLC12A5) / NKCC1,chloride-homeostasis distinction,physiology observation,GABA/glycine functional response,False,,R01;R13;R16
+Identity and circuit structure,ALDH1L1 / SOX9 / GFAP / S100B / HOXB4,astrocyte and regional identity candidates,assay only,multi-marker plus function,False,,R01;R13;R16
+Identity and circuit structure,OLIG2 / SOX10 / PDGFRA,OPC lineage candidates,future only,separate cell identity and myelin endpoint,False,,R01;R13;R16
+Identity and circuit structure,P2RY12 / TMEM119,microglial phenotype candidates,future only,"distinct origin/immune phenotype, no infection challenge",False,,R01;R13;R16
+Synaptic learning and maintenance hypotheses,AMPA / NMDA receptor complexes,excitatory synaptic influence,functional assay,specific response to matched cues,False,,R01;R13;R16
+Synaptic learning and maintenance hypotheses,GABA_A / glycine receptors,inhibitory gating and timing candidates,functional assay,measured net effect,False,,R01;R13;R16
+Synaptic learning and maintenance hypotheses,PSD-95(DLG4) / Shank / Homer / SynGAP,postsynaptic scaffold and condensate-like assemblies,structure hypothesis,spatial localization and task-specific consequence,False,,R01;R13;R16
+Synaptic learning and maintenance hypotheses,RIM / Munc13,presynaptic vesicle release organization,structure assay,paired structure/function,False,,R01;R13;R16
+Synaptic learning and maintenance hypotheses,CaMKII / RhoA / Rac1 / Cdc42 / actin,local synaptic remodeling machinery,mechanism study,compartment-specific remodeling and response,False,,R01;R13;R16
+Synaptic learning and maintenance hypotheses,Arc,activity-linked local protein regulation candidate,mechanism assay,cell/time specific observation,False,,R01;R13;R16
+Synaptic learning and maintenance hypotheses,KIBRA(WWC1) / PKMzeta,maintenance relationship studied in mouse memory,research only,selective retained relation beyond broad activity,False,,R01;R13;R16
+Synaptic learning and maintenance hypotheses,Ank2 / NFIA,"astrocyte state, structure and recall-related candidates",research only,associational then causal controls,False,,R01;R13;R16
+Synaptic learning and maintenance hypotheses,EAAT1/EAAT2 / Kir4.1,astrocyte uptake and ion buffering candidates,support and observation,function plus health/response outcomes,False,,R01;R13;R16
+Synaptic learning and maintenance hypotheses,ATP / adenosine / purinergic pathways,metabolic and extracellular signaling roles differ,research only,compartment-specific assay and causal alternative,False,,R01;R13;R16

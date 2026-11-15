@@ -1,0 +1,56 @@
+[
+  {
+    "id": "P00",
+    "name": "Basis, claims and oversight",
+    "goal": "Lock definitions, source registry, claimed capabilities, permissions, ethical scope",
+    "exit": "Release plan, role dictionary, authority matrix"
+  },
+  {
+    "id": "P01",
+    "name": "Reference composition and interface contracts (THIS RELEASE)",
+    "goal": "Select grounded planar cell reference; identify per-module quantities, chemistry, structures, I/O and measurements",
+    "exit": "Cell budget, molecule inventory, WindEvent, unknown-parameter lock list"
+  },
+  {
+    "id": "P02",
+    "name": "Cell-free instrument and digital test harness",
+    "goal": "Run host, E evaluator, H router, L limit controller, audit and simulated neural response",
+    "exit": "Zero-cell system passes clocks, permissions, fault injections and event integrity"
+  },
+  {
+    "id": "P03",
+    "name": "Qualified planar living core",
+    "goal": "Qualified partner characterizes C and verifies identity, support and MEA input/output",
+    "exit": "Source G1, maturation G2, interface G3 release records"
+  },
+  {
+    "id": "P04",
+    "name": "Acquisition, Roots, and consolidation",
+    "goal": "Train frozen-reader reference task; compare delayed performance and interference to controls",
+    "exit": "Documented acquisition and explicit retention horizon; negative outcomes retained"
+  },
+  {
+    "id": "P05",
+    "name": "Observer, support, recipient and joined teaching",
+    "goal": "Independently qualify O, B, then S; shadow bridge; advice; teacher-off tests",
+    "exit": "Useful marginal contribution; protected old skills; independent B test"
+  },
+  {
+    "id": "P06",
+    "name": "3D Soil and diversified regional modules",
+    "goal": "Separate organoid line/shape, diffusion, coverage, regional mix and service qualification",
+    "exit": "Independent release for each preparation and interface version"
+  },
+  {
+    "id": "P07",
+    "name": "Physical Crystal and molecular Word hypotheses",
+    "goal": "Nominate bounded material carrier; establish reader, content linkage, retention and independent use",
+    "exit": "Physically grounded results or recorded failure; no assumed portable memories"
+  },
+  {
+    "id": "P08",
+    "name": "Scaling, field lifecycle and governance",
+    "goal": "Serviceability, remote use, upgrade packs, ethics and supplier qualification",
+    "exit": "Validated digital release; independent decision for any future live deployment"
+  }
+]

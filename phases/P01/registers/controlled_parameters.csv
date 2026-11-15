@@ -1,0 +1,18 @@
+parameter_id,question,blocking_gate,owner,required_evidence,default_disposition
+U01,Reference hardware mode,R1,Culture+hardware lead,Select Axion vendor reference vs MaxOne research mode,Do not apply 80k/20k to MaxOne
+U02,Exact neuron/astrocyte lot + subtype purity,G1,Culture lead,Supplier release and pair compatibility,Do not plate unknown composition
+U03,3D organoid initial cell count and geometry,P06,Organoid lead,Preparation-specific data with size/diffusion/coverage validation,Do not infer 2D densities
+U04,Complete medium formulation and change schedule,G2,Culture lead,One supplier or laboratory SOP with compatible composition,No daily arbitrary nutrient dosing
+U05,Coating / matrix / support volumes,G2,Culture lead,Chosen source+platform protocol and blank compatibility,No cross-platform coating transfer
+U06,Electrical stimulation profile library,G3,Electrophysiology lead,Vendor limits + cell-free interlock + live response qualification,H cannot invent waveform values
+U07,Input/output electrode map and decoder,G3,Systems lead,Stimulus-to-response calibration and locked digest,No training result under moving reader
+U08,"Noise threshold, activity drift tolerance",G3,Electrophysiology lead,"Measured pilot distribution, reference/sham characterization",No guessed SNR threshold
+U09,Closed-loop delay/exposure budget,G4,Systems lead,End-to-end measurements and eligibility hypothesis tests,No invented latency window
+U10,Learning pilot replicates and confirmed controls,G4,Stats lead,"Preplanned unit, variance, target and attrition",Wells are not independent donor lines
+U11,Retention test horizons and readout,G5,Science lead,Preregistered 45m and later qualified test windows,No claim of durable Roots from quick improvement
+U12,"Bridge bandwidth, codebook, disconnect",G6,Systems lead,"Measured A/B timing, route disable and cache clear",No hidden teacher signals
+U13,Astrocyte reporter specificity,A1/A3 research,Imaging lead,"Validated reporter, kinetics and effects",No calcium event as memory content
+U14,Physical Crystal carrier and reader,G7,Mechanism lead,"Material entity, task relation, reader contract, content-specific causality",No portable memory label
+U15,Molecular-peptide input,Research only,Molecular biology lead,"Molecular target/receptor, selectivity, off-target and review",No pill-style knowledge update
+U16,Surveillance / microglia-like cells,P06+,Culture lead,"Defined immune lineage, model question, validated assay and consequence",No unneeded immune module
+U17,Human organoid ethical review,Before live organoid,Institution,"Consent, oversight, complexity & end-point review",No public general mind claim

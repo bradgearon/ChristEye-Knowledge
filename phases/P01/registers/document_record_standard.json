@@ -1,0 +1,129 @@
+{
+  "revision": "P01.0",
+  "design_sections": [
+    {
+      "index": "01",
+      "section": "Document authority",
+      "minimum": "ID, version, evidence F/X/H/D/A, authors, references, approved build revision, open unknowns."
+    },
+    {
+      "index": "02",
+      "section": "Functional contract",
+      "minimum": "User need, measurable outputs, non-goals, digital/live/simulated mode."
+    },
+    {
+      "index": "03",
+      "section": "System boundaries",
+      "minimum": "Source, receiver, owner, permitted routes, safety interlock, separation/replay plan."
+    },
+    {
+      "index": "04",
+      "section": "Bill of materials",
+      "minimum": "Vendor, part, compatible device, alternatives, sourcing, lot traceability, quantity and unit."
+    },
+    {
+      "index": "05",
+      "section": "Cell census",
+      "minimum": "Tissue identity, input viable count, subtype fractions, area/volume, final observed census, replication unit."
+    },
+    {
+      "index": "06",
+      "section": "Molecular inventory",
+      "minimum": "Chemical identity, process role, stage, compartment, receptor, status, lot, assay and SOP reference."
+    },
+    {
+      "index": "07",
+      "section": "Anatomical/structural inventory",
+      "minimum": "Organoid/planar geometry, ECM, neurites, synapses, glial contacts and measured connectivity."
+    },
+    {
+      "index": "08",
+      "section": "Developmental stages",
+      "minimum": "Production source, maturation, acceptance, training, retention, renewal; gate between stages."
+    },
+    {
+      "index": "09",
+      "section": "Nourishment & exchange",
+      "minimum": "Separate support route, supply identity, consumption/waste, service schedule, alarms and sensor freshness."
+    },
+    {
+      "index": "10",
+      "section": "Electronic interfaces",
+      "minimum": "Electrodes, sampling and stimulus profiles, clocks, ground, readout quality, vendor permit and shutdown."
+    },
+    {
+      "index": "11",
+      "section": "Information protocol",
+      "minimum": "Codebook, WindEvent, training target, decoder state, state/label isolation, information budget."
+    },
+    {
+      "index": "12",
+      "section": "Learning program",
+      "minimum": "Baseline; teaching; probes; rest/intervening activity; delayed evaluation; curriculum progression."
+    },
+    {
+      "index": "13",
+      "section": "Data and software",
+      "minimum": "JSON schemas, calibration versions, signature and hash, provenance, reproducibility."
+    },
+    {
+      "index": "14",
+      "section": "Diagnostics",
+      "minimum": "Structural, electrophysiological, optical, health and task performance measures; unknown states."
+    },
+    {
+      "index": "15",
+      "section": "Controls and statistics",
+      "minimum": "Independent preparations, negative controls, power/precision, preregistration, sealed holdout."
+    },
+    {
+      "index": "16",
+      "section": "Failure and hazards",
+      "minimum": "Potential faults, observable signatures, response authority, no silent auto-rescue."
+    },
+    {
+      "index": "17",
+      "section": "Resource budgets",
+      "minimum": "Cell supply, plates/chips, storage bandwidth, imaging, operator time, fluid service, energy."
+    },
+    {
+      "index": "18",
+      "section": "Verification and release",
+      "minimum": "Bench/cell-free tests, living gates, evidence class, acceptance decisions, nonclaims."
+    },
+    {
+      "index": "19",
+      "section": "Traceability",
+      "minimum": "Cited primary data, supporting ChristEye documents, deviations and superseded claims."
+    },
+    {
+      "index": "20",
+      "section": "Change control",
+      "minimum": "Exact changed component, null dependencies, regression plan, independent approval and rollback limitations."
+    }
+  ],
+  "evidence_states": [
+    "F",
+    "X",
+    "H",
+    "D",
+    "A"
+  ],
+  "document_required_fields": [
+    "document_id",
+    "module_id",
+    "revision",
+    "applicable_preparation",
+    "status",
+    "source_refs",
+    "controlled_unknowns",
+    "owner",
+    "gate"
+  ],
+  "source_namespaces": [
+    "external primary",
+    "supplier",
+    "prior Anaiero specification",
+    "measured experiment"
+  ]
+}

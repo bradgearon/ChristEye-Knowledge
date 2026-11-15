@@ -1,0 +1,36 @@
+module_id,name,first_release,ref_live_neurons_per_unit,ref_live_astrocytes_per_unit,ref_total_per_unit,platform,source_id,status,qualification_note
+C,Core learner,R1,80000,20000,100000,Axion CytoView 24-well MEA,R01,SUPPLIER_REFERENCE_ONLY,"Supplier example: one Axion 24-well MEA well; motor-neuron + matched astrocyte reference, not full learning mesh."
+O,Observer learner,R2,80000,20000,100000,Axion CytoView 24-well MEA,R01,SUPPLIER_REFERENCE_ONLY,Same starting population as C; monitoring identity must be earned by training and test.
+B,Recipient learner,R2 separate campaign,80000,20000,100000,Axion CytoView 24-well MEA,R01,SUPPLIER_REFERENCE_ONLY,"Same preparation; teaching A→B, then physically separate electronic route, test B alone."
+S,Support-policy learner,R3,80000,20000,100000,Axion CytoView 24-well MEA,R01,SUPPLIER_REFERENCE_ONLY,"Same starting preparation; can advise allowed actions only, never autonomous fluid or molecule changes."
+G_local,Local glia support,R1+,,,,,,ALREADY_ALLOCATED_NOT_ADDITIONAL,Astrocytes already included inside each module; no external G cartridge credited.
+Prod,Cell bank/maturation service,Before R1,,,,,,BLOCKED_UNQUALIFIED,"Supplier bank and laboratory lot history; count determined by enrolled wells, yield, and reserves."
+3D-C,Future 3D organoid Soil,P06,,,,,,BLOCKED_UNQUALIFIED,"Different geometry, transport, and source; cannot inherit Axion planar values."
+Immuno,Anti-disease / microglial research,P06+,,,0,,,NOT_IN_REFERENCE_RELEASE,Quality surveillance digital first; any added immune-lineage class is a separate scope and lineage qualification.
+OPC,Oligodendrocyte lineage study,P06+,,,0,,,NOT_IN_REFERENCE_RELEASE,Only if axonal maintenance question justifies added population.
+Neuromod,Brainstem/neuromodulatory candidate,P06+,,,0,,,NOT_IN_REFERENCE_RELEASE,Named regional differentiation and functional validation required; no generic brainstem added.
+Crystal-P,Physical Crystal candidate,P07,,,,,,BLOCKED_UNQUALIFIED,"Carrier identity and boundary unproven, no seeding number can be assigned."
+A01,Episodic and working memory,R0_DIGITAL,0,0,0,digital,,DIGITAL_ZERO_CELLS,This software service does not have its own biological culture by default.
+A02,Long-term storage,R0_DIGITAL,0,0,0,digital,,DIGITAL_ZERO_CELLS,This software service does not have its own biological culture by default.
+A03,Healing/integrity adviser,R0_DIGITAL,0,0,0,digital,,DIGITAL_ZERO_CELLS,This software service does not have its own biological culture by default.
+A04,Growth/capacity planner,R0_DIGITAL,0,0,0,digital,,DIGITAL_ZERO_CELLS,This software service does not have its own biological culture by default.
+A05,Refresh/renewal,R0_DIGITAL,0,0,0,digital,,DIGITAL_ZERO_CELLS,This software service does not have its own biological culture by default.
+A06,Learning stabilization assessment,R0_DIGITAL,0,0,0,digital,,DIGITAL_ZERO_CELLS,This software service does not have its own biological culture by default.
+A07,Learning enhancement curriculum,R0_DIGITAL,0,0,0,digital,,DIGITAL_ZERO_CELLS,This software service does not have its own biological culture by default.
+A08,Health surveillance,R0_DIGITAL,0,0,0,digital,,DIGITAL_ZERO_CELLS,This software service does not have its own biological culture by default.
+A09,Main core software boundary,R0_DIGITAL,0,0,0,digital,,DIGITAL_ZERO_CELLS,This software service does not have its own biological culture by default.
+A10,Usage Crystal compiler,R0_DIGITAL,0,0,0,digital,,DIGITAL_ZERO_CELLS,This software service does not have its own biological culture by default.
+A11,Connective controllers,R0_DIGITAL,0,0,0,digital,,DIGITAL_ZERO_CELLS,This software service does not have its own biological culture by default.
+A12,Lotus governor,R0_DIGITAL,0,0,0,digital,,DIGITAL_ZERO_CELLS,This software service does not have its own biological culture by default.
+A13,Crystal cloning,R0_DIGITAL,0,0,0,digital,,DIGITAL_ZERO_CELLS,This software service does not have its own biological culture by default.
+A14,Crystal consumption/replay,R0_DIGITAL,0,0,0,digital,,DIGITAL_ZERO_CELLS,This software service does not have its own biological culture by default.
+A15,Organoid development planning,R0_DIGITAL,0,0,0,digital,,DIGITAL_ZERO_CELLS,This software service does not have its own biological culture by default.
+A16,Root registry,R0_DIGITAL,0,0,0,digital,,DIGITAL_ZERO_CELLS,This software service does not have its own biological culture by default.
+A17,Daily care record/controller boundary,R0_DIGITAL,0,0,0,digital,,DIGITAL_ZERO_CELLS,This software service does not have its own biological culture by default.
+A18,Bread/Meat/Water/Metabolic abstraction,R0_DIGITAL,0,0,0,digital,,DIGITAL_ZERO_CELLS,This software service does not have its own biological culture by default.
+A19,Central data router,R0_DIGITAL,0,0,0,digital,,DIGITAL_ZERO_CELLS,This software service does not have its own biological culture by default.
+A20,Filesystem/snapshots,R0_DIGITAL,0,0,0,digital,,DIGITAL_ZERO_CELLS,This software service does not have its own biological culture by default.
+A21,Affective support/Honey policy,R0_DIGITAL,0,0,0,digital,,DIGITAL_ZERO_CELLS,This software service does not have its own biological culture by default.
+A22,Independent limits,R0_DIGITAL,0,0,0,digital,,DIGITAL_ZERO_CELLS,This software service does not have its own biological culture by default.
+A23,Molecular Word / Crystal research,R0_DIGITAL,0,0,0,digital,,DIGITAL_ZERO_CELLS,This software service does not have its own biological culture by default.
+A24,Observer stream software,R0_DIGITAL,0,0,0,digital,,DIGITAL_ZERO_CELLS,This software service does not have its own biological culture by default.

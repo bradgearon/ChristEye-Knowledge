@@ -1,0 +1,38 @@
+{
+  "trial_id": "EXAMPLE-NO-LIVE-EXECUTION",
+  "module_id": "C",
+  "preparation_id": "NOT-ASSIGNED",
+  "split": "development",
+  "task": {
+    "context": "C0",
+    "sequence": [
+      "A",
+      "B"
+    ],
+    "expected_class": "X"
+  },
+  "encoder": {
+    "codebook_id": "context-order-v1",
+    "vendor_profile_id": null,
+    "output_electrode_group": null,
+    "physical_enabled": false
+  },
+  "event": {
+    "planned_time_ns": null,
+    "delivered_time_ns": null,
+    "validity": "SIMULATION_ONLY"
+  },
+  "decoder": {
+    "digest": null,
+    "frozen": true
+  },
+  "readout": {
+    "predicted_class": null,
+    "valid": false
+  },
+  "evaluation": {
+    "feedback_enabled": false,
+    "outcome": null
+  },
+  "record_status": "SCHEMA_EXAMPLE"
+}

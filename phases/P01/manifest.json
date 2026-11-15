@@ -1,0 +1,24 @@
+{
+  "source": "Anaiero v6 DOCX Phase P01 and original machine registers",
+  "release_date": "2026-11-15",
+  "items": 17,
+  "documents": [
+    "phases/P01/docs/00_Program_Phases_and_Document_Standard.md",
+    "phases/P01/docs/01_Physical_Module_Composition_and_Counts.md",
+    "phases/P01/docs/02_Molecules_Structures_and_Development_Companion.md",
+    "phases/P01/docs/03_Electrical_WindBus_and_Training_Companion.md",
+    "phases/P01/docs/04_Daily_Care_Quality_Gates_and_Assays.md",
+    "phases/P01/docs/05_Build_Decisions_Controlled_Unknowns_and_Handoff.md",
+    "phases/P01/references.md",
+    "phases/P01/registers/controlled_parameters.csv",
+    "phases/P01/registers/document_record_standard.json",
+    "phases/P01/registers/module_cell_count_registry.csv",
+    "phases/P01/registers/module_cell_count_registry.json",
+    "phases/P01/registers/molecule_and_structure_registry.csv",
+    "phases/P01/registers/phase_roadmap.json",
+    "phases/P01/registers/reference_trial_example.json",
+    "phases/P01/registers/source_register.json",
+    "phases/P01/registers/README.md",
+    "phases/P01/README.md"
+  ]
+}
