@@ -1,0 +1,471 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:christeye:software:media_module:v1",
+  "title": "ChristEye AVM Media Module Manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "module_id",
+    "model_id",
+    "hardware_revision",
+    "serial",
+    "inventory_epoch",
+    "manifest_revision",
+    "firmware_digest",
+    "device_identity_ref",
+    "verification_state",
+    "opamp_cards",
+    "ports",
+    "transport_profiles",
+    "feature_inventory",
+    "biological_action_authority"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "ce.media.module/1"
+    },
+    "module_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "model_id": {
+      "enum": [
+        "AVM-V1",
+        "AVM-S8",
+        "AVM-R16",
+        "AVM-SOFTWARE"
+      ]
+    },
+    "hardware_revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "serial": {
+      "type": "string",
+      "minLength": 1
+    },
+    "inventory_epoch": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "manifest_revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "firmware_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "device_identity_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "verification_state": {
+      "enum": [
+        "UNTRUSTED",
+        "ENROLLED",
+        "AUTHORIZED",
+        "REVOKED"
+      ]
+    },
+    "opamp_cards": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "slot_id",
+          "module_id",
+          "serial",
+          "analog_role",
+          "state",
+          "power_off_replaceable",
+          "electrical_profile_digest",
+          "calibration_digest"
+        ],
+        "properties": {
+          "slot_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "module_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "serial": {
+            "type": "string",
+            "minLength": 1
+          },
+          "analog_role": {
+            "enum": [
+              "MIC_PRE",
+              "LINE_IN",
+              "LINE_OUT",
+              "HEADPHONE_OUT",
+              "RESEARCH_OBSERVATION_ADAPTER"
+            ]
+          },
+          "state": {
+            "enum": [
+              "CATALOG_ONLY",
+              "INSTALLED",
+              "VERIFIED",
+              "ACTIVE",
+              "DEGRADED",
+              "REMOVED"
+            ]
+          },
+          "power_off_replaceable": {
+            "const": true
+          },
+          "electrical_profile_digest": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "calibration_digest": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "compatible_carrier_revisions": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true
+          },
+          "measured_noise_floor_dbfs": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "max_verified_gain_db": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "hot_swap_allowed": {
+            "const": false
+          }
+        }
+      }
+    },
+    "ports": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "port_id",
+          "media_kind",
+          "direction",
+          "connector",
+          "channels",
+          "clock_domain",
+          "state",
+          "access_scope"
+        ],
+        "properties": {
+          "port_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "media_kind": {
+            "enum": [
+              "AUDIO_PCM",
+              "MIDI_UMP",
+              "VIDEO_FRAME",
+              "NEURAL_OBSERVATION"
+            ]
+          },
+          "direction": {
+            "enum": [
+              "INPUT",
+              "OUTPUT"
+            ]
+          },
+          "connector": {
+            "enum": [
+              "XLR",
+              "TRS",
+              "COMBO_XLR_TRS",
+              "RCA",
+              "HEADPHONE_TRS",
+              "USB_AUDIO",
+              "USB_MIDI",
+              "DIN_MIDI",
+              "USB3_CAMERA",
+              "GIGE_CAMERA",
+              "NETWORK_MEDIA",
+              "SOFTWARE_VIRTUAL",
+              "VENDOR_READ_ONLY"
+            ]
+          },
+          "channels": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "clock_domain": {
+            "type": "string",
+            "minLength": 1
+          },
+          "state": {
+            "enum": [
+              "CATALOG_ONLY",
+              "INSTALLED",
+              "VERIFIED",
+              "ACTIVE",
+              "DEGRADED",
+              "REMOVED"
+            ]
+          },
+          "access_scope": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sample_rates_hz": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "enum": [
+                44100,
+                48000,
+                88200,
+                96000,
+                176400,
+                192000
+              ]
+            },
+            "uniqueItems": true
+          },
+          "sample_formats": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "PCM_S16",
+                "PCM_S24_3",
+                "PCM_S24_IN32",
+                "PCM_S32",
+                "PCM_F32",
+                "MIDI1_IN_UMP",
+                "MIDI2_UMP",
+                "H264",
+                "MJPEG",
+                "RAW_BAYER",
+                "FEATURES",
+                "NEURAL_OBSERVATION"
+              ]
+            },
+            "uniqueItems": true
+          },
+          "midi_ump_groups": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 16
+          },
+          "midi_ci_supported": {
+            "type": "boolean"
+          },
+          "phantom_power_capable": {
+            "type": "boolean"
+          },
+          "opamp_card_slot": {
+            "type": "string",
+            "minLength": 1
+          },
+          "physical_output_role": {
+            "enum": [
+              "NOT_APPLICABLE",
+              "LINE_LEVEL",
+              "HEADPHONE_LEVEL",
+              "SPEAKER_LEVEL"
+            ]
+          },
+          "measured_roundtrip_latency_us": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "calibration_digest": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "option_dependency_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "media_kind": {
+                  "const": "NEURAL_OBSERVATION"
+                }
+              },
+              "required": [
+                "media_kind"
+              ]
+            },
+            "then": {
+              "properties": {
+                "direction": {
+                  "const": "INPUT"
+                },
+                "connector": {
+                  "enum": [
+                    "VENDOR_READ_ONLY",
+                    "SOFTWARE_VIRTUAL"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "media_kind": {
+                  "const": "MIDI_UMP"
+                }
+              },
+              "required": [
+                "media_kind"
+              ]
+            },
+            "then": {
+              "required": [
+                "midi_ump_groups",
+                "midi_ci_supported"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "transport_profiles": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "USB_AUDIO_CLASS_2",
+          "USB_MIDI",
+          "MIDI_DIN",
+          "USB3",
+          "ETHERNET_1G",
+          "ETHERNET_10G",
+          "AES67",
+          "MILAN_AVB",
+          "WEBRTC_GATEWAY",
+          "SOFTWARE_LOOPBACK"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "feature_inventory": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "feature_id",
+          "state"
+        ],
+        "properties": {
+          "feature_id": {
+            "enum": [
+              "MIC_CAPTURE",
+              "LINE_CAPTURE",
+              "LINE_PLAYBACK",
+              "HEADPHONE_PLAYBACK",
+              "MIDI_UMP",
+              "MIDI_CI",
+              "MIDI_DIN",
+              "CAMERA_CAPTURE",
+              "NETWORK_AUDIO",
+              "CLOCK_SYNC_PTP",
+              "READ_ONLY_NEURAL_OBSERVATION",
+              "AUDIO_LOOPBACK",
+              "TEACHER_VOICE"
+            ]
+          },
+          "state": {
+            "enum": [
+              "CATALOG_ONLY",
+              "INSTALLED",
+              "VERIFIED",
+              "ACTIVE",
+              "DEGRADED",
+              "REMOVED"
+            ]
+          },
+          "option_dependency_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true
+          }
+        }
+      }
+    },
+    "supported_media_clock_domains": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "readout_topics": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "manifest_digest": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "signed_manifest_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "biological_action_authority": {
+      "const": "NONE"
+    }
+  }
+}
