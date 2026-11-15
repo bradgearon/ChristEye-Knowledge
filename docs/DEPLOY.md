@@ -1,12 +1,27 @@
-# Enable the documentation site
+# Publishing the ChristEye Anaiero documentation
 
-The documentation source and responsive website are committed in `docs/`. GitHub Actions can deploy them as static pages **after the repository owner enables GitHub Pages**.
+**Updated November 15, 2026 · We Develop Software LLC**
 
-1. Open [ChristEye-Knowledge Pages settings](https://github.com/bradgearon/ChristEye-Knowledge/settings/pages).
-2. Set **Build and deployment → Source = GitHub Actions** and save.
-3. Open [Deploy Anaiero GitHub Pages](https://github.com/bradgearon/ChristEye-Knowledge/actions/workflows/pages.yml) and choose **Run workflow** on `main` if a new run does not start automatically.
-4. Confirm the workflow is green before using `https://bradgearon.github.io/ChristEye-Knowledge/`.
+The full project Markdown is available directly on GitHub. The professional landing page is `docs/index.html`, with styles in `docs/assets/site.css` and an accessible SVG architecture diagram.
 
-The previous attempt failed at `actions/configure-pages` because the site was not enabled. The workflow token was not permitted to create the Pages site automatically. **Files are already available in the GitHub repository independent of Pages.**
+GitHub has already reported a successful **pages build and deployment** run for the branch-based site. The default workflow does not need another custom deploy action on every commit.
 
-The web landing page is `docs/index.html`, which references `docs/assets/site.css` and `docs/assets/architecture.svg`. It does not expose raw logs or patent materials.
+## Check site status
+
+1. Open [GitHub Pages settings](https://github.com/bradgearon/ChristEye-Knowledge/settings/pages).
+2. Confirm the **publishing source** currently configured. For branch publication, use `main` and `/docs` as the folder; for GitHub Actions publication use the optional manual workflow.
+3. Check [Pages build and deployment runs](https://github.com/bradgearon/ChristEye-Knowledge/actions) for the latest green result.
+4. Open [https://bradgearon.github.io/ChristEye-Knowledge/](https://bradgearon.github.io/ChristEye-Knowledge/) after deployment finishes.
+
+## Publication organization
+
+- The GitHub Markdown library contains the six complete P01 source documents plus 174 other complete DOCX conversion editions.
+- Current implementation documents live under `specifications/v3/`; historical work under `archive/v2/`.
+- The original schema contracts live under `schemas/v6/` and `schemas/p02/`.
+- Patent documents are not published; research ownership is covered by the WDS Public Research Reference License.
+
+## Troubleshooting
+
+If the website is unavailable but the Markdown works on GitHub, verify the Pages source in repository settings first. The optional `.github/workflows/pages.yml` workflow is now **manual-only**, preventing a competing release from running on every Markdown edit. A GitHub Pages build may succeed before all caching/indexing is visible to external visitors.
+
+**The source documentation remains accessible on GitHub regardless of Pages hosting.**
