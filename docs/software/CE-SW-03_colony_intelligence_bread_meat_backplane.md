@@ -189,6 +189,8 @@ The JSON schemas are descriptive interchange/diagnostic records; production CE-S
 Minimum proposed events:
 COLONY_STATE_REVISION, PARTICIPANT_CANDIDATE, BOARD_ENROLLED, BOARD_FAULT, SENSOR_OBSERVATION, SENSOR_DATA_GAP, SUPPORT_STATUS, CHEMICAL_OBSERVATION, BREAD_PACK_COMPILED, MEAT_PLAN_PROPOSED, LEARNING_TEST_RECORDED, NEED_IDENTIFIED, GUIDANCE_PROPOSED, GUIDANCE_REVIEWED, CLOCK_ANCHOR, STORE_CHECKPOINT.
 
+For developer-only onboarding examples, see [sample board capability](../../examples/colony_board_capability.sample.json) (intentionally UNTRUSTED, never a deployable credential) and [sample human-review guidance](../../examples/colony_guidance.sample.json). New devices may advertise a readout list, but enrollment approval decides which publications/subscriptions become active.
+
 ## 16. Release and acceptance gates
 
 **SIM0:** synthetic boards and colonies, mutable simulated observations, immutable event sources, revisioned snapshots and push-delta reconnect.
