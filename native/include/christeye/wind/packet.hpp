@@ -5,6 +5,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <limits>
 #include <span>
 
@@ -20,7 +21,7 @@ inline constexpr std::uint16_t kKnownFlags = 0x001Fu;
 enum class Error : std::uint8_t {
   ok, invalid_argument, bad_magic, unsupported_version, unsupported_flags,
   invalid_kind, invalid_class, invalid_length, exceeds_limits,
-  truncated, unknown_required_tlv, duplicate_singleton_tlv
+  truncated, unknown_required_tlv, duplicate_singleton_tlv, overlapping_buffers
 };
 
 enum class Kind : std::uint8_t {
@@ -113,6 +114,18 @@ inline Error validate_tlvs(std::span<const std::byte> tlvs) noexcept {
   }
   return Error::ok;
 }
+// std::less defines a strict total order for pointers, including distinct arrays.
+// For deterministic, heap-free encoding we reject aliasing rather than copying
+// while writing header fields over an input view.
+inline bool overlaps(std::span<const std::byte> input,
+                     std::span<std::byte> output) noexcept {
+  if (input.empty() || output.empty()) return false;
+  const std::less<const std::byte*> less{};
+  const auto* in = input.data();
+  const auto* out = output.data();
+  return less(in, out + output.size()) && less(out, in + input.size());
+}
+
 inline Error validate_header(const Header& h, std::size_t tlvs,
                              std::size_t payload, Limits limits) noexcept {
   if (h.major != kMajorVersion || h.minor > kMinorVersion) return Error::unsupported_version;
@@ -142,6 +155,9 @@ inline Error encode(const Header& h, std::span<const std::byte> extensions,
   if ((e = detail::validate_tlvs(extensions)) != Error::ok) return e;
   const std::size_t frame_size = std::size_t(h.header_bytes) + payload.size();
   if (output.size() < frame_size) return Error::truncated;
+  const auto written_region = output.first(frame_size);
+  if (detail::overlaps(extensions, written_region) ||
+      detail::overlaps(payload, written_region)) return Error::overlapping_buffers;
   output[0] = std::byte{'C'}; output[1] = std::byte{'E'};
   output[2] = std::byte{'W'}; output[3] = std::byte{'P'};
   output[4] = std::byte(h.major); output[5] = std::byte(h.minor);
