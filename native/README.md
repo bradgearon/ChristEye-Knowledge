@@ -67,3 +67,23 @@ ctest --test-dir build/native -C Release --output-on-failure
 ```
 
 Each frame is tagged `SIM1_UNCALIBRATED_DIGITAL`. This work does **not** demonstrate an organoid, biological RNA motion, neuronal language learning, viability, a physical Crystal or experimental material delivery. Real instrument links, signed provenance and durable WindStore remain separate future work.
+
+## VLM1 — portable virtual living machines
+
+See [CE-SW-07](../docs/software/CE-SW-07_virtual_living_machine_bundles.md). A single editable `.avlm` image includes initial synthetic cells/molecules/Soil; a sealed instance adds the deterministic runtime journal and FNV consistency checks (not cryptographic). The host-only `virtual_machine.hpp` wrapper supports 8×8 six-channel conservation-based synthetic field movement, independent image cloning, full-state forks and deterministic replay. It does not control real cultures or prove neural learning.
+
+```sh
+cmake -S native -B build/native -DCE_WIND_BUILD_TESTS=ON
+cmake --build build/native --config Release
+ctest --test-dir build/native -C Release --output-on-failure
+# adjust executable path for your platform
+./build/native/ce_vlm inspect examples/vlm/crest-garden.avlm
+./build/native/ce_vlm new examples/vlm/crest-garden.avlm colony-a.avlm colony-a
+./build/native/ce_vlm run colony-a.avlm colony-a-25.avlm 25
+./build/native/ce_vlm verify colony-a-25.avlm
+./build/native/ce_vlm fork colony-a-25.avlm colony-b.avlm colony-b
+./build/native/ce_vlm execute colony-b.avlm examples/vlm/teacher-session.ops colony-b-next.avlm
+./build/native/ce_vlm stream colony-b-next.avlm 10
+```
+
+The `stream` output is NDJSON with all synthetic actors, proxy counters and a six-field 8×8 grid per tick, usable by a future visualization. Physics, biology, instruction schedules and constants are arbitrary software assumptions. No automatic stimulation, molecular delivery, physical Crystal learning or operator-free culture intervention is present.
