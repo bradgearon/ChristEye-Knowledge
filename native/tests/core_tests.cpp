@@ -124,6 +124,8 @@ static void packet_overlapping_buffers_rejected() {
   CHECK(written == 60);
   h.header_bytes = 60; h.payload_bytes = 0;
   // A TLV borrowed from the output buffer must also be rejected.
+  buffer[15] = std::byte{1}; buffer[16] = std::byte{0};
+  buffer[17] = std::byte{0}; buffer[18] = std::byte{0};
   const auto extension = std::span<const std::byte>(buffer.data() + 15, 4);
   CHECK(encode(h, extension, {}, output, written) == Error::overlapping_buffers);
   CHECK(written == 0);
