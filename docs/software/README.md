@@ -8,6 +8,9 @@
 |---|---|---|
 | [CE-SW-01: Native Mesh, WindBus and Evidence Changesets](CE-SW-01_native_mesh_architecture.md) | Cross-platform C++20 core; compact versioned WindPacket; authenticated sessions; interrupt/event-driven transport; weighted endpoint queues; append-only content-addressed WindStore; durable WindChange DAG and provenance; secure replication | **Design only** |
 | [CE-SW-02: Developmental WindBus and Evidence-Guided Integration](CE-SW-02_developmental_windbus_architecture.md) | Read-only developmental observation and evidence records for candidate cell lineage, axons, neurites/spines, local RNA measurements, multirate sensor fusion, developmental hypotheses, experimental case histories, and validated digital-model improvements | **Design only** |
+| [CE-SW-03: Colony Intelligence, Bread/Meat Planner and Support Backplane](CE-SW-03_colony_intelligence_bread_meat_backplane.md) | Live materialized colony state, revisioned push deltas, digital Bread/Meat compilation, source-linked team guidance, read-only serial diagnostics, Ethernet/USB3/fiber board connections and secure plug-in onboarding | **Design only** |
+
+See also [proposed Colony Intelligence schemas](../../schemas/software/README.md) for snapshot, board capability, Bread/Meat planning and guidance records.
 
 ## System integration
 
