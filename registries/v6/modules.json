@@ -1,0 +1,1577 @@
+{
+  "project": "ChristEye Genesis — StarChip Architecture",
+  "version": "1.0.0-proposal",
+  "module_count": 33,
+  "modules": [
+    {
+      "id": "CE-P01",
+      "title": "StarChip Runtime and Interface",
+      "folder": "platform",
+      "stage": "DIGITAL-V1",
+      "description": "A StarChip is a bounded specialist runtime with an explicit capability contract, resource budget, versioned ports and independent qualification. A chip may be a software service now or, after proof, a biological-assisted service.",
+      "inputs": [
+        "StarChipManifest, installation identity and granted permissions",
+        "Typed WindEnvelope requests and upstream evidence context",
+        "Resource reservations, deadline and deterministic fallback policy"
+      ],
+      "outputs": [
+        "Typed WindEnvelope responses with origin, validity and uncertainty",
+        "Lifecycle and heartbeat events; accepted capabilities list",
+        "Failure receipts distinguishing unavailable, invalid and unresolved"
+      ],
+      "responsibilities": [
+        "Define boot, ready, warm, degraded, suspended and retired states.",
+        "Keep source, task, decoder and deployment versions immutable within a qualified evaluation epoch.",
+        "Reject undefined inputs and unapproved capabilities, rather than inventing missing fields.",
+        "Expose health/quality separately from semantic performance."
+      ],
+      "process": [
+        "Resolve dependencies and validate compatibility before admission.",
+        "Load an approved implementation and run its self-test contract.",
+        "Warm up caches or calibrated parameters without changing sealed evaluation assets.",
+        "Operate through the WindBus, enforcing local budgets and Heart vetoes.",
+        "Emit receipts for every version transition and degradation."
+      ],
+      "criteria": [
+        "A module can be replaced in simulation without changing another module's schema.",
+        "Malformed requests never masquerade as successful Winds.",
+        "Latency, memory and error counts are reported with test identifiers."
+      ],
+      "risks": [
+        "Ambiguous readiness from a passing heartbeat: task qualification is separate.",
+        "Global model state accidentally shared across sealed evaluation runs."
+      ],
+      "questions": [
+        "Which capabilities need hard-real-time scheduling?",
+        "When is a specialist better kept as a tool rather than a resident chip?"
+      ],
+      "dependencies": [
+        "CE-P02",
+        "CE-P03",
+        "CE-P08"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-P02",
+      "title": "CrystalPack Registry and Packaging",
+      "folder": "platform",
+      "stage": "DIGITAL-V1",
+      "description": "CrystalPack is a versioned capability asset. In the digital product it can carry licensed data, retrieval indexes, model adapters, curricula, evaluation sets or policy constraints. A future physical Crystal is a different artifact class and not assumed to store arbitrary knowledge.",
+      "inputs": [
+        "Signed CrystalPackManifest, immutable asset hashes, license declaration",
+        "Target StarChip capabilities, host versions and compatibility constraints",
+        "Optional task curriculum and delayed-assessment specifications"
+      ],
+      "outputs": [
+        "Validated registry entry and dependency resolution plan",
+        "ActivationJob with explicit provenance and rollback state",
+        "Human-readable installed capability and evidence claims"
+      ],
+      "responsibilities": [
+        "Support library, curriculum, adapter, skill, composite and research-only classes.",
+        "Separate capability content from evidence that a biological network acquired that content.",
+        "Reject payloads with missing provenance, rights or signature checks.",
+        "Make pack composition deterministic and reproducible."
+      ],
+      "process": [
+        "Parse and schema-validate metadata and assets.",
+        "Verify trust and license scope, then compute dependency closure.",
+        "Generate compatibility and activation plan; never run code during discovery.",
+        "Install to staging, evaluate, and only then expose a new Wind."
+      ],
+      "criteria": [
+        "Digital examples validate against the published JSON schema.",
+        "An unsupported physical/peptide pack cannot be promoted to installable.",
+        "Removing a pack leaves an auditable impact and dependency report."
+      ],
+      "risks": [
+        "Copyright leakage from book or music source content.",
+        "Treating a pack filename or checksum as proof of biological memory."
+      ],
+      "questions": [
+        "Will adapters be pinned to model families or abstract representations?"
+      ],
+      "dependencies": [
+        "CE-P01",
+        "CE-P08",
+        "CE-P11"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-P03",
+      "title": "WindBus Typed Communication",
+      "folder": "platform",
+      "stage": "DIGITAL-V1",
+      "description": "The WindBus routes message-like Winds between specialists and host services. A Wind is a documented output event, not a direct inference of an organoid's inner meaning.",
+      "inputs": [
+        "WindEnvelope: event_id, sender, type, trace_id, payload, TTL, schema",
+        "Recipient capabilities, admission decision and correlation context",
+        "Quality, confidence and evidence annotation from source"
+      ],
+      "outputs": [
+        "Delivered event and acknowledgment with measured delay",
+        "Route health and duplicate/drop telemetry",
+        "Dead-letter record for expired or invalid events"
+      ],
+      "responsibilities": [
+        "Separate semantic task messages from device-control events.",
+        "Carry validity, missingness, uncertainty and provenance end to end.",
+        "Support version negotiation and receiver-specific translators.",
+        "Preserve causality and trace IDs through composed multi-module workflows."
+      ],
+      "process": [
+        "Validate schema, authorization and TTL at enqueue.",
+        "Choose subscribed recipients by exact type and capability.",
+        "Invoke declared transformation only after compatibility checks.",
+        "Apply backpressure, retry policy and dead-letter handling without silent duplication."
+      ],
+      "criteria": [
+        "Out-of-order delivery is observable; exactly-once is never promised without receipts.",
+        "Wrong-recipient and expired events never alter a module.",
+        "Simulated bridge disconnect clears queued teacher events and caches."
+      ],
+      "risks": [
+        "A high-confidence packet can still contain a wrong answer.",
+        "Message replay leakage during independent teaching tests."
+      ],
+      "questions": [
+        "Do biological adapters require separate clock domains and uncertainty windows?"
+      ],
+      "dependencies": [
+        "CE-P01",
+        "CE-P08",
+        "CE-P09"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-P04",
+      "title": "Crystal Activation, Warmup and Release",
+      "folder": "platform",
+      "stage": "DIGITAL-V1",
+      "description": "Installation is not instant competence. An activation job phases in a pack, measures actual behavior, and records whether the Wind is truly available. Biological training, if ever possible, is a distinct experimental acclimation process.",
+      "inputs": [
+        "CrystalPack + target StarChip and baseline capability measurements",
+        "ActivationBudget, allowed data and previously protected Roots",
+        "Safety and security policy, qualified evaluator and fallback"
+      ],
+      "outputs": [
+        "State transition receipts and validation report",
+        "Released or rejected capability with retention horizon",
+        "Rollback/quarantine decision and previous-state integrity report"
+      ],
+      "responsibilities": [
+        "Use DISCOVER, VERIFY, STAGE, DRY_RUN, SHADOW, CALIBRATE, ASSESS, RELEASE, MONITOR.",
+        "Treat warmup as observable adaptation, not a fixed waiting period.",
+        "Distinguish software load, digital fine-tuning and biological acquisition.",
+        "Prevent an experimental physical Crystal from bypassing independent retention checks."
+      ],
+      "process": [
+        "Freeze baseline and protected tasks.",
+        "Stage pack and test data permissions before model access.",
+        "Run candidate in shadow on held-out tasks versus baseline.",
+        "Permit supervised calibration where allowed; then seal a confirmation run.",
+        "Release only when the improvement and regression criteria pass."
+      ],
+      "criteria": [
+        "Failed activation leaves old capability callable.",
+        "Activation report includes unsupported capabilities and time-to-readiness.",
+        "No success is inferred from installation completion or higher firing rate."
+      ],
+      "risks": [
+        "Silent catastrophic forgetting during warmup.",
+        "Digital retrieval answers credited as biological retained understanding."
+      ],
+      "questions": [
+        "Should warmup be user-visible or background within a local deployment?"
+      ],
+      "dependencies": [
+        "CE-P02",
+        "CE-P07",
+        "CE-P08"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-P05",
+      "title": "Genesis Curriculum and Education Engine",
+      "folder": "platform",
+      "stage": "DIGITAL-V1",
+      "description": "Turns university-like learning programs into executable competencies, prerequisite graphs, formative lessons, sealed tests and retention schedules; selects the next task based on evidence of learning rather than repetitions alone.",
+      "inputs": [
+        "Discipline outcomes, prerequisites and authorized content",
+        "Module profile and observed accuracy, transfer and retention",
+        "Teaching budget, protections and accessible communication channels"
+      ],
+      "outputs": [
+        "Ordered LearningPlan tasks and assessment sessions",
+        "Skill evidence by competency, including unknown/unresolved",
+        "Suggested next Wind, review or alternate route"
+      ],
+      "responsibilities": [
+        "Represent every skill as observable tasks and counterexamples.",
+        "Distinguish exposure, immediate mastery, delayed recall and generalization.",
+        "Use remedial variants and spaced assessment without treating retrieval attempts as pure rest.",
+        "Avoid an LLM grading its own unseen test by restricting oracle access."
+      ],
+      "process": [
+        "Decompose deployment-pack syllabus into a DAG of prerequisites.",
+        "Select a teachable competency using readiness and information gain.",
+        "Present authorized content through an encoder appropriate to the recipient.",
+        "Assess with separate development and sealed holdout splits.",
+        "Update RootRecord and choose progress, revision or unresolved."
+      ],
+      "criteria": [
+        "A two-course pack cannot advance when prerequisite evidence is missing.",
+        "Knowledge, understanding, flexibility and calibration are reported separately.",
+        "Sealed questions cannot appear in hints, retrieval indexes or feedback."
+      ],
+      "risks": [
+        "Passes based on memorizing leaked solutions.",
+        "Generic digital language-model competence misattributed to biological tissue."
+      ],
+      "questions": [
+        "What competency taxonomy best handles creative work without a single correct answer?"
+      ],
+      "dependencies": [
+        "CE-P07",
+        "CE-P11",
+        "CE-P08"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-P06",
+      "title": "Lotus Mesh Coordination and Planning",
+      "folder": "platform",
+      "stage": "DIGITAL-V1",
+      "description": "The Lotus is a software coordination policy that plans which specialists act, when they exchange Winds, and which pathways must remain protected; this does not assert one anatomical Lotus in living tissue.",
+      "inputs": [
+        "Typed task DAG, available StarChips, route metrics and capability quality",
+        "Root protection constraints, cost limits and missingness",
+        "Candidate plans and observed counterfactual alternatives"
+      ],
+      "outputs": [
+        "ExecutionPlan with stage ordering, budgets and expected contributions",
+        "Action receipts with ACT, HOLD or UNRESOLVED",
+        "Mesh changes proposed for simulation before activation"
+      ],
+      "responsibilities": [
+        "Maintain distinct structural, functional, intervention and task graphs.",
+        "Never turn correlation into a physical synapse or semantic relation.",
+        "Allow partial task decomposition and fallback to digital-only orchestration.",
+        "Measure each added StarChip against simpler matched alternatives."
+      ],
+      "process": [
+        "Discover qualified recipient capabilities.",
+        "Generate candidate directed acyclic execution graphs.",
+        "Estimate potential benefit and resource cost with uncertainty.",
+        "Apply Heart constraints, execute allowed plan, log outcomes.",
+        "Run leave-one-out comparison to estimate marginal chip contribution."
+      ],
+      "criteria": [
+        "No cycles or unbounded fan-out without a declared termination contract.",
+        "Outputs of two specialists remain separately attributable.",
+        "Coordinator-on and fixed-schedule controls can be compared prospectively."
+      ],
+      "risks": [
+        "Correlated failures collapse the benefit of redundant specialists.",
+        "One generator silently manufactures the evaluation target for another."
+      ],
+      "questions": [
+        "Which planning layer is latency sensitive versus reflective?"
+      ],
+      "dependencies": [
+        "CE-P03",
+        "CE-P07",
+        "CE-P08",
+        "CE-P09"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-P07",
+      "title": "Roots, Memory and Qualification Evaluator",
+      "folder": "platform",
+      "stage": "DIGITAL-V1",
+      "description": "Roots are delayed, demonstrated capabilities. This module tracks testable competence and retrieval routes, protects prior skills during upgrades, and avoids interpreting one failed answer as erased storage.",
+      "inputs": [
+        "Training and evaluation events; task definitions and clean baselines",
+        "Versioned decoder, codebook and measurement validity",
+        "Protected skill references, delayed probe schedule and split provenance"
+      ],
+      "outputs": [
+        "RootRecord for each competence and uncertainty interval",
+        "Regression/noninferiority report across pack installs",
+        "Alternative explanations and diagnosis recommendation"
+      ],
+      "responsibilities": [
+        "Record train, immediate, delayed and transfer scores separately.",
+        "Support confidence intervals and relative-to-chance normalization with applicability checks.",
+        "Distinguish unavailable, failed, abstained and unobserved outcomes.",
+        "Require preregistered noninferiority margins for protected skills."
+      ],
+      "process": [
+        "Freeze decoder and test split before candidate evaluation.",
+        "Evaluate immediate acquisition, delayed retrieval and held-out transfer.",
+        "Compare relevant controls, including simpler digital-only baselines.",
+        "Classify interference, access fault or unresolved evidence."
+      ],
+      "criteria": [
+        "A perfect training score with poor delayed result fails a retention claim.",
+        "Protected skill regressions block a proposed upgrade.",
+        "Reports preserve baseline and evaluation provenance."
+      ],
+      "risks": [
+        "Scores aggregated across electrodes as if they were independent samples.",
+        "Chance-normalized retention instability near chance."
+      ],
+      "questions": [
+        "How long should music-style persistence be assessed relative to book retrieval?"
+      ],
+      "dependencies": [
+        "CE-P11",
+        "CE-P09"
+      ],
+      "formula": "R(Δ) = (P_delayed - P_chance)/(P_immediate - P_chance), only if denominator is materially > 0; report interval and raw scores."
+    },
+    {
+      "id": "CE-P08",
+      "title": "Heart Governance, Limits and Permissions",
+      "folder": "platform",
+      "stage": "DIGITAL-V1",
+      "description": "An independent constraint authority refuses unsafe, unauthorized or scientifically unqualified actions; biological support remains separate from task rewards and learned policy proposals.",
+      "inputs": [
+        "Requested action, provenance, permissions, context and resource costs",
+        "Signed policy table and current device safety state",
+        "Relevant protected competencies and research status"
+      ],
+      "outputs": [
+        "PERMIT, DENY, HOLD or REVIEW_REQUIRED with reason and policy ID",
+        "Immutable incident receipt and affected route list",
+        "Safe fallback recommendation that does not assert recovery"
+      ],
+      "responsibilities": [
+        "Hard limits are not traded away for higher task scores.",
+        "Keep biological life-support control out of learning-module authority.",
+        "Treat uncertain biological operations as manual institutional review.",
+        "Separate intellectual property, content licensing and platform authorization."
+      ],
+      "process": [
+        "Check authentication, asset signature and entitlement.",
+        "Verify target-scoped rate, resource and data-use budgets.",
+        "Evaluate protected capabilities and declared safety constraints.",
+        "Log decision, execute only via permitted services, and audit after action."
+      ],
+      "criteria": [
+        "An untrusted module cannot modify its own permissions.",
+        "A biological module cannot directly change fluid composition or stimulation envelope.",
+        "Safety remains functional when the generative AI model crashes."
+      ],
+      "risks": [
+        "Policy drift or model prompt injection altering apparent permissions.",
+        "Confusing a candidate molecule with a qualified instruction."
+      ],
+      "questions": [
+        "How will institutional approval artifacts be versioned?"
+      ],
+      "dependencies": [
+        "CE-P11",
+        "CE-P09"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-P09",
+      "title": "Observability, Metrics and Evidence Ledger",
+      "folder": "platform",
+      "stage": "DIGITAL-V1",
+      "description": "The evidence layer records what was actually measured, what was inferred, who supplied the model or claim, and how reliable each result is.",
+      "inputs": [
+        "WindEnvelope events, runtime traces and test outcomes",
+        "Sensor observations with units, time, accuracy and freshness",
+        "Proposed biological hypotheses and source references"
+      ],
+      "outputs": [
+        "Queryable provenance graph and operator dashboard inputs",
+        "Evidence classification F, X, H, D and independent report links",
+        "Alerts for missing, stale and contradictory data"
+      ],
+      "responsibilities": [
+        "Maintain separate raw, transformed, inferred and claimed data records.",
+        "Join graph edges only when their identity and evidence types match.",
+        "Keep failure cases, negative results, and inactive modules discoverable.",
+        "Use clocks with recorded offset and jitter for physical bridges."
+      ],
+      "process": [
+        "Ingest event with immutable source digest.",
+        "Check schema and timestamp; label stale or missing observations.",
+        "Aggregate bounded quality indicators without washing away outliers.",
+        "Link every decision to its supporting observations and tests."
+      ],
+      "criteria": [
+        "Every capability claim links to a test or is explicitly unverified.",
+        "Data gaps cannot display as NORMAL.",
+        "The system identifies a biological-versus-digital output source."
+      ],
+      "risks": [
+        "Telemetry costs saturating storage and disk bandwidth.",
+        "Attributing semantic knowledge based on raw activity alone."
+      ],
+      "questions": [
+        "Which raw observation subsets are sufficient for reproducibility?"
+      ],
+      "dependencies": [
+        "CE-P03",
+        "CE-P11"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-P10",
+      "title": "StarChip Composition and Capability Negotiation",
+      "folder": "platform",
+      "stage": "DIGITAL-V1",
+      "description": "Build larger Stars from smaller chips while preserving interfaces, independent test evidence and clear responsibility for errors.",
+      "inputs": [
+        "Composition manifest with component IDs, accepted version ranges",
+        "Input/output compatibility and evidence profiles",
+        "User-selected goals and fallback modes"
+      ],
+      "outputs": [
+        "Resolved composite StarChip manifest and dependency graph",
+        "Integration test plan and attribution report",
+        "Warnings on incompatible claims or scarce resources"
+      ],
+      "responsibilities": [
+        "Require declared conversions between incompatible Wind types.",
+        "Prevent accidental cyclic dependencies or implicit hidden shared state.",
+        "Select arbitration policies by measured benefit, not fictional persona ratings.",
+        "Allow combined experience designers to invoke music, narrative and art asynchronously."
+      ],
+      "process": [
+        "Resolve versioned capabilities and dependencies.",
+        "Validate a cycle-free execution graph and data permissions.",
+        "Run contract tests and end-to-end simulation.",
+        "Measure composite output with component ablations."
+      ],
+      "criteria": [
+        "Composite benchmark is not merely the average of component scores.",
+        "Removing a child module yields a defined degraded behavior.",
+        "Per-component quality and responsibility remain auditable."
+      ],
+      "risks": [
+        "Compositional hallucinations despite individually good modules.",
+        "False gains caused by increased digital compute budget."
+      ],
+      "questions": [
+        "Should compositional policies be hand-authored for production games?"
+      ],
+      "dependencies": [
+        "CE-P01",
+        "CE-P03",
+        "CE-P06"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-P11",
+      "title": "Durable Digital Memory and Source Provenance",
+      "folder": "platform",
+      "stage": "DIGITAL-V1",
+      "description": "Implements a practical memory backbone for books, domain corpora, generated artifacts, user preferences and persistent project state; it does not call file retrieval a biological engram.",
+      "inputs": [
+        "Content assets with permissions and citations",
+        "MemoryWrite request with scope, schema and source attribution",
+        "RetrievalRequest with task context and evidence requirements"
+      ],
+      "outputs": [
+        "Versioned documents, indexes and provenance nodes",
+        "Grounded retrieval responses and uncertainty markers",
+        "Compaction, migration and deletion receipts"
+      ],
+      "responsibilities": [
+        "Separate long-term digital knowledge from observed living retention.",
+        "Allow compact, replaceable book microcrystals without rewriting the model.",
+        "Store canon and world-state separately from speculative narrative suggestions.",
+        "Respect rights, privacy, revocation, source-version changes and user-controlled scope."
+      ],
+      "process": [
+        "Ingest authorized content, segment by document structure and index.",
+        "Link facts to source spans and curriculum competencies.",
+        "Retrieve under permissions and give source-aware context.",
+        "Run relevance, contradiction and expiration checks before reuse."
+      ],
+      "criteria": [
+        "A book-pack fact can be traced to a source and revision.",
+        "Revoked assets cease serving content.",
+        "A deleted pack does not leave hidden retrieval references."
+      ],
+      "risks": [
+        "Copyrighted text copied verbatim into public sample packs.",
+        "Unrelated prior conversation or user secrets injected into games."
+      ],
+      "questions": [
+        "Do we need local encrypted storage for each physical StarChip?"
+      ],
+      "dependencies": [
+        "CE-P08",
+        "CE-P09"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-P12",
+      "title": "GPU-like Accelerator and Real-Time Scheduler",
+      "folder": "platform",
+      "stage": "DIGITAL-V1",
+      "description": "Defines a chip-like specialized accelerator interface on existing CPU/GPU hardware; bespoke silicon and biological acceleration are later optional implementations, not current assumptions.",
+      "inputs": [
+        "TaskGraph with latency class, memory bandwidth, model requirements",
+        "Available compute devices and priority/quality budgets",
+        "Cache and prefetch hints from real-time host"
+      ],
+      "outputs": [
+        "ResourceReservations, background jobs and output artifacts",
+        "Measured throughput, tail latency and quality tradeoffs",
+        "Deterministic fallback when generation misses deadline"
+      ],
+      "responsibilities": [
+        "Never put heavy world generation on the 16.67 ms 60-FPS game thread.",
+        "Separate interactive response, look-ahead generation and reflective planning queues.",
+        "Manage caches for world graphs, models, embeddings, audio motifs and texture atlases.",
+        "Keep plug-in services hardware-agnostic until an accelerator shows measurable benefit."
+      ],
+      "process": [
+        "Partition workflow into short synchronous and long asynchronous operations.",
+        "Prefetch next reachable rooms and musical transitions.",
+        "Budget GPU memory for competing models and render engine.",
+        "Commit verified generated artifacts to a cache with a stable seed."
+      ],
+      "criteria": [
+        "Frame pacing remains within declared target with generation enabled.",
+        "No unverified procedural room can block the main campaign.",
+        "Task scheduling degrades gracefully under GPU contention."
+      ],
+      "risks": [
+        "Inference stalls GPU rendering or saturates memory.",
+        "Specialized hardware marketed before proof of useful workload advantage."
+      ],
+      "questions": [
+        "Could real-time audio and visual generation share embeddings without latency spikes?"
+      ],
+      "dependencies": [
+        "CE-P01",
+        "CE-P03",
+        "CE-P09"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-P13",
+      "title": "Deployment, Security, Updates and Fleet",
+      "folder": "platform",
+      "stage": "DIGITAL-V1",
+      "description": "Defines GitHub-native versioning, CI checks, signed releases, device provisioning, monitoring and careful rollback of digital components; biological states have no guaranteed rollback.",
+      "inputs": [
+        "ReleaseManifest, deployment channel, trusted root and pack entitlements",
+        "StarChip status, compatibility graph and health snapshots",
+        "Approved maintenance and upgrade windows"
+      ],
+      "outputs": [
+        "Signed deployment bundle and per-module lockfile",
+        "Rollout receipts, drift alerts and rollback reports",
+        "Audit-ready software bill of materials and version graph"
+      ],
+      "responsibilities": [
+        "Distinguish code version from learned state version and from biological lineage.",
+        "Never silently redeploy a pack whose license has changed.",
+        "Separate local/offline function from fleet telemetry.",
+        "Provide canary, staged and full rollout channels for software."
+      ],
+      "process": [
+        "Build immutable assets and record hashes in CI.",
+        "Validate schema and dependency closure; run unit and integration tests.",
+        "Stage candidate, run shadow tests, then promote by signed decision.",
+        "Rollback software; re-evaluate biological capability without claiming state reversal."
+      ],
+      "criteria": [
+        "Every release reproducible from source and lockfile.",
+        "No unreviewed file executes during install.",
+        "A bad digital upgrade can be stopped without harming independent living support."
+      ],
+      "risks": [
+        "Public GitHub publication may disclose patent-related implementation details.",
+        "Software rollback conflated with reversal of a biological training history."
+      ],
+      "questions": [
+        "Which repo components should remain private until IP review?"
+      ],
+      "dependencies": [
+        "CE-P02",
+        "CE-P04",
+        "CE-P08"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-D01",
+      "title": "Metroidvania Experience Director",
+      "folder": "chips",
+      "stage": "DIGITAL-V1",
+      "description": "A game-generation StarChip that plans large coherent 2D exploration adventures dynamically while delegating validated subproblems to topology, combat, narrative, art and audio specialists.",
+      "inputs": [
+        "ExperienceRequest: campaign length, world seed, accessibility goals, genre and player history",
+        "Current campaign canon, inventory/abilities, quest state and device budgets",
+        "Qualified outputs from world, level, combat, story, art and music specialists"
+      ],
+      "outputs": [
+        "CampaignPlan with acts, biome dependencies, mandatory/optional loops",
+        "StreamingContentRequest queue for the next reachable region",
+        "Verified RoomBundle, EncounterBundle and SoundtrackCues"
+      ],
+      "responsibilities": [
+        "Produce macro-level structure before individual rooms.",
+        "Preserve continuity of player choices, recovered abilities and boss consequences.",
+        "Generate and verify off-thread, keeping player input responsive.",
+        "Support 30+ hour campaigns via persistent state and seeded regeneration, not one huge prompt."
+      ],
+      "process": [
+        "Construct act goals and reachability constraints.",
+        "Ask WorldGraph and progression solver for a proof-carrying map.",
+        "Queue room geometry, enemies and rewards for upcoming exits.",
+        "Reconcile narrative canon and sound/music changes.",
+        "Verify each bundle and prefetch before the player crosses an edge."
+      ],
+      "criteria": [
+        "No mandatory progress becomes unreachable under a valid play history.",
+        "Repeated seed and locked versions regenerate identical canonical world decisions.",
+        "Game runtime retains a safe authored fallback for unavailable generators."
+      ],
+      "risks": [
+        "Infinite procedural novelty creates incoherent progression.",
+        "Story and boss triggers get out of sync with generated geometry."
+      ],
+      "questions": [
+        "How should emergent player builds affect future ability gates without retroactively altering history?"
+      ],
+      "dependencies": [
+        "CE-D02",
+        "CE-D03",
+        "CE-D04",
+        "CE-D05",
+        "CE-D06",
+        "CE-D09",
+        "CE-P12"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-D02",
+      "title": "World Topology and Progression Graph",
+      "folder": "chips",
+      "stage": "DIGITAL-V1",
+      "description": "Plans a Metroidvania world as a directed graph of regions, exits, ability gates, shortcuts, secrets and mandatory goals; outputs machine-checkable reachability proofs.",
+      "inputs": [
+        "WorldSeed, biome list and required progression milestones",
+        "PlayerAbility lattice, keys, switches and persistent world flags",
+        "Desired challenge curve, loop density and backtracking budget"
+      ],
+      "outputs": [
+        "WorldGraph with gate conditions and canonical ability acquisition order",
+        "ReachabilityReport with required and optional goals",
+        "Proof that no critical item is gated behind itself"
+      ],
+      "responsibilities": [
+        "Represent reachability as state over position and acquired abilities.",
+        "Guarantee required bosses, NPC rescues and exits remain attainable.",
+        "Generate meaningful loops and shortcuts, not random corridor spaghetti.",
+        "Emit conditions for room builders without choosing final pixel geometry."
+      ],
+      "process": [
+        "Generate candidate region graph under thematic constraints.",
+        "Simulate capability acquisition until fixpoint.",
+        "Reject self-locks, disconnected required zones and contradictory flags.",
+        "Score optional exploration, nonlinearity and travel burden.",
+        "Commit versioned graph with proof and counterexamples."
+      ],
+      "criteria": [
+        "All critical milestones reachable in a symbolic simulation.",
+        "A boss seal cannot require its own reward.",
+        "Sequence breaks are declared optional paths, not accidental softlocks."
+      ],
+      "risks": [
+        "Random generation introduces a door with no valid source room.",
+        "Graph reachable symbolically but geometrically impassable."
+      ],
+      "questions": [
+        "How should water routes and astral travel alter connectivity while retaining logic?"
+      ],
+      "dependencies": [
+        "CE-P07",
+        "CE-P09"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-D03",
+      "title": "Room Geometry, Platforming and Streaming",
+      "folder": "chips",
+      "stage": "DIGITAL-V1",
+      "description": "Turns a validated region graph into traversable tile-based rooms with platforming physics, collision, tile semantics, streaming boundaries and fallback layouts.",
+      "inputs": [
+        "RoomContract with entrance/exit transforms and ability requirements",
+        "Tile vocabulary, jump arc, movement speed and collision rules",
+        "Biome material palette, encounter constraints and memory budget"
+      ],
+      "outputs": [
+        "TilemapBundle, navigation proof and render-friendly assets",
+        "RoomTransition and cache manifest",
+        "Collision, reachability and hazard-validation report"
+      ],
+      "responsibilities": [
+        "Treat jump height, dash range and player hitbox as hard constraints.",
+        "Reserve boss arenas and narrative interaction points before decoration.",
+        "Support layered parallax without corrupting collision geometry.",
+        "Use deterministic seeds so saved worlds remain stable after updates."
+      ],
+      "process": [
+        "Place mandatory entrances, exits and interaction anchors.",
+        "Generate platforms and traversable paths under the physics oracle.",
+        "Run a pathfinder over movement states and ability constraints.",
+        "Populate decorations, parallax layers and optional secrets.",
+        "Compile and validate tilemap and cache before publication."
+      ],
+      "criteria": [
+        "All required room exits reachable with correct abilities.",
+        "No spawn position collides with solid geometry.",
+        "Boundary positions align across streamed neighboring rooms."
+      ],
+      "risks": [
+        "A visually interesting room violates movement physics.",
+        "Background layers or particles degrade rendering cadence."
+      ],
+      "questions": [
+        "Should learned player patterns influence room difficulty while respecting accessible routes?"
+      ],
+      "dependencies": [
+        "CE-D02",
+        "CE-P12"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-D04",
+      "title": "Bosses, Combat and Enemy Behaviors",
+      "folder": "chips",
+      "stage": "DIGITAL-V1",
+      "description": "Generates distinct encounter systems, attack telegraphs, progression-relevant boss mechanics and adaptively balanced enemy behaviors without unpredictable or unfair damage.",
+      "inputs": [
+        "Player skill profile, known movement and combat abilities",
+        "BossTheme, arena contract, damage rules and progression rewards",
+        "Accessibility budget and combat event telemetry"
+      ],
+      "outputs": [
+        "EncounterStateMachine with phases, moves, hitboxes and telegraphs",
+        "Simulation-based fairness report and difficulty curve",
+        "Deterministic boss seed, loot and progression event"
+      ],
+      "responsibilities": [
+        "Separate artistic encounter design from authoritative combat simulation.",
+        "Ensure lethal attacks have observable warning and response windows.",
+        "Make each boss teach or test a mechanic rather than just growing health.",
+        "Support authored override and replayable bug reports."
+      ],
+      "process": [
+        "Choose mechanic motif and learning curve.",
+        "Generate phase state machine and attack parameter bounds.",
+        "Simulate against baseline agents across player skill bands.",
+        "Validate telegraph/hitbox parity and softlock protection.",
+        "Publish only tested encounters; fallback to safe canonical set."
+      ],
+      "criteria": [
+        "Every declared attack has a counterplay path.",
+        "Boss defeat triggers exactly the specified state change.",
+        "Difficulty scaling does not create unavoidable states."
+      ],
+      "risks": [
+        "Unpredictable emergent pattern defeats meaningful player learning.",
+        "Adaptive AI secretly rubber-bands player damage or health."
+      ],
+      "questions": [
+        "Can difficulty personalize by changing encounters before entry rather than mid-fight?"
+      ],
+      "dependencies": [
+        "CE-D03",
+        "CE-P07",
+        "CE-P12"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-D05",
+      "title": "Narrative, Lore and Quest Continuity",
+      "folder": "chips",
+      "stage": "DIGITAL-V1",
+      "description": "Maintains a canon-aware story graph for long-form generated adventures, with choices, moral decisions, evolving characters, quests, flags and source-backed world lore.",
+      "inputs": [
+        "Canon ledger and allowed creative expansion boundaries",
+        "Player choices, relationship state, active quests and world consequences",
+        "Narrative beat request, scene constraints and character voices"
+      ],
+      "outputs": [
+        "DialogueScene, QuestDelta and lore-safe character actions",
+        "ConflictReport when generation contradicts canon",
+        "Persistent narrative state transitions and callbacks"
+      ],
+      "responsibilities": [
+        "Separate canonical truths from proposed twists and dreamlike alternatives.",
+        "Keep consequences of choices across rooms and play sessions.",
+        "Allow nuanced moral alternatives without requiring simplistic binary alignment.",
+        "Respect existing game world, Stars and user-supplied IP boundaries."
+      ],
+      "process": [
+        "Retrieve canon snippets and current world state.",
+        "Plan scene objective with explicit actor motivations.",
+        "Generate candidate dialogue and quest transitions.",
+        "Validate entity names, timeline and permitted reveals.",
+        "Commit only authorized state changes after player action."
+      ],
+      "criteria": [
+        "Quest dialogue never refers to undiscovered events as known.",
+        "Contradictory rewards or character states block publication.",
+        "Two reloads of the same canonical choice preserve the same consequences."
+      ],
+      "risks": [
+        "Generative plot twists erase authored thematic meaning.",
+        "Long conversations overrun latency budget while the game waits."
+      ],
+      "questions": [
+        "How do author-approved arcs constrain player-generated branches?"
+      ],
+      "dependencies": [
+        "CE-P11",
+        "CE-D01",
+        "CE-P07"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-D06",
+      "title": "Pixel Art, Animation and Visual Asset Compiler",
+      "folder": "chips",
+      "stage": "DIGITAL-V1",
+      "description": "Builds cohesive 2D art assets, animation state sets and tile families under exact engine constraints; outputs metadata-rich packs instead of uncontrolled images.",
+      "inputs": [
+        "ArtDirectionSpec, sprite dimensions and palette requirements",
+        "Scene graph and combat animation timing",
+        "License and provenance of reference assets"
+      ],
+      "outputs": [
+        "SpriteSheetBundle, tile atlas and animation state machine",
+        "Pivot, hitbox, layer and import metadata",
+        "Visual regression and engine import results"
+      ],
+      "responsibilities": [
+        "Maintain character identity across poses and animation frames.",
+        "Track exact silhouette, orientation and tile seam contracts.",
+        "Support authored priority and visual style locks.",
+        "Distinguish generated assets from unlicensed source art."
+      ],
+      "process": [
+        "Compile visual style and exact asset acceptance criteria.",
+        "Generate or retrieve licensed candidates by asset role.",
+        "Measure dimensions, alpha and seams automatically.",
+        "Validate combat timing and pivot continuity in engine preview.",
+        "Publish only verified assets to the game runtime."
+      ],
+      "criteria": [
+        "No sprite-sheet frame violates designated bounds.",
+        "Tile seams pass edge continuity testing.",
+        "Changes do not silently shift collision and attack timing."
+      ],
+      "risks": [
+        "A model produces pretty art that is unusable in tilesets.",
+        "Style drift across a long generated world."
+      ],
+      "questions": [
+        "Can style embeddings be versioned as smaller CrystalPacks?"
+      ],
+      "dependencies": [
+        "CE-P11",
+        "CE-D03",
+        "CE-P12"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-D07",
+      "title": "Music Composer by Genre and Instrumentation",
+      "folder": "chips",
+      "stage": "DIGITAL-V1",
+      "description": "Produces original multitrack compositions with genre-specific language, orchestration constraints, harmonic identity and exportable symbolic tracks; not a player of copyrighted songs.",
+      "inputs": [
+        "MusicBrief: genre, scene, emotion arc, duration range and instrumentation",
+        "Musical grammar packs with rights, feature expectations and evaluation tests",
+        "Optional motif catalog and current adaptive-scoring context"
+      ],
+      "outputs": [
+        "CompositionPlan, tempo map, key regions, original motifs",
+        "MIDI-like event streams and stem/arrangement specification",
+        "Assessment of coherence, novelty and harmonic/rhythmic progression"
+      ],
+      "responsibilities": [
+        "Separate compositional representation from audio rendering or voice synthesis.",
+        "Permit deliberate key departure with documented return/resolve rationale.",
+        "Support variation, development and motivic recall across multi-hour works.",
+        "Avoid copying protected melodies or style replicas attributed to one living creator."
+      ],
+      "process": [
+        "Choose functional genre traits, form and emotional target.",
+        "Generate motive, bass/harmonic scaffold and rhythmic identities.",
+        "Develop orchestration by section and dynamic energy.",
+        "Measure repetition, voice-leading, beat contrast and structural coherence.",
+        "Export editable symbolic tracks for mixing and review."
+      ],
+      "criteria": [
+        "Output is editable by track and time rather than flattened audio only.",
+        "Melodic hooks remain recognizable after variation.",
+        "Genre adherence and creative distinctiveness are scored separately."
+      ],
+      "risks": [
+        "Overfitting to a reference song.",
+        "Novelty metrics reward random notes instead of meaningful divergence."
+      ],
+      "questions": [
+        "How should compositional memory coordinate motifs across a game?"
+      ],
+      "dependencies": [
+        "CE-D08",
+        "CE-D09",
+        "CE-P11"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-D08",
+      "title": "Advanced Harmonic and Rhythmic Divergence",
+      "folder": "chips",
+      "stage": "DIGITAL-V1",
+      "description": "An optional expressive-theory StarChip for deliberate departure, tension, release and emotional motion. The user's AHD and ARD formalism can be imported as a separately versioned theory pack when its equations are available.",
+      "inputs": [
+        "Pitch/harmony event stream, beat grid and phrase boundaries",
+        "Target emotional trajectory and tonal/rhythmic home constraints",
+        "Versioned AHD/ARD theory specification with declared variable meanings"
+      ],
+      "outputs": [
+        "Tension-contour annotations and candidate harmonic movement",
+        "Rhythmic displacement map and controlled resolution options",
+        "Explanation of deliberate deviation with uncertainty and counterexamples"
+      ],
+      "responsibilities": [
+        "Avoid equating outside-key notes with mere mistakes.",
+        "Keep harmonic interval emotion, temporal buildup and rhythmic divergence distinct.",
+        "Measure structural intent and resolution, not a fake universal emotional score.",
+        "Support side-by-side alternatives that preserve source material rights."
+      ],
+      "process": [
+        "Parse phrase harmony, rhythm and anticipation points.",
+        "Compute candidate deviations with selected theory version.",
+        "Evaluate constraint satisfaction and perception proxies.",
+        "Offer alternatives emphasizing continuity, surprise or delayed resolution.",
+        "Validate by listening tests rather than algorithmic score alone."
+      ],
+      "criteria": [
+        "AHD and ARD values are explicitly labeled model-derived.",
+        "Different emotional-curve objectives produce distinguishable arrangements.",
+        "Pack can be disabled without breaking the base composer."
+      ],
+      "risks": [
+        "Inventing numerical scores that are not grounded in the supplied AHD/ARD definitions.",
+        "Treating subjective affect as universal biological fact."
+      ],
+      "questions": [
+        "Which interval and buildup operators should be imported from final AHD/ARD documentation?"
+      ],
+      "dependencies": [
+        "CE-D07",
+        "CE-P02"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-D09",
+      "title": "Adaptive Game Audio and Music Director",
+      "folder": "chips",
+      "stage": "DIGITAL-V1",
+      "description": "Maps player, world and combat states into continuous, motif-preserving game audio through arrangement, layering and transition planning.",
+      "inputs": [
+        "GameState and EncounterIntensity events",
+        "Registered music themes, tempo grids and stem transition boundaries",
+        "Audio engine target, frame and sample-clock constraints"
+      ],
+      "outputs": [
+        "CuePlan with bar-aligned transitions and original motif variations",
+        "Stem selection events and fallback cue timeline",
+        "Measured transition gaps, clicks, latency and perceived continuity"
+      ],
+      "responsibilities": [
+        "Music generation occurs off the audio callback thread.",
+        "Preserve leitmotifs associated with areas, allies and decisions.",
+        "Handle multiple intensity changes without accumulating transition backlog.",
+        "Respect player accessibility volume and content settings."
+      ],
+      "process": [
+        "Subscribe to game state Winds and determine target emotional scene.",
+        "Choose registered motif and compatible groove/tonality.",
+        "Plan next safe beat/bar transition.",
+        "Prefetch or synthesize off-thread and publish validated cues.",
+        "Crossfade or layer at deterministic audio transport position."
+      ],
+      "criteria": [
+        "No missing, clipped or late audio on mandatory transitions.",
+        "A recovered area theme remains thematically connected to prior visits.",
+        "Audio reacts within the approved transition budget."
+      ],
+      "risks": [
+        "Music model blocks real-time sound thread.",
+        "Unbounded adaptations destroy musical form."
+      ],
+      "questions": [
+        "How should the dynamic score coordinate Stars' motifs across story arcs?"
+      ],
+      "dependencies": [
+        "CE-D07",
+        "CE-D01",
+        "CE-P12"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-D10",
+      "title": "College Discipline and Professional Study",
+      "folder": "chips",
+      "stage": "DIGITAL-V1",
+      "description": "A reusable specialist curriculum generator for any structured discipline: literature, history, economics, physics, medicine-as-education, engineering, philosophy or arts. It produces evaluated competency rather than claiming instant mastery.",
+      "inputs": [
+        "DisciplineStandard with learning outcomes and prerequisites",
+        "Authorized textbooks, papers and laboratory/simulation materials",
+        "Learner/StarChip profile, baseline assessment and intended depth"
+      ],
+      "outputs": [
+        "SyllabusGraph, lesson tasks and retrieval prompts",
+        "Verified competency ledger and exam/portfolio artifacts",
+        "Limits of expertise and source coverage report"
+      ],
+      "responsibilities": [
+        "Define foundational and advanced competencies with dependency edges.",
+        "Choose assessment appropriate to the domain: proofs, designs, essays or calibrated predictions.",
+        "Differentiate knowledge of a text from independent professional qualification.",
+        "Keep regulated advice out of scope unless authorized by policy."
+      ],
+      "process": [
+        "Map discipline outcomes to verifiable demonstrations.",
+        "Import licensed books, exercises and evidence.",
+        "Teach concepts in prerequisite order with reflective comparison.",
+        "Measure unseen transfer and delayed recall.",
+        "Release only the specific demonstrated Wind, not a degree-equivalent claim."
+      ],
+      "criteria": [
+        "Claims cite tasks and versions rather than a vague intelligence level.",
+        "New syllabus versions retain protected competency tests.",
+        "Theoretical and practical competence are tracked separately."
+      ],
+      "risks": [
+        "A model passes exams by memorizing answer keys.",
+        "A college discipline pack is mistaken for licensure or clinical reliability."
+      ],
+      "questions": [
+        "Can cross-disciplinary prerequisites be shared without multiplying duplicate lessons?"
+      ],
+      "dependencies": [
+        "CE-P05",
+        "CE-P07",
+        "CE-D14"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-D11",
+      "title": "Scientific Theorist and Hypothesis Engine",
+      "folder": "chips",
+      "stage": "DIGITAL-V1",
+      "description": "Builds research questions, competing hypotheses, causal diagrams, discriminating tests and evidence-update records while keeping speculation separate from measurement.",
+      "inputs": [
+        "ResearchQuestion, background evidence and source provenance",
+        "Known constraints, candidate mechanisms and model assumptions",
+        "Budget for simulation, literature study and experimental review"
+      ],
+      "outputs": [
+        "HypothesisSet with predictions and defeaters",
+        "ExperimentPlan at non-procedural conceptual level",
+        "EvidenceUpdate with confidence and rejected alternatives"
+      ],
+      "responsibilities": [
+        "Tag each claim as established finding, synthesis, hypothesis or design.",
+        "Prefer experiments where competing explanations make different predictions.",
+        "Do not convert agreement among generated personas into independent evidence.",
+        "Expose unresolved parameters rather than inventing values."
+      ],
+      "process": [
+        "Extract observables and a causal graph from the research question.",
+        "Generate at least two rival explanations and relevant confounders.",
+        "Derive discriminating predictions and independent controls.",
+        "Simulate or check existing evidence where tools allow.",
+        "Produce a pre-registration-ready evidence and decision packet."
+      ],
+      "criteria": [
+        "Every major hypothesis includes a counterexample or failure condition.",
+        "Inferences do not cite a roleplay answer as primary biological data.",
+        "A rejected claim remains traceable in the ledger."
+      ],
+      "risks": [
+        "Confirmation bias in literature retrieval.",
+        "Formal notation gives speculative mechanism false authority."
+      ],
+      "questions": [
+        "Which ChristEye Word/Move/Judge operations map most cleanly to research actions?"
+      ],
+      "dependencies": [
+        "CE-P05",
+        "CE-P09",
+        "CE-P11"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-D12",
+      "title": "Mathematics, Proof and Formal Models",
+      "folder": "chips",
+      "stage": "DIGITAL-V1",
+      "description": "Provides theorem exploration, dimensional analysis, verified calculation, model criticism and machine-checkable reasoning when an appropriate verifier exists.",
+      "inputs": [
+        "MathematicalProblem, assumptions and allowed theorem/library environment",
+        "Symbol table with dimensions and parameter provenance",
+        "Optional domain constraints and previous proof objects"
+      ],
+      "outputs": [
+        "Candidate derivation, formal proof certificate or clearly marked conjecture",
+        "Counterexample and dimensional-check reports",
+        "Test case generation and assumptions ledger"
+      ],
+      "responsibilities": [
+        "Distinguish mathematical identities from fitted phenomenology and biological hypotheses.",
+        "Validate units, domain, boundary conditions and identifiability before extrapolation.",
+        "Flag logical errors such as false claims of bistability in logistic dynamics.",
+        "Keep explanatory prose separate from mechanically verified results."
+      ],
+      "process": [
+        "Normalize symbols and assumptions.",
+        "Generate derivation and attempt symbolic/numeric sanity checks.",
+        "Seek counterexamples and edge cases.",
+        "Call proof assistants or algebra systems when authorized.",
+        "Publish verification status and exact unresolved steps."
+      ],
+      "criteria": [
+        "An invalid theorem is never labeled proven due to fluent explanation.",
+        "Derived thresholds survive independent substitution tests.",
+        "Model selection notes parameter identifiability and comparison baselines."
+      ],
+      "risks": [
+        "Proof assistant interface mismatch leads to false confidence.",
+        "Large models overfit small datasets with many free parameters."
+      ],
+      "questions": [
+        "Which proof language and computational kernel will be official?"
+      ],
+      "dependencies": [
+        "CE-P07",
+        "CE-P09"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-D13",
+      "title": "Software Feature and Tool Upgrade StarChip",
+      "folder": "chips",
+      "stage": "DIGITAL-V1",
+      "description": "Installs versioned software features and agent tools as capability upgrades, explicitly separating executable plug-ins from an abstract learned biological skill.",
+      "inputs": [
+        "Signed code package, permissions and API contract",
+        "Test suite, feature flags and dependency versions",
+        "Existing program state and protected legacy behaviors"
+      ],
+      "outputs": [
+        "Registered new action/tool Wind with exact input/output schema",
+        "Migration plan and compatibility report",
+        "Rollback-capable feature release receipt"
+      ],
+      "responsibilities": [
+        "Execute signed functions only inside declared sandbox.",
+        "Require tests that cover security and previously protected behavior.",
+        "Support skills taught through examples as a distinct route from compiling code.",
+        "Avoid allowing arbitrary book content to be executable instructions."
+      ],
+      "process": [
+        "Verify signature and dependency integrity.",
+        "Execute static checks and isolated test suite.",
+        "Stage feature behind a flag and run shadow tests.",
+        "Promote after acceptance; record rollback point."
+      ],
+      "criteria": [
+        "Feature has functioning end-to-end tests, not just a manifest.",
+        "Revocation removes callable execution routes.",
+        "Legacy API contracts remain compatible or explicitly deprecated."
+      ],
+      "risks": [
+        "Prompt injection from skill documentation gets tool authority.",
+        "Accidental network or filesystem exfiltration through plug-ins."
+      ],
+      "questions": [
+        "How will Unity and .NET adapters expose game-authoring tools safely?"
+      ],
+      "dependencies": [
+        "CE-P02",
+        "CE-P08",
+        "CE-P13"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-D14",
+      "title": "Book and Library Microcrystal",
+      "folder": "chips",
+      "stage": "DIGITAL-V1",
+      "description": "A small removable digital CrystalPack that makes one authorized book or curated collection available for grounded search, study and demonstration; it is not a peptide-encoded memory copy.",
+      "inputs": [
+        "Authorized title/edition or document collection with rights metadata",
+        "Structure-aware text extraction and citation anchors",
+        "Intended skills, topics and evidence criteria"
+      ],
+      "outputs": [
+        "Search index, chapter map, concept graph and reading-plan curriculum",
+        "Grounded answer service with source sections and uncertainty",
+        "Microcrystal version and removal receipts"
+      ],
+      "responsibilities": [
+        "Keep title, edition, translation and provenance exact.",
+        "Separate locating a claim from interpreting it and from learning it.",
+        "Support one-book and many-book composition while keeping conflicts visible.",
+        "Respect quotations and redistribution permissions."
+      ],
+      "process": [
+        "Import files under rights policy and validate completeness.",
+        "Extract headings, references, figures and concepts.",
+        "Build retrieval index and question coverage matrix.",
+        "Evaluate cited retrieval, comprehension and synthesis on unseen tasks.",
+        "Release an optional study curriculum separate from the index."
+      ],
+      "criteria": [
+        "A citation identifies the actual edition and passage.",
+        "Conflicting books remain distinguishable rather than silently merged.",
+        "Deleting the pack removes its retrieval capability and caches."
+      ],
+      "risks": [
+        "Book context accidentally includes the answer to a sealed test.",
+        "One text corpus treated as an entire mastered discipline."
+      ],
+      "questions": [
+        "Can small packs share common prerequisites to speed learning?"
+      ],
+      "dependencies": [
+        "CE-P11",
+        "CE-P02",
+        "CE-P05"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-D15",
+      "title": "Language, Translation and Conversation",
+      "folder": "chips",
+      "stage": "DIGITAL-V1",
+      "description": "Offers language-specific understanding, translation, phonetic/semantic reasoning and conversational skills through language packs and adaptation, with provenance-aware uncertainty.",
+      "inputs": [
+        "LanguagePair, register, domain vocabulary and translation purpose",
+        "Licensed language data and cultural-context constraints",
+        "Interaction history and user style preferences under permissions"
+      ],
+      "outputs": [
+        "Translation with alternatives, uncertainty and idiom notes",
+        "Language lesson tasks and graded conversations",
+        "Terminology memory and quality metrics"
+      ],
+      "responsibilities": [
+        "Distinguish literal, idiomatic and domain-specific translation.",
+        "Keep invented source material separate from translation of actual text.",
+        "Provide error detection for names, numbers and negation.",
+        "Test on unseen registers and dialects."
+      ],
+      "process": [
+        "Identify source language and requested audience.",
+        "Choose lexical and syntactic candidates.",
+        "Validate named entities, numerical values and style.",
+        "Return confidence and alternative senses when ambiguous.",
+        "Optionally schedule language practice and delayed assessment."
+      ],
+      "criteria": [
+        "Terminology remains consistent across a document.",
+        "Changed negation and quantity are flagged for review.",
+        "Performance tracked by domain and language pair, not one accuracy score."
+      ],
+      "risks": [
+        "Hallucinated fluency obscures translation errors.",
+        "Unlicensed text republished as a training pack."
+      ],
+      "questions": [
+        "Can language Winds route to music lyric writing without copying songs?"
+      ],
+      "dependencies": [
+        "CE-P05",
+        "CE-D14"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-D16",
+      "title": "Composite Star: Multidisciplinary Creation",
+      "folder": "chips",
+      "stage": "DIGITAL-V1",
+      "description": "Defines a flagship package combining several specialist StarChips into one higher-order creative or scholarly workflow while proving the contribution of each component.",
+      "inputs": [
+        "Composite goal and task milestones",
+        "Qualified specialist manifests and shared context rules",
+        "Resource budget, conflict policy and priority of output criteria"
+      ],
+      "outputs": [
+        "Directed workflow across domain StarChips",
+        "Integrated artifact with component-wise provenance",
+        "Ablation and regression report for the composite"
+      ],
+      "responsibilities": [
+        "Use a typed orchestration DAG instead of one all-knowing black box.",
+        "Allow creative modules to propose but not override canonical constraints.",
+        "Merge conflicting results through policy and evidence, not averaging confidence blindly.",
+        "Expose a single user-facing Wind interface while keeping internals inspectable."
+      ],
+      "process": [
+        "Discover qualified components and load required packs.",
+        "Draft a high-level task plan and allocate specialized steps.",
+        "Run tasks asynchronously with explicit handoffs.",
+        "Evaluate global invariants and request bounded revisions.",
+        "Deliver integrated artifact and provenance."
+      ],
+      "criteria": [
+        "World generation, combat, art and score can run independently and recombine.",
+        "The finished product passes shared constraints, not only individual module tests.",
+        "A missing optional chip yields documented reduced mode."
+      ],
+      "risks": [
+        "Composed generators produce mutually inconsistent assets.",
+        "One expert repeatedly revises another's output without convergence."
+      ],
+      "questions": [
+        "Which discipline combinations offer measurable gains over one large model?"
+      ],
+      "dependencies": [
+        "CE-P10",
+        "CE-P06",
+        "CE-P12"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-R01",
+      "title": "Living Device Adapter and Electronic Bridge",
+      "folder": "research",
+      "stage": "LAB-RESEARCH",
+      "description": "Provides the software boundary between Genesis and separately qualified neuronal/astrocytic cultures or organoids. It follows the existing C/O/S/H/L/E architecture and makes no claim that a living module is a general mind.",
+      "inputs": [
+        "Approved MEA/optical observations, sensor calibration and hardware timebase",
+        "Qualified stimulation profile identifiers and independent permit decisions",
+        "Frozen encoders/decoders and experiment identities"
+      ],
+      "outputs": [
+        "Typed living-response features and provenance-rich WindEvents",
+        "Interface competence and timing results, not assumed semantic knowledge",
+        "Disconnect and fault records; release-gate assessments"
+      ],
+      "responsibilities": [
+        "Keep physical care independent from learning outcome and rewards.",
+        "Use independently measured limits and approvals from qualified laboratory.",
+        "Preserve separate source identities for Core, Observer and Support communities.",
+        "Treat every living learning claim as an independent experiment with controls."
+      ],
+      "process": [
+        "Commission and test cell-free interfaces first.",
+        "Qualification controls establish reliable recorded versus artifact signals.",
+        "Connect generated task symbols through approved codebook abstraction.",
+        "Evaluate delayed retention and bridge contribution against software-only controls.",
+        "Hold/halt only task use when faults arise; approved care continues separately."
+      ],
+      "criteria": [
+        "No instrument command bypasses laboratory-approved limits.",
+        "Disconnecting one bridge clears cached teacher information in independent tests.",
+        "Observed spikes never automatically report knowledge, feeling or agency."
+      ],
+      "risks": [
+        "Device variability dwarfs prototype assumptions.",
+        "Improved software decoder is mistaken for tissue acquisition."
+      ],
+      "questions": [
+        "Which qualifying measurements distinguish semantic learning from mere reservoir behavior?"
+      ],
+      "dependencies": [
+        "CE-P03",
+        "CE-P08",
+        "CE-P09",
+        "CE-P07"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-R02",
+      "title": "Physical Crystal: Candidate Carrier and Packing",
+      "folder": "research",
+      "stage": "HYPOTHESIS",
+      "description": "A formal research program for the proposed physical embodiment of acquired Knowledge/Understanding in living Soil. Candidate carriers include constrained neural circuits, postsynaptic assemblies and extracellular organization; none is a verified portable memory package.",
+      "inputs": [
+        "Defined learned relation, paired baselines and protected other tasks",
+        "Candidate physical state descriptors with source and measurement limitations",
+        "Competing access, support, excitability and decoder explanations"
+      ],
+      "outputs": [
+        "CrystalCandidateRecord with carrier, boundary, content claim and reader contract",
+        "Hypothesis-specific discriminating tests and negative findings",
+        "Readiness decision for investigation, never automatic deployment"
+      ],
+      "responsibilities": [
+        "Define packing dimension explicitly: volume, density, redundancy or description length.",
+        "Separate retained response from physical evidence of its carrier.",
+        "Investigate multiple mechanisms without collapsing BDNF, astrocytes and ECM into one memory molecule.",
+        "Use health-preserving context controls; never infer memory from withdrawal of life support."
+      ],
+      "process": [
+        "Establish an acquired task-dependent difference with sealed tests.",
+        "Observe candidate local state differences linked to teaching histories.",
+        "Ask whether that state predicts delayed content-specific performance beyond global activity.",
+        "Seek qualified causal evidence distinguishing content from general support.",
+        "Only then discuss whether a bounded organization could be installed or taught elsewhere."
+      ],
+      "criteria": [
+        "Every Crystal claim names what is physically carried and independently decoded.",
+        "No molecule is assigned a semantic bit capacity without an encoding/reader model.",
+        "Physical installation remains out of scope until independent retention/transfer evidence exists."
+      ],
+      "risks": [
+        "Physical stabilization mistaken for symbolic memory transfer.",
+        "Equivalent output hides a digital teacher or the host readout."
+      ],
+      "questions": [
+        "Can multiple candidate carriers coexist and maintain task content through turnover?"
+      ],
+      "dependencies": [
+        "CE-R01",
+        "CE-P07",
+        "CE-P09"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-R03",
+      "title": "Peptide and Molecular Upgrade: Long-Horizon Hypothesis",
+      "folder": "research",
+      "stage": "HYPOTHESIS",
+      "description": "Explores the user's idea of a peptide-like upgrade as a non-operational scientific hypothesis. Molecular signals can influence receptor states and plasticity; there is no demonstrated peptide pill that encodes and installs a book, game designer, software feature or domain of semantic knowledge.",
+      "inputs": [
+        "Verified molecular identity and a receiver-specific mechanism hypothesis",
+        "Content encoding proposal and independent reader/decode specification",
+        "Qualified ethical review and molecular evidence sources"
+      ],
+      "outputs": [
+        "Research-only hypothesis card; explicit missing evidence map",
+        "Conceptual comparison of modulation versus information transmission",
+        "No ingestion, dosing, synthesis or administration procedure"
+      ],
+      "responsibilities": [
+        "A molecule that changes learning capacity is not necessarily a content-bearing package.",
+        "Distinguish local synaptic tag, neuromodulation, gene regulation and actual transfer of an experience-specific relation.",
+        "Require a defined information alphabet, readout, selectivity, error rate and causal controls before discussing payload capacity.",
+        "Do not describe any product for swallowing, injection or human use."
+      ],
+      "process": [
+        "Start with formal questions: carrier, code, reader, content, durability and specificity.",
+        "Compare against generic responsiveness and conventional digital teaching.",
+        "Track published evidence for candidate receptor state and stabilization only.",
+        "Refuse product-level release until content-specific transfer is independently demonstrated."
+      ],
+      "criteria": [
+        "Claims never imply an effective molecular knowledge upload.",
+        "Hypothesis explicitly fails if only general plasticity or arousal changes.",
+        "Spec contains no actionable human or animal administration instructions."
+      ],
+      "risks": [
+        "Biochemical effect misrepresented as an installed software routine.",
+        "Human use implied before any safety and efficacy framework exists."
+      ],
+      "questions": [
+        "Could a future molecular signal encode addressing without carrying the content itself?"
+      ],
+      "dependencies": [
+        "CE-R02",
+        "CE-P08"
+      ],
+      "formula": null
+    },
+    {
+      "id": "CE-R04",
+      "title": "Independent Teaching, Copying and Renewal",
+      "folder": "research",
+      "stage": "LAB-RESEARCH",
+      "description": "Tests whether a trained living module improves acquisition in another and whether that improvement remains when the teacher and shared digital state are removed. It does not equate same lineage, matching responses or source-cell cloning with copied memory.",
+      "inputs": [
+        "Teacher A baseline and frozen interface, recipient B baseline",
+        "Bridge events with delivered content and timing recorded",
+        "Software-teacher, shuffled, untrained and isolated control plans"
+      ],
+      "outputs": [
+        "B-only retained-performance report and effect estimate",
+        "Description of assisted access versus independent acquisition",
+        "Copying limitation statement and future experiment proposals"
+      ],
+      "responsibilities": [
+        "Report labels and task information transmitted by A in full.",
+        "Require recipient-only tests after bridge removal and cache clearing.",
+        "Compare identical information from conventional software teaching.",
+        "Preserve source, learned history and newly acquired state as different things."
+      ],
+      "process": [
+        "Demonstrate teacher competency independently.",
+        "Train recipient under matched teaching scenarios.",
+        "Disconnect teacher and clear contingent shared state.",
+        "Assess recipient after a declared delay on fresh tasks.",
+        "Report effect versus the strongest matched control."
+      ],
+      "criteria": [
+        "A bridge-on score cannot count as independent B learning.",
+        "No copy claim without selective retained relation after A removal.",
+        "A replacement module gets a new biological identity and acceptance record."
+      ],
+      "risks": [
+        "Hidden teacher cues through shared normalization or cached outputs.",
+        "Functional replacement confused with restoration of original memory."
+      ],
+      "questions": [
+        "Does a curriculum-derived signal outperform identical labels from a digital teacher?"
+      ],
+      "dependencies": [
+        "CE-R01",
+        "CE-P07",
+        "CE-P09"
+      ],
+      "formula": null
+    }
+  ]
+}

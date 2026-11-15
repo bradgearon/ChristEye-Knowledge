@@ -1,0 +1,402 @@
+---
+title: "R08 Wind Water and Crystal formal supplement 1 "
+project: "ChristEye Anaiero"
+publication_date: "2026-11-15"
+edition: "Complete Markdown edition of original DOCX"
+classification: "source"
+rights_holder: "We Develop Software LLC"
+---
+
+> **Complete text edition · 15 November 2026 · We Develop Software LLC**  
+> **Original DOCX:** `research/source_documents/R08_Wind_Water_and_Crystal_formal_supplement_1_.docx`  
+> **SHA-256 (original DOCX):** `4181b6b9d69c2941fa6620c0b1fd30d5e43ef95e2ccd440d34430e3ba91eb51f`  
+> **Conversion:** Pandoc DOCX → GitHub Flavored Markdown. Original headings, tables, notes, and equations preserved where supported; images retained as assets.
+
+# Wind, Water and Crystal: formal supplement
+
+Nov 14, 2026 · @Brad
+
+## Scope and standing
+
+These equations are instruments for deciding experiments, not a theory of memory. Each one exists so that a measurement can come out against it.
+
+Three tiers are used, and the tier is marked on every equation in this document. Conflating them is the main way a framework like this becomes unfalsifiable.
+
+| Tier               | What it means                                                                                                                              | What it licenses                                                              | Count here |
+|--------------------|--------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|------------|
+| **I. Standard**    | Established physical or biochemical law, applied here without modification                                                                 | Quantitative prediction. Deviation is an experimental error, not a discovery  | 6          |
+| **II. Fitted**     | A functional form with free parameters, chosen because it has the right qualitative behaviour and is identifiable from data we can collect | Comparison between conditions. The parameter values mean nothing in isolation | 7          |
+| **III. Schematic** | A relation written to make a claim precise enough to kill. No units are claimed, and the functional form is a placeholder                  | Falsification only. Never a number to quote                                   | 5          |
+
+A Tier III equation that survives its first test does not become Tier II. It is promoted only when the functional form itself is measured, not when a prediction it made happened to come out.
+
+**The ChristEye correspondence runs one way.** Every symbol below is defined by its measurement, then mapped to a ChristEye term. No term supplies a property to its symbol. If the mapping were deleted, every equation here would still be testable, which is the test of whether the mapping is doing illegitimate work.
+
+## Notation
+
+Every symbol has a measurement route. A symbol without one would be decoration.
+
+| Symbol | Name                    | Units                   | How it is measured                                                       |
+|--------|-------------------------|-------------------------|--------------------------------------------------------------------------|
+| x(t)   | Network state           | dimensionless, N-vector | Binned multi-unit firing rates across N electrode channels               |
+| M      | Spontaneous manifold    | —                       | Low-dimensional subspace fit to 20 min of unstimulated activity          |
+| D(t)   | Displacement            | dimensionless           | Mahalanobis distance from x(t) to M in the fitted basis                  |
+| u(t)   | Drive                   | µA or pulses per s      | The stimulation waveform. Known exactly, not estimated                   |
+| E      | Delivered energy        | µA²·s                   | Integral of u² over the epoch. Matched across conditions by construction |
+| O      | Order parameter         | bits                    | Mutual information between pulse identity and pulse position             |
+| c(t)   | Suspended concentration | nM                      | ELISA or mass spec on sampled medium                                     |
+| s(t)   | Deposited mass          | nM-equivalent           | Immunostain or bound-fraction assay on the washed substrate              |
+| k      | Clearance rate          | per s                   | Decay of c after a pulse, deposition arm absent                          |
+| b      | Sedimentation rate      | per s                   | Fitted from the c to s transfer                                          |
+| T      | Agitation               | dimensionless           | Variance of x orthogonal to M. The analogue of temperature               |
+| p(t)   | Matrix permissivity     | dimensionless, 0 to 1   | Normalized active MMP-9 over total TIMP-1                                |
+| R      | Retention               | dimensionless, 0 to 1   | Response after withdrawal over response before, same probe               |
+| tw     | Withdrawal delay        | s                       | Experimenter-set                                                         |
+| dG     | Lattice stability       | arbitrary               | Not measured. Tier III placeholder only                                  |
+
+Two conventions, both load-bearing.
+
+**Matched energy.** Any comparison between ordered and scattered input holds E fixed and varies O. An unmatched comparison measures how much current was delivered and nothing else.
+
+**Withdrawal is an operation, not a time point.** R is always written with respect to a specific removal: which medium was drained, how fast, and at what delay. A retention number without its removal spec is uninterpretable.
+
+## Wind
+
+Wind is drive that displaces the network off its spontaneous manifold. The whole section turns on one question: does the *arrangement* of a fixed amount of input change the displacement it produces.
+
+**W1 · Driven dynamics.** Tier I. Nothing here is novel; it is the standard form every later equation reduces to.
+
+\frac{dx}{dt} = f(x) + B\\u(t) + \xi(t)
+
+f is the autonomous flow whose attractor defines the manifold M, B maps stimulation channels onto state, and the noise term has covariance that sets the floor on everything below.
+
+**W2 · Displacement under matched energy.** Tier II. This is the operative equation of the Wind section.
+
+D\_{\max}(E,\mathcal{O}) = \alpha\sqrt{E}\\\bigl(1 + \gamma\\\mathcal{O}\bigr)
+
+The square root in E is the expected form for a damped linear response to bounded drive; it is not the claim. The claim is the parameter γ, which prices order. **Scatter is the hypothesis that γ = 0:** that the network integrates total current and is indifferent to its arrangement. Everything called Wind in the companion document is the assertion that γ \> 0, and E2 estimates it.
+
+If γ is indistinguishable from zero at the sample size that gives 80% power, T5 is dead and the Water and Crystal sections are testing a medium that never receives anything structured.
+
+**A caution on D, added after review.** Displacement off the spontaneous manifold is not learning and not retention. The published figures that motivated this section measure latent-state displacement against within-recording movement, and the same work reports substantial reuse of spontaneous dimensions — so leaving the manifold is not established as necessary for anything. D is the dependent variable of the Wind experiments and nothing more. Any sentence that treats a larger D as more learning is wrong.
+
+**W3 · Closed-loop gain.** Tier II. The reported 15.5-fold versus 4.4-fold displacement is a gain ratio of about 3.5, which is a fact in search of a mechanism. Write the loop as drive conditioned on state:
+
+u\_{\mathrm{cl}}(t) = K\bigl\[x(t-\tau_d) - x^{\*}\bigr\], \qquad G = \frac{D\_{\mathrm{cl}}}{D\_{\mathrm{ol}}}
+
+If the gain comes from phase-locking to ongoing activity, it must decay as the loop delay exceeds the coherence time of the oscillation being locked to:
+
+G(\tau_d) = 1 + (G_0 - 1)\\e^{-\tau_d/\tau\_{\mathrm{coh}}}
+
+This is the cheapest way to find out whether closed-loop advantage is phase-locking or something duller. Sweep τd from 0 to 200 ms. A gain that survives a delay longer than the coherence time is not phase-locking, and the stream's account of Wind as *timed* movement would need rewriting.
+
+**W4 · Persistence after the drive stops.** Tier III. The signature that separates Wind from noise.
+
+D(t) = D\_{\mathrm{off}}\\e^{-(t-t\_{\mathrm{off}})/\tau_r}
+
+Scatter predicts τr on the order of the membrane and synaptic time constants, tens to hundreds of milliseconds. Wind predicts τr longer than that by at least an order of magnitude, because something was left behind for Water to receive. The exponential form is a placeholder: a multi-exponential or power-law decay would itself be informative, and the fit should be tested against both.
+
+## Water
+
+The four offices are not four metaphors. They are four terms in one balance equation, and each is separately measurable and separately disruptable, which is what makes the decomposition worth having.
+
+**W5 · The medium balance.** Tier II. Every office is one term.
+
+\frac{\partial c}{\partial t} = \underbrace{D_c\nabla^2 c - v\cdot\nabla c}\_{\text{carry}} \\+\\ \underbrace{J(t)}\_{\text{suspend}} \\-\\ \underbrace{\kappa\\c}\_{\text{clear}} \\-\\ \underbrace{\beta(T)\\c}\_{\text{receive}}
+
+| Office      | Term     | Measured by                                    | Disrupted by                      |
+|-------------|----------|------------------------------------------------|-----------------------------------|
+| **Carry**   | Dc and v | FRAP or tracer spread in the same medium       | Viscosity load, flow arrest       |
+| **Suspend** | J(t)     | Release assay with deposition blocked          | Secretion block                   |
+| **Clear**   | k        | Decay of c after a pulse, no substrate present | Protease inhibition, uptake block |
+| **Receive** | b(T)     | The c to s transfer with everything else held  | Agitation, matrix closure         |
+
+**W6 · The deposit.** Tier II. What leaves suspension arrives somewhere, and it can leave again.
+
+\frac{d\sigma}{dt} = \beta(T)\\c - \delta\\\sigma
+
+The pair W5 and W6 is a two-compartment model with four rates. All four are identifiable from a single time course provided you sample both compartments, which is the reason the protocol insists on the washed-substrate arm.
+
+**W7 · The stillness law.** Tier III, and the most consequential guess in this document.
+
+\beta(T) = \beta_0\\e^{-T/T_0}
+
+Agitation changes deposition. The sign is written here as suppression, and an independent review has shown that the sign is not established and may be backwards — see the review section, where this equation takes the heaviest hit in the document. What survives is that b depends on T at all, that T0 is a scale to be measured rather than assumed, and that Stillness is an empirical question about where the optimum sits rather than a derived necessity. Turbulence as a failure mode stands or falls on that measurement.
+
+If b turns out to be independent of T across the whole achievable range, the Stillness gate is not a gate, and the unified cycle in the companion document loses its second arrow.
+
+**W8 · The removal test as an estimator.** Tier I, in the sense that this is just an estimator definition and there is nothing to be wrong about except using it carelessly.
+
+\hat{\sigma}(\tau_w) = \frac{A\_{\text{post}}(\tau_w)}{A\_{\text{pre}}}, \qquad A = \text{response to a fixed probe}
+
+Run as a delay series, never a single point. A single timepoint cannot separate turbulence from an empty Sea: both give a flat low value. The delay series separates them, because turbulence has c \> 0 with σ ≈ 0 at every delay while an empty Sea has both near zero from the start.
+
+**Three-way removal.** The outcome space has three cells, not two, and reporting only “held” or “lost” discards the informative one.
+
+| Outcome                          | Reading                                  | What it rules out                                                                                     |
+|----------------------------------|------------------------------------------|-------------------------------------------------------------------------------------------------------|
+| σ falls to control               | Nothing was deposited                    | Crystal, at this delay                                                                                |
+| σ falls partially, then plateaus | A deposit exists under a labile fraction | Pure suspension                                                                                       |
+| σ unchanged                      | Deposited and matrix-locked              | Nothing. This is the result the program is built to obtain, and the one most likely to be an artifact |
+
+## Stillness and recession
+
+The three gates of the unified cycle are three inequalities. Writing them out shows that the second one is doing more work than the stream's language suggested, and that the third one is the only place selectivity can come from.
+
+**G1 · Input stops.** Tier III.
+
+u(t) = 0 \quad\text{and}\quad T(t) \< T_0
+
+Both halves are required and they are not the same condition. Cutting the drive does not make the network still; T has its own relaxation time, and a network that keeps reverberating after stimulation ends is loud with the stimulator off. This is the practical content of “rest is a condition, not an absence.” Measure T, do not assume it from the stimulus log.
+
+**G2 · Noise cleared.** Tier II.
+
+t - t\_{\mathrm{off}} \\\>\\ \frac{1}{\kappa}\ln\\\left(\frac{c_n(t\_{\mathrm{off}})}{c_n^{\\\mathrm{tol}}}\right)
+
+Clearance is exponential, so the wait required to drop background by a factor of ten is about 2.3 clearance time constants, and by a hundred about 4.6. If 1/k is minutes, the gate costs tens of minutes, and any protocol that withdraws the medium sooner is testing something else. This number should be measured per preparation before any crystallization attempt, because it sets the floor on the whole experiment's duration.
+
+**G3 · Selectivity.** Tier II, and the result that justifies the section.
+
+For any species in the medium, the fraction that ends up deposited rather than cleared is a competition between two rates:
+
+f_i = \frac{\beta_i}{\beta_i + \kappa_i}
+
+So retention is selective only if that ratio differs between what should be kept and what should not:
+
+S = \frac{\beta_s(\beta_n + \kappa_n)}{\beta_n(\beta_s + \kappa_s)} \\\>\\ 1
+
+**This is where selectivity has to live.** Nothing in Wind selects — drive displaces everything it reaches. Nothing in the removal test selects — it only reads out. If S = 1, the system deposits signal and noise in proportion to what was suspended, and “selective retention” reduces to “whatever there was most of.” Any mechanism proposed for selectivity must show up as a difference in b or k between species, and can be tested that way without any reference to crystals at all.
+
+**G4 · Recession makes supersaturation.** Tier I. The medium withdrawing concentrates what remains, with no new material added.
+
+c(t) = \frac{N}{V(t)}, \qquad \frac{dc}{dt} = -\frac{N}{V^2}\frac{dV}{dt} \> 0 \quad\text{for}\quad \frac{dV}{dt} \< 0
+
+This is the formal content of the stream's claim that the crystal appears when the sea withdraws rather than when the teaching arrives. Recession is not a passive ending. It is the only step in the cycle that raises concentration, and therefore the only one that can cross a nucleation threshold without adding anything.
+
+The practical corollary is uncomfortable: **the rate of recession is an experimental variable, not a nuisance.** Drain fast and you cross the threshold everywhere at once, which gives many small defective nuclei. Drain slowly and you cross it at the most favourable sites first. Nobody has measured this in the biological setting, and the companion program does not currently contain an experiment that does.
+
+## Crystal
+
+Two independent routes lead to the same prediction here, which is the main reason the section is worth writing: a threshold in the number of participating sites, below which nothing is retained however long you wait.
+
+**C1 · Nucleation.** Tier III. The classical form is borrowed whole, and the borrowing is the claim.
+
+\Delta G(r) = -\tfrac{4}{3}\pi r^3 \Delta g + 4\pi r^2 \gamma_s, \qquad r^{\*} = \frac{2\gamma_s}{\Delta g}, \qquad \Delta G^{\*} = \frac{16\pi\gamma_s^{3}}{3\\\Delta g^{2}}
+
+Read biologically: r is the number of co-tagged sites in a dendritic neighbourhood, dg the per-site stabilization favouring the retained state, gs the cost of the boundary between retained and unretained tissue. No units are claimed and the geometry is certainly wrong. What survives translation is the structure: a competition between a bulk term that grows faster than a surface term, which produces a critical size below which clusters dissolve.
+
+**The prediction is a threshold, not a slope.** Retention against number of co-activated sites should be sigmoid with a sharp knee, not linear. A linear relation falsifies the nucleation picture outright, and would be the single cleanest negative result available from the whole program.
+
+**C2 · The retention curve.** Tier II. The empirical form the threshold is fitted with.
+
+R(n) = \frac{1}{1 + e^{-(n - n^{\*})/w}}
+
+n\* is the critical cluster size and w its sharpness. The nucleation picture predicts w \<\< n\*. A broad w comparable to n\* means there is no threshold, only a gradual dose effect, which is a different and much less interesting mechanism.
+
+**C3 · Persistence through turnover.** Tier II. This is where the KIBRA–PKMζ literature enters, and it arrives at the same threshold by a route with nothing to do with crystals.
+
+\frac{d\sigma}{dt} = \alpha\\\sigma\left(1 - \frac{\sigma}{\sigma\_{\max}}\right) - \delta\\\sigma
+
+Autocatalytic maintenance against first-order degradation. For a \> d the system is bistable, with an unstable separatrix at
+
+\sigma_c = \sigma\_{\max}\left(1 - \frac{\delta}{\alpha}\right)
+
+A deposit below σc decays to zero; above it, the deposit rebuilds itself from its own products and survives complete replacement of every molecule in it. That is a memory that outlives its material, stated without any mysticism and with an experimentally reachable threshold.
+
+**The convergence matters more than either equation.** Nucleation says there is a critical cluster size. Autocatalytic maintenance says there is a critical deposit density. They are different arguments, and if the measured thresholds coincide within error, that is evidence the two descriptions are of one process. If they do not coincide, at least one of them is wrong, and the mismatch says which measurement to trust.
+
+**C4 · Lifetime.** Tier III. Included for completeness and not currently testable in this program.
+
+\tau\_{\text{life}} = \tau_0\\e^{\Delta G^{\ddagger}/\Theta}
+
+Θ is the effective noise scale, the analogue of temperature for escape over a barrier. The equation says lifetime is exponential in barrier height and so is extraordinarily sensitive to it, which is the honest explanation for why retention results in this field are hard to replicate across preparations. It makes no prediction anyone here can check, and is marked Tier III for that reason.
+
+## Soil
+
+The matrix must open to teach and close to keep. Written out, that is a non-monotone yield function, and non-monotonicity is a strong and unusual signature — strong enough that one experiment can settle it.
+
+**S1 · Permissivity.** Tier I. TIMP-1 inhibits MMP-9 tight-bindingly and near-stoichiometrically, so the free-enzyme fraction follows Morrison rather than a simple ratio.
+
+\phi = \frac{\[E\]\_f}{\[E\]\_T}, \qquad \[E\]\_f = \frac{1}{2}\left\[(\[E\]\_T - \[I\]\_T - K_i^{\text{app}}) + \sqrt{(\[E\]\_T - \[I\]\_T - K_i^{\text{app}})^2 + 4K_i^{\text{app}}\[E\]\_T}\right\]
+
+The practical consequence is a cliff. With Ki in the picomolar range and enzyme and inhibitor at comparable concentration, p goes from near one to near zero over a narrow range of the inhibitor-to-enzyme ratio. **The Soil does not dim; it shuts.** Any protocol aiming for a partial opening has to be titrated carefully, and reporting a dose in nanograms without reporting the ratio is close to meaningless.
+
+**S2 · The window.** Tier II. Opening buys teaching and costs keeping, so yield is a product of two opposed factors.
+
+Y = \left(\int_0^{T}\\\phi(t)\\dt\right)\exp\\\left(-\lambda\\\int\_{T}^{\infty}\\\phi(t)\\dt\right)
+
+The first factor is cumulative plasticity admitted during teaching, which needs an open matrix. The second is survival of what was admitted, which needs a closed one. λ prices how fast an open matrix erodes a deposit.
+
+**S3 · The prediction that makes E5 worth running.** The optimum of Y is p = 1 for t \< T and p = 0 after, which orders the three arms:
+
+| Arm                   | Teaching window | After  | Predicted yield      |
+|-----------------------|-----------------|--------|----------------------|
+| Closed after teaching | open            | closed | **Highest**          |
+| Open throughout       | open            | open   | Middle               |
+| Closed throughout     | closed          | closed | Lowest, near control |
+
+Total MMP-9 exposure is highest in the open-throughout arm and it is predicted to lose. **That non-monotonicity is the whole test.** If yield rises monotonically with total exposure, there is no window, the Soil is just a plasticity dial, and T2 is dead. Monotone results are the common outcome in this kind of pharmacology, so this experiment is genuinely at risk, which is what makes it worth the reagents.
+
+**S4 · The timing constraint.** Tier III. Closure must happen after deposition and before erosion.
+
+\frac{1}{\beta} \\\<\\ \tau\_{\text{close}} \\\<\\ \frac{1}{\lambda\phi\_{\text{open}}}
+
+If that interval is empty — if the matrix erodes deposits faster than deposits form — no closure schedule works and the window picture fails for timing reasons rather than mechanistic ones. Both bounds are measurable from W6 and the open-throughout arm, so the interval can be checked before anyone attempts to hit it.
+
+## Word
+
+The lowest rung, and the only one where the experiment is cheap enough to run this month. Two equations: which product gets made, and whether the order of arrival matters.
+
+**P1 · Which Word is spoken.** Tier I. Several proteases compete for one substrate, so the proteoform distribution is set by their specificity constants.
+
+-\frac{d\[S\]}{dt} = \sum_j \frac{k\_{\text{cat},j}\[E_j\]\[S\]}{K\_{m,j} + \[S\]}
+
+Below saturation this collapses to the form that matters:
+
+f_j = \frac{(k\_{\text{cat}}/K_m)\_j\\\[E_j\]}{\sum_i (k\_{\text{cat}}/K_m)\_i\\\[E_i\]}
+
+**The prediction is smoothness.** The product mix is a ratio of specificity constants, so shifting protease concentrations shifts the mix continuously. There is no switch here. If E1's mass spec finds the distribution jumping between discrete mixes as protease ratios are varied, something is channeling substrate between enzymes and the simple competition model is wrong in an interesting way.
+
+This also sets the ceiling on T8. The number of distinguishable product mixes is limited by how finely protease ratios can be set against assay noise, which is a measurable quantity and not a thing to estimate from first principles. No capacity figure is claimed here; P1 is the equation that would have to be inverted to claim one.
+
+**P2 · Order dependence.** Tier II. The E0 assay, written out. Let E denote fractional effect on the chosen readout, scaled so that 0 is vehicle and 1 is saturating.
+
+The reference model must be declared before the run, and Bliss is a choice, not the neutral option. Bliss assumes independent action on a fractional scale; Loewe assumes a shared dose-response and compares potencies. They disagree, and a combination can be synergistic under one and additive under the other. Declare which, and on which endpoint, or the result is not interpretable. Writing Bliss here:
+
+E\_{\text{Bliss}} = E_P + E_M - E_P E_M
+
+Two statistics come off the four-arm design:
+
+\Delta\_{\text{order}} = E\_{P\to M} - E\_{M\to P}, \qquad \Delta\_{\text{prime}} = E\_{P\to M} - E\_{\text{Bliss}}
+
+| Result                  | Reading                                                                                                                                  |
+|-------------------------|------------------------------------------------------------------------------------------------------------------------------------------|
+| Δorder = 0, Δprime = 0  | Bag of cargo. The precursor holds two independent ligands, T1 dies, Rung 1 is one Word                                                   |
+| Δorder = 0, Δprime \> 0 | Synergy without sequence. They cooperate but arrival order is free                                                                       |
+| Δorder \> 0             | **Grammar.** Prodomain-first beats mature-first, consistent with the prodomain assembling the receptor complex before the ligand arrives |
+| Δorder \< 0             | Order matters the other way, and the assembly story is backwards                                                                         |
+
+Simultaneous application should fall between the two sequential arms if the mechanism is assembly kinetics. If it beats both, the mechanism is not assembly but something requiring co-presence, and the model needs rewriting rather than extending.
+
+**P3 · What the assay needs to be worth running.** Tier II. Power, stated before the plate is poured.
+
+n \\\geq\\ \frac{2(z\_{1-\alpha/2} + z\_{1-\beta})^2\\\varsigma^2}{\Delta\_{\min}^2}
+
+With a within-arm coefficient of variation around 15% on a plate-reader endpoint and a smallest effect worth having of 10 percentage points, this lands near 36 wells per arm, four arms plus controls, which is one plate run in triplicate. **Set Δmin and the arm count before the first run and freeze them.** The failure mode of this assay is not a wrong answer; it is running it underpowered, getting an ambiguous Δorder, and then reasoning about it.
+
+## Annealing
+
+A crystal that cannot be locally corrected is a record, not knowledge. The question is whether one deposit can be revised without damaging its neighbours, and the answer turns out to be a comparison of two lengths.
+
+**A1 · Specificity.** Tier II. Intervene at site A, measure what happens at site B.
+
+\Lambda = 1 - \frac{\|\Delta\sigma_B\|}{\|\Delta\sigma_A\|}
+
+Λ = 1 is perfectly local revision. Λ = 0 means the intervention hit both equally and nothing was revised, only damaged. Negative values mean the neighbour suffered more than the target, which happens more often than people expect when the intervention is pharmacological.
+
+**A2 · The collateral length.** Tier II, and the reason this section exists.
+
+Revision requires reopening the matrix locally, which means releasing a diffusible protease. A diffusible agent that is inactivated at some rate has a characteristic range:
+
+\lambda\_{\text{rev}} = \sqrt{\frac{D_E}{k\_{\text{inact}}}}
+
+This is the standard screened-diffusion length and is Tier I as mathematics; it is Tier II here only because DE and k_inact for active MMP-9 in this preparation have to be measured rather than looked up.
+
+**A3 · The condition for revisability.** Tier III. Everything above reduces to one inequality.
+
+\lambda\_{\text{rev}} \\\<\\ d\_{\min}
+
+Local revision is possible only if the collateral length is shorter than the spacing between deposits. **This is checkable before E6 is run**, by measuring the two quantities separately, and it is the kind of check that saves a quarter. If λrev exceeds the spacing, no amount of protocol refinement gives clean revision, and the honest conclusion is that revision in this system is necessarily regional — which is itself a finding worth publishing, and a sharp constraint on what the Crystal could be.
+
+Note the tension with S1. The Soil shuts rather than dims, so a local opening is hard to make shallow. A cliff-like permissivity function and a diffusible opener together argue that openings will be all-or-nothing within λrev, which is the pessimistic reading and the one to design against.
+
+**A4 · The annealing schedule.** Tier III, and frankly an analogy rather than a model.
+
+\Theta(t) = \frac{\Theta_0}{\log(1 + t/t_0)}
+
+The logarithmic cooling schedule is what guarantees convergence in simulated annealing, and the parallel to alternating agitation and rest is obvious enough to be suspicious. It is recorded here because it generates one testable contrast: cycled teaching with interposed rest should outperform a single long teaching epoch of equal total energy. That contrast can be run as a variant of E2 and does not depend on any of the rest of this being right.
+
+## Correspondence
+
+One row per term that has a symbol. A term with no symbol is listed in the last section rather than given a placeholder here.
+
+| ChristEye term | Symbol         | Measured quantity                                           | Literature anchor                                                                   |
+|----------------|----------------|-------------------------------------------------------------|-------------------------------------------------------------------------------------|
+| Word           | f_j            | Proteoform fractions from the competing-protease mix        | Plasmin and furin cleave proBDNF at different boundaries, giving different products |
+| Prosody        | O              | Mutual information between pulse identity and position      | Spike-timing-dependent plasticity, Bi and Poo 1998                                  |
+| Wind           | D(t), u(t)     | Drive and the displacement it produces                      | Organoid latent-state displacement under patterned stimulation                      |
+| Eyes           | —              | Receptor complement of the receiving cell                   | TrkB, SorCS2, p75 partnership determines response to BDNF forms                     |
+| Heart          | E in P2        | Response of the receiver to a given Word                    | BDNF prodomain acts through TrkB/SorCS2 in cortical astrocytes                      |
+| Water          | c(t), Dc, v, k | Suspended concentration, transport, clearance               | Extracellular transport and protease clearance kinetics                             |
+| Stillness      | T, T0          | Variance orthogonal to the manifold, and its critical scale | **Contested. See the review section**                                               |
+| Soil           | p(t)           | Active MMP-9 over total TIMP-1, Morrison-corrected          | Transient protease activity promotes plasticity; TIMP-1 bounds it                   |
+| Sea            | V(t)           | Volume or availability of the supporting medium             | Distinct from Soil; see the review section                                          |
+| Honey          | b(T), S        | Sedimentation rate and the selectivity ratio                | Transient TrkB activation as a synaptic tag                                         |
+| Milk           | not modelled   | Metabolic support                                           | Astrocyte-neuron lactate transport in long-term memory                              |
+| Mesh           | s(t)           | Deposited, washed-resistant mass                            | PSD scaffold condensates: PSD-95, SynGAP, Shank, Homer                              |
+| Throne         | s(t) structure | Scaffold organization within the deposit                    | Reconstituted PSD as a molecular platform                                           |
+| Roots          | R, sc          | Retention, and the bistability separatrix                   | KIBRA anchoring PKMζ maintains memory persistence                                   |
+| Crystal        | n\*, w         | Critical cluster size and threshold sharpness               | No anchor. This is the unestablished term                                           |
+| Fruit          | R(n)           | Retained, probe-evoked response after withdrawal            | —                                                                                   |
+
+**Read the fourth column carefully.** An anchor means the literature establishes that the measured quantity is real and matters, never that it is the ChristEye term. Two rows have no anchor at all, and those two are what the program is for.
+
+**One molecule, several rows, by design.** MMP-9 appears as a Word-maker in P1 and as the Soil's permissivity in S1. That is not sloppiness: it carries a prediction. An intervention on MMP-9 should move f_j and p together, and any protocol that assumes it can open the Soil without changing which Words are spoken is making an assumption that P1 says is false.
+
+## Falsification
+
+Each theory as a signed inequality with a decision rule fixed in advance. A theory without a number in the third column is not yet an experiment.
+
+| \#  | Theory                                                      | Dies if                                                                                       | Decided by                   |
+|-----|-------------------------------------------------------------|-----------------------------------------------------------------------------------------------|------------------------------|
+| T1  | The precursor carries grammar, not cargo                    | Δorder and Δprime both within equivalence bounds of zero against the declared reference model | E0                           |
+| T2  | The Soil has a window                                       | Yield monotone increasing in total MMP-9 exposure, so open-throughout beats closed-after      | E5                           |
+| T3  | Revision can be local                                       | Λ \< 0.5 at the smallest achievable separation, or λrev \> dmin measured directly             | E6, or the two lengths alone |
+| T4  | Selectivity lives in the deposition competition             | S indistinguishable from 1 across every species pair tested                                   | E4                           |
+| T5  | Order of input matters at matched energy                    | γ within equivalence bounds of zero at 80% power                                              | E2                           |
+| T6  | The product mix is a continuous function of protease ratios | Discrete jumps in the proteoform distribution as ratios are swept                             | E1                           |
+| T7  | Retention has a threshold in cluster size                   | w comparable to n\*, so the curve is a slope not a knee                                       | E3, E6                       |
+| T8  | Capacity is set by resolvable protease ratios               | No encoding model exists, so no prediction is currently derivable                             | **Not testable as stated**   |
+
+**Equivalence bounds, not p-values.** Five of these die on a null result, and a non-significant result is not a null result. Each must be declared as a two-one-sided-test bound before the run: γ within ±0.05, Δorder within ±5 percentage points, S within \[0.9, 1.1\]. Without those numbers written down first, every one of these theories is unfalsifiable in practice however falsifiable it looks on paper.
+
+**T8 should be struck or rebuilt.** It has no encoding model, so there is nothing to compute a capacity from and nothing that could come out against it. Listing it alongside seven testable claims flatters the set.
+
+**What survives if the first three experiments all come out negative.** γ = 0, monotone Soil, and a continuous product mix together leave a system that integrates total input, has a plasticity dial rather than a window, and makes a smoothly varying product mix. That is a perfectly respectable description of a neural culture, and it is not the ChristEye architecture. The honest position is that this outcome is more likely than not, and the program is worth running because the experiments are cheap and the alternative is interesting.
+
+## Where this is metaphor
+
+The equations above are a mix of borrowed physics, fitted phenomenology and dressed-up assertions. This section separates them, because a reader who cannot tell which is which will trust the wrong ones.
+
+**Borrowed whole, and the borrowing is unjustified.** Classical nucleation theory in C1 was derived for molecules in a supersaturated solution forming a periodic solid. Synapses in a dendritic neighbourhood are not molecules, the deposit is not periodic, and there is no surface tension. What transfers is one structural feature — a bulk term growing faster than a boundary term, hence a critical size — and that feature could be obtained from several other models. **If the threshold prediction succeeds, it does not confirm nucleation.** It confirms that something with a threshold is happening, which C3 also predicts from entirely different premises.
+
+**Simulated annealing in A4 is an analogy and nothing more.** The logarithmic schedule has a convergence proof for a class of optimization problems that organoids are not in. It is in the document because it generates one cheap contrast, cycled versus continuous teaching, and that contrast stands on its own without the analogy.
+
+**Symbols with no assignment.** Sinew and Leaves appear in the ladder with no physical reading and therefore no symbol. Crown is assigned to selection with no equation. These are honest gaps, and writing a placeholder equation for them would be worse than leaving them empty.
+
+**Free parameters, counted.** α γ λ β₀ T₀ δ α_auto w n\* Θ τ₀ τcoh — twelve, against roughly six independent measurements the first-round experiments produce. **The model is underdetermined and will fit almost anything.** This is the strongest reason to care about the equivalence bounds rather than the fits: a good fit here means very little, while a measured γ outside its declared bound means something.
+
+**What no equation here licenses.** Nothing above supports reading content out of a molecule, assigning a bit capacity to a protein, transferring knowledge between preparations, or treating any measured quantity as semantic. The symbols are rates, concentrations and distances. Where a ChristEye term supplies the name of a symbol, the term is a label on a measurement and acquires no properties from the equation it appears in. The reverse — using an equation's behaviour to argue a property of the term — is the specific error this document is organized to prevent, and it is an easy one to make while reading a page of mathematics.
+
+## External review
+
+An independent pass over the same source material, produced by a different model and supplied on 14 November, corroborates the architecture and breaks several of the equations above. Its corrections are kept here rather than quietly absorbed, because which claims were retracted and when is part of the record.
+
+| Correction                                                                                                                                                                                     | What it hits                                                              | What changes here                                                                                                                                                                 |
+|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Agitation does not prevent crystallization.** Crystallization is routinely done in stirred vessels, and a primary study found shorter nucleation induction times with increased agitation    | W7, and the physical argument for Stillness as a gate                     | The sign of b(T) is no longer assumed. Stillness becomes a question about where the optimum sits, not a derived necessity. The strongest form of the Stillness claim is withdrawn |
+| **The 15.5x and 4.4x figures measure latent-state displacement, not learning.** The same preprint reports substantial reuse of spontaneous dimensions                                          | W2, W3, and the reading of D                                              | Caution added to the Wind section. D is a dependent variable, and leaving the manifold is not established as necessary                                                            |
+| **Additive does not mean unrelated and synergistic does not mean complementary.** Bliss and Loewe rest on different assumptions and can disagree; potency and maximal efficacy move separately | P2 and its result table                                                   | Reference model must be declared before the run. The table's readings are now conditional on that declaration                                                                     |
+| **No established ranking says prodomain-first must beat simultaneous.** Simultaneous exposure still permits one molecular event to precede another inside the cell                             | P2's interpretation of Δorder                                             | A positive Δorder shows history sensitivity. It does not identify assembly as the mechanism without separate evidence of the receptor-state change                                |
+| **An MMP-9 / TIMP-1 abundance ratio is not net local proteolytic activity.**                                                                                                                   | S1's measurement route, directly                                          | p needs an activity readout, in-situ zymography or a cleavable reporter, not an abundance ratio. The Morrison correction is necessary and not sufficient                          |
+| **Withdrawing support confounds storage with viability and readout.**                                                                                                                          | W8 and the whole removal test                                             | Removal must be a matched, health-preserving change in one contextual feature. Draining the medium tests viability at the same time, and cannot separate the two                  |
+| **Solvent removal produces an ordered phase; it does not reveal a lattice that was already there.**                                                                                            | The language around G4 and C1                                             | G4's mathematics is unaffected — concentration does rise — but no sentence should imply the Crystal pre-existed under the Water                                                   |
+| **Soil is the organoid itself, not the matrix.** Sea and Soil must not be merged                                                                                                               | The companion document's ladder and the p row of the correspondence table | p is matrix permissivity *within* the Soil, a property of it rather than its definition. The companion document needs this amendment                                              |
+| **A quiet organoid is not a sleeping brain**, and the clearance literature is actively contested between studies                                                                               | Any argument from sleep physiology                                        | No such argument is load-bearing here. G2 is exponential clearance with a measured rate and stands on its own                                                                     |
+
+**Where it corroborates.** Order as grammar with spike-timing precedent; PSD condensates as the concrete candidate for Mesh and Throne; KIBRA–PKMζ as Root maintenance; bounded protease activity as the matrix window; perineuronal nets and astrocytic matrix regulation as an outer constraint. Its twelve theories overlap seven of the eight here. Two descriptions agreeing is not evidence, and it says so about itself, which is the right instinct.
+
+**What it is.** A second model reading the same inputs, not peer review. Its citations have not been verified in this pass, and several of its strongest corrections — the agitation study in particular — should be read directly before the Stillness claim is rewritten rather than merely weakened. Its own framing of the sequence, *teaching → intervening activity and support → possible stabilization → later selective use*, is more defensible than Wind → Stillness → Recession → Crystal and costs nothing to adopt except the imagery.
+
+**The net effect is a smaller program.** One gate is downgraded to a question, one measurement route is invalid as written, one assay needs its reference model declared, and the removal test needs a health-preserving design it does not currently have. None of that touches E0, which is still the cheapest decisive experiment and is still the one to run first.
+
