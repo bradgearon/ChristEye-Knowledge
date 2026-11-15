@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Anaiero public site page metadata v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source_path",
+    "route",
+    "title",
+    "kind",
+    "audiences",
+    "status",
+    "revision",
+    "rights",
+    "source_of_truth",
+    "disclosure_review"
+  ],
+  "properties": {
+    "source_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "route": {
+      "type": "string",
+      "pattern": "^/[a-z0-9_/-]*/$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 4
+    },
+    "summary": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "kind": {
+      "enum": [
+        "overview",
+        "module-design",
+        "scientific-companion",
+        "process",
+        "schema",
+        "research",
+        "chip-manifest",
+        "interactive-demo",
+        "scholar-essay",
+        "archive",
+        "governance"
+      ]
+    },
+    "audiences": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "general",
+          "developer",
+          "embedded-engineer",
+          "scientist",
+          "neuroscientist",
+          "scholar",
+          "creative"
+        ]
+      },
+      "minItems": 1
+    },
+    "status": {
+      "enum": [
+        "design",
+        "digital-prototype",
+        "hardware-unvalidated",
+        "lab-research",
+        "measured-external",
+        "historical-superseded",
+        "editorial"
+      ]
+    },
+    "evidence_classes": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "F",
+          "X",
+          "H",
+          "D",
+          "A"
+        ]
+      }
+    },
+    "revision": {
+      "type": "string"
+    },
+    "phase": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "rights": {
+      "type": "string"
+    },
+    "source_of_truth": {
+      "type": "string",
+      "minLength": 1
+    },
+    "related_source_paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "references": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "demo_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "disclosure_review": {
+      "enum": [
+        "reviewed-non-patent",
+        "hold-for-review",
+        "excluded"
+      ]
+    },
+    "source_hash": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-f0-9]{40}$"
+    }
+  }
+}

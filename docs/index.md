@@ -4,6 +4,10 @@
 
 The documentation is a **complete technical library**, not an index of promised future writing. Current and historical specifications are separated, and original experimental figures and machine-readable data are preserved.
 
+## Website S01 roadmap
+
+[Full site redevelopment blueprint](../website/README.md) · [Site architecture](../website/planning/02-information-architecture.md) · [Visual system](../website/planning/03-design-system.md) · [Studio demos](../website/planning/05-interactive-labs-and-starchips.md)
+
 ## V3.1 full scientific engineering
 
 - [24 detailed designs and their scientific companions](../specifications/v3/README.md)

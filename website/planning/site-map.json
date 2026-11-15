@@ -1,0 +1,273 @@
+{
+  "revision": "2026-11-15",
+  "base": "/ChristEye-Knowledge",
+  "routes": [
+    {
+      "path": "/",
+      "role": "Landing and evidence-led intro",
+      "sources": [
+        "README.md",
+        "docs/architecture.md"
+      ],
+      "audience": [
+        "general"
+      ],
+      "status": "planned"
+    },
+    {
+      "path": "/start/",
+      "role": "Five-minute system introduction",
+      "sources": [
+        "docs/index.md",
+        "docs/roadmap.md"
+      ],
+      "audience": [
+        "general"
+      ],
+      "status": "planned"
+    },
+    {
+      "path": "/architecture/",
+      "role": "Linked system atlas",
+      "sources": [
+        "docs/architecture.md",
+        "specifications/v3/README.md"
+      ],
+      "audience": [
+        "all"
+      ],
+      "status": "planned"
+    },
+    {
+      "path": "/architecture/lotus-heart/",
+      "role": "Lotus, Heart and independent limits",
+      "sources": [
+        "specifications/v3/design/CE-A12_lotus_coordinator_Design.md"
+      ],
+      "audience": [
+        "developer",
+        "scientist"
+      ],
+      "status": "planned"
+    },
+    {
+      "path": "/architecture/buses/",
+      "role": "WindBus, ChemiBus, SustiBus, BioBridge",
+      "sources": [
+        "processes/BIO-04-sustibus-chemibus.md",
+        "docs/windbus.md"
+      ],
+      "audience": [
+        "developer",
+        "scientist"
+      ],
+      "status": "planned"
+    },
+    {
+      "path": "/living/",
+      "role": "Living-system lifecycle and open research",
+      "sources": [
+        "processes/SCIENTIST_WORKFLOW.md"
+      ],
+      "audience": [
+        "scientist",
+        "neuroscientist"
+      ],
+      "status": "planned"
+    },
+    {
+      "path": "/living/soil/",
+      "role": "Organoid Soil and regional observations",
+      "sources": [
+        "processes/BIO-03-soil-organoid.md"
+      ],
+      "audience": [
+        "neuroscientist"
+      ],
+      "status": "planned"
+    },
+    {
+      "path": "/living/roots-axons/",
+      "role": "Spinal Root tissue vs learned Roots",
+      "sources": [
+        "processes/BIO-02-axon-spinal-root.md"
+      ],
+      "audience": [
+        "neuroscientist"
+      ],
+      "status": "planned"
+    },
+    {
+      "path": "/living/care/",
+      "role": "Essential care, Milk, Honey and independent support",
+      "sources": [
+        "processes/BIO-04-sustibus-chemibus.md",
+        "processes/BIO-10-care-health.md"
+      ],
+      "audience": [
+        "scientist"
+      ],
+      "status": "planned"
+    },
+    {
+      "path": "/living/growth/",
+      "role": "Growth decision stages and cell identities",
+      "sources": [
+        "processes/BIO-09-growth-control.md",
+        "processes/BIO-01-crest-lineage.md"
+      ],
+      "audience": [
+        "scientist"
+      ],
+      "status": "planned"
+    },
+    {
+      "path": "/science/",
+      "role": "Evidence, experiments and research methods",
+      "sources": [
+        "docs/research.md",
+        "research/evidence/anaiero-biology-2026-11.md"
+      ],
+      "audience": [
+        "scientist",
+        "scholar"
+      ],
+      "status": "planned"
+    },
+    {
+      "path": "/science/molecules/",
+      "role": "Molecular and structural atlas",
+      "sources": [
+        "processes/MOLECULAR_INDEX.md",
+        "docs/molecule-and-structure-inventory.md"
+      ],
+      "audience": [
+        "neuroscientist"
+      ],
+      "status": "planned"
+    },
+    {
+      "path": "/science/equations/",
+      "role": "Formal models and correction history",
+      "sources": [
+        "research/full-markdown/R03_03_Formal_Models_and_Reconciliation_1_.md"
+      ],
+      "audience": [
+        "scientist",
+        "scholar"
+      ],
+      "status": "planned"
+    },
+    {
+      "path": "/build/",
+      "role": "Quickstart and full module documentation",
+      "sources": [
+        "docs/code.md",
+        "docs/windbus.md",
+        "specifications/v3/README.md"
+      ],
+      "audience": [
+        "developer"
+      ],
+      "status": "planned"
+    },
+    {
+      "path": "/build/modules/",
+      "role": "24 modules with paired design and science",
+      "sources": [
+        "specifications/v3/README.md",
+        "specifications/v3/rigorous-module-registry.json"
+      ],
+      "audience": [
+        "developer"
+      ],
+      "status": "planned"
+    },
+    {
+      "path": "/build/schemas/",
+      "role": "JSON schemas, examples and constraints",
+      "sources": [
+        "schemas/README.md",
+        "docs/schema-reference.md"
+      ],
+      "audience": [
+        "developer"
+      ],
+      "status": "planned"
+    },
+    {
+      "path": "/build/hardware/",
+      "role": "Supervisory, instruments and timing",
+      "sources": [
+        "docs/hardware.md",
+        "phases/P02B/README.md"
+      ],
+      "audience": [
+        "embedded-engineer"
+      ],
+      "status": "planned"
+    },
+    {
+      "path": "/studio/",
+      "role": "Specialist StarChip catalog and capabilities",
+      "sources": [
+        "registries/README.md",
+        "registries/v6/module-manifests/CE-D01.json"
+      ],
+      "audience": [
+        "developer",
+        "creative"
+      ],
+      "status": "planned"
+    },
+    {
+      "path": "/studio/labs/",
+      "role": "Simulation output gallery, live browser demos",
+      "sources": [
+        "examples/run_digital_replay.py",
+        "examples/p02b_supervisor_demo.py"
+      ],
+      "audience": [
+        "general"
+      ],
+      "status": "planned"
+    },
+    {
+      "path": "/scholarship/",
+      "role": "Philosophy, terminology, research history",
+      "sources": [
+        "research/full-markdown/README.md",
+        "docs/decisions.md"
+      ],
+      "audience": [
+        "scholar"
+      ],
+      "status": "planned"
+    },
+    {
+      "path": "/library/",
+      "role": "Current documentation and archived editions",
+      "sources": [
+        "docs/full-document-library.md",
+        "archive/v2/README.md"
+      ],
+      "audience": [
+        "general"
+      ],
+      "status": "planned"
+    },
+    {
+      "path": "/project/",
+      "role": "Roadmap, governance, rights and status",
+      "sources": [
+        "docs/roadmap.md",
+        "CHANGELOG.md",
+        "LICENSE.md"
+      ],
+      "audience": [
+        "general"
+      ],
+      "status": "planned"
+    }
+  ]
+}
