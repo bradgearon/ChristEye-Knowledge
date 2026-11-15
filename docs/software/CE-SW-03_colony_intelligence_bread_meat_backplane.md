@@ -201,6 +201,10 @@ For developer-only onboarding examples, see [sample board capability](../../exam
 
 Acceptance tests must show: stale sensor never presented as current; no replay of a physical action; accepted serial peer cannot gain actuation rights; no LWW erasure of contradictory evidence; subscription enforces scope; 1GbE overload produces a loss record; disconnected state still retrievable with age; faulty clocks abstain from causal temporal inference; model improvement beats held-out baselines instead of merely improving training scores.
 
+## 16.1 Twelve-axis controls and sensory extension
+
+The separately versioned [CE-SW-04](CE-SW-04_control_surface_crystal_vision_teaching.md) specifies host/client analog control profiles, swappable digital teacher/CrystalPack strategies, research-only Crystal presence/evidence tracking, realtime teacher audio input/output, and camera/vision routing via qualified USB3/GigE acquisition. That software control plane must never override independent support or biological intervention limits.
+
 ## 17. Decisions and unknowns
 
 Provisional recommendation: **Cat5e/1GbE as primary native mesh; USB3/GigE Vision for local optics; separate isolated fieldbus/USB diagnostic; SFP+ fiber later where required; never HDMI as general data bus.** Exact board connector, power budgets, physical isolation, safety approvals, RTOS/PHY, embedded key storage, throughput target and camera/MEA vendor compatibility remain controlled engineering decisions. No hardware commissioning or biological mechanism is demonstrated by this specification.
