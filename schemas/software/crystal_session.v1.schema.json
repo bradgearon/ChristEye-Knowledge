@@ -205,5 +205,51 @@
     "physical_action_authority": {
       "const": "NONE"
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "material_class": {
+            "const": "PHYSICAL_MATERIAL_CANDIDATE"
+          }
+        },
+        "required": [
+          "material_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "archive_class": {
+            "enum": [
+              "NOT_ARCHIVED",
+              "RESEARCH_DOSSIER_ONLY"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "RESEARCH_DOSSIER_ARCHIVED"
+          }
+        },
+        "required": [
+          "state"
+        ]
+      },
+      "then": {
+        "required": [
+          "archive_class"
+        ],
+        "properties": {
+          "archive_class": {
+            "const": "RESEARCH_DOSSIER_ONLY"
+          }
+        }
+      }
+    }
+  ]
 }
