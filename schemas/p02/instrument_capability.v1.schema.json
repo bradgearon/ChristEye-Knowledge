@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "mode",
+    "recording_units",
+    "physical_output_enabled"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "mode": {
+      "enum": [
+        "SIMULATED",
+        "READ_ONLY_PLACEHOLDER"
+      ]
+    },
+    "recording_units": {
+      "type": "string"
+    },
+    "physical_output_enabled": {
+      "const": false
+    },
+    "vendor_config_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

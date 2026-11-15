@@ -48,3 +48,12 @@ The original JSON schemas from the project engineering release are preserved wit
 - [wind_envelope.v1.schema.json](v6/wind_envelope.v1.schema.json)
 
 [Module contract specifications](../docs/module-contracts.md) · [Phase 1 scientific source records](../phases/P01/registers/README.md)
+
+## Phase P02 cell-free instrument and WindBus schemas
+
+- [wind_envelope.v1.schema.json](p02/wind_envelope.v1.schema.json)
+- [trial_record.v1.schema.json](p02/trial_record.v1.schema.json)
+- [route_acl.v1.schema.json](p02/route_acl.v1.schema.json)
+- [audit_entry.v1.schema.json](p02/audit_entry.v1.schema.json)
+- [instrument_capability.v1.schema.json](p02/instrument_capability.v1.schema.json)
+- [clock_anchor.v1.schema.json](p02/clock_anchor.v1.schema.json)

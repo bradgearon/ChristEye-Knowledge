@@ -33,7 +33,7 @@ class PublicationIntegrityTests(unittest.TestCase):
         companions=list((ROOT/"specifications"/"v3"/"companion").glob("*.md"))
         self.assertEqual(len(designs),24)
         self.assertEqual(len(companions),24)
-        self.assertEqual(len(list((ROOT/"archive"/"v2").glob("*.md"))),83)
+        self.assertEqual(len(list((ROOT/"archive"/"v2").glob("CE-*.md"))),83)
 
     def test_phase_specific_originals(self):
         phase2=list((ROOT/"phases"/"P02"/"docs").rglob("*.md"))
@@ -44,7 +44,8 @@ class PublicationIntegrityTests(unittest.TestCase):
     def test_json_schemas_parse(self):
         files=sorted((ROOT/"schemas"/"v6").rglob("*.schema.json"))
         # v6 contains 24 module-record schemas plus cross-system contracts.
-        self.assertGreaterEqual(len(files),37)
+        self.assertGreaterEqual(len(files),36)
+        self.assertEqual(len(list((ROOT/"schemas"/"p02").glob("*.schema.json"))),6)
         for path in files:
             obj=json.loads(path.read_text(encoding="utf-8"))
             self.assertEqual(obj.get("type"),"object",path.name)

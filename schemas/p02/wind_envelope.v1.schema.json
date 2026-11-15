@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/anaiero/p02/wind-envelope.v1.schema.json",
+  "title": "P02 WindEnvelope v1 (software semantics)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "trace_id",
+    "source",
+    "recipient",
+    "event_type",
+    "sequence",
+    "emitted_ns",
+    "deadline_ns",
+    "payload",
+    "consent_scope",
+    "schema_version",
+    "clock_domain",
+    "parent_id",
+    "producer_digest"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "recipient": {
+      "type": "string",
+      "minLength": 1
+    },
+    "event_type": {
+      "enum": [
+        "TASK_CUE",
+        "TASK_RESULT",
+        "OBSERVATION",
+        "TRAINING_FEEDBACK",
+        "SUPPORT_PROPOSAL",
+        "DECISION",
+        "RECEIPT",
+        "HEARTBEAT",
+        "FAULT",
+        "SYNC_ANCHOR"
+      ]
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "emitted_ns": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "deadline_ns": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "payload": {
+      "type": "object",
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "stimulation_waveform"
+            ]
+          },
+          {
+            "required": [
+              "physical_actuation"
+            ]
+          }
+        ]
+      }
+    },
+    "consent_scope": {
+      "enum": [
+        "local",
+        "restricted",
+        "shareable"
+      ]
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "clock_domain": {
+      "const": "sim-monotonic"
+    },
+    "parent_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "producer_digest": {
+      "type": "string"
+    }
+  }
+}

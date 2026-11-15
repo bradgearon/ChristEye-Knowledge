@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "trial_id",
+    "split",
+    "prediction",
+    "valid",
+    "reference_label",
+    "reader_digest",
+    "feedback_released",
+    "learner_digest_after"
+  ],
+  "properties": {
+    "trial_id": {
+      "type": "string"
+    },
+    "split": {
+      "enum": [
+        "baseline",
+        "training",
+        "development",
+        "confirmation",
+        "delayed"
+      ]
+    },
+    "prediction": {
+      "enum": [
+        "X",
+        "Y",
+        "HOLD",
+        "INVALID"
+      ]
+    },
+    "valid": {
+      "type": "boolean"
+    },
+    "reference_label": {
+      "enum": [
+        "X",
+        "Y",
+        "HOLD",
+        "UNRESOLVED"
+      ]
+    },
+    "reader_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "feedback_released": {
+      "type": "boolean"
+    },
+    "learner_digest_after": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

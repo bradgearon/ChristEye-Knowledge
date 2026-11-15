@@ -128,7 +128,7 @@ Browse the original JSON contract files and their required-field definitions. Th
 | `timestamp` | string | yes |  |
 | `parent_id` | string / null | no |  |
 
-## [audit_entry.v1.schema.json](../schemas/v6/audit_entry.v1.schema.json)
+## [audit_entry.v1.schema.json](../schemas/p02/audit_entry.v1.schema.json)
 
 **Schema draft:** https://json-schema.org/draft/2020-12/schema  
 
@@ -138,7 +138,7 @@ Browse the original JSON contract files and their required-field definitions. Th
 | `payload` | object | yes |  |
 | `entry_hash` | string | yes |  · pattern: `^[0-9a-f]{64}$` |
 
-## [clock_anchor.v1.schema.json](../schemas/v6/clock_anchor.v1.schema.json)
+## [clock_anchor.v1.schema.json](../schemas/p02/clock_anchor.v1.schema.json)
 
 **Schema draft:** https://json-schema.org/draft/2020-12/schema  
 
@@ -188,7 +188,7 @@ Browse the original JSON contract files and their required-field definitions. Th
 | `measurable_endpoint` | string | no |  |
 | `confounders` | array | no |  |
 
-## [instrument_capability.v1.schema.json](../schemas/v6/instrument_capability.v1.schema.json)
+## [instrument_capability.v1.schema.json](../schemas/p02/instrument_capability.v1.schema.json)
 
 **Schema draft:** https://json-schema.org/draft/2020-12/schema  
 
@@ -670,7 +670,7 @@ Browse the original JSON contract files and their required-field definitions. Th
 | `evidence_class` | enum · F, X, H, D | yes |  |
 | `source_ids` | array | no |  |
 
-## [route_acl.v1.schema.json](../schemas/v6/route_acl.v1.schema.json)
+## [route_acl.v1.schema.json](../schemas/p02/route_acl.v1.schema.json)
 
 **Schema draft:** https://json-schema.org/draft/2020-12/schema  
 
@@ -700,7 +700,7 @@ Browse the original JSON contract files and their required-field definitions. Th
 | `integration_refs` | array | yes |  |
 | `boot_dependencies` | array | yes |  |
 
-## [trial_record.v1.schema.json](../schemas/v6/trial_record.v1.schema.json)
+## [trial_record.v1.schema.json](../schemas/p02/trial_record.v1.schema.json)
 
 **Schema draft:** https://json-schema.org/draft/2020-12/schema  
 
@@ -735,7 +735,7 @@ Browse the original JSON contract files and their required-field definitions. Th
 | `confidence` | number | no |  · min: 0 |
 | `expires_at` | string | no |  |
 
-## [wind_envelope.v1.schema.json](../schemas/v6/wind_envelope.v1.schema.json)
+## [wind_envelope.v1.schema.json](../schemas/p02/wind_envelope.v1.schema.json)
 
 **Record:** P02 WindEnvelope v1 (software semantics)  
 **Schema draft:** https://json-schema.org/draft/2020-12/schema  

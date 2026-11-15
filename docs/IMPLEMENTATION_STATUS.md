@@ -9,7 +9,7 @@ The full public documentation release has been converted from the v6 source arch
 - **83** historical v2 design editions.
 - **7** DOCX scientific source editions.
 - **10** research Markdown editions altogether when the original Markdown and HTML sources are included.
-- **37** original v6 JSON schemas plus two digital runtime schemas.
+- **42** original JSON schemas (36 system/module schemas plus six P02 instrument schemas), plus two digital runtime schemas.
 - **33** StarChip / specialist module manifests, plus module record registries and source maps.
 
 The authoritative original source SHA-256 file register is [here](../specifications/conversion-manifest.json). **No patent document was included.**

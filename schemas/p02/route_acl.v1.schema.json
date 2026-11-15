@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source",
+    "recipient",
+    "event_types",
+    "max_bytes"
+  ],
+  "properties": {
+    "source": {
+      "type": "string"
+    },
+    "recipient": {
+      "type": "string"
+    },
+    "event_types": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "TASK_CUE",
+          "TASK_RESULT",
+          "OBSERVATION",
+          "TRAINING_FEEDBACK",
+          "SUPPORT_PROPOSAL",
+          "DECISION",
+          "RECEIPT",
+          "HEARTBEAT",
+          "FAULT",
+          "SYNC_ANCHOR"
+        ]
+      }
+    },
+    "max_bytes": {
+      "type": "integer",
+      "minimum": 1
+    }
+  }
+}
