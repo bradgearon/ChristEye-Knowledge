@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schemas.christeye.example/software/colony_state.v1",
+  "$id": "urn:christeye:software:colony_state:v1",
   "title": "ColonyState Snapshot v1",
   "type": "object",
   "additionalProperties": false,
