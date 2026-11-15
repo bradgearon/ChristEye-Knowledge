@@ -1,0 +1,437 @@
+{
+  "revision": "2026-11-15",
+  "owner": "We Develop Software LLC",
+  "modules": [
+    {
+      "id": "CE-A01",
+      "slug": "episodic_and_working_memory",
+      "substrate": "candidate spinal Root and/or Soil ensemble, digital event-buffer first",
+      "axon": "axonal input order, recipient dendrites, and glial support characterized independently",
+      "molecular_questions": "AMPA/NMDA/GABA/glycine; ARC, CaMKII, EAAT as readouts",
+      "training": "declare episode encoding → confirm reception → train contextual sequence → delayed cue recall → transfer",
+      "growth": "no new tissue without demonstrated persistent deficit after software repair",
+      "acceptance": "frozen-reader delayed improvement with source provenance and preserved earlier functions",
+      "failure": "decoder/index learning masquerading as new biological memory",
+      "processes": [
+        "BIO-02",
+        "BIO-05",
+        "BIO-06",
+        "SYS-11"
+      ],
+      "status": "research design; no live tissue action"
+    },
+    {
+      "id": "CE-A02",
+      "slug": "long_term_storage",
+      "substrate": "proposed spinal Root tissue distinct from verified digital CAS storage",
+      "axon": "trace soma-axon terminals, synaptic candidate structures and regional persistence",
+      "molecular_questions": "KIBRA/PKMζ, DLG4/SHANK/HOMER, BDNF/TrkB, astrocyte MCT assay candidates",
+      "training": "qualify learning → delayed readout without teaching → alternate cue access → protected-task test → mechanism study",
+      "growth": "propose regional renewal only after a separate scientific review; no automatic cell supply",
+      "acceptance": "delayed content-specific Root function and independently restored digital storage",
+      "failure": "corrupted retrieval or generalized excitability labeled physical memory",
+      "processes": [
+        "BIO-02",
+        "BIO-05",
+        "BIO-06",
+        "SYS-12"
+      ],
+      "status": "research design; no live tissue action"
+    },
+    {
+      "id": "CE-A03",
+      "slug": "healing_and_integrity",
+      "substrate": "qualified neuron/glia health and digital diagnostic policy",
+      "axon": "spatial axon discontinuity and function must be differentiated from missing electrode samples",
+      "molecular_questions": "EAAT1/2, Kir4.1, glial phenotypes, viability, ECM as measurement candidates",
+      "training": "test instrument → test retrieval → test support → compare held learning → route human review",
+      "growth": "healing means review and approved care, not an autonomous treatment program",
+      "acceptance": "fault isolated with no fabricated explanation; protected Roots retained after digital repair",
+      "failure": "readout artifact or rapid retraining interpreted as biological healing",
+      "processes": [
+        "BIO-02",
+        "BIO-05",
+        "BIO-09",
+        "BIO-10"
+      ],
+      "status": "research design; no live tissue action"
+    },
+    {
+      "id": "CE-A04",
+      "slug": "growth_and_capacity",
+      "substrate": "Crest source, proposed Root and Soil module capacity, software scheduler",
+      "axon": "distinguish new neuron division from axon extension or synaptic remodeling",
+      "molecular_questions": "regional MNX1/ISL1/CHAT, GAP43, actin, glial identity assay candidates",
+      "training": "quantify deficit → try digital alternatives → characterize morphology → seek approved expansion study → measure effect",
+      "growth": "qualified source and ethics signoff before any physical enlargement",
+      "acceptance": "verified useful functional gain, source traceability, old-task noninferiority",
+      "failure": "more cells and larger shape assumed to mean more intelligence",
+      "processes": [
+        "BIO-01",
+        "BIO-02",
+        "BIO-03",
+        "BIO-09"
+      ],
+      "status": "research design; no live tissue action"
+    },
+    {
+      "id": "CE-A05",
+      "slug": "refresh_renewal",
+      "substrate": "digital index renewal and independently measured biological upkeep",
+      "axon": "monitor axon continuity and glial context; no identity of exact cells inferred from function",
+      "molecular_questions": "astrocytic metabolic markers, KIBRA, scaffold and ECM for scoped studies",
+      "training": "classify external fact staleness vs index decay vs Root loss vs health → digital repair → delayed probe",
+      "growth": "renewal review gated by physical need and protected old skills",
+      "acceptance": "demonstrable corrected access with cause, no hidden reteaching",
+      "failure": "software snapshot or replacement cell interpreted as saved neural engram",
+      "processes": [
+        "BIO-02",
+        "BIO-06",
+        "BIO-09",
+        "SYS-11"
+      ],
+      "status": "research design; no live tissue action"
+    },
+    {
+      "id": "CE-A06",
+      "slug": "learning_stabilization",
+      "substrate": "spinal Root / Soil candidate lasting synaptic organization",
+      "axon": "monitor candidate axon and synapse state across delayed task phases",
+      "molecular_questions": "KIBRA/PKMζ, PSD95/SynGAP, ARC, BDNF, MMP9/TIMP1 for separate measured hypotheses",
+      "training": "freeze task → baseline → teaching → off-feedback delay → retained relation → test structural correlation",
+      "growth": "no matrix/peptide manipulation outside qualified study proposal",
+      "acceptance": "selective delayed improvement above matched exposure and background dynamics",
+      "failure": "slow bursting or protein density mistaken for content retention",
+      "processes": [
+        "BIO-02",
+        "BIO-05",
+        "BIO-06",
+        "BIO-08"
+      ],
+      "status": "research design; no live tissue action"
+    },
+    {
+      "id": "CE-A07",
+      "slug": "learning_enhancement",
+      "substrate": "digital Bread/Meat instruction, living interface only in scoped tests",
+      "axon": "measured excitatory/inhibitory routes and axonal response if actual living study",
+      "molecular_questions": "AMPA/NMDA/GABA, ARC, CaMKII and astrocyte state as readouts",
+      "training": "prerequisite lessons → advanced task → contingent feedback → withheld transfer → protected old tasks",
+      "growth": "positive immediate reward never grants tissue growth authority",
+      "acceptance": "unseen performance with calibrated uncertainty and no interference",
+      "failure": "sealed answer leakage or prompt repetition called learning",
+      "processes": [
+        "BIO-04",
+        "BIO-05",
+        "BIO-06",
+        "SYS-11"
+      ],
+      "status": "research design; no live tissue action"
+    },
+    {
+      "id": "CE-A08",
+      "slug": "health_surveillance",
+      "substrate": "Soil/Root viability and identity monitoring; later qualified microglial class optional",
+      "axon": "neurite/axon changes measured as health states, not autonomous disease diagnosis",
+      "molecular_questions": "SOX9, ALDH1L1, P2RY12/TMEM119 only where qualified; metabolite and sensor references",
+      "training": "verify sensor calibration → baseline tissue status → classify anomalies → human biosafety/care review",
+      "growth": "no autonomous immune manipulation or pathogen challenge",
+      "acceptance": "bounded false alerts and continued independently qualified care",
+      "failure": "sensor drift and normal maturation mistaken for disease",
+      "processes": [
+        "BIO-03",
+        "BIO-05",
+        "BIO-09",
+        "BIO-10"
+      ],
+      "status": "research design; no live tissue action"
+    },
+    {
+      "id": "CE-A09",
+      "slug": "main_living_core",
+      "substrate": "Soil is the living organoid as a whole; optional distinct spinal Root compartment",
+      "axon": "map axon regions and receptor/terminal function, electrical readout validity separately",
+      "molecular_questions": "TUBB3/MAP2/RBFOX3, spinal identities, astrocytes, scaffold and glial metabolic candidates",
+      "training": "source release → morphology/viability → interface qualification → frozen task → delayed test → joined benefit",
+      "growth": "capacity amendment human controlled with distinct planar versus 3D lots",
+      "acceptance": "acquired selective response under real living qualified instrumentation",
+      "failure": "spontaneous activity or adaptive decoder credited to core learned knowledge",
+      "processes": [
+        "BIO-01",
+        "BIO-02",
+        "BIO-03",
+        "BIO-06"
+      ],
+      "status": "research design; no live tissue action"
+    },
+    {
+      "id": "CE-A10",
+      "slug": "usage_crystal_compiler",
+      "substrate": "digital consented experience archive; no cell generation requirement",
+      "axon": "optional axon/Root recordings are evidence files, not cloneable tissue",
+      "molecular_questions": "no chemical ingredient for software packs; physical carrier remains separate research",
+      "training": "consent → immutable source digest → curriculum → pack verify → replay → held-out evaluation",
+      "growth": "no physical change derived from export or compilation event",
+      "acceptance": "exact digital byte clone and assessed skill with rights preserved",
+      "failure": "claimed biochemical memory transfer from a JSON file",
+      "processes": [
+        "BIO-08",
+        "SYS-11",
+        "SYS-12"
+      ],
+      "status": "research design; no live tissue action"
+    },
+    {
+      "id": "CE-A11",
+      "slug": "connective_controllers",
+      "substrate": "WindBus / BioBridge host, independently qualified physical interface",
+      "axon": "axonal joining as separately measured future route, not identical to software message",
+      "molecular_questions": "neurotransmitter receptors, synaptic identity and glial state as connection assays",
+      "training": "route ACL → clock/receipt → isolated source/recipient → joined test → remove bridge test",
+      "growth": "physical routes require OEM bench qualification and qualified source compatibility",
+      "acceptance": "real delivered event and recipient benefit vs matched control with old skills protected",
+      "failure": "common drive, medium cross-talk or decoder cache called synaptic joining",
+      "processes": [
+        "BIO-02",
+        "BIO-05",
+        "BIO-07",
+        "SYS-11"
+      ],
+      "status": "research design; no live tissue action"
+    },
+    {
+      "id": "CE-A12",
+      "slug": "lotus_coordinator",
+      "substrate": "digital governor; local biological coordination separately named and scoped",
+      "axon": "axon maps inform observations but never authorize growth or stimulation",
+      "molecular_questions": "no universal Lotus molecule; assay named local neuronal/glial process if hypothesized",
+      "training": "read needs → evaluate alternative causes → propose digital action → limit veto → audit → re-evaluate",
+      "growth": "no Lotus-issued chemical, growth or cell-production actuation",
+      "acceptance": "held-out coordination benefit against fixed policy with physical veto intact",
+      "failure": "scoring gain overwhelms protected Root constraints",
+      "processes": [
+        "BIO-04",
+        "BIO-06",
+        "BIO-09",
+        "SYS-11"
+      ],
+      "status": "research design; no live tissue action"
+    },
+    {
+      "id": "CE-A13",
+      "slug": "crystal_replication_and_cloning",
+      "substrate": "byte-verifiable digital clone, Crest-derived biological lineage as separate question",
+      "axon": "new biological descendants need their own axons, synapses and acquisition evaluation",
+      "molecular_questions": "lineage barcode research; PSD/KIBRA do not prove transferable code",
+      "training": "clone digital assets → verify hashes → independently train recipient → test no live teacher",
+      "growth": "never order biological copy as substitute for learned state",
+      "acceptance": "verified digital clone and honest distinction between lineage and learned content",
+      "failure": "cloned DNA/source lineage equated with copied memory",
+      "processes": [
+        "BIO-01",
+        "BIO-08",
+        "SYS-12",
+        "BIO-06"
+      ],
+      "status": "research design; no live tissue action"
+    },
+    {
+      "id": "CE-A14",
+      "slug": "crystal_consumption_and_replay",
+      "substrate": "digital install/retrieval/replay; physical feeding remains unvalidated concept",
+      "axon": "record recipient Root/axon baseline if investigating future physical reader",
+      "molecular_questions": "candidate chemical Word requires distinct proteoform/receiver study, not encoded book",
+      "training": "verify rights → stage compatible reader → replay digital curriculum → independent delayed probes",
+      "growth": "no peptide feeding or tissue expansion directed by installer",
+      "acceptance": "software training result attributable to pack, not hidden feedback",
+      "failure": "material concentration assumed to convey exact semantic data",
+      "processes": [
+        "BIO-04",
+        "BIO-06",
+        "BIO-08",
+        "SYS-11"
+      ],
+      "status": "research design; no live tissue action"
+    },
+    {
+      "id": "CE-A15",
+      "slug": "organoid_development_and_shape",
+      "substrate": "living Soil tissue with declared cell-source and regional architecture",
+      "axon": "3D registered axon trajectories and dendritic spines versus cell population changes",
+      "molecular_questions": "SOX2/MNX1/ISL1, MAP2/TUBB3, glial SOX9, ECM and scaffold readouts",
+      "training": "qualified source → observed formation → identity/geometry → viable functional baseline → education gate",
+      "growth": "morphology changes need scientist review; no universal growth cadence",
+      "acceptance": "specific structural/functional readiness with 3D coverage bounds",
+      "failure": "planar cell numbers assumed universally valid for a shaped organoid",
+      "processes": [
+        "BIO-01",
+        "BIO-02",
+        "BIO-03",
+        "BIO-05"
+      ],
+      "status": "research design; no live tissue action"
+    },
+    {
+      "id": "CE-A16",
+      "slug": "root_registry_and_mapping",
+      "substrate": "physical candidate spinal Root tissue and independent functional retention ledger",
+      "axon": "axon tracks, synapses and task relations have distinct typed graph edges",
+      "molecular_questions": "KIBRA/PKMζ, DLG4/Syn1, BDNF and glial assays as hypotheses",
+      "training": "declare relation → map source region → four-edge evidence → delayed task → protected skill check",
+      "growth": "expand Root tissue only with actual qualified need, not registry event",
+      "acceptance": "retained task relation plus separately supported physical contribution",
+      "failure": "anatomy or electrode coincidence called engram location",
+      "processes": [
+        "BIO-02",
+        "BIO-05",
+        "BIO-06",
+        "SYS-12"
+      ],
+      "status": "research design; no live tissue action"
+    },
+    {
+      "id": "CE-A17",
+      "slug": "daily_care_and_dispensing",
+      "substrate": "task-independent SustiBus plan and qualified human/oem service",
+      "axon": "axon integrity and glial viability monitored as protected endpoints, not food-routing actuators",
+      "molecular_questions": "salts/buffers, glucose, pyruvate, amino acids, lipids, supplements; lactate/oxygen observations",
+      "training": "register approved care SOP → monitor sensors → notify due → log physical receipt → review deviation",
+      "growth": "no model-controlled medium/food changing or pump command",
+      "acceptance": "valid care receipts and correct stale/invalid alerts without task coupling",
+      "failure": "training score drives a feeder or failed sensor presumed healthy",
+      "processes": [
+        "BIO-03",
+        "BIO-04",
+        "BIO-05",
+        "BIO-10"
+      ],
+      "status": "research design; no live tissue action"
+    },
+    {
+      "id": "CE-A18",
+      "slug": "bread_meat_water_and_metabolic",
+      "substrate": "digital foundational/advanced teaching distinct from physical Milk/Water",
+      "axon": "nutritional status of axon/Root is measured context, not arbitrary feedback",
+      "molecular_questions": "astrocytic MCT1/MCT4, neuronal MCT2, metabolic substrates and selected chemistry assays",
+      "training": "build Bread prerequisites → Meat tasks → Honey feedback → independent Milk monitoring → delayed evaluation",
+      "growth": "no starch/protein meal or lactate feeding by task events",
+      "acceptance": "proven digital learning separately from qualified physiological sufficiency",
+      "failure": "lactate change counted as a memory or food encoded as an upgrade",
+      "processes": [
+        "BIO-04",
+        "BIO-05",
+        "BIO-06",
+        "BIO-10"
+      ],
+      "status": "research design; no live tissue action"
+    },
+    {
+      "id": "CE-A19",
+      "slug": "central_data_router_and_host",
+      "substrate": "authenticated digital host and wired high-speed data paths",
+      "axon": "physical axons not a networking protocol; maps are read-only evidence",
+      "molecular_questions": "no molecular reagent required for host router",
+      "training": "verify source/rights → version event → route by ACL → receipt and audit → fault injection",
+      "growth": "increase digital throughput before considering physical network changes",
+      "acceptance": "no remote commands to care, stimulation or cell production",
+      "failure": "internet or Bluetooth injection bypasses limits",
+      "processes": [
+        "BIO-05",
+        "BIO-07",
+        "SYS-11",
+        "SYS-12"
+      ],
+      "status": "research design; no live tissue action"
+    },
+    {
+      "id": "CE-A20",
+      "slug": "filesystem_and_snapshots",
+      "substrate": "digital content-addressed files, schema metadata and checkpoint provenance",
+      "axon": "tissue observations archived; true axonal/synaptic states cannot be restored from disk alone",
+      "molecular_questions": "no molecular correspondence to filesystem inode assumed",
+      "training": "write blob and WAL metadata → outbox index → Merkle snapshot → cold restore → consent erasure",
+      "growth": "no biological growth from data snapshot; physical replay remains research",
+      "acceptance": "exact digital restore with stable source rights and indexes",
+      "failure": "restoring files interpreted as cloning trained living organism",
+      "processes": [
+        "SYS-11",
+        "SYS-12",
+        "BIO-08",
+        "BIO-05"
+      ],
+      "status": "research design; no live tissue action"
+    },
+    {
+      "id": "CE-A21",
+      "slug": "affective_support_and_honey",
+      "substrate": "digital compassionate support and separate task learning feedback",
+      "axon": "do not infer human emotions from neural spikes or peripheral axon activity",
+      "molecular_questions": "neuromodulatory and astrocytic signaling as observation candidates only",
+      "training": "consent → user support policy → scoped feedback → independent task outcome/experience evaluation",
+      "growth": "no neurochemical mood recipe or tissue manipulation from engagement score",
+      "acceptance": "transparent user-controlled support and evidence of educational benefit",
+      "failure": "reward-hacking, emotional manipulation or clinical claim from unvalidated signals",
+      "processes": [
+        "BIO-04",
+        "BIO-05",
+        "BIO-06",
+        "SYS-11"
+      ],
+      "status": "research design; no live tissue action"
+    },
+    {
+      "id": "CE-A22",
+      "slug": "independent_limits_and_governance",
+      "substrate": "hardware limit controller and human scientific authority outside Lotus",
+      "axon": "neural/axon response never overrides physical veto",
+      "molecular_questions": "candidate reagent, assay and source lot statuses tracked without software dosing",
+      "training": "source permission → action qualification → validate sensor freshness → hard veto → signed review",
+      "growth": "all cell, food, peptide and stimulation changes depend on qualified lab SOP",
+      "acceptance": "injected faults always suppress unapproved physical actuation and preserve essential care",
+      "failure": "reclassifying physical command as data routing to evade limits",
+      "processes": [
+        "BIO-01",
+        "BIO-04",
+        "BIO-09",
+        "BIO-10"
+      ],
+      "status": "research design; no live tissue action"
+    },
+    {
+      "id": "CE-A23",
+      "slug": "molecular_word_and_physical_crystal",
+      "substrate": "unproven physical carrier within living Soil/Root reader; digital pack separate",
+      "axon": "a synaptic/axon structure must show content-specific contribution, not only density",
+      "molecular_questions": "proBDNF/mature BDNF, TrkB/SorCS2/p75, MMP9/TIMP1, PSD95/SHANK/KIBRA as scoped forms",
+      "training": "identify molecular form/receiver → history effect → delayed relation → bound carrier → independent reader",
+      "growth": "never add peptide or alter feed as a proven semantic programming route",
+      "acceptance": "selective causal carrier evidence beyond general excitability; otherwise hypothesis",
+      "failure": "a cleavage product or dense phase claimed to store a book",
+      "processes": [
+        "BIO-04",
+        "BIO-05",
+        "BIO-08",
+        "BIO-09"
+      ],
+      "status": "research design; no live tissue action"
+    },
+    {
+      "id": "CE-A24",
+      "slug": "observer_monitoring_communities",
+      "substrate": "digital Observer O primary; living neuronal/glial observer independently qualified",
+      "axon": "axonal/astrocytic state measured in C but shared input handled as confound",
+      "molecular_questions": "GFAP/ALDH1L1, calcium/receptor, metabolic transport as assay questions",
+      "training": "O1 status baseline → O2 prospective prediction → blinded digital control → support-policy comparison",
+      "growth": "add observer capacity only if independently measured benefit and safe interface",
+      "acceptance": "true prospective improvement with feature cutoff and calibration",
+      "failure": "correlated sources scored as independent agreement or future labels leaked",
+      "processes": [
+        "BIO-05",
+        "BIO-06",
+        "BIO-07",
+        "BIO-10"
+      ],
+      "status": "research design; no live tissue action"
+    }
+  ]
+}
