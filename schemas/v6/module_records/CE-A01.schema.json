@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EpisodeRecord",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "episode_id",
+    "source_sha256",
+    "actor_scope",
+    "project_id",
+    "observed_at",
+    "kind",
+    "payload_object",
+    "consent_training",
+    "consent_export"
+  ],
+  "properties": {
+    "episode_id": {
+      "type": "string",
+      "description": "uuid"
+    },
+    "source_sha256": {
+      "type": "string",
+      "description": "hex64"
+    },
+    "actor_scope": {
+      "type": "string",
+      "description": "enum"
+    },
+    "project_id": {
+      "type": "string",
+      "description": "string"
+    },
+    "observed_at": {
+      "type": "string",
+      "description": "UTC"
+    },
+    "kind": {
+      "type": "string",
+      "description": "enum"
+    },
+    "payload_object": {
+      "type": "string",
+      "description": "sha256"
+    },
+    "consent_training": {
+      "type": "boolean",
+      "description": "boolean"
+    },
+    "consent_export": {
+      "type": "boolean",
+      "description": "boolean"
+    },
+    "causal_parent": {
+      "type": "string",
+      "description": "uuid?"
+    },
+    "correction_of": {
+      "type": "string",
+      "description": "uuid?"
+    }
+  }
+}

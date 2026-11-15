@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BiologicalTrial",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "trial_id",
+    "preparation_id",
+    "task_codebook_version",
+    "requested_event",
+    "raw_record_ref",
+    "mask_digest",
+    "decoder_digest",
+    "response",
+    "validity"
+  ],
+  "properties": {
+    "trial_id": {
+      "type": "string",
+      "description": "uuid"
+    },
+    "preparation_id": {
+      "type": "string",
+      "description": "string"
+    },
+    "task_codebook_version": {
+      "type": "string",
+      "description": "string"
+    },
+    "requested_event": {
+      "type": "string",
+      "description": "id"
+    },
+    "delivered_event": {
+      "type": "string",
+      "description": "id?"
+    },
+    "raw_record_ref": {
+      "type": "string",
+      "description": "string"
+    },
+    "mask_digest": {
+      "type": "string",
+      "description": "sha256"
+    },
+    "decoder_digest": {
+      "type": "string",
+      "description": "sha256"
+    },
+    "response": {
+      "type": "string",
+      "description": "enum"
+    },
+    "validity": {
+      "type": "string",
+      "description": "enum"
+    },
+    "evaluator_label": {
+      "type": "string",
+      "description": "enum?"
+    },
+    "feedback_receipt": {
+      "type": "string",
+      "description": "id?"
+    }
+  }
+}

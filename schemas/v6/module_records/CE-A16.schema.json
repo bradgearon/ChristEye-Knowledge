@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RootRecord",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "root_id",
+    "task_relation",
+    "learner_id",
+    "context",
+    "acquisition_run",
+    "reader_digest",
+    "delay_scores",
+    "protected",
+    "evidence_links",
+    "graph_edges",
+    "access_routes",
+    "status"
+  ],
+  "properties": {
+    "root_id": {
+      "type": "string",
+      "description": "string"
+    },
+    "task_relation": {
+      "type": "string",
+      "description": "string"
+    },
+    "learner_id": {
+      "type": "string",
+      "description": "string"
+    },
+    "context": {
+      "type": "array",
+      "description": "list"
+    },
+    "acquisition_run": {
+      "type": "string",
+      "description": "id"
+    },
+    "reader_digest": {
+      "type": "string",
+      "description": "sha256"
+    },
+    "delay_scores": {
+      "type": "object",
+      "description": "dict"
+    },
+    "protected": {
+      "type": "boolean",
+      "description": "boolean"
+    },
+    "evidence_links": {
+      "type": "array",
+      "description": "list"
+    },
+    "graph_edges": {
+      "type": "array",
+      "description": "list"
+    },
+    "access_routes": {
+      "type": "array",
+      "description": "list"
+    },
+    "status": {
+      "type": "string",
+      "description": "enum"
+    }
+  }
+}

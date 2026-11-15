@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ObserverPrediction",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "prediction_id",
+    "observer_id",
+    "source_preparation",
+    "feature_cutoff",
+    "future_horizon",
+    "feature_digest",
+    "missingness_mask",
+    "predicted_class",
+    "advice_type"
+  ],
+  "properties": {
+    "prediction_id": {
+      "type": "string",
+      "description": "uuid"
+    },
+    "observer_id": {
+      "type": "string",
+      "description": "string"
+    },
+    "source_preparation": {
+      "type": "string",
+      "description": "string"
+    },
+    "feature_cutoff": {
+      "type": "string",
+      "description": "UTC"
+    },
+    "future_horizon": {
+      "type": "string",
+      "description": "ms"
+    },
+    "feature_digest": {
+      "type": "string",
+      "description": "sha256"
+    },
+    "missingness_mask": {
+      "type": "object",
+      "description": "object"
+    },
+    "predicted_class": {
+      "type": "string",
+      "description": "enum"
+    },
+    "calibrated_probability": {
+      "type": "number",
+      "description": "float?"
+    },
+    "observed_outcome_ref": {
+      "type": "string",
+      "description": "string?"
+    },
+    "advice_type": {
+      "type": "string",
+      "description": "enum"
+    }
+  }
+}

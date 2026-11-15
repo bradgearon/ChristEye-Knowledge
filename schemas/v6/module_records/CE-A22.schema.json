@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PermitReceipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "receipt_id",
+    "action_id",
+    "actor",
+    "module",
+    "action_type",
+    "approval_scope",
+    "policy_digest",
+    "inputs_valid",
+    "state",
+    "reason_code",
+    "timestamp"
+  ],
+  "properties": {
+    "receipt_id": {
+      "type": "string",
+      "description": "uuid"
+    },
+    "action_id": {
+      "type": "string",
+      "description": "uuid"
+    },
+    "actor": {
+      "type": "string",
+      "description": "string"
+    },
+    "module": {
+      "type": "string",
+      "description": "string"
+    },
+    "action_type": {
+      "type": "string",
+      "description": "string"
+    },
+    "approval_scope": {
+      "type": "string",
+      "description": "string"
+    },
+    "policy_digest": {
+      "type": "string",
+      "description": "sha256"
+    },
+    "inputs_valid": {
+      "type": "boolean",
+      "description": "boolean"
+    },
+    "state": {
+      "type": "string",
+      "description": "enum"
+    },
+    "reason_code": {
+      "type": "string",
+      "description": "string"
+    },
+    "authorized_by": {
+      "type": "string",
+      "description": "string?"
+    },
+    "timestamp": {
+      "type": "string",
+      "description": "UTC"
+    }
+  }
+}

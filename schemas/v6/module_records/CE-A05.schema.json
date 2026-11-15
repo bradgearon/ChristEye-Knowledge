@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RefreshPlan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "plan_id",
+    "target_id",
+    "last_validated",
+    "age",
+    "stale_dependencies",
+    "action",
+    "snapshot_before",
+    "outcome_receipt",
+    "followup_due"
+  ],
+  "properties": {
+    "plan_id": {
+      "type": "string",
+      "description": "uuid"
+    },
+    "target_id": {
+      "type": "string",
+      "description": "string"
+    },
+    "last_validated": {
+      "type": "string",
+      "description": "UTC"
+    },
+    "age": {
+      "type": "string",
+      "description": "seconds"
+    },
+    "stale_dependencies": {
+      "type": "array",
+      "description": "list"
+    },
+    "action": {
+      "type": "string",
+      "description": "enum"
+    },
+    "snapshot_before": {
+      "type": "string",
+      "description": "sha256"
+    },
+    "outcome_receipt": {
+      "type": "string",
+      "description": "uuid"
+    },
+    "followup_due": {
+      "type": "string",
+      "description": "UTC"
+    }
+  }
+}

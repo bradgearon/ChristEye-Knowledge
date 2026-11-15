@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CrystalManifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pack_id",
+    "semver",
+    "kind",
+    "producer",
+    "build_digest",
+    "artifacts",
+    "lessons",
+    "memory_roots",
+    "license",
+    "reader_contract",
+    "tests",
+    "evidence_tier",
+    "installable"
+  ],
+  "properties": {
+    "pack_id": {
+      "type": "string",
+      "description": "string"
+    },
+    "semver": {
+      "type": "string",
+      "description": "string"
+    },
+    "kind": {
+      "type": "string",
+      "description": "enum"
+    },
+    "producer": {
+      "type": "string",
+      "description": "string"
+    },
+    "build_digest": {
+      "type": "string",
+      "description": "sha256"
+    },
+    "artifacts": {
+      "type": "array",
+      "description": "list[digest]"
+    },
+    "lessons": {
+      "type": "array",
+      "description": "list"
+    },
+    "memory_roots": {
+      "type": "array",
+      "description": "list"
+    },
+    "license": {
+      "type": "object",
+      "description": "object"
+    },
+    "reader_contract": {
+      "type": "string",
+      "description": "string"
+    },
+    "tests": {
+      "type": "object",
+      "description": "object"
+    },
+    "evidence_tier": {
+      "type": "string",
+      "description": "enum"
+    },
+    "installable": {
+      "type": "boolean",
+      "description": "boolean"
+    }
+  }
+}

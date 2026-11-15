@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ActivationJob",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "job_id",
+    "pack_id",
+    "target_module",
+    "state",
+    "required_checks",
+    "completed_checks",
+    "release_allowed"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "job_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "pack_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_module": {
+      "type": "string",
+      "pattern": "^CE-(P|D|R)\\d{2}$"
+    },
+    "state": {
+      "enum": [
+        "DISCOVER",
+        "VERIFY",
+        "STAGE",
+        "DRY_RUN",
+        "SHADOW",
+        "CALIBRATE",
+        "ASSESS",
+        "RELEASE",
+        "MONITOR",
+        "BLOCKED",
+        "FAILED"
+      ]
+    },
+    "required_checks": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "completed_checks": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "release_allowed": {
+      "type": "boolean"
+    },
+    "reason": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

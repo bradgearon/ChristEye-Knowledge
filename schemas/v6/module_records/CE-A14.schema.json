@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ConsumptionJob",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "job_id",
+    "pack_digest",
+    "target_reader",
+    "mode",
+    "state",
+    "replay_cursor",
+    "consent_snapshot",
+    "assessment_set",
+    "rollback_checkpoint"
+  ],
+  "properties": {
+    "job_id": {
+      "type": "string",
+      "description": "uuid"
+    },
+    "pack_digest": {
+      "type": "string",
+      "description": "sha256"
+    },
+    "target_reader": {
+      "type": "string",
+      "description": "string"
+    },
+    "mode": {
+      "type": "string",
+      "description": "enum"
+    },
+    "state": {
+      "type": "string",
+      "description": "enum"
+    },
+    "replay_cursor": {
+      "type": "integer",
+      "description": "uint64"
+    },
+    "consent_snapshot": {
+      "type": "string",
+      "description": "sha256"
+    },
+    "assessment_set": {
+      "type": "string",
+      "description": "sha256"
+    },
+    "rollback_checkpoint": {
+      "type": "string",
+      "description": "sha256"
+    },
+    "activation_receipt": {
+      "type": "string",
+      "description": "id?"
+    }
+  }
+}

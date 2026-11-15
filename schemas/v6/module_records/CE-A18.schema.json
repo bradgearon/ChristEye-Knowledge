@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ProvisionEvent",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "lane",
+    "category",
+    "content_or_SOP_ref",
+    "recipient_id",
+    "reason",
+    "rights_or_approval"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "uuid"
+    },
+    "lane": {
+      "type": "string",
+      "description": "enum[digital,physical_record]"
+    },
+    "category": {
+      "type": "string",
+      "description": "enum"
+    },
+    "content_or_SOP_ref": {
+      "type": "string",
+      "description": "string"
+    },
+    "recipient_id": {
+      "type": "string",
+      "description": "string"
+    },
+    "reason": {
+      "type": "string",
+      "description": "string"
+    },
+    "rights_or_approval": {
+      "type": "string",
+      "description": "string"
+    },
+    "delivered_receipt": {
+      "type": "string",
+      "description": "string?"
+    },
+    "evaluation_id": {
+      "type": "string",
+      "description": "string?"
+    }
+  }
+}

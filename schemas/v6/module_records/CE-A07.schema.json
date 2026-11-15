@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CurriculumUnit",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "unit_id",
+    "domain",
+    "prerequisites",
+    "content_digest",
+    "target_skill",
+    "format",
+    "learner_reader",
+    "assessment_digest",
+    "mastery_rule",
+    "copyright_scope"
+  ],
+  "properties": {
+    "unit_id": {
+      "type": "string",
+      "description": "string"
+    },
+    "domain": {
+      "type": "string",
+      "description": "string"
+    },
+    "prerequisites": {
+      "type": "array",
+      "description": "list"
+    },
+    "content_digest": {
+      "type": "string",
+      "description": "sha256"
+    },
+    "target_skill": {
+      "type": "string",
+      "description": "string"
+    },
+    "format": {
+      "type": "string",
+      "description": "enum"
+    },
+    "learner_reader": {
+      "type": "string",
+      "description": "string"
+    },
+    "assessment_digest": {
+      "type": "string",
+      "description": "sha256"
+    },
+    "mastery_rule": {
+      "type": "object",
+      "description": "object"
+    },
+    "copyright_scope": {
+      "type": "string",
+      "description": "string"
+    }
+  }
+}

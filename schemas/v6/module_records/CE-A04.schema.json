@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GrowthProposal",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "proposal_id",
+    "diagnosed_gap",
+    "comparator_results",
+    "resource_budget",
+    "candidate_module",
+    "expected_gain_vector",
+    "uncertainty",
+    "protected_roots",
+    "permit"
+  ],
+  "properties": {
+    "proposal_id": {
+      "type": "string",
+      "description": "uuid"
+    },
+    "diagnosed_gap": {
+      "type": "string",
+      "description": "string"
+    },
+    "comparator_results": {
+      "type": "array",
+      "description": "list"
+    },
+    "resource_budget": {
+      "type": "object",
+      "description": "object"
+    },
+    "candidate_module": {
+      "type": "string",
+      "description": "string"
+    },
+    "expected_gain_vector": {
+      "type": "object",
+      "description": "object"
+    },
+    "uncertainty": {
+      "type": "object",
+      "description": "object"
+    },
+    "protected_roots": {
+      "type": "array",
+      "description": "list"
+    },
+    "permit": {
+      "type": "string",
+      "description": "enum"
+    },
+    "observed_gain": {
+      "type": "object",
+      "description": "object?"
+    }
+  }
+}

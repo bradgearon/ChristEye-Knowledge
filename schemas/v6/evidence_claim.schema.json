@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EvidenceClaim",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "claim_id",
+    "claim",
+    "evidence_class",
+    "status",
+    "evidence_ids",
+    "counterexample"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "claim_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "claim": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_class": {
+      "enum": [
+        "F",
+        "X",
+        "H",
+        "D"
+      ]
+    },
+    "status": {
+      "enum": [
+        "proposed",
+        "tested",
+        "supported",
+        "rejected",
+        "unresolved"
+      ]
+    },
+    "evidence_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "counterexample": {
+      "type": "string",
+      "minLength": 1
+    },
+    "measurable_endpoint": {
+      "type": "string"
+    },
+    "confounders": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    }
+  },
+  "additionalProperties": false
+}

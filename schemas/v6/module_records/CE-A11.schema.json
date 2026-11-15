@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "WindEnvelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "trace_id",
+    "source_id",
+    "recipient_id",
+    "schema_id",
+    "version",
+    "kind",
+    "observed_at",
+    "issued_at",
+    "expires_at",
+    "payload_ref",
+    "source_scope"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "description": "uuid"
+    },
+    "trace_id": {
+      "type": "string",
+      "description": "uuid"
+    },
+    "source_id": {
+      "type": "string",
+      "description": "string"
+    },
+    "recipient_id": {
+      "type": "string",
+      "description": "string"
+    },
+    "schema_id": {
+      "type": "string",
+      "description": "string"
+    },
+    "version": {
+      "type": "string",
+      "description": "semver"
+    },
+    "kind": {
+      "type": "string",
+      "description": "enum"
+    },
+    "observed_at": {
+      "type": "string",
+      "description": "UTC"
+    },
+    "issued_at": {
+      "type": "string",
+      "description": "UTC"
+    },
+    "expires_at": {
+      "type": "string",
+      "description": "UTC"
+    },
+    "payload_ref": {
+      "type": "string",
+      "description": "sha256"
+    },
+    "source_scope": {
+      "type": "string",
+      "description": "enum"
+    },
+    "signature": {
+      "type": "string",
+      "description": "bytes?"
+    }
+  }
+}

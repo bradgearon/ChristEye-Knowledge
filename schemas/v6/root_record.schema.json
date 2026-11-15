@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RootRecord",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "competency_id",
+    "module_id",
+    "task_version",
+    "decoder_digest",
+    "evaluation_split",
+    "chance_performance",
+    "immediate_score",
+    "delayed_scores",
+    "evidence_class"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "competency_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "module_id": {
+      "type": "string",
+      "pattern": "^CE-(P|D|R)\\d{2}$"
+    },
+    "task_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "decoder_digest": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evaluation_split": {
+      "type": "string",
+      "minLength": 1
+    },
+    "chance_performance": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "immediate_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "delayed_scores": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "delay_hours",
+          "score"
+        ],
+        "properties": {
+          "delay_hours": {
+            "type": "number",
+            "minimum": 0
+          },
+          "score": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "confidence_low": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "confidence_high": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "evidence_class": {
+      "enum": [
+        "F",
+        "X",
+        "H",
+        "D"
+      ]
+    },
+    "source_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    }
+  },
+  "additionalProperties": false
+}

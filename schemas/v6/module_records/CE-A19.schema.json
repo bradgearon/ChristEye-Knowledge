@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "IngressAsset",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "asset_id",
+    "source_uri",
+    "original_digest",
+    "received_at",
+    "provenance",
+    "license",
+    "user_scope",
+    "content_type",
+    "parse_version",
+    "trust",
+    "decision"
+  ],
+  "properties": {
+    "asset_id": {
+      "type": "string",
+      "description": "sha256"
+    },
+    "source_uri": {
+      "type": "string",
+      "description": "string"
+    },
+    "original_digest": {
+      "type": "string",
+      "description": "sha256"
+    },
+    "received_at": {
+      "type": "string",
+      "description": "UTC"
+    },
+    "provenance": {
+      "type": "object",
+      "description": "object"
+    },
+    "license": {
+      "type": "object",
+      "description": "object"
+    },
+    "user_scope": {
+      "type": "string",
+      "description": "string"
+    },
+    "content_type": {
+      "type": "string",
+      "description": "MIME"
+    },
+    "parse_version": {
+      "type": "string",
+      "description": "string"
+    },
+    "trust": {
+      "type": "string",
+      "description": "enum"
+    },
+    "decision": {
+      "type": "string",
+      "description": "enum"
+    }
+  }
+}

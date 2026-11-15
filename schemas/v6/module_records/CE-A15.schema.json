@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PreparationVersion",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "prep_id",
+    "source_lineage",
+    "approval_refs",
+    "organism",
+    "region",
+    "geometry",
+    "batch",
+    "received_at",
+    "imaging_map_ref",
+    "functional_release",
+    "quality_review"
+  ],
+  "properties": {
+    "prep_id": {
+      "type": "string",
+      "description": "string"
+    },
+    "source_lineage": {
+      "type": "string",
+      "description": "ref"
+    },
+    "approval_refs": {
+      "type": "array",
+      "description": "list"
+    },
+    "organism": {
+      "type": "string",
+      "description": "enum"
+    },
+    "region": {
+      "type": "string",
+      "description": "string"
+    },
+    "geometry": {
+      "type": "string",
+      "description": "enum"
+    },
+    "batch": {
+      "type": "string",
+      "description": "string"
+    },
+    "received_at": {
+      "type": "string",
+      "description": "UTC"
+    },
+    "imaging_map_ref": {
+      "type": "string",
+      "description": "string"
+    },
+    "functional_release": {
+      "type": "object",
+      "description": "object"
+    },
+    "quality_review": {
+      "type": "string",
+      "description": "enum"
+    }
+  }
+}

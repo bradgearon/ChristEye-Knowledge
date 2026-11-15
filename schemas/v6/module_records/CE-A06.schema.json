@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RetentionStudy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "study_id",
+    "capability_id",
+    "participant_id",
+    "training_epoch",
+    "probe_schedule",
+    "holdout_digest",
+    "reader_digest",
+    "immediate",
+    "delayed",
+    "controls",
+    "status"
+  ],
+  "properties": {
+    "study_id": {
+      "type": "string",
+      "description": "uuid"
+    },
+    "capability_id": {
+      "type": "string",
+      "description": "string"
+    },
+    "participant_id": {
+      "type": "string",
+      "description": "string"
+    },
+    "training_epoch": {
+      "type": "string",
+      "description": "string"
+    },
+    "probe_schedule": {
+      "type": "array",
+      "description": "list"
+    },
+    "holdout_digest": {
+      "type": "string",
+      "description": "sha256"
+    },
+    "reader_digest": {
+      "type": "string",
+      "description": "sha256"
+    },
+    "immediate": {
+      "type": "number",
+      "description": "float"
+    },
+    "delayed": {
+      "type": "object",
+      "description": "dict"
+    },
+    "controls": {
+      "type": "array",
+      "description": "list"
+    },
+    "status": {
+      "type": "string",
+      "description": "enum"
+    }
+  }
+}

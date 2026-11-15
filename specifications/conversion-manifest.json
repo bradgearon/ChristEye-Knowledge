@@ -1,0 +1,1409 @@
+{
+  "title": "ChristEye Anaiero \u2014 Complete DOCX to Markdown conversion manifest",
+  "release_date": "2026-11-15",
+  "source_archive": "anaiero_v6_github.zip",
+  "documents": [
+    {
+      "path": "specifications/v3/master_architecture.md",
+      "source": "ChristEye_Anaiero_v6/docs/00_Master_Architecture_v3.docx",
+      "sha256": "f0181cbfa3ebc5f4739d331a399326ed8dedf02108f4ac9bbfe7b11fff877dbb",
+      "bytes": 13453,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "phases/P02/docs/00_P02_Master_Implementation_Architecture.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02_Cell_Free_Electronics_and_WindBus/docs/00_P02_Master_Implementation_Architecture.docx",
+      "sha256": "e47f402df48687493bc92fb8f63cb2659814a16a762bed6718493b5b4169f509",
+      "bytes": 10352,
+      "status": "P02",
+      "images": [
+        "phases/P02/docs/assets/00_P02_Master_Implementation_Architecture/image1.png",
+        "phases/P02/docs/assets/00_P02_Master_Implementation_Architecture/image2.png"
+      ]
+    },
+    {
+      "path": "phases/P02/docs/07_P02_Software_Verification_and_Release_Report.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02_Cell_Free_Electronics_and_WindBus/docs/07_P02_Software_Verification_and_Release_Report.docx",
+      "sha256": "2a98f7fd91a053d638531524f080ae6bdd19569e97a516038bd9427efc4f237c",
+      "bytes": 7545,
+      "status": "P02",
+      "images": []
+    },
+    {
+      "path": "phases/P02/docs/companion/P02-03_Acquisition_Clocks_and_Signal_Pipeline_Companion.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02_Cell_Free_Electronics_and_WindBus/docs/companion/P02-03_Acquisition_Clocks_and_Signal_Pipeline_Companion.docx",
+      "sha256": "a5e81608b8f2199c6c9e19c8689d43dd36c9dcc75e5dd994b985e06b10b7da6e",
+      "bytes": 7787,
+      "status": "P02",
+      "images": []
+    },
+    {
+      "path": "phases/P02/docs/companion/P02-05_Reference_Task_Education_and_Frozen_Reader_Companion.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02_Cell_Free_Electronics_and_WindBus/docs/companion/P02-05_Reference_Task_Education_and_Frozen_Reader_Companion.docx",
+      "sha256": "7e954a13fe010643a592d49b20ef24faae9a83db47c1d39566542f1b4a54e3ce",
+      "bytes": 7903,
+      "status": "P02",
+      "images": []
+    },
+    {
+      "path": "phases/P02/docs/companion/P02-02_WindBus_Messages_and_Connective_Controllers_Companion.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02_Cell_Free_Electronics_and_WindBus/docs/companion/P02-02_WindBus_Messages_and_Connective_Controllers_Companion.docx",
+      "sha256": "1b19f812ff41b6463ed2730489cb786e6a9e467065754ee4d6186a067a49e22d",
+      "bytes": 7394,
+      "status": "P02",
+      "images": []
+    },
+    {
+      "path": "phases/P02/docs/companion/P02-06_Archive_Observability_Verification_and_P03_Handoff_Companion.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02_Cell_Free_Electronics_and_WindBus/docs/companion/P02-06_Archive_Observability_Verification_and_P03_Handoff_Companion.docx",
+      "sha256": "b958fc3a755adaeabb248963ff06954ca277504d7d626148c7e8e79062ffba61",
+      "bytes": 8014,
+      "status": "P02",
+      "images": []
+    },
+    {
+      "path": "phases/P02/docs/companion/P02-01_Hardware_Boundaries_and_Commissioning_Companion.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02_Cell_Free_Electronics_and_WindBus/docs/companion/P02-01_Hardware_Boundaries_and_Commissioning_Companion.docx",
+      "sha256": "7ca1439ae7285fb0af729dd56cc09f5086e34893376b29435a55562424440772",
+      "bytes": 7934,
+      "status": "P02",
+      "images": []
+    },
+    {
+      "path": "phases/P02/docs/companion/P02-04_Independent_Limits_and_Lotus_Controller_Companion.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02_Cell_Free_Electronics_and_WindBus/docs/companion/P02-04_Independent_Limits_and_Lotus_Controller_Companion.docx",
+      "sha256": "08644229ed81d52dea6b496d65065715311dcc7e716f45eb1a74eb1a6f3c8a8c",
+      "bytes": 7183,
+      "status": "P02",
+      "images": []
+    },
+    {
+      "path": "phases/P02/docs/design/P02-03_Acquisition_Clocks_and_Signal_Pipeline_Design.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02_Cell_Free_Electronics_and_WindBus/docs/design/P02-03_Acquisition_Clocks_and_Signal_Pipeline_Design.docx",
+      "sha256": "456a18cdc2a940eadcefe1f2ba6d08db58319d570fe671fcec5ae598e0e52e01",
+      "bytes": 6702,
+      "status": "P02",
+      "images": []
+    },
+    {
+      "path": "phases/P02/docs/design/P02-01_Hardware_Boundaries_and_Commissioning_Design.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02_Cell_Free_Electronics_and_WindBus/docs/design/P02-01_Hardware_Boundaries_and_Commissioning_Design.docx",
+      "sha256": "f701672ae88d537840b41497a33def9457540b616d810cab82ccfc956a1ea51c",
+      "bytes": 7567,
+      "status": "P02",
+      "images": []
+    },
+    {
+      "path": "phases/P02/docs/design/P02-04_Independent_Limits_and_Lotus_Controller_Design.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02_Cell_Free_Electronics_and_WindBus/docs/design/P02-04_Independent_Limits_and_Lotus_Controller_Design.docx",
+      "sha256": "760166a9a31698321d5cb4f4b6fb7e5bd62fe260fb7e6fb55a31c3a6f12f9e0e",
+      "bytes": 6595,
+      "status": "P02",
+      "images": []
+    },
+    {
+      "path": "phases/P02/docs/design/P02-02_WindBus_Messages_and_Connective_Controllers_Design.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02_Cell_Free_Electronics_and_WindBus/docs/design/P02-02_WindBus_Messages_and_Connective_Controllers_Design.docx",
+      "sha256": "a4a00214e023155202056c0ebe2866d8cd5763a7e504fd59300d0e6962a7bdb1",
+      "bytes": 7220,
+      "status": "P02",
+      "images": []
+    },
+    {
+      "path": "phases/P02/docs/design/P02-05_Reference_Task_Education_and_Frozen_Reader_Design.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02_Cell_Free_Electronics_and_WindBus/docs/design/P02-05_Reference_Task_Education_and_Frozen_Reader_Design.docx",
+      "sha256": "01d59d852503066762d468cf7e8153320e83475d18a316bb3fcd09632434b9b0",
+      "bytes": 7417,
+      "status": "P02",
+      "images": []
+    },
+    {
+      "path": "phases/P02/docs/design/P02-06_Archive_Observability_Verification_and_P03_Handoff_Design.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02_Cell_Free_Electronics_and_WindBus/docs/design/P02-06_Archive_Observability_Verification_and_P03_Handoff_Design.docx",
+      "sha256": "3e78766ef9e6101eceb68d59c1b5d3ead765503f79bcf7579fb7328c6491ec69",
+      "bytes": 7326,
+      "status": "P02",
+      "images": []
+    },
+    {
+      "path": "phases/P02B/docs/00_P02B_Master_Engineering_Architecture.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02B_Supervisory_Electronics_and_Scientific_Operations/docs/00_P02B_Master_Engineering_Architecture.docx",
+      "sha256": "0c3aa3e7beab4ddbf5c384a3a119a28ccdcde6ecefc8d65d74ef929c36330b22",
+      "bytes": 7965,
+      "status": "P02B",
+      "images": [
+        "phases/P02B/docs/assets/00_P02B_Master_Engineering_Architecture/image1.png"
+      ]
+    },
+    {
+      "path": "phases/P02B/docs/companion/P02B-10_Commissioning_Release_and_GitHub_Evidence_Companion.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02B_Supervisory_Electronics_and_Scientific_Operations/docs/companion/P02B-10_Commissioning_Release_and_GitHub_Evidence_Companion.docx",
+      "sha256": "ec068af93e6d83ee514025add5d090636dbf6edc5f8c1abba1a746022c0e8bde",
+      "bytes": 2917,
+      "status": "P02B",
+      "images": []
+    },
+    {
+      "path": "phases/P02B/docs/companion/P02B-05_Scientific_Assistant_StarChips_Companion.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02B_Supervisory_Electronics_and_Scientific_Operations/docs/companion/P02B-05_Scientific_Assistant_StarChips_Companion.docx",
+      "sha256": "696d61137f5d41c8885aacefd2e5ba9b6aa77b8f786a253c00e2e6edb6c2a89c",
+      "bytes": 4293,
+      "status": "P02B",
+      "images": []
+    },
+    {
+      "path": "phases/P02B/docs/companion/P02B-06_Supervisor_MCU_and_Firmware_Companion.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02B_Supervisory_Electronics_and_Scientific_Operations/docs/companion/P02B-06_Supervisor_MCU_and_Firmware_Companion.docx",
+      "sha256": "f864dfe9d6c24497d805337d5a18770fc3e0aa307e86d1defcbe32621555f3af",
+      "bytes": 3214,
+      "status": "P02B",
+      "images": []
+    },
+    {
+      "path": "phases/P02B/docs/companion/P02B-09_Neural_Acquisition_and_Multimodal_Time_Base_Companion.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02B_Supervisory_Electronics_and_Scientific_Operations/docs/companion/P02B-09_Neural_Acquisition_and_Multimodal_Time_Base_Companion.docx",
+      "sha256": "129335c6cce94c70fc462f88193ad7215916e98f9c910e7f3ac806e416a372e8",
+      "bytes": 2696,
+      "status": "P02B",
+      "images": []
+    },
+    {
+      "path": "phases/P02B/docs/companion/P02B-07_Incubator_and_Provision_Telemetry_Companion.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02B_Supervisory_Electronics_and_Scientific_Operations/docs/companion/P02B-07_Incubator_and_Provision_Telemetry_Companion.docx",
+      "sha256": "210e2f05ec1cb0f2a14ebefcfaaf206730d0bc83e6fe81d7401530a9eff107a1",
+      "bytes": 2891,
+      "status": "P02B",
+      "images": []
+    },
+    {
+      "path": "phases/P02B/docs/companion/P02B-04_Metabolic_and_Multimodal_Observation_Companion.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02B_Supervisory_Electronics_and_Scientific_Operations/docs/companion/P02B-04_Metabolic_and_Multimodal_Observation_Companion.docx",
+      "sha256": "2fa3c6af8bc12f0bb219af9ad1cfec4bdf33ea5a9513e92e6695b311231212b3",
+      "bytes": 4888,
+      "status": "P02B",
+      "images": []
+    },
+    {
+      "path": "phases/P02B/docs/companion/P02B-08_Chemistry_Sensor_and_Assay_Channel_Companion.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02B_Supervisory_Electronics_and_Scientific_Operations/docs/companion/P02B-08_Chemistry_Sensor_and_Assay_Channel_Companion.docx",
+      "sha256": "fb314ae4d79270c82b2edb240e7d6c55076ca735bd2055c8231519b7548d6ab8",
+      "bytes": 2850,
+      "status": "P02B",
+      "images": []
+    },
+    {
+      "path": "phases/P02B/docs/companion/P02B-03_Host_Debug_and_Remote_Diagnostics_Companion.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02B_Supervisory_Electronics_and_Scientific_Operations/docs/companion/P02B-03_Host_Debug_and_Remote_Diagnostics_Companion.docx",
+      "sha256": "76a36d68892580524c4df492871187c77ac319b4dcedf856a5f2c7771869b913",
+      "bytes": 4270,
+      "status": "P02B",
+      "images": []
+    },
+    {
+      "path": "phases/P02B/docs/companion/P02B-01_Scientific_Direction_and_Cell_Production_Companion.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02B_Supervisory_Electronics_and_Scientific_Operations/docs/companion/P02B-01_Scientific_Direction_and_Cell_Production_Companion.docx",
+      "sha256": "0603f12b295aa137965fbe6598ae64600b75cea07e2742c7bdc23f1f8ed80817",
+      "bytes": 3766,
+      "status": "P02B",
+      "images": []
+    },
+    {
+      "path": "phases/P02B/docs/companion/P02B-02_Board_Topology_and_Instrument_Interfaces_Companion.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02B_Supervisory_Electronics_and_Scientific_Operations/docs/companion/P02B-02_Board_Topology_and_Instrument_Interfaces_Companion.docx",
+      "sha256": "72b48a4ce4b91a85f6cd96f8cd870b3af8c46a28253a0763a089a29b13e446aa",
+      "bytes": 4535,
+      "status": "P02B",
+      "images": []
+    },
+    {
+      "path": "phases/P02B/docs/design/P02B-05_Scientific_Assistant_StarChips_Design.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02B_Supervisory_Electronics_and_Scientific_Operations/docs/design/P02B-05_Scientific_Assistant_StarChips_Design.docx",
+      "sha256": "61e16a98bb4a8d8ecb0b1dba31c7049b5b2dddf43fb424d0bed3c5e59760b232",
+      "bytes": 5501,
+      "status": "P02B",
+      "images": []
+    },
+    {
+      "path": "phases/P02B/docs/design/P02B-01_Scientific_Direction_and_Cell_Production_Design.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02B_Supervisory_Electronics_and_Scientific_Operations/docs/design/P02B-01_Scientific_Direction_and_Cell_Production_Design.docx",
+      "sha256": "cfc3bfa4393688b275d388a8d9ddd3d5a280551ecbbf07e84e3d72bf416d824e",
+      "bytes": 6024,
+      "status": "P02B",
+      "images": []
+    },
+    {
+      "path": "phases/P02B/docs/design/P02B-10_Commissioning_Release_and_GitHub_Evidence_Design.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02B_Supervisory_Electronics_and_Scientific_Operations/docs/design/P02B-10_Commissioning_Release_and_GitHub_Evidence_Design.docx",
+      "sha256": "271bb171cc7154ea78b7f799f6a4f6eb8216ad8b21e7274073954d666f649683",
+      "bytes": 3484,
+      "status": "P02B",
+      "images": []
+    },
+    {
+      "path": "phases/P02B/docs/design/P02B-03_Host_Debug_and_Remote_Diagnostics_Design.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02B_Supervisory_Electronics_and_Scientific_Operations/docs/design/P02B-03_Host_Debug_and_Remote_Diagnostics_Design.docx",
+      "sha256": "faa3dbc6486e84ebd022093e43b608b0bef4a079d77b1397a4ae89ed64674984",
+      "bytes": 4856,
+      "status": "P02B",
+      "images": []
+    },
+    {
+      "path": "phases/P02B/docs/design/P02B-02_Board_Topology_and_Instrument_Interfaces_Design.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02B_Supervisory_Electronics_and_Scientific_Operations/docs/design/P02B-02_Board_Topology_and_Instrument_Interfaces_Design.docx",
+      "sha256": "efea27cb2986164b4d01b0e4df7ace99f12aee0c39c759070a2ac26988c47b70",
+      "bytes": 7266,
+      "status": "P02B",
+      "images": []
+    },
+    {
+      "path": "phases/P02B/docs/design/P02B-08_Chemistry_Sensor_and_Assay_Channel_Design.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02B_Supervisory_Electronics_and_Scientific_Operations/docs/design/P02B-08_Chemistry_Sensor_and_Assay_Channel_Design.docx",
+      "sha256": "0993d1c03bfbb70325df5cc05c0d5901dd47e553c94f0b07e7c9cccf95d20cb8",
+      "bytes": 3482,
+      "status": "P02B",
+      "images": []
+    },
+    {
+      "path": "phases/P02B/docs/design/P02B-07_Incubator_and_Provision_Telemetry_Design.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02B_Supervisory_Electronics_and_Scientific_Operations/docs/design/P02B-07_Incubator_and_Provision_Telemetry_Design.docx",
+      "sha256": "c8581761595311d47b97a3fa4db12afb4a452de91719f9f3d23b6236d9df7109",
+      "bytes": 3378,
+      "status": "P02B",
+      "images": []
+    },
+    {
+      "path": "phases/P02B/docs/design/P02B-09_Neural_Acquisition_and_Multimodal_Time_Base_Design.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02B_Supervisory_Electronics_and_Scientific_Operations/docs/design/P02B-09_Neural_Acquisition_and_Multimodal_Time_Base_Design.docx",
+      "sha256": "5b95da0b416f8024d097f7133c0bcb41900bd52652682ed88ad4f25cb9bd4f61",
+      "bytes": 3491,
+      "status": "P02B",
+      "images": []
+    },
+    {
+      "path": "phases/P02B/docs/design/P02B-06_Supervisor_MCU_and_Firmware_Design.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02B_Supervisory_Electronics_and_Scientific_Operations/docs/design/P02B-06_Supervisor_MCU_and_Firmware_Design.docx",
+      "sha256": "a2f6383678a0d02c2c4f127910ec75f0282e435c87e354dae2028690b1f82ed2",
+      "bytes": 4172,
+      "status": "P02B",
+      "images": []
+    },
+    {
+      "path": "phases/P02B/docs/design/P02B-04_Metabolic_and_Multimodal_Observation_Design.md",
+      "source": "ChristEye_Anaiero_v6/phases/P02B_Supervisory_Electronics_and_Scientific_Operations/docs/design/P02B-04_Metabolic_and_Multimodal_Observation_Design.docx",
+      "sha256": "415c702cef124887cf9676cf9e8d68a87b6280bca7ff74638c135070f451319a",
+      "bytes": 6927,
+      "status": "P02B",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/companion/CE-A18_bread_meat_water_and_metabolic_Companion.md",
+      "source": "ChristEye_Anaiero_v6/docs/companion/CE-A18_bread_meat_water_and_metabolic_Companion.docx",
+      "sha256": "74e15effecec04528707373aad9818ee00f6474785a8c5538456b1a1e084f1c4",
+      "bytes": 7949,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/companion/CE-A17_daily_care_and_dispensing_Companion.md",
+      "source": "ChristEye_Anaiero_v6/docs/companion/CE-A17_daily_care_and_dispensing_Companion.docx",
+      "sha256": "3b218c73efeae19335f5c788930f4636c45084c45bdddf66b11c0904c82411bd",
+      "bytes": 7930,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/companion/CE-A24_observer_monitoring_communities_Companion.md",
+      "source": "ChristEye_Anaiero_v6/docs/companion/CE-A24_observer_monitoring_communities_Companion.docx",
+      "sha256": "cfd21a45294b391b877d890b9ca2a7d36a45cf740768d0f8f07c5f4fe00cc28a",
+      "bytes": 7686,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/companion/CE-A22_independent_limits_and_governance_Companion.md",
+      "source": "ChristEye_Anaiero_v6/docs/companion/CE-A22_independent_limits_and_governance_Companion.docx",
+      "sha256": "29fc10f6f144f2ec623f1ea7ede90d7afb376d1664bf1f6633ad2b9d9ddd65a5",
+      "bytes": 7513,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/companion/CE-A23_molecular_word_and_physical_crystal_Companion.md",
+      "source": "ChristEye_Anaiero_v6/docs/companion/CE-A23_molecular_word_and_physical_crystal_Companion.docx",
+      "sha256": "7fea99e44086497e4c6f7b74b37d6b4ce83dfeb274860124a25bcb6b01a945c6",
+      "bytes": 8492,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/companion/CE-A04_growth_and_capacity_Companion.md",
+      "source": "ChristEye_Anaiero_v6/docs/companion/CE-A04_growth_and_capacity_Companion.docx",
+      "sha256": "c7f6858990f3fb925401fb194465ba6e78b02596aed4debe59750aa5fad3cbba",
+      "bytes": 7837,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/companion/CE-A15_organoid_development_and_shape_Companion.md",
+      "source": "ChristEye_Anaiero_v6/docs/companion/CE-A15_organoid_development_and_shape_Companion.docx",
+      "sha256": "aefc92199ff49a497ef5299b7248cf84cbc4ff6ed80bb96ba74682e7fa6e4fb2",
+      "bytes": 8226,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/companion/CE-A03_healing_and_integrity_Companion.md",
+      "source": "ChristEye_Anaiero_v6/docs/companion/CE-A03_healing_and_integrity_Companion.docx",
+      "sha256": "3335cac4c24e68bdbbc960c48aa163d101ee0fc709b41abd2da52db4e66148e0",
+      "bytes": 7524,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/companion/CE-A11_connective_controllers_Companion.md",
+      "source": "ChristEye_Anaiero_v6/docs/companion/CE-A11_connective_controllers_Companion.docx",
+      "sha256": "ea1412f58907028ba6393de4ac4146a715a1ff17f616b7644f86127a39937243",
+      "bytes": 7865,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/companion/CE-A05_refresh_renewal_Companion.md",
+      "source": "ChristEye_Anaiero_v6/docs/companion/CE-A05_refresh_renewal_Companion.docx",
+      "sha256": "093096beba82bd63ccb943e2f6d7aca11c6e9d9e467f31cd1d2ed5c227c4fe60",
+      "bytes": 7401,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/companion/CE-A19_central_data_router_and_host_Companion.md",
+      "source": "ChristEye_Anaiero_v6/docs/companion/CE-A19_central_data_router_and_host_Companion.docx",
+      "sha256": "a61e8db352cf401c1b3e755bc673238d7494e468dace6e8478a170cf9b65cf6f",
+      "bytes": 7312,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/companion/CE-A06_learning_stabilization_Companion.md",
+      "source": "ChristEye_Anaiero_v6/docs/companion/CE-A06_learning_stabilization_Companion.docx",
+      "sha256": "3604bbf794c4dc6c7fbc840167fc7ca2354dd2f23ca750cc846a984012ddb852",
+      "bytes": 8115,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/companion/CE-A02_long_term_storage_Companion.md",
+      "source": "ChristEye_Anaiero_v6/docs/companion/CE-A02_long_term_storage_Companion.docx",
+      "sha256": "6460299b0026a06ef0ba0c08dc2541857ad093f465a16cffea8479926babbb26",
+      "bytes": 7596,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/companion/CE-A08_health_surveillance_Companion.md",
+      "source": "ChristEye_Anaiero_v6/docs/companion/CE-A08_health_surveillance_Companion.docx",
+      "sha256": "7cd2d3c7d2249693fbfc8f41fd435e25fc8134bf792a95b7cef0413f29c45375",
+      "bytes": 7578,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/companion/CE-A01_episodic_and_working_memory_Companion.md",
+      "source": "ChristEye_Anaiero_v6/docs/companion/CE-A01_episodic_and_working_memory_Companion.docx",
+      "sha256": "e0b73b5077322e33a3755ac015e6294a4bc8bed5482ffed1a6a4a41b5b65c665",
+      "bytes": 7675,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/companion/CE-A09_main_living_core_Companion.md",
+      "source": "ChristEye_Anaiero_v6/docs/companion/CE-A09_main_living_core_Companion.docx",
+      "sha256": "0123364e465ac6627c6ec3958fc360ece6383f6daf809919b104f47768742777",
+      "bytes": 8569,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/companion/CE-A13_crystal_replication_and_cloning_Companion.md",
+      "source": "ChristEye_Anaiero_v6/docs/companion/CE-A13_crystal_replication_and_cloning_Companion.docx",
+      "sha256": "fa7d710c6b4441122f56090d99408ffe294d1b0fcf5317e5bab1954d7aaa2d27",
+      "bytes": 7532,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/companion/CE-A10_usage_crystal_compiler_Companion.md",
+      "source": "ChristEye_Anaiero_v6/docs/companion/CE-A10_usage_crystal_compiler_Companion.docx",
+      "sha256": "d690c280d811f518dc60a0bee8e1560e14af8de11ea46488e718075e4eb00cd9",
+      "bytes": 7487,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/companion/CE-A07_learning_enhancement_Companion.md",
+      "source": "ChristEye_Anaiero_v6/docs/companion/CE-A07_learning_enhancement_Companion.docx",
+      "sha256": "b10d567d7adf70f64b2d8f6a06b646bad550e05073c79531b5bc84f5dbbb0eb7",
+      "bytes": 7753,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/companion/CE-A20_filesystem_and_snapshots_Companion.md",
+      "source": "ChristEye_Anaiero_v6/docs/companion/CE-A20_filesystem_and_snapshots_Companion.docx",
+      "sha256": "9340b2a5a881e66e07a0a985fbcc8808fbb730988814d4c080457ece58276d2f",
+      "bytes": 7341,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/companion/CE-A12_lotus_coordinator_Companion.md",
+      "source": "ChristEye_Anaiero_v6/docs/companion/CE-A12_lotus_coordinator_Companion.docx",
+      "sha256": "7d83c6b50e98d32c6db5fccce8073e6196c85161519ea315295539b89788c2b9",
+      "bytes": 7474,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/companion/CE-A16_root_registry_and_mapping_Companion.md",
+      "source": "ChristEye_Anaiero_v6/docs/companion/CE-A16_root_registry_and_mapping_Companion.docx",
+      "sha256": "df5eb37ef051c60802bc653efb0541f82f4e88f99ec13bb79f5f3fbc992d6604",
+      "bytes": 8039,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/companion/CE-A21_affective_support_and_honey_Companion.md",
+      "source": "ChristEye_Anaiero_v6/docs/companion/CE-A21_affective_support_and_honey_Companion.docx",
+      "sha256": "9afcbf0033d45c5cf8bbe4ee9bd1d1403273e4e6e5e43f1aebd474991121af79",
+      "bytes": 7895,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/companion/CE-A14_crystal_consumption_and_replay_Companion.md",
+      "source": "ChristEye_Anaiero_v6/docs/companion/CE-A14_crystal_consumption_and_replay_Companion.docx",
+      "sha256": "c97db61858fa02e31e27737b1faee1b2cbec7cda2c772c7db2bf8787768ea17d",
+      "bytes": 7902,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/design/CE-A19_central_data_router_and_host_Design.md",
+      "source": "ChristEye_Anaiero_v6/docs/design/CE-A19_central_data_router_and_host_Design.docx",
+      "sha256": "55d5e52e1258624db075b7b2859804e072dc1029277090b23601c63354cde3ed",
+      "bytes": 8307,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/design/CE-A12_lotus_coordinator_Design.md",
+      "source": "ChristEye_Anaiero_v6/docs/design/CE-A12_lotus_coordinator_Design.docx",
+      "sha256": "1f135a5a7d802682f49cdfeb00e718958659382e8219dcf22c761df3d2b9daeb",
+      "bytes": 8403,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/design/CE-A11_connective_controllers_Design.md",
+      "source": "ChristEye_Anaiero_v6/docs/design/CE-A11_connective_controllers_Design.docx",
+      "sha256": "e4541364e6e4ca0d696ca7b4cc55b15ede00e9e15b226af797046dc8e28bbc8c",
+      "bytes": 8630,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/design/CE-A05_refresh_renewal_Design.md",
+      "source": "ChristEye_Anaiero_v6/docs/design/CE-A05_refresh_renewal_Design.docx",
+      "sha256": "073365e2adb9cb8fe7a8e5966877524a3b03238c429a758ceb993b54cd3031da",
+      "bytes": 8102,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/design/CE-A21_affective_support_and_honey_Design.md",
+      "source": "ChristEye_Anaiero_v6/docs/design/CE-A21_affective_support_and_honey_Design.docx",
+      "sha256": "c4d98807dda3e2a871da79a02f9ddaa95630bdd45a167f6b822fdf1ad23ae7c0",
+      "bytes": 8555,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/design/CE-A16_root_registry_and_mapping_Design.md",
+      "source": "ChristEye_Anaiero_v6/docs/design/CE-A16_root_registry_and_mapping_Design.docx",
+      "sha256": "14eb27b917e84ed72250fdf2c28296f402941f3a4b3d686f506d71cab52bd82b",
+      "bytes": 8587,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/design/CE-A15_organoid_development_and_shape_Design.md",
+      "source": "ChristEye_Anaiero_v6/docs/design/CE-A15_organoid_development_and_shape_Design.docx",
+      "sha256": "bc7d03ba65a765fc9e64917fe113c7c5b07ea70a25d98d2f63e196a5faf5ce60",
+      "bytes": 8738,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/design/CE-A09_main_living_core_Design.md",
+      "source": "ChristEye_Anaiero_v6/docs/design/CE-A09_main_living_core_Design.docx",
+      "sha256": "acd1698b6c07a3157e2ea8eb6ef3718df363b75f16de4966b04d864cf1fdce3b",
+      "bytes": 8816,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/design/CE-A17_daily_care_and_dispensing_Design.md",
+      "source": "ChristEye_Anaiero_v6/docs/design/CE-A17_daily_care_and_dispensing_Design.docx",
+      "sha256": "38c6734b89fcc061cc20d4f413a1babe13fecfe073e25938e552485cffea0cf0",
+      "bytes": 8625,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/design/CE-A03_healing_and_integrity_Design.md",
+      "source": "ChristEye_Anaiero_v6/docs/design/CE-A03_healing_and_integrity_Design.docx",
+      "sha256": "8a518d488d3c4e54b817a27afc909aadcae91616d3142e9759baea2b72de6024",
+      "bytes": 8436,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/design/CE-A01_episodic_and_working_memory_Design.md",
+      "source": "ChristEye_Anaiero_v6/docs/design/CE-A01_episodic_and_working_memory_Design.docx",
+      "sha256": "fea7a4af4cdaa133db20c6990bf6dac1d4f4e08ba365ce0b52a7efc2c51ef0e0",
+      "bytes": 8771,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/design/CE-A08_health_surveillance_Design.md",
+      "source": "ChristEye_Anaiero_v6/docs/design/CE-A08_health_surveillance_Design.docx",
+      "sha256": "78d003e16be96280d59ce7d8d7a0ee92a1f53c8a99690caf9999e0fa8fe526ad",
+      "bytes": 8269,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/design/CE-A20_filesystem_and_snapshots_Design.md",
+      "source": "ChristEye_Anaiero_v6/docs/design/CE-A20_filesystem_and_snapshots_Design.docx",
+      "sha256": "bdbe57d64ebe95ade95fd25510a00b9cd1da87f0744065c59859068f2b78c09c",
+      "bytes": 8395,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/design/CE-A22_independent_limits_and_governance_Design.md",
+      "source": "ChristEye_Anaiero_v6/docs/design/CE-A22_independent_limits_and_governance_Design.docx",
+      "sha256": "a1d3a211ae82d81c42ba5ace7f1278ec7583b9b528a62404d1b01138028eb52c",
+      "bytes": 8529,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/design/CE-A13_crystal_replication_and_cloning_Design.md",
+      "source": "ChristEye_Anaiero_v6/docs/design/CE-A13_crystal_replication_and_cloning_Design.docx",
+      "sha256": "35da34d9a6a114bed97f20ede478d2e1b3c880e46744136f021a840aef6833a1",
+      "bytes": 8268,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/design/CE-A02_long_term_storage_Design.md",
+      "source": "ChristEye_Anaiero_v6/docs/design/CE-A02_long_term_storage_Design.docx",
+      "sha256": "23d53dd8199db79e99f6a571acd8b9af5065dd4bcee7c3beaa56c378db75677e",
+      "bytes": 8458,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/design/CE-A18_bread_meat_water_and_metabolic_Design.md",
+      "source": "ChristEye_Anaiero_v6/docs/design/CE-A18_bread_meat_water_and_metabolic_Design.docx",
+      "sha256": "d391c8cf2457b4e18a0227672b7ef51bb1980dab6e745bb5b7f778f4cdb52adf",
+      "bytes": 8754,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/design/CE-A23_molecular_word_and_physical_crystal_Design.md",
+      "source": "ChristEye_Anaiero_v6/docs/design/CE-A23_molecular_word_and_physical_crystal_Design.docx",
+      "sha256": "f3ff0fcda2b6302b9a7459488082c8d9e15aa45999b5823c1b37f509aa9b6d23",
+      "bytes": 9186,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/design/CE-A14_crystal_consumption_and_replay_Design.md",
+      "source": "ChristEye_Anaiero_v6/docs/design/CE-A14_crystal_consumption_and_replay_Design.docx",
+      "sha256": "4c5df798a9f533f8a0adbedcb447cfd130debf0216d611d27615b14c66e4f2e6",
+      "bytes": 8677,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/design/CE-A10_usage_crystal_compiler_Design.md",
+      "source": "ChristEye_Anaiero_v6/docs/design/CE-A10_usage_crystal_compiler_Design.docx",
+      "sha256": "12e0a04043b3bb769203843aa6b7e6c4b00d6d1c73fd9a27fb75f07d296444ad",
+      "bytes": 8605,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/design/CE-A07_learning_enhancement_Design.md",
+      "source": "ChristEye_Anaiero_v6/docs/design/CE-A07_learning_enhancement_Design.docx",
+      "sha256": "3d9e13e66d7a918c628a4267aa5b70824991ca8ca509150e03fc7d52f81325d1",
+      "bytes": 8411,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/design/CE-A06_learning_stabilization_Design.md",
+      "source": "ChristEye_Anaiero_v6/docs/design/CE-A06_learning_stabilization_Design.docx",
+      "sha256": "c46138176f01ec0c15086df1e16e9e5f6bf3949a389f2fd25ee6eb90037ca7b8",
+      "bytes": 8534,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/design/CE-A24_observer_monitoring_communities_Design.md",
+      "source": "ChristEye_Anaiero_v6/docs/design/CE-A24_observer_monitoring_communities_Design.docx",
+      "sha256": "74fa7cc6a3af64e7330b2434d01259e4697e6afeed0104864af01b72ad0dc0f7",
+      "bytes": 8530,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "specifications/v3/design/CE-A04_growth_and_capacity_Design.md",
+      "source": "ChristEye_Anaiero_v6/docs/design/CE-A04_growth_and_capacity_Design.docx",
+      "sha256": "44883262055ef6f14e4ad8f0ba0b216c4de8854f429cb1a0e61449c696acc3e3",
+      "bytes": 8740,
+      "status": "current",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-R03_peptide_and_molecular_upgrade_long_horizon_hypothesis.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-R03_peptide_and_molecular_upgrade_long_horizon_hypothesis.docx",
+      "sha256": "dcce7ace3417357df1cbffb844eda684b68dc676cc7cbffee71943dfdb67a5eb",
+      "bytes": 4911,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A19_central_data_router_and_host_Design.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A19_central_data_router_and_host_Design.docx",
+      "sha256": "104a7c5f8edb6622e856304130ff8c2e47fe3a54a350edbeb4af72839c63206c",
+      "bytes": 4772,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-P03_windbus_typed_communication.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-P03_windbus_typed_communication.docx",
+      "sha256": "f939cee85b2d74c67d4308f25b0449fe4899b73b3c1631fcfaf458a6cd89e624",
+      "bytes": 4442,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-D06_pixel_art_animation_and_visual_asset_compiler.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-D06_pixel_art_animation_and_visual_asset_compiler.docx",
+      "sha256": "442b875801b79d797974514e005ebd223afdb64b586aab4056dc0fda150b32e9",
+      "bytes": 4317,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-P11_durable_digital_memory_and_source_provenance.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-P11_durable_digital_memory_and_source_provenance.docx",
+      "sha256": "0ad2c941cd2c128b72b803a137cc5f853dee2c5e446e4f8341f5a8426cc05ec4",
+      "bytes": 4438,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A12_lotus_coordinator_Design.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A12_lotus_coordinator_Design.docx",
+      "sha256": "59cef6d5aeac72ce524b51d565898b95b3d0b7eeef027c88d5206292c7cc1fa9",
+      "bytes": 4674,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-D07_music_composer_by_genre_and_instrumentation.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-D07_music_composer_by_genre_and_instrumentation.docx",
+      "sha256": "4c43167350c642bd7a220394004edcc4322b181e94e29966715237534230d11f",
+      "bytes": 4601,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-D03_room_geometry_platforming_and_streaming.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-D03_room_geometry_platforming_and_streaming.docx",
+      "sha256": "a1f889ffbc4d70f78fbb69b51def21d923a9cf82dc36a2f805cc41036c0843a3",
+      "bytes": 4491,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-D02_world_topology_and_progression_graph.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-D02_world_topology_and_progression_graph.docx",
+      "sha256": "dc4c525e3182c5e9da5c35775b257bcdd09826e33e181a590848436fc6decf21",
+      "bytes": 4517,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A11_connective_controllers_Design.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A11_connective_controllers_Design.docx",
+      "sha256": "74785faab1b0d81ca5977e041eeafc933ec7b86532281b1cdefad82940f6680c",
+      "bytes": 4682,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A05_refresh_renewal_Design.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A05_refresh_renewal_Design.docx",
+      "sha256": "8dd5d769e174b098d35e558263f8ec8e84527cdc80972d13c9ce30fdf48b0dbb",
+      "bytes": 4709,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-D15_language_translation_and_conversation.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-D15_language_translation_and_conversation.docx",
+      "sha256": "0d2ef92daad16b8a001b34bb28d881a7614a6cdf5da5a8922f1a93aa0265fe70",
+      "bytes": 4386,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A21_affective_support_and_honey_Design.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A21_affective_support_and_honey_Design.docx",
+      "sha256": "c122d771cee61d0e752deff5c0f8561dabc886cef237e69c248d6fb6161ce550",
+      "bytes": 4974,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A16_root_registry_and_mapping_Design.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A16_root_registry_and_mapping_Design.docx",
+      "sha256": "9651f752e09169b814ca9de262ed519750e7e370cce9a50beb6edec726ba3b36",
+      "bytes": 4792,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-P05_genesis_curriculum_and_education_engine.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-P05_genesis_curriculum_and_education_engine.docx",
+      "sha256": "0e52305fd7bc41dd0e0439967750b8ac7101bf5db8d8ef5d29af46003b5bbdc8",
+      "bytes": 4677,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-D08_advanced_harmonic_and_rhythmic_divergence.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-D08_advanced_harmonic_and_rhythmic_divergence.docx",
+      "sha256": "3a9bef126540960e610f09e90459f99a828c8b1602059388c66054ecb4a0a119",
+      "bytes": 4674,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A18_bread_meat_water_and_metabolic_Companion.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A18_bread_meat_water_and_metabolic_Companion.docx",
+      "sha256": "58ecc3b4c069708740eb7b3dc1ad137f972e15218129ae1067898c92a35f01dd",
+      "bytes": 4809,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A17_daily_care_and_dispensing_Companion.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A17_daily_care_and_dispensing_Companion.docx",
+      "sha256": "2fadf60f84ba738f4b5a59c2bb0be980a59744950b1f558a2504f1beb0491f4f",
+      "bytes": 4876,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A24_observer_monitoring_communities_Companion.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A24_observer_monitoring_communities_Companion.docx",
+      "sha256": "d3044056e8a4d84f0b953eb5eda82d332c707917ebfda769c060b6c490a74088",
+      "bytes": 4629,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-P06_lotus_mesh_coordination_and_planning.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-P06_lotus_mesh_coordination_and_planning.docx",
+      "sha256": "fab8ad1517c304d179c7b01614ef2293c9dc5284475a7f2f1ae93926dd935877",
+      "bytes": 4573,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A15_organoid_development_and_shape_Design.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A15_organoid_development_and_shape_Design.docx",
+      "sha256": "67d29f3586fa90b0eb16688170748c438ed8db408aada82d6399f0b4e2c9ec6b",
+      "bytes": 4865,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-D13_software_feature_and_tool_upgrade_starchip.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-D13_software_feature_and_tool_upgrade_starchip.docx",
+      "sha256": "7c06849b63a73c38f8cf0088b191df46c71d19206a353bfe5f471576fd254c0b",
+      "bytes": 4324,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A22_independent_limits_and_governance_Companion.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A22_independent_limits_and_governance_Companion.docx",
+      "sha256": "b41bda60d99795bde92ac4fc1c144ff7a07baedf8b5a22a13d9f61d3a8dc6ed4",
+      "bytes": 4639,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-R04_independent_teaching_copying_and_renewal.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-R04_independent_teaching_copying_and_renewal.docx",
+      "sha256": "6f62a6f7cb475c8926d12c42a45f10ad3b45024f5c16e00b6e8e6a9514f07f22",
+      "bytes": 4633,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/00_Master_Architecture.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/00_Master_Architecture.docx",
+      "sha256": "818398905deb24f2c9f9a8a54fd04085189982cbc76583e41a3eccc98920945e",
+      "bytes": 15823,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A09_main_living_core_Design.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A09_main_living_core_Design.docx",
+      "sha256": "7ce63d3784fcc37cdfbe6d3021f08ea72cd25191ef09750d25a7cc9d24aecabd",
+      "bytes": 4900,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-P10_starchip_composition_and_capability_negotiation.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-P10_starchip_composition_and_capability_negotiation.docx",
+      "sha256": "404c5c89af423a633f9eafa886d32918632b717d829da7af75c673a7243c6125",
+      "bytes": 4362,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A23_molecular_word_and_physical_crystal_Companion.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A23_molecular_word_and_physical_crystal_Companion.docx",
+      "sha256": "3e360ff8b003a4487ac56878c09834029901caa1c869ec8a43bbd062264ba6e7",
+      "bytes": 4884,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A04_growth_and_capacity_Companion.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A04_growth_and_capacity_Companion.docx",
+      "sha256": "47127ee3556c41b53832786c366ffb5a85cb5e9bac3f929ea66584d5bf345df4",
+      "bytes": 4708,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-P02_crystalpack_registry_and_packaging.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-P02_crystalpack_registry_and_packaging.docx",
+      "sha256": "ac70f8a733475ab1aa2285ad0212a01ea1efd50b3e93398585e289fd90d1498e",
+      "bytes": 4617,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A17_daily_care_and_dispensing_Design.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A17_daily_care_and_dispensing_Design.docx",
+      "sha256": "8c7a5de9f01ad1d8e9053afcfbe089e004ff1635b8b0d29b66f86b8791e77277",
+      "bytes": 4839,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A15_organoid_development_and_shape_Companion.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A15_organoid_development_and_shape_Companion.docx",
+      "sha256": "e1034ce777d8b45eecc138dee7d20effa08ccdf7086c9b16220ad42dabe4474e",
+      "bytes": 4841,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-D10_college_discipline_and_professional_study.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-D10_college_discipline_and_professional_study.docx",
+      "sha256": "3852bff60e3441275ae3abf846ed1fb6042ab485eebaa705ebe377a63b54f482",
+      "bytes": 4620,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A03_healing_and_integrity_Companion.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A03_healing_and_integrity_Companion.docx",
+      "sha256": "0f170aba063ce0c317890216210f6d6dad120713d00012a6922f4e30a80dd880",
+      "bytes": 4606,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A03_healing_and_integrity_Design.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A03_healing_and_integrity_Design.docx",
+      "sha256": "636777709985922f0c115e4a5a53e17b2cfe8047da8f3345079d7d1db3c5203c",
+      "bytes": 4681,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A01_episodic_and_working_memory_Design.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A01_episodic_and_working_memory_Design.docx",
+      "sha256": "d0db758199cd083f2d57ff0e80fb394bc8af79161c649d98e924a15832de05ab",
+      "bytes": 4686,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-P04_crystal_activation_warmup_and_release.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-P04_crystal_activation_warmup_and_release.docx",
+      "sha256": "0b4d318cd9083c744e6ffdfc5d4512f4ca8a252160521d7c338b188246635251",
+      "bytes": 4623,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-R02_physical_crystal_candidate_carrier_and_packing.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-R02_physical_crystal_candidate_carrier_and_packing.docx",
+      "sha256": "02610c094a41abd8b146fe4da47cd546eb44d3ab06497a439d479f6f8ab710a2",
+      "bytes": 4959,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-D09_adaptive_game_audio_and_music_director.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-D09_adaptive_game_audio_and_music_director.docx",
+      "sha256": "9e8b1464cbd468e72c283567bc5a2cbc77f4ded6103be1b75441faa4d491ecba",
+      "bytes": 4398,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-P13_deployment_security_updates_and_fleet.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-P13_deployment_security_updates_and_fleet.docx",
+      "sha256": "0a78a6952965abf9d0f483254cd19373b92af68db101b0d29804e29e23b91cf4",
+      "bytes": 4459,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A11_connective_controllers_Companion.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A11_connective_controllers_Companion.docx",
+      "sha256": "e3feefcdff5c33b1a31cda86eea4b05fab4377620531d111d2dd26fe09f5765b",
+      "bytes": 4643,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-D12_mathematics_proof_and_formal_models.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-D12_mathematics_proof_and_formal_models.docx",
+      "sha256": "17e16f6b7f1e3e0d1da5e8aab959108d02f85c87aaba60ff3d201013c0609765",
+      "bytes": 4498,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A08_health_surveillance_Design.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A08_health_surveillance_Design.docx",
+      "sha256": "069ea8cefd38f8bac945cc1f34547560330f3b25b5e3762518dc64f84312c12b",
+      "bytes": 4746,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-D14_book_and_library_microcrystal.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-D14_book_and_library_microcrystal.docx",
+      "sha256": "8210170529e52a198073fd40c35a6e5fb5977c9746d09896f298bd99c1b71f50",
+      "bytes": 4464,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A20_filesystem_and_snapshots_Design.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A20_filesystem_and_snapshots_Design.docx",
+      "sha256": "14577cd61f8eae190650241ee3fd532bbc8019345047882c21c1458deff700f9",
+      "bytes": 4766,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-D05_narrative_lore_and_quest_continuity.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-D05_narrative_lore_and_quest_continuity.docx",
+      "sha256": "15d7e9f70adfb87df6cfbe885d08a9d9ecff3980e7a0eacdb0382f470496736a",
+      "bytes": 4479,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A22_independent_limits_and_governance_Design.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A22_independent_limits_and_governance_Design.docx",
+      "sha256": "a7da501c650c1f6a89a9bac13a40f23a6224b1c6c3cf68d2ec648f8f16cfaa52",
+      "bytes": 4646,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A05_refresh_renewal_Companion.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A05_refresh_renewal_Companion.docx",
+      "sha256": "daa3236b824a752039d23ba0fa697ff7f0db26b88d2aa7bd0d74272485d9b92c",
+      "bytes": 4553,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-P07_roots_memory_and_qualification_evaluator.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-P07_roots_memory_and_qualification_evaluator.docx",
+      "sha256": "385d332bf4a6a0a071364fa54ba6d1a8b8b497028a959248c5f76e3106f457b1",
+      "bytes": 4846,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A19_central_data_router_and_host_Companion.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A19_central_data_router_and_host_Companion.docx",
+      "sha256": "8cf2a4c19dbf36239403c1da682fffcf4328e57b887293ad7178d7c7b5d5163a",
+      "bytes": 4649,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A13_crystal_replication_and_cloning_Design.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A13_crystal_replication_and_cloning_Design.docx",
+      "sha256": "02b83a43b9b1ff42d53a7486e69bab53e3de7d1b3cf57ab6c6a64a59c68511ea",
+      "bytes": 4665,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-P08_heart_governance_limits_and_permissions.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-P08_heart_governance_limits_and_permissions.docx",
+      "sha256": "885226ac9683d43e6dd776840acad1892902de95ffe95b7fd6f6c13edd2272b7",
+      "bytes": 4482,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A02_long_term_storage_Design.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A02_long_term_storage_Design.docx",
+      "sha256": "fba84963679cca3250de2a60024824daa90243174254dc0505a85623ee671dda",
+      "bytes": 4675,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-D04_bosses_combat_and_enemy_behaviors.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-D04_bosses_combat_and_enemy_behaviors.docx",
+      "sha256": "1a6fbdc9aef8c9d40d48e62972e677266e3c3573bb0c34fc372ffd468541b466",
+      "bytes": 4460,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A18_bread_meat_water_and_metabolic_Design.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A18_bread_meat_water_and_metabolic_Design.docx",
+      "sha256": "607b43c40fed3f6b94b90c892a02be1c6dcd4fe76e487b919078eb1bc5f5a358",
+      "bytes": 4928,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A23_molecular_word_and_physical_crystal_Design.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A23_molecular_word_and_physical_crystal_Design.docx",
+      "sha256": "e8f4749d9c3e81a6bfbbb8be9e33ff0e234a084824c975b2949f188dc9b71eaa",
+      "bytes": 4983,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-D11_scientific_theorist_and_hypothesis_engine.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-D11_scientific_theorist_and_hypothesis_engine.docx",
+      "sha256": "11084c94fcfa1ad041df2c38bf2e78267d4460783d4f5305cc46760a0ac91880",
+      "bytes": 4518,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-P12_gpu_like_accelerator_and_real_time_scheduler.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-P12_gpu_like_accelerator_and_real_time_scheduler.docx",
+      "sha256": "0b504b20edad0518e74829ba58ac41aff3c90c09d02799f35c43f78d067db0dc",
+      "bytes": 4541,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A06_learning_stabilization_Companion.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A06_learning_stabilization_Companion.docx",
+      "sha256": "54428559c458ef46de6a2f9436b5daeba436fa161b69a050a8c74f0381dad7f6",
+      "bytes": 4735,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A02_long_term_storage_Companion.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A02_long_term_storage_Companion.docx",
+      "sha256": "35ec6750656c153c4d5b6ab2306171d3893c783ad8a59d819b4403ab8d81d24c",
+      "bytes": 4616,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A08_health_surveillance_Companion.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A08_health_surveillance_Companion.docx",
+      "sha256": "c4e6baf86d34bca05da0939338544c758bce3773b9c57139153b846fec118942",
+      "bytes": 4703,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-R01_living_device_adapter_and_electronic_bridge.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-R01_living_device_adapter_and_electronic_bridge.docx",
+      "sha256": "6f1ce8d9b757994f44fd2cd871d31ee0850f80e9cf8e9f19343d386202e8ca00",
+      "bytes": 4746,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-P09_observability_metrics_and_evidence_ledger.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-P09_observability_metrics_and_evidence_ledger.docx",
+      "sha256": "22c55a7085340e602016bea7acac26cbc389c22d85706bb6a89df8f0f9a1345d",
+      "bytes": 4373,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A01_episodic_and_working_memory_Companion.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A01_episodic_and_working_memory_Companion.docx",
+      "sha256": "5982da43925c571fd769a40935538d57313396ed9a8031a69ae2210a7ae347cc",
+      "bytes": 4756,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-D16_composite_star_multidisciplinary_creation.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-D16_composite_star_multidisciplinary_creation.docx",
+      "sha256": "e95bc5a4ba47609671ff3b15a18ab1a7e565b4443889f8c3872a213096d625fc",
+      "bytes": 4502,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A09_main_living_core_Companion.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A09_main_living_core_Companion.docx",
+      "sha256": "62605aa3d5c37893c953d9d60233e7135ad199d548d09146969f8a1b5ab800c4",
+      "bytes": 4824,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-D01_metroidvania_experience_director.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-D01_metroidvania_experience_director.docx",
+      "sha256": "1f627e75aebf75e3d306332443c264a6d2c2d3085a6e821c56504a00d5136869",
+      "bytes": 4687,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A14_crystal_consumption_and_replay_Design.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A14_crystal_consumption_and_replay_Design.docx",
+      "sha256": "f32014922cc119223b6ba4445151ffc3edb10a973ab248a511dc4c91f8c7478f",
+      "bytes": 4831,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A13_crystal_replication_and_cloning_Companion.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A13_crystal_replication_and_cloning_Companion.docx",
+      "sha256": "41a28fef837f79509d686ab3d66c28bd33cb635e86f0c7b83fdf29f1503718ad",
+      "bytes": 4647,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A10_usage_crystal_compiler_Companion.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A10_usage_crystal_compiler_Companion.docx",
+      "sha256": "89e59c3104c16428b1673e238715b0d7215bdf90485bd242433b77b0eafd591b",
+      "bytes": 4723,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A10_usage_crystal_compiler_Design.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A10_usage_crystal_compiler_Design.docx",
+      "sha256": "61b10d4a3111a1689cce54c1e96462c50cd58aa9e6f6785301afe988276c1e99",
+      "bytes": 4736,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A07_learning_enhancement_Design.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A07_learning_enhancement_Design.docx",
+      "sha256": "876817b957f62c2ce16aee7352f77b0f2f499ebca5cbfd76697375382a5b5785",
+      "bytes": 4814,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A06_learning_stabilization_Design.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A06_learning_stabilization_Design.docx",
+      "sha256": "5d70c38ffdf79cd45a7595a1c4cd6fffa70b16cab805c7a17e2dbdae96eee8ce",
+      "bytes": 4665,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A07_learning_enhancement_Companion.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A07_learning_enhancement_Companion.docx",
+      "sha256": "0f6f11666ee50fa645b750e7cdbf4ea1d3908b2ca79f2fa7429f0eccd69aeb92",
+      "bytes": 4670,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A24_observer_monitoring_communities_Design.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A24_observer_monitoring_communities_Design.docx",
+      "sha256": "7abdfe3dc994cd242469fd8df67e567493987873235d680c609468761a35d51a",
+      "bytes": 4791,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/00_Anaiero_Master_Architecture_v2.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/00_Anaiero_Master_Architecture_v2.docx",
+      "sha256": "152d38240cd870d354df87a0e4d80e442c5ad70e939b9fe9c863693eda99fb59",
+      "bytes": 14186,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A20_filesystem_and_snapshots_Companion.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A20_filesystem_and_snapshots_Companion.docx",
+      "sha256": "9332f4ad392af04f8cb988bb075cade0fb1813d0e3833d88a916386dee5768f6",
+      "bytes": 4670,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A04_growth_and_capacity_Design.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A04_growth_and_capacity_Design.docx",
+      "sha256": "d790286bb476808f2abc200e285b156f12b7647be04d26e9989fff681ebe2691",
+      "bytes": 4822,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A12_lotus_coordinator_Companion.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A12_lotus_coordinator_Companion.docx",
+      "sha256": "af77ed69dfffae016edf86d7819f7183097cdad3121bf3f1876989e713586383",
+      "bytes": 4701,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A16_root_registry_and_mapping_Companion.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A16_root_registry_and_mapping_Companion.docx",
+      "sha256": "ea4f321aee59839550859df97ad64f1c0b742c4ad2b9c42cf0314a8a6847cc31",
+      "bytes": 4716,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A21_affective_support_and_honey_Companion.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A21_affective_support_and_honey_Companion.docx",
+      "sha256": "1fe0ff91894c29f2096f8e809676a5d5879d12e487df80b1c8131c19a318338a",
+      "bytes": 4749,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-P01_starchip_runtime_and_interface.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-P01_starchip_runtime_and_interface.docx",
+      "sha256": "eed18083c478148e0ca70972486d49a91aa1d36695239dc913272ee06b0784d4",
+      "bytes": 4771,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "archive/v2/CE-A14_crystal_consumption_and_replay_Companion.md",
+      "source": "ChristEye_Anaiero_v6/archive/word_history/v2_modules/CE-A14_crystal_consumption_and_replay_Companion.docx",
+      "sha256": "f01bf4ca0b899ce8652c9ff410265678cae51ae1cf72c7a35e0f63cd3349b469",
+      "bytes": 4810,
+      "status": "historical",
+      "images": []
+    },
+    {
+      "path": "research/full-markdown/R02_02_Research_and_System_Design_1_.md",
+      "source": "ChristEye_Anaiero_v6/research/source_documents/R02_02_Research_and_System_Design_1_.docx",
+      "sha256": "41006e667f09390c5950af60f4d539f81fcd8dfb2c36ddb395c51619e7b8b61c",
+      "bytes": 36144,
+      "status": "source",
+      "images": []
+    },
+    {
+      "path": "research/full-markdown/R03_03_Formal_Models_and_Reconciliation_1_.md",
+      "source": "ChristEye_Anaiero_v6/research/source_documents/R03_03_Formal_Models_and_Reconciliation_1_.docx",
+      "sha256": "d49f1031576712f0833d6bcca64b874246d1a6d39b83d27f1746d23904990f0e",
+      "bytes": 25683,
+      "status": "source",
+      "images": []
+    },
+    {
+      "path": "research/full-markdown/R04_ChristEye_Physical_Learning_Device_Design_v0_4_3_.md",
+      "source": "ChristEye_Anaiero_v6/research/source_documents/R04_ChristEye_Physical_Learning_Device_Design_v0_4_3_.docx",
+      "sha256": "5e0b875070de397ea8a3747404500a773dc3e200c4862ec1672dc2abe332d0c8",
+      "bytes": 126014,
+      "status": "source",
+      "images": [
+        "research/full-markdown/assets/R04_ChristEye_Physical_Learning_Device_Design_v0_4_3_/image1.png"
+      ]
+    },
+    {
+      "path": "research/full-markdown/R08_Wind_Water_and_Crystal_formal_supplement_1_.md",
+      "source": "ChristEye_Anaiero_v6/research/source_documents/R08_Wind_Water_and_Crystal_formal_supplement_1_.docx",
+      "sha256": "4181b6b9d69c2941fa6620c0b1fd30d5e43ef95e2ccd440d34430e3ba91eb51f",
+      "bytes": 45510,
+      "status": "source",
+      "images": []
+    },
+    {
+      "path": "research/full-markdown/R07_Wind_Water_and_Crystal_a_ChristEye_research_program_1_.md",
+      "source": "ChristEye_Anaiero_v6/research/source_documents/R07_Wind_Water_and_Crystal_a_ChristEye_research_program_1_.docx",
+      "sha256": "fa50d3d14166453f456decc156e2dc4744fc9478fa41d219b6a10d1e30ecfa27",
+      "bytes": 35403,
+      "status": "source",
+      "images": [
+        "research/full-markdown/assets/R07_Wind_Water_and_Crystal_a_ChristEye_research_program_1_/image1.png"
+      ]
+    },
+    {
+      "path": "research/full-markdown/R01_01_Technical_Companion_1_.md",
+      "source": "ChristEye_Anaiero_v6/research/source_documents/R01_01_Technical_Companion_1_.docx",
+      "sha256": "3e2f85c7e17a2481c30c88a941b1f81c9c3ce95a0b5b329c03f43331fff5e719",
+      "bytes": 78275,
+      "status": "source",
+      "images": []
+    },
+    {
+      "path": "research/full-markdown/R10_ChristEye_Equations_Explained_with_Science_v1.5_2_.md",
+      "source": "ChristEye_Anaiero_v6/research/source_documents/R10_ChristEye_Equations_Explained_with_Science_v1.5_2_.docx",
+      "sha256": "e7387a18a53f2554fe2024d9b323dddab2b339bfd9262166f6efe3f1f5d35166",
+      "bytes": 4766,
+      "status": "source",
+      "images": []
+    }
+  ],
+  "excluded_patent_documents": []
+}

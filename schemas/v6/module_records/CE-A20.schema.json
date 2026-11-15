@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FilesystemSnapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "snapshot_id",
+    "root_manifest",
+    "project_scope",
+    "policy_digest",
+    "file_count",
+    "total_bytes",
+    "created_at",
+    "verified"
+  ],
+  "properties": {
+    "snapshot_id": {
+      "type": "string",
+      "description": "sha256"
+    },
+    "parent_snapshot": {
+      "type": "string",
+      "description": "string?"
+    },
+    "root_manifest": {
+      "type": "string",
+      "description": "sha256"
+    },
+    "project_scope": {
+      "type": "string",
+      "description": "string"
+    },
+    "policy_digest": {
+      "type": "string",
+      "description": "sha256"
+    },
+    "file_count": {
+      "type": "integer",
+      "description": "uint64"
+    },
+    "total_bytes": {
+      "type": "integer",
+      "description": "uint64"
+    },
+    "created_at": {
+      "type": "string",
+      "description": "UTC"
+    },
+    "crystallization_job": {
+      "type": "string",
+      "description": "string?"
+    },
+    "verified": {
+      "type": "boolean",
+      "description": "boolean"
+    }
+  }
+}

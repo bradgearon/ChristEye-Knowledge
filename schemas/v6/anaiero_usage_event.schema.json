@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "title": "Anaiero UsageEvent v2",
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._-]{3,90}$"
+    },
+    "project_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._-]{3,90}$"
+    },
+    "kind": {
+      "enum": [
+        "task",
+        "correction",
+        "demonstration",
+        "reference",
+        "result",
+        "preference",
+        "revocation"
+      ]
+    },
+    "content": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scope": {
+      "enum": [
+        "local",
+        "shareable",
+        "restricted"
+      ]
+    },
+    "use_for_training": {
+      "type": "boolean"
+    },
+    "allow_export": {
+      "type": "boolean"
+    },
+    "timestamp": {
+      "type": "string"
+    },
+    "parent_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "event_id",
+    "project_id",
+    "kind",
+    "content",
+    "source_id",
+    "scope",
+    "use_for_training",
+    "allow_export",
+    "timestamp"
+  ]
+}

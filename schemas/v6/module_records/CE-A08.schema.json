@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "HealthAlert",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "alert_id",
+    "module_id",
+    "sensor_id",
+    "observed_at",
+    "validity",
+    "threshold_ref",
+    "deviation",
+    "category",
+    "required_review"
+  ],
+  "properties": {
+    "alert_id": {
+      "type": "string",
+      "description": "uuid"
+    },
+    "module_id": {
+      "type": "string",
+      "description": "string"
+    },
+    "sensor_id": {
+      "type": "string",
+      "description": "string"
+    },
+    "observed_at": {
+      "type": "string",
+      "description": "UTC"
+    },
+    "validity": {
+      "type": "string",
+      "description": "enum"
+    },
+    "threshold_ref": {
+      "type": "string",
+      "description": "string"
+    },
+    "deviation": {
+      "type": "object",
+      "description": "object"
+    },
+    "confidence": {
+      "type": "number",
+      "description": "float?"
+    },
+    "category": {
+      "type": "string",
+      "description": "enum"
+    },
+    "required_review": {
+      "type": "string",
+      "description": "string"
+    },
+    "receipt": {
+      "type": "string",
+      "description": "id?"
+    }
+  }
+}

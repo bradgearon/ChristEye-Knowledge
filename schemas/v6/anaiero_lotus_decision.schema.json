@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "title": "Anaiero Lotus decision and limit receipt",
+  "properties": {
+    "decision_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._-]{3,90}$"
+    },
+    "action": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "STAGE_DIGITAL",
+        "HOLD",
+        "VETO",
+        "UNRESOLVED"
+      ]
+    },
+    "evidence": {
+      "type": "string",
+      "minLength": 1
+    },
+    "limit_decision": {
+      "enum": [
+        "permitted-digital",
+        "veto",
+        "not-reviewed"
+      ]
+    },
+    "protected_root_delta": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "physical_action_executed": {
+      "const": false
+    }
+  },
+  "required": [
+    "decision_id",
+    "action",
+    "status",
+    "evidence",
+    "limit_decision",
+    "physical_action_executed"
+  ]
+}

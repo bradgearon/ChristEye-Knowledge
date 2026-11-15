@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "title": "Anaiero Root evidence record",
+  "properties": {
+    "root_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._-]{3,90}$"
+    },
+    "competency": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_tier": {
+      "enum": [
+        "F",
+        "X",
+        "H",
+        "D",
+        "A"
+      ]
+    },
+    "measured_retention": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "delay_label": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "claim_scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "biological_engram_proven": {
+      "const": false
+    }
+  },
+  "required": [
+    "root_id",
+    "competency",
+    "task_version",
+    "evidence_tier",
+    "delay_label",
+    "source_refs",
+    "claim_scope",
+    "biological_engram_proven"
+  ]
+}

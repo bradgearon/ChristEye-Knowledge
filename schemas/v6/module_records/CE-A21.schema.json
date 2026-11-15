@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SupportInteraction",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "interaction_id",
+    "need_category",
+    "explicitly_reported_by_user",
+    "policy_version",
+    "proposed_response",
+    "consent_scope",
+    "distress_inference"
+  ],
+  "properties": {
+    "interaction_id": {
+      "type": "string",
+      "description": "uuid"
+    },
+    "need_category": {
+      "type": "string",
+      "description": "enum"
+    },
+    "explicitly_reported_by_user": {
+      "type": "boolean",
+      "description": "boolean"
+    },
+    "user_preference_ref": {
+      "type": "string",
+      "description": "string?"
+    },
+    "policy_version": {
+      "type": "string",
+      "description": "string"
+    },
+    "proposed_response": {
+      "type": "string",
+      "description": "string"
+    },
+    "consent_scope": {
+      "type": "string",
+      "description": "string"
+    },
+    "outcome_rating": {
+      "type": "number",
+      "description": "float?"
+    },
+    "distress_inference": {
+      "type": "string",
+      "description": "enum[none,unverified]"
+    }
+  }
+}

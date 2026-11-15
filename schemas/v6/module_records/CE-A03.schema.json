@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RecoveryCase",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "onset",
+    "symptom",
+    "affected_routes",
+    "sensor_quality",
+    "competing_hypotheses",
+    "selected_action",
+    "status"
+  ],
+  "properties": {
+    "case_id": {
+      "type": "string",
+      "description": "uuid"
+    },
+    "onset": {
+      "type": "string",
+      "description": "UTC"
+    },
+    "symptom": {
+      "type": "string",
+      "description": "enum"
+    },
+    "affected_routes": {
+      "type": "array",
+      "description": "list"
+    },
+    "sensor_quality": {
+      "type": "object",
+      "description": "object"
+    },
+    "competing_hypotheses": {
+      "type": "array",
+      "description": "list"
+    },
+    "selected_action": {
+      "type": "string",
+      "description": "enum"
+    },
+    "permit_receipt": {
+      "type": "string",
+      "description": "id?"
+    },
+    "before_after_test": {
+      "type": "string",
+      "description": "id?"
+    },
+    "status": {
+      "type": "string",
+      "description": "enum"
+    }
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DurableObject",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "sha256",
+    "plaintext_size",
+    "media_type",
+    "tenant",
+    "retention_policy",
+    "origin_event_id",
+    "created_at"
+  ],
+  "properties": {
+    "sha256": {
+      "type": "string",
+      "description": "hex64"
+    },
+    "plaintext_size": {
+      "type": "integer",
+      "description": "uint64"
+    },
+    "media_type": {
+      "type": "string",
+      "description": "MIME"
+    },
+    "tenant": {
+      "type": "string",
+      "description": "string"
+    },
+    "retention_policy": {
+      "type": "string",
+      "description": "enum"
+    },
+    "origin_event_id": {
+      "type": "string",
+      "description": "uuid"
+    },
+    "created_at": {
+      "type": "string",
+      "description": "UTC"
+    },
+    "encryption_key_id": {
+      "type": "string",
+      "description": "string?"
+    },
+    "supersedes": {
+      "type": "string",
+      "description": "sha256?"
+    },
+    "verified_at": {
+      "type": "string",
+      "description": "UTC?"
+    }
+  }
+}

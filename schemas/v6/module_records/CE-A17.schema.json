@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CareServiceReceipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "service_id",
+    "prep_id",
+    "approved_SOP_ref",
+    "requested_at",
+    "due_window",
+    "responsible_operator",
+    "supply_lot",
+    "measurements_before",
+    "authorized",
+    "measurements_after"
+  ],
+  "properties": {
+    "service_id": {
+      "type": "string",
+      "description": "uuid"
+    },
+    "prep_id": {
+      "type": "string",
+      "description": "string"
+    },
+    "approved_SOP_ref": {
+      "type": "string",
+      "description": "string"
+    },
+    "requested_at": {
+      "type": "string",
+      "description": "UTC"
+    },
+    "due_window": {
+      "type": "object",
+      "description": "object"
+    },
+    "responsible_operator": {
+      "type": "string",
+      "description": "string"
+    },
+    "supply_lot": {
+      "type": "string",
+      "description": "string"
+    },
+    "measurements_before": {
+      "type": "object",
+      "description": "dict"
+    },
+    "authorized": {
+      "type": "boolean",
+      "description": "boolean"
+    },
+    "execution_reference": {
+      "type": "string",
+      "description": "string?"
+    },
+    "measurements_after": {
+      "type": "object",
+      "description": "dict"
+    },
+    "deviation": {
+      "type": "string",
+      "description": "string?"
+    }
+  }
+}

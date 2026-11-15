@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CrystalCandidate",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "candidate_id",
+    "preparation_id",
+    "carrier_class",
+    "physical_boundary",
+    "learned_relation",
+    "matched_histories",
+    "receiver_contract",
+    "retention_horizon",
+    "observed_measurements",
+    "evidence_tier",
+    "alternative_explanations",
+    "portability_claim"
+  ],
+  "properties": {
+    "candidate_id": {
+      "type": "string",
+      "description": "string"
+    },
+    "preparation_id": {
+      "type": "string",
+      "description": "string"
+    },
+    "carrier_class": {
+      "type": "string",
+      "description": "enum"
+    },
+    "physical_boundary": {
+      "type": "string",
+      "description": "string"
+    },
+    "learned_relation": {
+      "type": "string",
+      "description": "string"
+    },
+    "matched_histories": {
+      "type": "array",
+      "description": "list"
+    },
+    "receiver_contract": {
+      "type": "string",
+      "description": "string"
+    },
+    "retention_horizon": {
+      "type": "string",
+      "description": "string"
+    },
+    "observed_measurements": {
+      "type": "array",
+      "description": "list"
+    },
+    "evidence_tier": {
+      "type": "string",
+      "description": "enum"
+    },
+    "alternative_explanations": {
+      "type": "array",
+      "description": "list"
+    },
+    "portability_claim": {
+      "type": "boolean",
+      "description": "boolean"
+    }
+  }
+}

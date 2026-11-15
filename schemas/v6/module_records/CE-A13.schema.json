@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CloneReceipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "parent_pack",
+    "child_pack",
+    "version",
+    "copy_mode",
+    "authorizer",
+    "rights_audit",
+    "reader",
+    "clone_tests",
+    "isolated_test",
+    "created_at"
+  ],
+  "properties": {
+    "parent_pack": {
+      "type": "string",
+      "description": "sha256"
+    },
+    "child_pack": {
+      "type": "string",
+      "description": "sha256"
+    },
+    "version": {
+      "type": "string",
+      "description": "string"
+    },
+    "copy_mode": {
+      "type": "string",
+      "description": "enum"
+    },
+    "authorizer": {
+      "type": "string",
+      "description": "string"
+    },
+    "rights_audit": {
+      "type": "string",
+      "description": "sha256"
+    },
+    "reader": {
+      "type": "string",
+      "description": "string"
+    },
+    "clone_tests": {
+      "type": "object",
+      "description": "object"
+    },
+    "isolated_test": {
+      "type": "object",
+      "description": "object"
+    },
+    "created_at": {
+      "type": "string",
+      "description": "UTC"
+    }
+  }
+}

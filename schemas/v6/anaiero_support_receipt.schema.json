@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "title": "Anaiero lab-issued support receipt",
+  "properties": {
+    "module_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._-]{3,90}$"
+    },
+    "service_event_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._-]{3,90}$"
+    },
+    "approved_procedure_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "performed_by": {
+      "type": "string",
+      "minLength": 1
+    },
+    "observations_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "planned",
+        "completed",
+        "deviated",
+        "escalated"
+      ]
+    },
+    "no_biological_setpoints_generated_by_learner": {
+      "const": true
+    }
+  },
+  "required": [
+    "module_id",
+    "service_event_id",
+    "approved_procedure_ref",
+    "performed_by",
+    "observations_ref",
+    "status",
+    "no_biological_setpoints_generated_by_learner"
+  ]
+}

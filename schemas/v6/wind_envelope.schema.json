@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "WindEnvelope",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "event_id",
+    "trace_id",
+    "source_module",
+    "target_module",
+    "capability",
+    "issued_at",
+    "validity",
+    "payload",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "event_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "trace_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_module": {
+      "type": "string",
+      "pattern": "^CE-(P|D|R)\\d{2}$"
+    },
+    "target_module": {
+      "type": "string",
+      "pattern": "^CE-(P|D|R)\\d{2}$"
+    },
+    "capability": {
+      "type": "string",
+      "minLength": 1
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "validity": {
+      "enum": [
+        "valid",
+        "invalid",
+        "unresolved",
+        "expired"
+      ]
+    },
+    "payload": {},
+    "provenance": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false
+}
