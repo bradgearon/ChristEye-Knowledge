@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.christeye.example/software/guidance_proposal.v1",
+  "title": "Colony Guidance Proposal v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "proposal_id",
+    "colony_id",
+    "category",
+    "requested_review_role",
+    "summary",
+    "evidence_refs",
+    "uncertainty_state",
+    "status",
+    "created_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "ce.colony.guidance/1"
+    },
+    "proposal_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "colony_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "participant_candidate_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "category": {
+      "enum": [
+        "DIGITAL_LEARNING",
+        "EVIDENCE_REVIEW",
+        "SUPPORT_REVIEW",
+        "HARDWARE_SERVICE",
+        "SCIENTIFIC_HYPOTHESIS"
+      ]
+    },
+    "requested_review_role": {
+      "type": "string",
+      "minLength": 1
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "alternatives": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "protected_interests": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "suggested_read_only_checks": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "compatible_sop_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "priority_score": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "priority_score_kind": {
+      "enum": [
+        "UNCALIBRATED_HEURISTIC",
+        "NOT_SCORED"
+      ]
+    },
+    "uncertainty_state": {
+      "enum": [
+        "LOW",
+        "MODERATE",
+        "HIGH",
+        "INSUFFICIENT_EVIDENCE"
+      ]
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "status": {
+      "enum": [
+        "PROPOSED",
+        "REVIEW_ONLY",
+        "HUMAN_REVIEW",
+        "REJECTED",
+        "EVALUATED",
+        "UNRESOLVED"
+      ]
+    },
+    "decision_receipt_ref": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
