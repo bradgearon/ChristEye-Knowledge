@@ -1,0 +1,2 @@
+# Reference uses only the Python standard library.
+# Python 3.11 or newer recommended.

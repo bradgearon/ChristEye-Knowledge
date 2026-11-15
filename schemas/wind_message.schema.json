@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Anaiero digital WindMessage v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "source",
+    "recipient",
+    "kind",
+    "payload_digest",
+    "schema_version",
+    "scope",
+    "expires_at"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "recipient": {
+      "type": "string",
+      "minLength": 1
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "task",
+        "experience",
+        "observation",
+        "advisory",
+        "evidence",
+        "replay",
+        "status"
+      ]
+    },
+    "payload_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "scope": {
+      "type": "string",
+      "enum": [
+        "local",
+        "shareable",
+        "restricted"
+      ]
+    },
+    "expires_at": {
+      "type": "number"
+    },
+    "trace_id": {
+      "type": "string"
+    }
+  }
+}

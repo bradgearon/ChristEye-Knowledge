@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Anaiero digital CrystalPack manifest v2",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "pack_id",
+    "version",
+    "kind",
+    "installable",
+    "permission_mode",
+    "physical_carrier",
+    "asset",
+    "source_event_ids"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "pack_id": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "kind": {
+      "const": "digital-experience-replay"
+    },
+    "installable": {
+      "const": true
+    },
+    "physical_carrier": {
+      "const": false
+    },
+    "permission_mode": {
+      "type": "string",
+      "enum": [
+        "local-only",
+        "shareable"
+      ]
+    },
+    "asset": {
+      "type": "object",
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "properties": {
+        "path": {
+          "const": "assets/experiences.json"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "source_event_ids": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
