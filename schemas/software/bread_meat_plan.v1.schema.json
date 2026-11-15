@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schemas.christeye.example/software/bread_meat_plan.v1",
+  "$id": "urn:christeye:software:bread_meat_plan:v1",
   "title": "Bread/Meat Plan and Research Hypothesis v1",
   "type": "object",
   "additionalProperties": false,
