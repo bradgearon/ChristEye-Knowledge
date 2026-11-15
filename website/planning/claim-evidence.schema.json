@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Anaiero statement-level evidence annotation v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "claim_id",
+    "statement",
+    "evidence_class",
+    "claim_status",
+    "scope",
+    "explanation",
+    "source_refs",
+    "updated_at"
+  ],
+  "properties": {
+    "claim_id": {
+      "type": "string",
+      "minLength": 3
+    },
+    "statement": {
+      "type": "string",
+      "minLength": 8
+    },
+    "evidence_class": {
+      "enum": [
+        "F",
+        "X",
+        "H",
+        "D",
+        "A"
+      ]
+    },
+    "claim_status": {
+      "enum": [
+        "external-study",
+        "local-software-test",
+        "local-biological-result",
+        "proposal",
+        "unresolved",
+        "disconfirmed"
+      ]
+    },
+    "scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "preparation_or_runtime": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "measurement_type": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "evidence_digest": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "alternatives": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "limitation": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "explanation": {
+      "type": "string"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date"
+    },
+    "reviewed_by_role": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}
