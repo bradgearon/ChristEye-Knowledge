@@ -125,6 +125,29 @@ Serial readout is *observation only* and available from the service processor, n
 
 Every readout is a typed WindPacket or an explicitly bounded link-frame mapped to it by the gateway. Include monotonically increasing sequence, reason/observed time, units when applicable, staleness and payload digest. For a UART service console, use a strict read-only command whitelist, audited access, no untrusted binary dump of restricted biological data, and physically gated maintenance mode.
 
+### 11.1 Proposed serial readout frame and interrupt-driven delivery
+
+For small UART/USB-CDC links, use a compact **SerialReadout/1** record instead of sending a 56-byte native WindPacket header for every tiny sensor reading. Wire proposal: magic 2 bytes ("CS"), version u8, kind u8, total_payload_bytes u16, board_slot u16, sequence u32, local_monotonic_tick_us u64, bounded payload TLVs, CRC32C u32 (24 bytes of fixed metadata including CRC). The UART transport wraps the record with COBS and a zero-byte delimiter, or an equivalently verified framing layer. Transport segmentation and decoder byte limits are explicit. A gateway maps this to a WindPacket carrying the true authenticated gateway principal, board source provenance, separate capture clock, calibration and original serial digest.
+
+CRC and sequence detect accidental framing damage and gaps; they **do not authenticate the sensor**. The connected secure session or a reviewed per-board MAC scheme establishes authenticity according to the threat model. External serial ports default read-only; do not transmit credentials, actuator commands or protected experimental data through unauthenticated maintenance consoles.
+
+Transmit on actual sensor acquisition, hardware alarm, link state transition or diagnostic subscription activation. DMA/IRQ and queue notification drive delivery; watchdog/liveness timers may exist independently. Overflow increments a persistent gap counter and generates a loss event. Serial low-level monitoring is not a safety interlock.
+
+### 11.2 Typed service interfaces
+
+~~~cpp
+// Conceptual interfaces only; not compiled runtime API yet.
+struct SnapshotRef { ColonyId id; Epoch epoch; uint64_t revision; Digest digest; Freshness freshness; };
+SnapshotRef get_last_known_snapshot(ColonyId id); // local atomic copy, always carries staleness
+Subscription subscribe_colony_deltas(ColonyId id, uint64_t from_revision, DeltaCallback cb);
+Subscription subscribe_board_readouts(BoardId id, ReadoutFilter authorized, ReadoutCallback cb);
+Result propose_digital_bread(BreadRequest request, EvidenceRefs evidence);
+Result propose_digital_meat(MeatRequest request, EvidenceRefs evidence);
+Result submit_guidance_for_human_review(GuidanceProposal proposal);
+~~~
+
+The actual C++ interface will use explicit lifetimes and bounded callback queues. Snapshot reads are on-demand; continuous progress travels through pushed revisioned deltas, not periodic polling. In a restart, replay committed local journal entries before publishing a current revision.
+
 ## 12. Host/client plug-in onboarding
 
 1. **Connect:** Ethernet carrier/PoE or separately rated power, or supported USB/fieldbus peripheral. Physical link alone grants no access.
