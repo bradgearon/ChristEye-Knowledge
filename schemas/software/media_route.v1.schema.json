@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:christeye:software:media_route:v1",
+  "title": "ChristEye AVM Transactional Media Route Proposal v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "route_id",
+    "expected_revision",
+    "source",
+    "destination",
+    "media_kind",
+    "state",
+    "requesting_principal",
+    "clock_policy",
+    "access_scope",
+    "biological_action_authority"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "ce.media.route/1"
+    },
+    "route_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "expected_revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "module_id",
+        "port_id"
+      ],
+      "properties": {
+        "module_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "port_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "destination": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "module_id",
+        "port_id"
+      ],
+      "properties": {
+        "module_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "port_id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "media_kind": {
+      "enum": [
+        "AUDIO_PCM",
+        "MIDI_UMP",
+        "VIDEO_FRAME",
+        "NEURAL_OBSERVATION"
+      ]
+    },
+    "state": {
+      "enum": [
+        "PROPOSED",
+        "REJECTED",
+        "ADMITTED",
+        "ACTIVE",
+        "MUTED",
+        "REMOVED"
+      ]
+    },
+    "requesting_principal": {
+      "type": "string",
+      "minLength": 1
+    },
+    "clock_policy": {
+      "enum": [
+        "EXACT_SAME_CLOCK",
+        "AUTHORIZED_RESAMPLING",
+        "TIMESTAMPED_ASYNC",
+        "INCOMPATIBLE"
+      ]
+    },
+    "sample_rate_hz": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "channel_map": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "access_scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "teacher_consent_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "bandwidth_reserved_bytes_s": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "max_latency_us": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "driver_build_digest": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "revision_receipt_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "biological_action_authority": {
+      "const": "NONE"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "media_kind": {
+            "const": "NEURAL_OBSERVATION"
+          }
+        },
+        "required": [
+          "media_kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "state": {
+            "enum": [
+              "PROPOSED",
+              "REJECTED",
+              "ADMITTED",
+              "MUTED",
+              "REMOVED"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
