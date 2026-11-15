@@ -1,0 +1,106 @@
+{
+  "meta": {
+    "project": "ChristEye Anaiero",
+    "revision": "S01-2026-11-15",
+    "theme": "Scientific editorial, not science fiction ornament",
+    "source": "Project-owned draft tokens; implementation not yet integrated"
+  },
+  "colors": {
+    "dark": {
+      "canvas": "#091522",
+      "surface": "#102439",
+      "elevated": "#173047",
+      "ink": "#ECF4F2",
+      "secondary": "#B2C5D3",
+      "muted": "#8198A8",
+      "stroke": "#38536A",
+      "link": "#71DCC7",
+      "gold": "#E4B97D",
+      "violet": "#B9A8DF",
+      "warning": "#E6AD79",
+      "danger": "#E59A97"
+    },
+    "light": {
+      "canvas": "#F8FAF7",
+      "surface": "#FFFFFF",
+      "elevated": "#ECF1ED",
+      "ink": "#102433",
+      "secondary": "#425F6C",
+      "muted": "#647884",
+      "stroke": "#BECBD1",
+      "link": "#116A64",
+      "gold": "#80551D",
+      "violet": "#675287",
+      "warning": "#87531B",
+      "danger": "#9B3B43"
+    }
+  },
+  "semanticColorUse": {
+    "digital": "teal",
+    "living": "gold",
+    "research": "violet",
+    "neutral": "muted",
+    "warning": "warning",
+    "danger": "danger"
+  },
+  "typography": {
+    "ui": "Inter or system-ui",
+    "reading": "system-ui",
+    "scholar": "Source Serif 4 or Georgia fallback",
+    "code": "0.87rem / 1.65",
+    "hero": "clamp(2.75rem, 5vw, 5rem)",
+    "h1": "clamp(2rem, 3.2vw, 3.15rem)",
+    "h2": "clamp(1.4rem, 2.1vw, 2.1rem)",
+    "body": "1rem / 1.7",
+    "caption": "0.83rem / 1.5"
+  },
+  "layout": {
+    "maxCanvasPx": 1440,
+    "maxDocWidthCh": 78,
+    "mainGrid": "12 columns",
+    "sideRailPx": 268,
+    "tocRailPx": 212,
+    "navHeightPx": 68,
+    "breakpointsPx": {
+      "mobile": 680,
+      "tablet": 1024,
+      "desktop": 1320
+    }
+  },
+  "spacingScalePx": [
+    4,
+    8,
+    12,
+    16,
+    24,
+    32,
+    48,
+    64,
+    96
+  ],
+  "radiusPx": {
+    "card": 16,
+    "control": 9,
+    "diagram": 18
+  },
+  "motion": {
+    "durationMs": {
+      "short": 160,
+      "medium": 320
+    },
+    "reduceMotion": "respect prefers-reduced-motion",
+    "diagramAnimationDefault": "paused until interaction"
+  },
+  "border": {
+    "thinPx": 1,
+    "focusPx": 3
+  },
+  "a11y": {
+    "wcag": "AA minimum; verify contrast with automated tests",
+    "keyboardNavigation": true,
+    "visibleFocus": true,
+    "skipToContent": true,
+    "allInteractionsUseAccessibleControls": true,
+    "staticFallbackForAllDemos": true
+  }
+}
