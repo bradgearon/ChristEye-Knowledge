@@ -1,0 +1,209 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:christeye:software:crystal_session:v1",
+  "title": "Crystal Research Evidence Session v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "session_id",
+    "colony_id",
+    "material_id",
+    "material_class",
+    "state",
+    "presence_method",
+    "presence_quality",
+    "evidence_refs",
+    "started_at",
+    "physical_action_authority"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "ce.crystal.session/1"
+    },
+    "session_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "colony_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "preparation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "material_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "material_class": {
+      "enum": [
+        "DIGITAL_CRYSTAL_PACK",
+        "PHYSICAL_MATERIAL_CANDIDATE"
+      ]
+    },
+    "state": {
+      "enum": [
+        "REGISTERED",
+        "PRESENCE_CANDIDATE",
+        "PRESENCE_VERIFIED",
+        "BASELINE_BOUND",
+        "OBSERVING",
+        "EXIT_RECORDED",
+        "EVALUATED",
+        "RESEARCH_DOSSIER_ARCHIVED",
+        "UNRESOLVED",
+        "REJECTED"
+      ]
+    },
+    "presence_method": {
+      "enum": [
+        "OPERATOR_LOG",
+        "RFID",
+        "BARCODE",
+        "IMAGE_FIDUCIAL",
+        "QUALIFIED_SENSOR",
+        "NOT_DETECTED"
+      ]
+    },
+    "presence_quality": {
+      "enum": [
+        "VERIFIED",
+        "CANDIDATE",
+        "UNKNOWN",
+        "REJECTED"
+      ]
+    },
+    "presence_time": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "exit_time": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "baseline_evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "observations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "kind",
+          "claim_status",
+          "evidence_refs",
+          "observed_at"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "NEURITE_MORPHOLOGY",
+              "SPINE_MORPHOLOGY",
+              "RNA_DIRECT_IMAGING",
+              "RNA_ASSAY_SNAPSHOT",
+              "RNA_INFERRED",
+              "PROTEIN_ASSAY",
+              "SOIL_STRUCTURE",
+              "ELECTROPHYSIOLOGY",
+              "DIGITAL_CAPABILITY_TEST",
+              "INDEPENDENT_ROOT_RETEST",
+              "MEASUREMENT_QUALITY"
+            ]
+          },
+          "claim_status": {
+            "enum": [
+              "MEASURED",
+              "INFERRED",
+              "UNRESOLVED"
+            ]
+          },
+          "observed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "source_clock_domain": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1
+          },
+          "model_digest": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "confidence": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      }
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "independent_evaluation_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "archive_class": {
+      "enum": [
+        "NOT_ARCHIVED",
+        "RESEARCH_DOSSIER_ONLY",
+        "DIGITAL_INSTALLABLE_PACK_VERIFIED"
+      ]
+    },
+    "physical_action_authority": {
+      "const": "NONE"
+    }
+  }
+}
