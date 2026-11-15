@@ -6,7 +6,7 @@
 
 In Anaiero, **Root tissue** is proposed as the *spinal-derived physical foundational circuitry*. It can be a dedicated spinal module or a spinal-associated compartment in a larger Soil. It is not scientifically established that a spinal cord model stores all long-term knowledge; **Root function** remains the separately tested stable relation. The *Soil* is the living organoid whole.
 
-A neuron has soma and processes. **Axon** carries neuronal output and can form terminals; **dendrites** principally receive and integrate inputs; **dendritic spines** are protrusions of dendrites. New synapses, axonal extension and additional progenitor-derived cells are three different growth processes. No "axon clone" or "spine cell" is a valid manufacturing unit.
+A neuron has soma and processes. Axons, dendrites, and dendritic spines are **parts of neurons**, not independently cloned cells. **Axon** carries neuronal output and can form terminals; **dendrites** principally receive and integrate inputs; **dendritic spines** are protrusions of dendrites. New synapses, axonal extension and additional progenitor-derived cells are three different growth processes. No "axon clone" or "spine cell" is a valid manufacturing unit.
 
 ## 2. Structural and functional map
 

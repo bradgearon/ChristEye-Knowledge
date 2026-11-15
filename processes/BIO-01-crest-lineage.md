@@ -36,7 +36,7 @@ Controlled process states: `REQUESTED → SOURCE_IDENTIFIED → QUALIFICATION_PE
 
 ## 3. Per-cell identity proposal (digital-first)
 
-Use four noninterchangeable identifiers:
+No lineage barcode automatically assigns a **globally unique** identifier to every daughter cell. Use four noninterchangeable identifiers:
 
 - `source_lot_id`: immutable bank/lot provenance.
 - `clone_lineage_id`: shared ancestor lineage; *multiple daughter cells may share it*.
