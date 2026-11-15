@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "module_id": "CE-P10",
+  "name": "StarChip Composition and Capability Negotiation",
+  "version": "1.0.0-proposal",
+  "stage": "DIGITAL-V1",
+  "capabilities": [
+    "starchip-composition-and-capability-negotiation"
+  ],
+  "integration_refs": [
+    "CE-P01",
+    "CE-P03",
+    "CE-P06"
+  ],
+  "boot_dependencies": [],
+  "ports": {
+    "input": [
+      "WindEnvelope",
+      "CrystalPackManifest"
+    ],
+    "output": [
+      "WindEnvelope",
+      "ActionReceipt"
+    ]
+  },
+  "resources": {
+    "execution_class": "background",
+    "fallback": "Return UNRESOLVED with typed failure receipt"
+  },
+  "evidence_state": "design"
+}

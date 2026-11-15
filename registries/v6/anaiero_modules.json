@@ -1,0 +1,1277 @@
+{
+  "schema_version": "2.0.0",
+  "project": "ChristEye Anaiero",
+  "release": "2.0.0-design",
+  "modules": [
+    {
+      "id": "CE-A01",
+      "slug": "episodic_and_working_memory",
+      "title": "Working and Episodic Memory StarChip",
+      "track": "digital-first",
+      "mission": "Learn to capture recent experiences without confusing a recorded event with a durable memory or a changed biological engram.",
+      "features": [
+        "Provide bounded working context with eviction rules and source attribution",
+        "Partition episodes by user, device, project and consent scope",
+        "Train retrieval with time-separated examples, paraphrases and negative distractors",
+        "Promote only validated episodic summaries to candidate Roots"
+      ],
+      "inputs": [
+        "WindEvent; permissioned user action; timestamped task outcome; raw reference"
+      ],
+      "outputs": [
+        "EpisodeRecord; short-context summary; retrieval candidates; promotion proposal"
+      ],
+      "flow": [
+        "ACQUIRE",
+        "NORMALIZE",
+        "REDACT",
+        "INDEX",
+        "RETRIEVE",
+        "VERIFY",
+        "PROMOTE_OR_EXPIRE"
+      ],
+      "algorithm": "Append input to an event log; extract task/context/outcome; form semantic and temporal indexes; run held-out retrieval probes; reject leakage from future events; pass promotion proposals to the Root Registry.",
+      "measure": "MRR@k, recall@k, false-memory rate, evidence-link coverage, answer latency and retention by interval; report per-source and per-user slices.",
+      "validation": [
+        "A held-out question resolves to the correct episode with a source pointer",
+        "Conflicting or revoked episodes do not become authoritative",
+        "No future or sealed test event can enter a training answer"
+      ],
+      "risks": [
+        "Summaries can hallucinate details",
+        "Over-remembering exposes private context",
+        "High retrieval scores can reflect source leakage"
+      ],
+      "interfaces": [
+        "A19 ingress",
+        "A20 filesystem",
+        "A16 Root Registry",
+        "A12 Lotus",
+        "A22 limits"
+      ],
+      "research": "Neural response signals are candidate task features, not direct readouts of personal autobiographical memories. Biological short-term plasticity must be demonstrated independently.",
+      "build": [
+        "Implement permissioned episode ledger",
+        "Create temporal and semantic retrieval baselines",
+        "Add delayed recall benchmark and evidence QA"
+      ]
+    },
+    {
+      "id": "CE-A02",
+      "slug": "long_term_storage",
+      "title": "Long-Term Storage and Consolidation StarChip",
+      "track": "digital-first",
+      "mission": "Preserve durable, queryable knowledge across restarts and model changes, with explicit review before a claim becomes rooted.",
+      "features": [
+        "Use append-only event sourcing plus immutable content-addressed objects",
+        "Create versioned semantic indexes and snapshots with recovery points",
+        "Separate factual source, interpretation, capability, and personal preference",
+        "Propose spaced rehearsal only for consented, independently testable competencies"
+      ],
+      "inputs": [
+        "EpisodeRecord; document objects; validated findings; Root promotion proposal"
+      ],
+      "outputs": [
+        "LongTermObject; retrieval index; consolidation receipt; retention report"
+      ],
+      "flow": [
+        "STAGE",
+        "DEDUPLICATE",
+        "VALIDATE",
+        "COMMIT",
+        "INDEX",
+        "PROBE",
+        "RETAIN_OR_REVISE"
+      ],
+      "algorithm": "Stage content under a scoped identity; compute hashes; commit metadata and immutable objects atomically; build indexes; test retrieval after time- and topic-disjoint delays; keep revisions as new nodes rather than overwriting provenance.",
+      "measure": "Bit-integrity error rate, retrieval accuracy, stale-result rate, snapshot recovery time, topic-shift performance, old-skill noninferiority.",
+      "validation": [
+        "Reboot and restore preserve source-addressed objects",
+        "Conflicting sources remain distinguishable",
+        "A failed retention probe blocks a biological-memory claim"
+      ],
+      "risks": [
+        "A storage snapshot is not a neural engram backup",
+        "Index corruption may appear as forgetting",
+        "Repetition may teach the evaluator"
+      ],
+      "interfaces": [
+        "A01 episodes",
+        "A16 Roots",
+        "A20 filesystem",
+        "A13 clone",
+        "A22 audit"
+      ],
+      "research": "Neural consolidation and digital data durability are different forms of persistence. Delayed biological function is a separate empirical endpoint.",
+      "build": [
+        "Implement content-addressed ledger",
+        "Version indexes and snapshot recovery test",
+        "Compare immediate vs delayed held-out retrieval"
+      ]
+    },
+    {
+      "id": "CE-A03",
+      "slug": "healing_and_integrity",
+      "title": "Healing and Integrity Recovery Network",
+      "track": "digital-first + monitored research",
+      "mission": "Detect faults and restore verified function by the least disruptive route without mistaking resumed output for recreated neural content.",
+      "features": [
+        "Classify faults as interface, support, software, retrieval, biological-state or unresolved",
+        "Keep corrective proposals separate from the independent physical limit controller",
+        "Prefer reversible software corrections, redundant paths and retests",
+        "Record before/after affected and protected capabilities"
+      ],
+      "inputs": [
+        "Observer alerts; environment/status readings; invalid trials; Root regressions"
+      ],
+      "outputs": [
+        "FaultCase; diagnosis hypotheses; repair proposal; recovery receipt"
+      ],
+      "flow": [
+        "DETECT",
+        "TRIAGE",
+        "HYPOTHESIZE",
+        "APPROVE",
+        "REMEDIATE",
+        "RETEST",
+        "CLOSE_OR_ESCALATE"
+      ],
+      "algorithm": "Build a fault tree and compare predicted evidence for each cause; permit only scope-matched actions; demand a counterfactual or matched baseline before declaring the repair effective.",
+      "measure": "Time-to-detection, time-to-safe-state, restored valid-output fraction, protected-task loss, repeat-fault rate.",
+      "validation": [
+        "Unknown faults route to HOLD and review",
+        "Protection remains active during diagnosis",
+        "A successful fix leaves immutable action and test history"
+      ],
+      "risks": [
+        "Repair actions can mask deterioration",
+        "Repeated stimulation or resource increase is not a default fix",
+        "Software rollback does not undo plasticity"
+      ],
+      "interfaces": [
+        "A24 observer",
+        "A05 refresh",
+        "A22 limits",
+        "A12 Lotus",
+        "A16 Roots"
+      ],
+      "research": "This network does not autonomously repair tissue or cure disease. A laboratory defines any biological treatment and requalification.",
+      "build": [
+        "Implement fault taxonomy and shadow diagnostic engine",
+        "Implement action receipt ledger",
+        "Build fault-injection tests entirely in software"
+      ]
+    },
+    {
+      "id": "CE-A04",
+      "slug": "growth_and_capacity",
+      "title": "Growth and Capacity Planning Network",
+      "track": "digital-first + monitored research",
+      "mission": "Determine when to expand software capacity or request a separately qualified living module, rather than equating more cells with more intelligence.",
+      "features": [
+        "Locate recurring performance bottlenecks using controlled observations",
+        "Compare retrieval, routing, training and resource fixes before expansion",
+        "Score candidate StarChips by incremental validated value and interference cost",
+        "Gate any biological expansion through institutional and preparation-specific approval"
+      ],
+      "inputs": [
+        "NeedRequest; capacity utilization; Root test vectors; module registry"
+      ],
+      "outputs": [
+        "GrowthRequest; capacity plan; marginal-contribution test; dependency graph"
+      ],
+      "flow": [
+        "MEASURE_GAP",
+        "COMPARE_ALTERNATIVES",
+        "MODEL_VALUE",
+        "PLAN",
+        "APPROVE",
+        "SHADOW",
+        "ASSESS"
+      ],
+      "algorithm": "Compute prospective improvement relative to a do-nothing and a digital-only comparator; reserve compute/storage and observation budgets; release a new module only after protected outcomes remain within declared margins.",
+      "measure": "Capacity saturation, marginal task gain, energy/storage cost per validated result, interference delta, confidence interval on gain.",
+      "validation": [
+        "A bigger mesh must show incremental benefit",
+        "Dependencies cannot form installation cycles",
+        "New module does not inherit protected credentials automatically"
+      ],
+      "risks": [
+        "Network growth can worsen interference",
+        "Biological replication is preparation-level, not electrode-level",
+        "Optimization can game the chosen score"
+      ],
+      "interfaces": [
+        "A12 Lotus",
+        "A11 connective",
+        "A09 main core",
+        "A24 observer",
+        "A22 limits"
+      ],
+      "research": "Physical expansion is not a software hot-plug. The target organoid, interface, source and care capacity need separate qualification.",
+      "build": [
+        "Implement value-of-expansion planning service",
+        "Build digital stress and ablation tests",
+        "Write qualified-lab request contract without live culture parameters"
+      ]
+    },
+    {
+      "id": "CE-A05",
+      "slug": "refresh_renewal",
+      "title": "Refreshing, Renewal and Maintenance Network",
+      "track": "digital-first + monitored research",
+      "mission": "Restore access, rebuild indexes and schedule verified maintenance without silently overwriting the organism or pretending to reset biological history.",
+      "features": [
+        "Maintain per-module service state, freshness and maintenance history",
+        "Differentiate index refresh, rest, interface recalibration and replacement",
+        "Run pre/post regression on Root protection suite",
+        "Use new biological identity for any replacement living cartridge"
+      ],
+      "inputs": [
+        "Staleness reports; support calendar; Root baseline; environmental status"
+      ],
+      "outputs": [
+        "RefreshPlan; ServiceReceipt; successor reference; regression report"
+      ],
+      "flow": [
+        "OBSERVE",
+        "SCHEDULE",
+        "VERIFY_LIMITS",
+        "SERVICE",
+        "REQUALIFY",
+        "COMPARE",
+        "ARCHIVE"
+      ],
+      "algorithm": "Calculate freshness and affected dependencies; stage a minimal digital refresh; verify restoration of expected retrieval/capability with old-task comparisons; escalate biological care changes to qualified staff.",
+      "measure": "Freshness lag, service availability, post-refresh validity, old-task change, recovery rate, introduced-drift index.",
+      "validation": [
+        "No refresh is authorized solely by low accuracy",
+        "Prior state and service history remain inspectable",
+        "Unchanged results do not imply biological renewal"
+      ],
+      "risks": [
+        "Refreshing can amplify a bad decoder",
+        "Changing support changes experimental conditions",
+        "Scheduled maintenance can leak labels into evaluation"
+      ],
+      "interfaces": [
+        "A02 long-term",
+        "A03 healing",
+        "A16 Roots",
+        "A17 daily support"
+      ],
+      "research": "Tissue support and actual regeneration are distinct claims. A quiet interval is not assumed to be sleep.",
+      "build": [
+        "Implement scheduler and service receipts",
+        "Create digital restore test matrix",
+        "Trace old/new module versions and integrity"
+      ]
+    },
+    {
+      "id": "CE-A06",
+      "slug": "learning_stabilization",
+      "title": "Learning Stabilization and Consolidation Network",
+      "track": "digital-first + research hypothesis",
+      "mission": "Test whether newly acquired relations survive teaching withdrawal, changing context and later interference.",
+      "features": [
+        "Manage immediate, delayed and context-shift assessment schedules",
+        "Keep biological activity, digital decoder updates and task outcome separate",
+        "Protect old relations during new learning",
+        "Track candidate astrocytic and structural contribution as hypotheses, not memory extraction"
+      ],
+      "inputs": [
+        "TrainingRun; fixed decoder digest; delayed probes; condition metadata"
+      ],
+      "outputs": [
+        "RootCandidate; retention vector; interference report; consolidation finding"
+      ],
+      "flow": [
+        "QUALIFY",
+        "TRAIN",
+        "STOP_TEACHING",
+        "INTERVENE_AS_ASSIGNED",
+        "DELAYED_PROBE",
+        "COMPARE",
+        "PROMOTE_OR_REJECT"
+      ],
+      "algorithm": "For each competency freeze the scoring contract; compare acquired performance and delayed retention using appropriate baselines; log every retrieval probe because probes themselves can modify the learner.",
+      "measure": "Absolute delayed macro recall, retention ratio with applicability condition, flexibility, interference change, time-varying calibration.",
+      "validation": [
+        "Delayed score exceeds preregistered baseline across independent units",
+        "Learning and decoder adaptation are explicitly separated",
+        "Old-task protection is assessed as noninferiority, not null-significance"
+      ],
+      "risks": [
+        "A quiet culture is not a sleeping brain",
+        "Recovery of excitability can mimic retention",
+        "Candidate molecular signal may merely change global responsiveness"
+      ],
+      "interfaces": [
+        "A07 curriculum",
+        "A16 Roots",
+        "A02 long-term",
+        "A24 observer",
+        "A22 limits"
+      ],
+      "research": "Current organoid learning evidence is task-bounded; a 2026 organoid study reported gains that did not persist after 45 minutes in its tested preparation.",
+      "build": [
+        "Implement delay-aware evaluator",
+        "Freeze model and data splits",
+        "Publish evidence-tiered Root promotion contract"
+      ]
+    },
+    {
+      "id": "CE-A07",
+      "slug": "learning_enhancement",
+      "title": "Learning Enhancement and Curriculum Network",
+      "track": "digital-first",
+      "mission": "Choose the next teachable relation, format and difficulty so that progression improves validated Understanding rather than activity or immediate task score.",
+      "features": [
+        "Partition Bread fundamentals, Meat advanced curricula and Honey feedback policies",
+        "Generate prerequisites and adaptive but auditable lesson selection",
+        "Select examples that discriminate among live misconceptions",
+        "Use spaced review, practice, contrastive tests and independent confirmation"
+      ],
+      "inputs": [
+        "DeploymentPack; competency graph; source-rights record; learner performance"
+      ],
+      "outputs": [
+        "LessonPlan; training WindEvent; formative feedback; curriculum decision"
+      ],
+      "flow": [
+        "DIAGNOSE",
+        "CHOOSE_PREREQUISITE",
+        "PRESENT",
+        "RESPONSE",
+        "FEEDBACK",
+        "REVIEW",
+        "PROMOTE"
+      ],
+      "algorithm": "Rank lessons using expected learning benefit, novelty and uncertainty while enforcing a protected skill floor; randomize among comparably acceptable lessons during development to measure policy value.",
+      "measure": "Mastery on held-out competencies, sample efficiency, transfer beyond teaching examples, old-task noninferiority, curriculum benefit vs fixed schedule.",
+      "validation": [
+        "A module can advance only against a locked outcome",
+        "Training examples do not contaminate confirmation",
+        "Bread/Meat level is determined by prerequisites, not moral value"
+      ],
+      "risks": [
+        "A training signal may only displace state without learning",
+        "Reward hacking produces superficial answers",
+        "Curriculum may need to stop when evidence is unresolved"
+      ],
+      "interfaces": [
+        "A12 Lotus",
+        "A01 working",
+        "A06 stabilization",
+        "A19 ingress",
+        "A21 support"
+      ],
+      "research": "Mapping the semantic curriculum to a biological input code is a research gap. A successful digital lesson is not a biological engram.",
+      "build": [
+        "Create syllabus graph format",
+        "Implement digital curriculum loop with sealed tests",
+        "Add measurable policy-comparison study"
+      ]
+    },
+    {
+      "id": "CE-A08",
+      "slug": "health_surveillance",
+      "title": "Health, Anti-Disease Surveillance and Biosafety Network",
+      "track": "monitored research",
+      "mission": "Observe health and contamination risk and trigger review while refusing autonomous treatment, immune manipulation or claims of anti-disease competence.",
+      "features": [
+        "Use instrument state, freshness, provenance and qualified assay records",
+        "Detect drift, contamination warnings and unexpected operating conditions",
+        "Maintain independent physical safeguards and human escalation",
+        "Separate illness/contamination inference from task-performance scores"
+      ],
+      "inputs": [
+        "Environment observations; lab quality release; equipment fault; source and lot record"
+      ],
+      "outputs": [
+        "HealthAlert; qualification flag; isolation/review request; evidence record"
+      ],
+      "flow": [
+        "BASELINE",
+        "SENSE",
+        "VALIDATE",
+        "COMPARE",
+        "ALERT",
+        "ESCALATE",
+        "DOCUMENT"
+      ],
+      "algorithm": "Run software anomaly and rule monitors on qualified observations; classify UNKNOWN when channels are stale or missing; request institutional review for possible biological risk without automatic treatment changes.",
+      "measure": "Detection latency, false alert burden, sensor validity, traceability completion, review time, within-qualified-band uptime.",
+      "validation": [
+        "Stale measurements cannot be treated as normal",
+        "No anti-pathogen engineering or autonomous biological dosing",
+        "Stop/containment actions follow the site-approved safety plan"
+      ],
+      "risks": [
+        "Anomaly does not diagnose a disease",
+        "Immune-like cells are not automatic biosensors",
+        "Growing more cells can complicate oversight"
+      ],
+      "interfaces": [
+        "A17 care",
+        "A24 observer",
+        "A22 limits",
+        "A03 recovery"
+      ],
+      "research": "Safeguards are surveillance and escalation only. No engineered pathogen resistance, antiviral/antibacterial modification or biomedical intervention recipe is specified.",
+      "build": [
+        "Implement status-only monitoring dashboard",
+        "Add stale-data and false-positive tests",
+        "Create qualified laboratory escalation interface"
+      ]
+    },
+    {
+      "id": "CE-A09",
+      "slug": "main_living_core",
+      "title": "Main Living Network: Soil, Spirit, Heart and Tree",
+      "track": "hybrid research architecture",
+      "mission": "Define the core computing substrate as a qualified living Soil with identifiable Spirit participants, response-forming Heart, linked Mesh and demonstrable capabilities.",
+      "features": [
+        "Separate tissue boundaries from host software boundaries",
+        "Support task-specific input/response codebooks and independent evaluation",
+        "Report neuronal, astrocytic, inhibitory, structural and telemetry components as typed participants",
+        "Join observers and other modules through reversible electronic interfaces first"
+      ],
+      "inputs": [
+        "Qualified stimulus profile identifiers; task context; sensor observations; care status"
+      ],
+      "outputs": [
+        "Measured neural response; decoded Wind; trial receipt; Root evidence"
+      ],
+      "flow": [
+        "SOURCE_RELEASE",
+        "CHARACTERIZE",
+        "INTERFACE_READY",
+        "TRAIN",
+        "REST",
+        "EVALUATE",
+        "REVIEW"
+      ],
+      "algorithm": "Host H presents only authorized task events and records delivered events; neural activity remains a physical observation; decoder outputs a class or UNKNOWN; evaluator E scores after response closure and controls feedback disclosure.",
+      "measure": "Macro recall, availability, channel validity, network drift, delayed retention, route contribution, calibration.",
+      "validation": [
+        "Valid input/output responses beyond artifacts",
+        "Learning beyond matched noncontingent controls",
+        "A claimed biology-driven result survives frozen digital readout tests"
+      ],
+      "risks": [
+        "Organoid is not a validated full mind",
+        "Spinal cells and cerebral organoids are different preparations",
+        "Morphology does not establish task understanding"
+      ],
+      "interfaces": [
+        "A11 WindBus",
+        "A12 Lotus",
+        "A24 observer",
+        "A17 support",
+        "A22 limit controller"
+      ],
+      "research": "Organoid preparation choice, species, regional identity, cell composition, supplier instructions and institutional approval are controlled external dependencies, not generated prescriptions.",
+      "build": [
+        "Create software simulator matching device contracts",
+        "Build read-only MEA adapter interface",
+        "Define independent evidence gates before living research"
+      ]
+    },
+    {
+      "id": "CE-A10",
+      "slug": "usage_crystal_compiler",
+      "title": "Experience-to-Crystal Compiler",
+      "track": "digital-first",
+      "mission": "Compile permissioned usage traces, successful examples, corrections and assessments into reusable digital educational CrystalPacks.",
+      "features": [
+        "Capture tasks and provenance with explicit data rights",
+        "Distill episodes into lessons, examples, tool configurations and retrieval indexes",
+        "Separate exact replay data from distilled summaries and validated capabilities",
+        "Make export reproducible with content hashes and rejection reasons"
+      ],
+      "inputs": [
+        "Consented event ledger; selected Root records; model/tool versions; rights manifest"
+      ],
+      "outputs": [
+        "CrystalPack directory; replay script manifest; asset hashes; provenance and evaluation report"
+      ],
+      "flow": [
+        "SELECT",
+        "REDACT",
+        "DEDUPE",
+        "DISTILL",
+        "PACKAGE",
+        "VERIFY",
+        "ASSESS",
+        "SIGN_OR_REJECT"
+      ],
+      "algorithm": "Select events by declared user scope; strip secrets; classify records as facts, demonstrations or hypotheses; build training/replay assets; run independent tests; emit an installable pack only for digital assets with complete rights.",
+      "measure": "Compression ratio with verified task utility, reconstruction fidelity, provenance coverage, leakage rate, replay gain, pack verification pass rate.",
+      "validation": [
+        "Compiler cannot claim that a digital pack contains a biological engram",
+        "Private source content is excluded without permission",
+        "A distilled pack must preserve a readable evidence and license ledger"
+      ],
+      "risks": [
+        "Inaccurate summaries become reusable errors",
+        "Experience replay can reproduce bad habits",
+        "Data exfiltration through exported packs"
+      ],
+      "interfaces": [
+        "A01 episodes",
+        "A02 long-term",
+        "A20 filesystem",
+        "A13 cloning",
+        "A14 consumer",
+        "A22 policy"
+      ],
+      "research": "The candidate physical Crystal P_crystal has a separate carrier/readout claim and cannot be emitted by this digital compiler.",
+      "build": [
+        "Implement compiler from event ledger",
+        "Implement content-addressed pack build",
+        "Add redaction and replay validation tests"
+      ]
+    },
+    {
+      "id": "CE-A11",
+      "slug": "connective_controllers",
+      "title": "Connective Controllers, WindBus and Bridge Endpoints",
+      "track": "digital-first + measured biological adapter",
+      "mission": "Maintain typed, permissioned communications between Anaiero modules and optional measured biological endpoints.",
+      "features": [
+        "Use source/recipient/sequence/timestamps/schema and route permissions for every Wind",
+        "Distinguish command, observation, cue, answer, training outcome and advisory status",
+        "Require explicit adapter versions, freshness and overload handling",
+        "Support disconnect tests that clear caches and teacher-derived shared state"
+      ],
+      "inputs": [
+        "WindEnvelope; module capability record; policy decisions; adapter health"
+      ],
+      "outputs": [
+        "RouteReceipt; delivered Wind; failure status; bridge test result"
+      ],
+      "flow": [
+        "REGISTER",
+        "NEGOTIATE",
+        "AUTHORIZE",
+        "ENCODE",
+        "ROUTE",
+        "ACK",
+        "TRACE",
+        "DISCONNECT"
+      ],
+      "algorithm": "Use schema-checked event envelopes and bounded queues; reject unknown recipient/TTL violations; check every route against policy; duplicate-protect via event ID; keep source and delivery times separately.",
+      "measure": "P95/P99 delivery latency, dropped/duplicate events, schema failure, bridge information budget, contribution vs replay control.",
+      "validation": [
+        "Untrusted modules cannot reach life support controls",
+        "Disconnect clears all answer-bearing teacher routes",
+        "Source attribution survives transforms"
+      ],
+      "risks": [
+        "Two correlated modules can share input rather than directly influence one another",
+        "A neural bridge is not physical connectivity",
+        "Unbounded queues may feed stale advice"
+      ],
+      "interfaces": [
+        "A12 Lotus",
+        "A19 central router",
+        "A22 limit controller",
+        "A09 living core"
+      ],
+      "research": "Electronic bridge claims require actual measured delivery and artifact controls. Axonal joining would be a distinct research version.",
+      "build": [
+        "Implement typed event bus with ACL and TTL",
+        "Implement loop/cycle detection and replay clear",
+        "Benchmark digital latency and disconnection"
+      ]
+    },
+    {
+      "id": "CE-A12",
+      "slug": "lotus_coordinator",
+      "title": "Lotus Main Coordinator and Developmental Operating System",
+      "track": "digital-first",
+      "mission": "Orchestrate the complete learning lifecycle while keeping biological Lotus roles distinct from this software control plane.",
+      "features": [
+        "Coordinate observe-diagnose-plan-stage-evaluate loops across all StarChips",
+        "Enforce dependency, resource and protection constraints through an independent limit gate",
+        "Represent UNRESOLVED as a first-class planning outcome",
+        "Keep a per-decision explanation, evidence references and alternative plan"
+      ],
+      "inputs": [
+        "NeedRequest; current module state; protected Roots; available action catalog"
+      ],
+      "outputs": [
+        "DevelopmentDecision; staged plan; authorization request; performance receipt"
+      ],
+      "flow": [
+        "OBSERVE",
+        "DIAGNOSE",
+        "PROPOSE",
+        "VETO_CHECK",
+        "STAGE",
+        "EVALUATE",
+        "PROMOTE_OR_HOLD"
+      ],
+      "algorithm": "Estimate each action benefit vector and uncertainty; use a declared scalar ranking only after hard per-competency constraints; route physical actions to a separately approved controller, never direct autonomous operation.",
+      "measure": "Validated capability improvement, protected-task noninferiority, decision regret, veto compliance, unresolved fraction, cost per qualified action.",
+      "validation": [
+        "Safety veto cannot be overruled by utility",
+        "Plans never run with missing parameter bounds",
+        "Every action links to independent outcome evidence"
+      ],
+      "risks": [
+        "Uncalibrated reward may prioritize false metrics",
+        "Recursive self-approval is forbidden",
+        "Biological Lotus is not the host scheduler"
+      ],
+      "interfaces": [
+        "A22 limit controller",
+        "A24 observer",
+        "A04 growth",
+        "A07 curriculum",
+        "A11 WindBus"
+      ],
+      "research": "The word Lotus can name local physiological coordination or host governance when scale and mechanism are explicit. No single biological coordinator has been proven.",
+      "build": [
+        "Implement explicit state machine and decision log",
+        "Add constrained vector-score evaluator",
+        "Simulate veto, UNRESOLVED and recovery branches"
+      ]
+    },
+    {
+      "id": "CE-A13",
+      "slug": "crystal_replication_and_cloning",
+      "title": "Crystal Replication, Versioning and Cloning",
+      "track": "digital-first + research-only physical branch",
+      "mission": "Produce exact, verifiable copies of digital CrystalPacks and design separate tests for biological recipient re-learning.",
+      "features": [
+        "Content-address every exported object and package manifest",
+        "Use deterministic archive build, immutable versions and signed release metadata",
+        "Differentiate copy, replay, retrain and true biological content preservation",
+        "Verify no capability regression or secret leakage across cloned environments"
+      ],
+      "inputs": [
+        "CrystalPack; complete artifact hashes; environment/reader contract; release approval"
+      ],
+      "outputs": [
+        "CloneArtifact; integrity proof; compatibility result; clone comparison report"
+      ],
+      "flow": [
+        "READ",
+        "VERIFY",
+        "COPY",
+        "HASH",
+        "ISOLATE",
+        "INSTALL",
+        "EVALUATE",
+        "ATTEST"
+      ],
+      "algorithm": "Digital clone is a byte-exact copy with matching manifest and digests; remanifested learner is a new model/recipient that may acquire comparable function; report its measured skill separately from the copied object.",
+      "measure": "Hash equality, reproducibility of output, task equivalence, replay sample efficiency, retained learning delta, clone divergence.",
+      "validation": [
+        "Unapproved rights cannot be copied",
+        "Research-only physical carrier has installable=false",
+        "Comparable biological behavior is not an identical engram"
+      ],
+      "risks": [
+        "Mutable index undermines exact clone claims",
+        "Model nondeterminism causes behavior drift",
+        "Shared credentials in packs create risk"
+      ],
+      "interfaces": [
+        "A10 compiler",
+        "A14 consumer",
+        "A20 filesystem",
+        "A16 roots",
+        "A22 evidence"
+      ],
+      "research": "No physical engram-cloning technology is assumed; independent A-to-B learning with a severed teaching link is a separate research endpoint.",
+      "build": [
+        "Implement clone and integrity CLI",
+        "Test deterministic archives and digest validation",
+        "Add recipient-only assessment contract"
+      ]
+    },
+    {
+      "id": "CE-A14",
+      "slug": "crystal_consumption_and_replay",
+      "title": "Crystal Consumption, Experience Replay and Remanifestation",
+      "track": "digital-first + biological study concept",
+      "mission": "Install a verified CrystalPack as a structured experience feed, replay its teaching content, and independently assess what the receiver learned.",
+      "features": [
+        "Separate package ingestion, replay, inference-time retrieval and permanent learning",
+        "Stage a pack in sandbox/shadow mode before active use",
+        "Replay examples with contextual cues, corrections and correct temporal ordering",
+        "Retest after the teaching route is removed to distinguish access from new Roots"
+      ],
+      "inputs": [
+        "Signed digital pack; compatible reader; teaching stream; evaluation protocol"
+      ],
+      "outputs": [
+        "ConsumptionReceipt; ReplayTrace; ActivationState; learned capability result"
+      ],
+      "flow": [
+        "DISCOVER",
+        "VERIFY",
+        "STAGE",
+        "PARSE",
+        "REPLAY",
+        "QUIET_EVALUATION",
+        "PROMOTE",
+        "MONITOR"
+      ],
+      "algorithm": "Install data into a trusted digital staging area (not a culture medium); generate a bounded replay plan; expose only allowed experiences to the target model; clear teacher caches for independent evaluation; retain promotion/rollback history.",
+      "measure": "Replay completion, retrieval vs learned-skill gap, cold-start gain, delayed score, protected-task loss, rollback success.",
+      "validation": [
+        "Unverified packs never train an active module",
+        "Playback cannot bypass test freeze or Heart limits",
+        "Physical consumption through food is not a supported protocol"
+      ],
+      "risks": [
+        "Replay is not proof of learning",
+        "Model may memorize the answers",
+        "Biological stimulation and feeding must not be conflated"
+      ],
+      "interfaces": [
+        "A10 compiler",
+        "A13 clone",
+        "A07 curriculum",
+        "A11 WindBus",
+        "A22 safety"
+      ],
+      "research": "Material carriers added to food/medium do not have a demonstrated method to encode or install arbitrary knowledge. Molecular intake is laboratory research only, not an implementation requirement.",
+      "build": [
+        "Implement staged installer and event-replay library",
+        "Add holdout + clear-caches evaluation",
+        "Implement digital rollback and capability receipts"
+      ]
+    },
+    {
+      "id": "CE-A15",
+      "slug": "organoid_development_and_shape",
+      "title": "Organoid Soil Development, Geometry and Morphology",
+      "track": "qualified-lab research only",
+      "mission": "Define engineering interfaces for characterizing and observing a living organoid without prescribing a cell-production or neural-growth recipe.",
+      "features": [
+        "Keep planar and three-dimensional preparation versions separate",
+        "Specify source provenance, geometry, living boundary and observation coverage",
+        "Record functional responses independently of morphology and network density",
+        "Route production, differentiation and shaping choices to qualified laboratory processes"
+      ],
+      "inputs": [
+        "Consented source record; lab-issued preparation version; imaging metadata; instrument constraints"
+      ],
+      "outputs": [
+        "PreparationRecord; morphology timeline; interface readiness; unresolved biological inputs"
+      ],
+      "flow": [
+        "SOURCE_REVIEW",
+        "QUALIFIED_PRODUCTION",
+        "RECEIVE",
+        "CHARACTERIZE",
+        "INTERFACE_TEST",
+        "RELEASE_OR_REJECT"
+      ],
+      "algorithm": "Use controlled observation contracts for chamber geometry, regions and cell identities; compare observations to supplier/lab release criteria; refuse to synthesize missing biological steps or transferable parameter values.",
+      "measure": "Identity verification, measured coverage, observation completeness, stability, response specificity, readiness gate status.",
+      "validation": [
+        "Cell identity and viability must be documented by specialists",
+        "No biological procedure is inferred from ChristEye terminology",
+        "A visually shaped organoid is not a general-purpose brain"
+      ],
+      "risks": [
+        "Growth enhancement may alter physiology unpredictably",
+        "Deep tissue coverage differs from planar MEAs",
+        "Lab methods must reflect consent and oversight"
+      ],
+      "interfaces": [
+        "A09 core",
+        "A24 observers",
+        "A17 support",
+        "A08 biosafety",
+        "A22 limit"
+      ],
+      "research": "Provide high-level release requirements only. No morphogen combinations, culture recipes, concentrations, timing, genetic manipulation or neural complexity optimization.",
+      "build": [
+        "Write lab-facing requirements checklist",
+        "Build sample identity/version schema",
+        "Implement image metadata and temporal registration mock"
+      ]
+    },
+    {
+      "id": "CE-A16",
+      "slug": "root_registry_and_mapping",
+      "title": "Roots Registry, Engram Hypothesis Tracking and Growth Maps",
+      "track": "digital-first + measured research",
+      "mission": "Locate validated learned relationships in a functional dependency graph and track which physical observations may contribute to them.",
+      "features": [
+        "Keep four distinct graphs: structure, correlation, intervention-supported influence and task relations",
+        "Record a Root as a task-specific retained relation with access conditions",
+        "Attach candidate physical regions only at the evidence tier actually reached",
+        "Track revisions, pruning history, conditional dependence and protected competencies"
+      ],
+      "inputs": [
+        "RootCandidate; delayed task result; Wind route receipts; sensor observations"
+      ],
+      "outputs": [
+        "RootRecord; typed graph edge; causal-study hypothesis; longitudinal dashboard view"
+      ],
+      "flow": [
+        "PROPOSE",
+        "ATTRIBUTION",
+        "PROBE",
+        "CONFIRM",
+        "LINK",
+        "MONITOR",
+        "REVISE"
+      ],
+      "algorithm": "Promote a Root after delayed independent performance; associate episodes and candidate features; measure alternative retrieval and reversible software masking; retain negative results and counterexamples.",
+      "measure": "Retention horizon, access reliability, edge confidence and type, old-task delta, cross-context support, graph lineage completeness.",
+      "validation": [
+        "A candidate region cannot be called memory storage from imaging alone",
+        "Physical contact does not imply meaning or causality",
+        "A missing response leaves storage vs access unresolved"
+      ],
+      "risks": [
+        "High-dimensional neural drift can scramble naive longitudinal IDs",
+        "Correlated firing reflects common input",
+        "Ablation without power may hide useful routes"
+      ],
+      "interfaces": [
+        "A02 long term",
+        "A06 stability",
+        "A24 observer",
+        "A09 core",
+        "A20 filesystem"
+      ],
+      "research": "The registry is the known location of digital Root evidence. Biological engram localization remains hypothetical until selective causal evidence.",
+      "build": [
+        "Implement typed graph and provenance schema",
+        "Build skill-diff monitor",
+        "Simulate branch masking and protected regression"
+      ]
+    },
+    {
+      "id": "CE-A17",
+      "slug": "daily_care_and_dispensing",
+      "title": "Daily Milk, Water and Support-Dispensing Operations",
+      "track": "qualified-lab support + digital scheduler",
+      "mission": "Plan, monitor and audit continuous qualified care without treating feeding as a reward or a route to arbitrary information transfer.",
+      "features": [
+        "Track each living module under its own support and provenance identity",
+        "Use approved site procedures and instrument permissive states for routine service",
+        "Separate care delivery, environmental observations and task feedback",
+        "Maintain alarms, human signoff and failure-safe support continuity"
+      ],
+      "inputs": [
+        "Lab-approved service schedule; calibrated environment readings; cartridge ID; supplies inventory"
+      ],
+      "outputs": [
+        "CareSchedule; completed service receipt; shortage alert; deviation record"
+      ],
+      "flow": [
+        "VERIFY_ID",
+        "VERIFY_APPROVAL",
+        "CHECK_STATUS",
+        "REQUEST_SERVICE",
+        "RECORD_DELIVERY",
+        "CHECK_RESPONSE",
+        "ESCALATE"
+      ],
+      "algorithm": "Create an inventory-backed scheduler that checks due service, source lot, calibration and authorized operator; log intended vs delivered handling and unexpected conditions; preserve care when educational tasks are paused.",
+      "measure": "Care-service completion, missed deadlines, sensor freshness, local boundary compliance, unplanned interruptions, traceability.",
+      "validation": [
+        "Default does not invent dose/volume/flow/composition",
+        "Learner cannot change food as a punishment or reward",
+        "Failed checks trigger human care review"
+      ],
+      "risks": [
+        "Automated fluids can affect transport and endogenous signals",
+        "One reservoir measurement may not describe local conditions",
+        "Essential support must never be withheld for training"
+      ],
+      "interfaces": [
+        "A08 health",
+        "A18 metabolic",
+        "A22 independent controller",
+        "A09 core"
+      ],
+      "research": "This is a service-management design, not an operating culture protocol. Nutrient schedules and delivery pathways are specified only by a qualified laboratory and supported vendor system.",
+      "build": [
+        "Implement service calendar and inventory simulator",
+        "Add identity, stale-sensor and fault tests",
+        "Prepare approved-parameter placeholders and signoff ledger"
+      ]
+    },
+    {
+      "id": "CE-A18",
+      "slug": "bread_meat_water_and_metabolic",
+      "title": "Bread, Meat, Water and Metabolic Provision Network",
+      "track": "dual-lane: digital curricula + lab-governed biological care",
+      "mission": "Separate knowledge provision (Bread, Meat) from physiological support (Milk, Water and energy substrates), each with explicit carriers and checks.",
+      "features": [
+        "Represent Bread as prerequisites/fundamentals, Meat as advanced integrated competencies",
+        "Represent Water as typed delivery and routing, not stored memory content",
+        "Represent physiological resources by lab-qualified formulation and observed exchange",
+        "Prevent the curriculum engine from writing direct chemical setpoints"
+      ],
+      "inputs": [
+        "Prerequisite graph; content objects; lab-approved feed profiles; resource telemetry"
+      ],
+      "outputs": [
+        "ProvisionPlan; teaching distribution event; support-adequacy observation; resource warning"
+      ],
+      "flow": [
+        "CLASSIFY_NEED",
+        "CHOOSE_PROVISION",
+        "CHECK_ROUTE",
+        "AUTHORIZE",
+        "DELIVER_DIGITALLY_OR_REQUEST_CARE",
+        "MEASURE"
+      ],
+      "algorithm": "Use two isolated lanes: digital curriculum content travels via WindBus, while physical culture support follows validated care procedures. Cross-links are read-only observations until independent approval.",
+      "measure": "Curriculum transfer, support-state validity, resource accounting completeness, delayed competence, out-of-band time and response.",
+      "validation": [
+        "No raw starch or protein mixture is proposed for organoids",
+        "Digital educational Meat is not an edible nutrient",
+        "Biological energy provision uses approved medium rather than speculative diet"
+      ],
+      "risks": [
+        "Nutrient concentration alone is not flux or uptake",
+        "Glucose/sugar labels are not universal media recipes",
+        "Feeding and training cannot be merged in an uncontrolled experiment"
+      ],
+      "interfaces": [
+        "A07 curriculum",
+        "A17 care",
+        "A19 router",
+        "A21 Honey support",
+        "A22 permissions"
+      ],
+      "research": "Living neural cultures require preparation-specific nutrients in qualified medium; directly offering starch/protein foods would not be a justified culture support plan.",
+      "build": [
+        "Define dual-lane content-vs-care contract",
+        "Add versioned provision taxonomy",
+        "Write independent review checkpoints for physical changes"
+      ]
+    },
+    {
+      "id": "CE-A19",
+      "slug": "central_data_router_and_host",
+      "title": "Central Data Router, Host and Internet Integration",
+      "track": "digital-first",
+      "mission": "Route permissioned information from host applications, user files and optional external connectors to memory, curriculum, filesystem and creative StarChips.",
+      "features": [
+        "Use one authenticated ingress gateway with explicit per-source rights",
+        "Normalize URLs, files, app events, sensor data and device signals into typed observations",
+        "Separate local-only, shareable and restricted content domains",
+        "Support offline mode, bounded caching, source removal and user-controlled export"
+      ],
+      "inputs": [
+        "Host software events; files; public URLs; connected-account data with consent"
+      ],
+      "outputs": [
+        "DataReceipt; routed observation; memory import request; export/share receipt"
+      ],
+      "flow": [
+        "AUTHENTICATE",
+        "AUTHORIZE",
+        "SANITIZE",
+        "CLASSIFY",
+        "ROUTE",
+        "ACK",
+        "AUDIT",
+        "EXPIRE"
+      ],
+      "algorithm": "Treat all external data as untrusted; resolve source identity and permissions; apply parsing/size limits; record original and transformed hashes; route to named subscribers with explicit purpose; never auto-share user work.",
+      "measure": "Ingestion validity, leak/error rate, queue delay, permissions violations, revocation latency, provenance coverage.",
+      "validation": [
+        "A module cannot request unauthorized connector data",
+        "Sharing requires owner-approved scope",
+        "Untrusted documents cannot issue execution instructions"
+      ],
+      "risks": [
+        "Prompt injection and malicious files",
+        "Source rights may expire",
+        "External feeds can contaminate evaluation"
+      ],
+      "interfaces": [
+        "A11 WindBus",
+        "A20 filesystem",
+        "A01 memory",
+        "A10 compiler",
+        "A22 policy"
+      ],
+      "research": "Nothing about a network interface demonstrates biological semantic uptake; data only reaches living hardware after a separate encoder and qualified research gate.",
+      "build": [
+        "Implement offline mock adapters and ACL",
+        "Use signed source metadata and content hashing",
+        "Build export/revoke and red-team tests"
+      ]
+    },
+    {
+      "id": "CE-A20",
+      "slug": "filesystem_and_snapshots",
+      "title": "Filesystem StarChip, Versioned Knowledge and Scheduled Crystallization",
+      "track": "digital-first",
+      "mission": "Organize objects, project structures and meaning-rich indexes so work can be recovered and periodically compiled into reproducible digital Crystals.",
+      "features": [
+        "Expose virtual filesystem operations through narrow permissioned APIs",
+        "Track files, content hashes, semantic relations, branches and lineage",
+        "Generate snapshots without mutating source history",
+        "Trigger incremental Crystal compilation only after validation and explicit sharing policy"
+      ],
+      "inputs": [
+        "Imported file object; directory operation; project context; snapshot policy"
+      ],
+      "outputs": [
+        "FilesystemReceipt; immutable snapshot; CrystalCompileRequest; restore report"
+      ],
+      "flow": [
+        "INGEST",
+        "HASH",
+        "INDEX",
+        "LINK",
+        "SNAPSHOT",
+        "VALIDATE",
+        "EXPORT_OR_HOLD"
+      ],
+      "algorithm": "Use content-addressed chunks with immutable object IDs and transactional namespace updates; maintain semantic metadata in separate indexes; create incremental snapshot manifest and trigger A10 compiler for consented scopes.",
+      "measure": "Snapshot recovery point, hash integrity, dedupe ratio, namespace correctness, stale index count, restore latency.",
+      "validation": [
+        "A Crystal snapshot is not automatic neural memory transfer",
+        "Restore must reproduce content and permissions",
+        "Snapshot/export excludes revoked/private material"
+      ],
+      "risks": [
+        "Filesystem model can invent wrong directory semantics",
+        "Stale indexes resemble forgotten facts",
+        "Backup corruption can hide behind successful metadata copy"
+      ],
+      "interfaces": [
+        "A19 router",
+        "A02 long term",
+        "A10 compiler",
+        "A13 clone",
+        "A22 rights"
+      ],
+      "research": "Periodic software crystallization is practical; physical packing of neural Roots remains an unvalidated research hypothesis.",
+      "build": [
+        "Implement virtual FS in content-addressed store",
+        "Add periodic snapshot dry run",
+        "Test restore and permission restoration"
+      ]
+    },
+    {
+      "id": "CE-A21",
+      "slug": "affective_support_and_honey",
+      "title": "Supportive and Affective Regulation, Honey and Needs Network",
+      "track": "digital-first + hypothesis for tissue states",
+      "mission": "Provide supportive interaction policies and measurable stability-oriented feedback while distinguishing software emotion models from subjective experiences in living tissue.",
+      "features": [
+        "Maintain declared user preferences and supportive communication boundaries",
+        "Map Honey to task-contingent feedback, guidance or eligibility with explicit recipient",
+        "Track fatigue/interruption and system wellbeing through observable operating indicators",
+        "Use consent and user controls for personalization and memory retention"
+      ],
+      "inputs": [
+        "Preference record; context; user feedback; observer status; protected-task performance"
+      ],
+      "outputs": [
+        "SupportRecommendation; feedback Wind; preference update; burden report"
+      ],
+      "flow": [
+        "LISTEN",
+        "INFER_NEED_WITH_UNCERTAINTY",
+        "PROPOSE",
+        "CONSENT",
+        "SUPPORT",
+        "MEASURE",
+        "REVISE"
+      ],
+      "algorithm": "For the digital companion, rank supportive responses by explicit user preferences and measured satisfaction without guessing psychological state; for living tissue, use only validated observable metrics and independent care.",
+      "measure": "User-rated helpfulness, consent compliance, task improvement, stability/alert indicators, feedback discrimination, burden.",
+      "validation": [
+        "No claim that an organoid wants food or experiences emotions",
+        "Essential Milk remains independent of task success",
+        "Supportive policy cannot manipulate or coerce the user"
+      ],
+      "risks": [
+        "Behavioral labels may anthropomorphize tissue",
+        "Reward can be misassigned",
+        "Over-personalization exposes private data"
+      ],
+      "interfaces": [
+        "A07 curriculum",
+        "A24 observers",
+        "A17 care",
+        "A22 permissions",
+        "A12 Lotus"
+      ],
+      "research": "Emotional support is a proposed system role. Neurochemical reward states and living subjective emotion are not established by the presented device.",
+      "build": [
+        "Implement consented preference and feedback service",
+        "Add policy-level evaluation with negative cases",
+        "Keep tissue health metrics separate from affective labels"
+      ]
+    },
+    {
+      "id": "CE-A22",
+      "slug": "independent_limits_and_governance",
+      "title": "Independent Limit Controller, Governance and Evidence",
+      "track": "digital-first + mandatory lab controls",
+      "mission": "Provide non-negotiable protection, audit and claim integrity across every module regardless of a proposed Lotus benefit.",
+      "features": [
+        "Keep independent safety controller L separate from biological Heart",
+        "Enforce signed policy, allowed actions, missingness and freshness requirements",
+        "Prevent research-only packs from being executed or materialized through ordinary installer",
+        "Maintain F/X/H/D/A evidence provenance and immutable decisions"
+      ],
+      "inputs": [
+        "ActionRequest; route identity; resource status; evidence status; permission token"
+      ],
+      "outputs": [
+        "Permit or veto; reason; audit trail; escalation receipt; claim record"
+      ],
+      "flow": [
+        "CHECK_IDENTITY",
+        "CHECK_POLICY",
+        "CHECK_FRESHNESS",
+        "CHECK_BOUND",
+        "PERMIT_OR_VETO",
+        "LOG",
+        "ESCALATE"
+      ],
+      "algorithm": "Fail closed for unqualified physical control; allow normal approved care independently of task-level pause; reject any model-generated override of independently owned limits.",
+      "measure": "Policy violations blocked, unauthorized actions, coverage of stop rules, provenance completeness, false permit rate.",
+      "validation": [
+        "Research-only molecular and physical Crystal packages are never installable",
+        "No utility score overrides veto",
+        "Safety and capability claims have separate release status"
+      ],
+      "risks": [
+        "Model self-edit might bypass oversight",
+        "Unregistered paths can defeat limits",
+        "Biological rollback is not guaranteed"
+      ],
+      "interfaces": [
+        "A12 Lotus",
+        "A11 WindBus",
+        "A17 care",
+        "A08 health",
+        "A14 consumer"
+      ],
+      "research": "Human-derived material, privacy/consent, institutional oversight and site-approved operating procedures are required before living studies. No medical claims.",
+      "build": [
+        "Implement permission-check library",
+        "Add research-pack no-execute tests",
+        "Build evidence ledger with change audit"
+      ]
+    },
+    {
+      "id": "CE-A23",
+      "slug": "molecular_word_and_physical_crystal",
+      "title": "Physical Crystal Candidates, Molecular Words and Peptides",
+      "track": "research-only",
+      "mission": "Organize hypotheses about molecular participation, physical carriers and recipient compatibility without inferring that peptide administration installs knowledge.",
+      "features": [
+        "Distinguish molecular form, receiver, compartment and observed effect",
+        "Keep candidate physical Crystals separate from digital software CrystalPacks",
+        "Record bounded carrier/reader/content/maintenance hypothesis and alternatives",
+        "Require evidence against generic excitability, maturation and external answer-bearing input"
+      ],
+      "inputs": [
+        "ResearchClaim; molecular identity record; carrier hypothesis; selected lab observation"
+      ],
+      "outputs": [
+        "CrystalCandidateRecord; reader compatibility proposal; hypothesis decision"
+      ],
+      "flow": [
+        "DEFINE_CARRIER",
+        "REVIEW_EVIDENCE",
+        "DESCRIBE_READER",
+        "REGISTER_CONTROLS",
+        "QUALIFIED_STUDY",
+        "JUDGE"
+      ],
+      "algorithm": "Track claimed participation as a hypothesis graph; evaluate only lab-supplied measurements; require independent delayed task relationship, carrier association, and selective causal contribution before naming a learned-content carrier.",
+      "measure": "Carrier-specific association, content selectivity, delayed benefit, effect vs general activity, matched reader compatibility, uncertainty.",
+      "validation": [
+        "No peptide formula, synthesis, dosing, ingestion or culture addition instructions",
+        "Physical package never has digital installable=true",
+        "An observed structural change is not memory content"
+      ],
+      "risks": [
+        "Proteolysis changes many processes concurrently",
+        "Material concentration is not semantic storage",
+        "No established biologically encoded book or software-feature transfer"
+      ],
+      "interfaces": [
+        "A09 living core",
+        "A16 roots",
+        "A14 consumer",
+        "A22 safety"
+      ],
+      "research": "The relevant science supports study of BDNF processing, receptors, PSD condensates, astrocytic states and ECM regulation, but not a portable material engram or behavior-programming peptide.",
+      "build": [
+        "Build claim registry and sample metadata schema",
+        "Define hypothetical reader contract",
+        "Include source reconciliation and clear research gating"
+      ]
+    },
+    {
+      "id": "CE-A24",
+      "slug": "observer_monitoring_communities",
+      "title": "Observer Mesh and Monitoring Communities",
+      "track": "digital-first + measured research",
+      "mission": "Train dedicated observers to classify operating state and predict selected failures before they occur, without giving observers control of essential care.",
+      "features": [
+        "Partition O1 status, O2 prospective warning and O3 action-category recommendation",
+        "Use only timestamped features available before the predicted outcome",
+        "Train on simulated/software faults before living recordings",
+        "Benchmark each observer against equally informed digital and fixed-policy controls"
+      ],
+      "inputs": [
+        "Feature stream; missingness mask; source clock; historical state and outcome"
+      ],
+      "outputs": [
+        "ObserverStatus; alert confidence; NeedRequest; evidence link"
+      ],
+      "flow": [
+        "QUALIFY_FEATURES",
+        "TRAIN",
+        "FREEZE",
+        "SHADOW",
+        "MEASURE_LEAD",
+        "ADVISE",
+        "RETEST"
+      ],
+      "algorithm": "Prepare episode-separated examples with common-cause and shortcut checks; freeze decoding and feature cutoffs for evaluation; measure early alert utility and added support benefit only after action-matched comparison.",
+      "measure": "Macro recall, precision-recall area, warning lead time, false alerts/hour, availability, downstream support contribution.",
+      "validation": [
+        "No post-outcome feature leakage",
+        "UNKNOWN when sensors stale",
+        "No direct access to pump, stimulation or genetic control"
+      ],
+      "risks": [
+        "Observer may learn service timestamps rather than need",
+        "Correlated feature does not establish cause",
+        "Large signal is not necessarily distress"
+      ],
+      "interfaces": [
+        "A09 main core",
+        "A03 healing",
+        "A08 health",
+        "A12 Lotus",
+        "A22 limits"
+      ],
+      "research": "An observer trained on encoded telemetry is not a chemically sensing cell without established receptor and validated transduction.",
+      "build": [
+        "Implement digital O1/O2 benchmark with leakage tests",
+        "Add shadow routing and alert dashboard",
+        "Write independent living-qualification study design"
+      ]
+    }
+  ]
+}

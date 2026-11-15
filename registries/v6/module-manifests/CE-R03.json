@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0.0",
+  "module_id": "CE-R03",
+  "name": "Peptide and Molecular Upgrade: Long-Horizon Hypothesis",
+  "version": "1.0.0-proposal",
+  "stage": "HYPOTHESIS",
+  "capabilities": [
+    "peptide-and-molecular-upgrade-long-horizon-hypothesis"
+  ],
+  "integration_refs": [
+    "CE-R02",
+    "CE-P08"
+  ],
+  "boot_dependencies": [],
+  "ports": {
+    "input": [
+      "WindEnvelope",
+      "CrystalPackManifest"
+    ],
+    "output": [
+      "WindEnvelope",
+      "ActionReceipt"
+    ]
+  },
+  "resources": {
+    "execution_class": "research",
+    "fallback": "Defer to reviewed laboratory procedure"
+  },
+  "evidence_state": "design"
+}

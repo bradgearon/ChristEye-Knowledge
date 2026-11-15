@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "module_id": "CE-P12",
+  "name": "GPU-like Accelerator and Real-Time Scheduler",
+  "version": "1.0.0-proposal",
+  "stage": "DIGITAL-V1",
+  "capabilities": [
+    "gpu-like-accelerator-and-real-time-scheduler"
+  ],
+  "integration_refs": [
+    "CE-P01",
+    "CE-P03",
+    "CE-P09"
+  ],
+  "boot_dependencies": [],
+  "ports": {
+    "input": [
+      "WindEnvelope",
+      "CrystalPackManifest"
+    ],
+    "output": [
+      "WindEnvelope",
+      "ActionReceipt"
+    ]
+  },
+  "resources": {
+    "execution_class": "realtime",
+    "fallback": "Return UNRESOLVED with typed failure receipt"
+  },
+  "evidence_state": "design"
+}

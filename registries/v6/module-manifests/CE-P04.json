@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "module_id": "CE-P04",
+  "name": "Crystal Activation, Warmup and Release",
+  "version": "1.0.0-proposal",
+  "stage": "DIGITAL-V1",
+  "capabilities": [
+    "crystal-activation-warmup-and-release"
+  ],
+  "integration_refs": [
+    "CE-P02",
+    "CE-P07",
+    "CE-P08"
+  ],
+  "boot_dependencies": [],
+  "ports": {
+    "input": [
+      "WindEnvelope",
+      "CrystalPackManifest"
+    ],
+    "output": [
+      "WindEnvelope",
+      "ActionReceipt"
+    ]
+  },
+  "resources": {
+    "execution_class": "background",
+    "fallback": "Return UNRESOLVED with typed failure receipt"
+  },
+  "evidence_state": "design"
+}

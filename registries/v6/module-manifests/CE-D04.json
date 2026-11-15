@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "module_id": "CE-D04",
+  "name": "Bosses, Combat and Enemy Behaviors",
+  "version": "1.0.0-proposal",
+  "stage": "DIGITAL-V1",
+  "capabilities": [
+    "bosses-combat-and-enemy-behaviors"
+  ],
+  "integration_refs": [
+    "CE-D03",
+    "CE-P07",
+    "CE-P12"
+  ],
+  "boot_dependencies": [],
+  "ports": {
+    "input": [
+      "WindEnvelope",
+      "CrystalPackManifest"
+    ],
+    "output": [
+      "WindEnvelope",
+      "ActionReceipt"
+    ]
+  },
+  "resources": {
+    "execution_class": "background",
+    "fallback": "Return UNRESOLVED with typed failure receipt"
+  },
+  "evidence_state": "design"
+}

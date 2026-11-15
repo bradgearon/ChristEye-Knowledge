@@ -1,0 +1,1653 @@
+[
+  {
+    "id": "CE-A01",
+    "title": "Working and Episodic Memory StarChip",
+    "track": "digital-first",
+    "record": "EpisodeRecord",
+    "fields": [
+      [
+        "episode_id",
+        "uuid"
+      ],
+      [
+        "source_sha256",
+        "hex64"
+      ],
+      [
+        "actor_scope",
+        "enum"
+      ],
+      [
+        "project_id",
+        "string"
+      ],
+      [
+        "observed_at",
+        "UTC"
+      ],
+      [
+        "kind",
+        "enum"
+      ],
+      [
+        "payload_object",
+        "sha256"
+      ],
+      [
+        "consent_training",
+        "boolean"
+      ],
+      [
+        "consent_export",
+        "boolean"
+      ],
+      [
+        "causal_parent",
+        "uuid?"
+      ],
+      [
+        "correction_of",
+        "uuid?"
+      ]
+    ],
+    "process": [
+      "Normalize an input to canonical UTF-8, attach a stable source hash and the user-selected project/permission scope. Refuse an event with no source or no applicable recording permission.",
+      "Append the full event and its predecessor hash to the immutable journal before asynchronous indexing; never treat an index as the system of record.",
+      "Extract candidate task/context/action/result spans and store offsets to the original source; isolate model-inferred fields with an explicit confidence and model version.",
+      "Retrieve using a lexical baseline followed by an optional semantic ranker; filter first by rights, project and cutoff time, then rank only eligible hits.",
+      "On correction, append a superseding event and close the previous assertion’s active interval, retaining evidence history; revocation removes it from all active indexes and Crystal eligibility.",
+      "Create delayed recall tests from episodes by holding out whole tasks and later timestamps; promote only evidence-backed, independently assessed outcomes."
+    ],
+    "measure": "Recall@k = |relevant episodes in first k| / |relevant episodes|; false-memory rate = unsupported answers / answered probes.",
+    "experiment": "Train retrieval on earlier projects; evaluate on later projects and unseen paraphrases. Compare lexical-only, semantic-only and combined retrievers under the same permission filters. Include near-duplicate but wrong-project distractors.",
+    "controls": "Temporal holdout; project-disjoint examples; revoked-event probes; adversarial conflicting notes; evaluation-set unavailability during indexing.",
+    "sources": "CE-DEV-001 §21; CE-CRYSTAL-SYS-001 Requirements R02–R05 and EX04.",
+    "science": [
+      "S03"
+    ],
+    "design": "docs/design/CE-A01_episodic_and_working_memory_Design.docx",
+    "companion": "docs/companion/CE-A01_episodic_and_working_memory_Companion.docx"
+  },
+  {
+    "id": "CE-A02",
+    "title": "Long-Term Storage and Consolidation StarChip",
+    "track": "digital-first",
+    "record": "DurableObject",
+    "fields": [
+      [
+        "sha256",
+        "hex64"
+      ],
+      [
+        "plaintext_size",
+        "uint64"
+      ],
+      [
+        "media_type",
+        "MIME"
+      ],
+      [
+        "tenant",
+        "string"
+      ],
+      [
+        "retention_policy",
+        "enum"
+      ],
+      [
+        "origin_event_id",
+        "uuid"
+      ],
+      [
+        "created_at",
+        "UTC"
+      ],
+      [
+        "encryption_key_id",
+        "string?"
+      ],
+      [
+        "supersedes",
+        "sha256?"
+      ],
+      [
+        "verified_at",
+        "UTC?"
+      ]
+    ],
+    "process": [
+      "Write blob bytes to a temporary name, fsync, compute SHA-256, atomically rename to objects/aa/digest and update the metadata transaction.",
+      "Index only committed objects using a durable outbox; a worker retries idempotently and writes index_generation on success.",
+      "Create a Merkle-style snapshot manifest listing sorted logical paths, digests, permissions and policy version; hash and sign the manifest before publishing.",
+      "Run restore drills on a clean instance, verify object digests, rebuild indexes and reconcile active tombstones before allowing queries.",
+      "Define compaction separately from deletion: superseded material can be retained for traceability while an authorized erasure request removes protected payloads according to policy.",
+      "Qualify all critical recovery paths through simulated crash points before describing a repository as long-term storage."
+    ],
+    "measure": "Storage integrity = 1 − corrupted_verified_objects / audited_objects; RPO = latest durable event gap; RTO = measured fresh-node restoration elapsed time.",
+    "experiment": "Fault-inject interruption before rename, after rename but before metadata commit, and during index rebuild. Verify that no committed path points to missing bytes and that recovery replays the outbox exactly once logically.",
+    "controls": "Cold restore from separate host; hash corruption; permissions migration; old-index query after deletion; retained biological records explicitly marked telemetry, not an engram backup.",
+    "sources": "CE-DEV-001 §21, §25–26; CE-CRYSTAL-SYS-001 §Records and software contracts.",
+    "science": [],
+    "design": "docs/design/CE-A02_long_term_storage_Design.docx",
+    "companion": "docs/companion/CE-A02_long_term_storage_Companion.docx"
+  },
+  {
+    "id": "CE-A03",
+    "title": "Healing and Integrity Recovery Network",
+    "track": "digital-first + monitored research",
+    "record": "RecoveryCase",
+    "fields": [
+      [
+        "case_id",
+        "uuid"
+      ],
+      [
+        "onset",
+        "UTC"
+      ],
+      [
+        "symptom",
+        "enum"
+      ],
+      [
+        "affected_routes",
+        "list"
+      ],
+      [
+        "sensor_quality",
+        "object"
+      ],
+      [
+        "competing_hypotheses",
+        "list"
+      ],
+      [
+        "selected_action",
+        "enum"
+      ],
+      [
+        "permit_receipt",
+        "id?"
+      ],
+      [
+        "before_after_test",
+        "id?"
+      ],
+      [
+        "status",
+        "enum"
+      ]
+    ],
+    "process": [
+      "Validate timestamps, freshness and recorded delivery before inferring a network deficit.",
+      "Generate named hypotheses with predicted observations for each, rather than labeling every poor response as forgotten knowledge.",
+      "Try reversible software checks in increasing order of scope: replay a valid message in simulation, switch an approved digital route, rebuild an index from durable objects, restore a known configuration.",
+      "Freeze task scoring before each comparison; report both target recovery and protected old-task performance.",
+      "On biological warning, request qualified review and keep routine approved life support separate from task pause; block unsupported changes.",
+      "Write a complete RecoveryCase with selected explanation, alternative explanations and unresolved status if evidence cannot distinguish them."
+    ],
+    "measure": "Recovery gain ΔQ = Q_after − Q_before (same task and eligibility); protected cost_j = Q_j,after − Q_j,before.",
+    "experiment": "Blindly inject router latency, stale observation, altered source index and suppressed decoder output into the digital harness; measure detection and correct diagnosis separately.",
+    "controls": "Matched no-action periods; independent hardware sensor; clean baseline; observer prevented from seeing the post-fault label before prediction.",
+    "sources": "CE-DEV-001 §25 and controller states §22; CE-CRYSTAL-SYS-001 EX07, EX09.",
+    "science": [
+      "S02"
+    ],
+    "design": "docs/design/CE-A03_healing_and_integrity_Design.docx",
+    "companion": "docs/companion/CE-A03_healing_and_integrity_Companion.docx"
+  },
+  {
+    "id": "CE-A04",
+    "title": "Growth and Capacity Planning Network",
+    "track": "digital-first + monitored research",
+    "record": "GrowthProposal",
+    "fields": [
+      [
+        "proposal_id",
+        "uuid"
+      ],
+      [
+        "diagnosed_gap",
+        "string"
+      ],
+      [
+        "comparator_results",
+        "list"
+      ],
+      [
+        "resource_budget",
+        "object"
+      ],
+      [
+        "candidate_module",
+        "string"
+      ],
+      [
+        "expected_gain_vector",
+        "object"
+      ],
+      [
+        "uncertainty",
+        "object"
+      ],
+      [
+        "protected_roots",
+        "list"
+      ],
+      [
+        "permit",
+        "enum"
+      ],
+      [
+        "observed_gain",
+        "object?"
+      ]
+    ],
+    "process": [
+      "Collect prospective saturation indicators: queue delay, memory pressure, task failure by type, effective data coverage and skill-transfer score.",
+      "Ask the diagnostic module whether the gap is routing, access, data quality, insufficiency of examples or genuinely missing computational capacity.",
+      "Model candidate actions: no change, index refresh, curriculum revision, software specialization, new digital module, research review.",
+      "Estimate expected quality gain and 95% uncertainty using held-out tasks; reject plans whose resource cost or protected-task loss exceeds approved bounds.",
+      "Deploy a new digital StarChip in shadow mode with the same observations, score it against old behavior and only then admit it to active routing.",
+      "For living research, request independent source, maturation, interface, maintenance and experimental qualification; never instantiate a cell population through software."
+    ],
+    "measure": "J(a) = Σ_i w_i E[ΔU_i|a] − λ C(a), subject to Pr(ΔU_protected,j ≥ −ε_j) ≥ 1−α_j.",
+    "experiment": "Ablate the Growth Planner and compare fixed expansion, no-expansion and evidence-guided policies on synthetic performance drift and demand bursts.",
+    "controls": "Frozen evaluation seeds; identical compute budget; repeated protected tasks; prospective confidence intervals; no biological module admission before lab gates.",
+    "sources": "CE-DEV-001 §18–19, §28; Lotus Stream Research §Move 6–7; Formal Models §Living-computer equation audit.",
+    "science": [
+      "S02",
+      "S10"
+    ],
+    "design": "docs/design/CE-A04_growth_and_capacity_Design.docx",
+    "companion": "docs/companion/CE-A04_growth_and_capacity_Companion.docx"
+  },
+  {
+    "id": "CE-A05",
+    "title": "Refreshing, Renewal and Maintenance Network",
+    "track": "digital-first + monitored research",
+    "record": "RefreshPlan",
+    "fields": [
+      [
+        "plan_id",
+        "uuid"
+      ],
+      [
+        "target_id",
+        "string"
+      ],
+      [
+        "last_validated",
+        "UTC"
+      ],
+      [
+        "age",
+        "seconds"
+      ],
+      [
+        "stale_dependencies",
+        "list"
+      ],
+      [
+        "action",
+        "enum"
+      ],
+      [
+        "snapshot_before",
+        "sha256"
+      ],
+      [
+        "outcome_receipt",
+        "uuid"
+      ],
+      [
+        "followup_due",
+        "UTC"
+      ]
+    ],
+    "process": [
+      "Attach validity intervals and explicit source status to each fact, route and capability certificate.",
+      "Schedule periodic queries and retrieval tests that do not leak answers from the future to the learner.",
+      "If a source is stale, reacquire only under authorized ingestion policy and retain old source for audit.",
+      "If a skill regresses, first retest using its established cue and unchanged decoder; compare with storage, access and environment explanations.",
+      "Refresh the digital cache or replay a Crystal in staging, then run old and new task tests before promotion.",
+      "Issue a research-review request for any observed physiological decline instead of assuming that more training, food or stimulation is a repair."
+    ],
+    "measure": "Freshness(a,t) = 1[t−observed_at ≤ TTL_a and calibration_valid]; service risk = Σ dependency_weight × stale_duration.",
+    "experiment": "Introduce source changes, clock skew, missing sensors and an intentionally corrupted local index. Assess correct remedy selection and whether protected answers are retained.",
+    "controls": "No-change baseline; alternate retrieval cue; separate retraining and restore arms; support-status covariates.",
+    "sources": "CE-DEV-001 §16, §25; CE-CRYSTAL-SYS-001 EX07, EX12.",
+    "science": [
+      "S02"
+    ],
+    "design": "docs/design/CE-A05_refresh_renewal_Design.docx",
+    "companion": "docs/companion/CE-A05_refresh_renewal_Companion.docx"
+  },
+  {
+    "id": "CE-A06",
+    "title": "Learning Stabilization and Consolidation Network",
+    "track": "digital-first + research hypothesis",
+    "record": "RetentionStudy",
+    "fields": [
+      [
+        "study_id",
+        "uuid"
+      ],
+      [
+        "capability_id",
+        "string"
+      ],
+      [
+        "participant_id",
+        "string"
+      ],
+      [
+        "training_epoch",
+        "string"
+      ],
+      [
+        "probe_schedule",
+        "list"
+      ],
+      [
+        "holdout_digest",
+        "sha256"
+      ],
+      [
+        "reader_digest",
+        "sha256"
+      ],
+      [
+        "immediate",
+        "float"
+      ],
+      [
+        "delayed",
+        "dict"
+      ],
+      [
+        "controls",
+        "list"
+      ],
+      [
+        "status",
+        "enum"
+      ]
+    ],
+    "process": [
+      "Define a competency and held-out task family before training; seal labels and reader/decoder version.",
+      "Record immediate acquisition, then delayed performance after teaching feedback has been disabled.",
+      "Record probe exposure itself, because retrieval can alter learning; where feasible use separate cohorts or matched schedules.",
+      "Analyze absolute delayed macro recall and paired deltas by biological preparation or digital training run, not electrode or trial pseudo-replicates.",
+      "Compare spaced versus massed curriculum only when total exposure and task-information supply are known and matched.",
+      "Propose promotion only when the lower confidence bound clears a preregistered target and old protected skills meet noninferiority criteria."
+    ],
+    "measure": "R_U(τ)=(P_τ−P_chance)/(P_0−P_chance), only when P_0−P_chance exceeds prespecified floor; never clamp R_U to [0,1].",
+    "experiment": "Contingent feedback vs matched noncontingent vs untrained baseline with independent preparations, frozen readout and delayed probes at specified horizons.",
+    "controls": "Equal task information where possible; software-only comparator; untrained and yoked controls; preparation and batch separation; attrition accounted for.",
+    "sources": "CE-DEV-001 §15–16, §23; Robbins et al. 2026 DOI 10.1016/j.celrep.2026.116984; Formal Models §Living-computer equation audit.",
+    "science": [
+      "S02",
+      "S04",
+      "S05"
+    ],
+    "design": "docs/design/CE-A06_learning_stabilization_Design.docx",
+    "companion": "docs/companion/CE-A06_learning_stabilization_Companion.docx"
+  },
+  {
+    "id": "CE-A07",
+    "title": "Learning Enhancement and Curriculum Network",
+    "track": "digital-first",
+    "record": "CurriculumUnit",
+    "fields": [
+      [
+        "unit_id",
+        "string"
+      ],
+      [
+        "domain",
+        "string"
+      ],
+      [
+        "prerequisites",
+        "list"
+      ],
+      [
+        "content_digest",
+        "sha256"
+      ],
+      [
+        "target_skill",
+        "string"
+      ],
+      [
+        "format",
+        "enum"
+      ],
+      [
+        "learner_reader",
+        "string"
+      ],
+      [
+        "assessment_digest",
+        "sha256"
+      ],
+      [
+        "mastery_rule",
+        "object"
+      ],
+      [
+        "copyright_scope",
+        "string"
+      ]
+    ],
+    "process": [
+      "Build a DAG of competencies with stable IDs and no prerequisite cycles.",
+      "For each skill create training examples, analogies, counterexamples, transfer cases and a withheld test set; never embed answer keys in learner-visible text.",
+      "At each turn choose among ready lessons using a declared utility of uncertainty reduction, novelty, estimated improvement and cost.",
+      "Use an explicit lesson-to-receiver adapter: LLM prompt/RAG/trainable model for digital modules; candidate stimulus encoding is a research-only interface.",
+      "After a learning block, test mastery and old-skill regression separately; reject progression if delays or held-out results fail.",
+      "Version the curriculum and keep the source license and produced representations so CrystalPack export is rights-auditable."
+    ],
+    "measure": "Utility(k)=w_1 expected_gain_k + w_2 uncertainty_k + w_3 novelty_k − w_4 cost_k; advance iff all prerequisite tests pass.",
+    "experiment": "Adaptive vs fixed lesson sequence vs randomized eligible sequence under matched token/time budget; evaluate domain transfer and retention.",
+    "controls": "Sealed problems; source-separated examples; equivalent task complexity; no test-label access by curriculum selector.",
+    "sources": "Living Computer Theory Set §19.4–20; CE-DEV-001 §14–15; Lotus Stream Research §Active understanding curriculum.",
+    "science": [
+      "S01",
+      "S03"
+    ],
+    "design": "docs/design/CE-A07_learning_enhancement_Design.docx",
+    "companion": "docs/companion/CE-A07_learning_enhancement_Companion.docx"
+  },
+  {
+    "id": "CE-A08",
+    "title": "Health, Anti-Disease Surveillance and Biosafety Network",
+    "track": "monitored research",
+    "record": "HealthAlert",
+    "fields": [
+      [
+        "alert_id",
+        "uuid"
+      ],
+      [
+        "module_id",
+        "string"
+      ],
+      [
+        "sensor_id",
+        "string"
+      ],
+      [
+        "observed_at",
+        "UTC"
+      ],
+      [
+        "validity",
+        "enum"
+      ],
+      [
+        "threshold_ref",
+        "string"
+      ],
+      [
+        "deviation",
+        "object"
+      ],
+      [
+        "confidence",
+        "float?"
+      ],
+      [
+        "category",
+        "enum"
+      ],
+      [
+        "required_review",
+        "string"
+      ],
+      [
+        "receipt",
+        "id?"
+      ]
+    ],
+    "process": [
+      "For each sensor record calibration, location, frequency, freshness and operating bounds supplied by the qualified lab.",
+      "Filter malformed/stale readings before trend detection and propagate UNKNOWN rather than normal.",
+      "Use rule-based deterministic alarms as the reference; compare any trained observer to that same information set.",
+      "Correlate alerts with source/batch, maintenance and instrumentation changes without inferring pathogen presence from neural activity.",
+      "Keep independent baseline support active when task work pauses; unauthorized medium, peptide or genetic changes are never emitted.",
+      "Record all alert acknowledgements, reviewed dispositions, false alarms and overdue service."
+    ],
+    "measure": "Availability = N_correct_valid_on_time / N_scheduled; alert burden = false alerts per hour + review minutes per alert.",
+    "experiment": "Synthetic sensor fault and blinded retrospective telemetry test; prospective biological alarms require lab-owned independently verified outcomes.",
+    "controls": "Lab-grade reference sensor; unmodified digital rules; sensor-disconnect simulation; no surrogate truth based on the same signal being predicted.",
+    "sources": "CE-DEV-001 §9, §12–13, §22; CE-CRYSTAL-SYS-001 R02, R10 and EX01.",
+    "science": [
+      "S09"
+    ],
+    "design": "docs/design/CE-A08_health_surveillance_Design.docx",
+    "companion": "docs/companion/CE-A08_health_surveillance_Companion.docx"
+  },
+  {
+    "id": "CE-A09",
+    "title": "Main Living Network: Soil, Spirit, Heart and Tree",
+    "track": "hybrid research architecture",
+    "record": "BiologicalTrial",
+    "fields": [
+      [
+        "trial_id",
+        "uuid"
+      ],
+      [
+        "preparation_id",
+        "string"
+      ],
+      [
+        "task_codebook_version",
+        "string"
+      ],
+      [
+        "requested_event",
+        "id"
+      ],
+      [
+        "delivered_event",
+        "id?"
+      ],
+      [
+        "raw_record_ref",
+        "string"
+      ],
+      [
+        "mask_digest",
+        "sha256"
+      ],
+      [
+        "decoder_digest",
+        "sha256"
+      ],
+      [
+        "response",
+        "enum"
+      ],
+      [
+        "validity",
+        "enum"
+      ],
+      [
+        "evaluator_label",
+        "enum?"
+      ],
+      [
+        "feedback_receipt",
+        "id?"
+      ]
+    ],
+    "process": [
+      "Commission a cell-free host where the full task loop, clock, artifact masks and abort paths are testable without tissue.",
+      "Version each preparation by source, geometry (planar or 3D), cell identities, environment and instrumentation; do not generalize across versions.",
+      "Qualify codebook delivery and recorded response with the lab, then freeze readout for learning comparisons.",
+      "Task oracle: C0+AB→X, C0+BA→Y, C1+AB→Y, C1+BA→X, identical AA/BB→HOLD; missing input→UNRESOLVED instrument status.",
+      "Deliver feedback only after the response window in a qualified training arm; withhold feedback and sealed targets during evaluation.",
+      "Report valid class macro recall, invalid fraction, delayed tests and differences to controlled software-only baselines as separate claims."
+    ],
+    "measure": "MAR=(Recall_X+Recall_Y+Recall_HOLD)/3. Proposed v0.4 targets: ≥0.80 immediate, ≥0.75 at 24 h, ≥0.70 at 7 d, all unachieved targets.",
+    "experiment": "R0 cell-free, R1 core with fixed decoder and controls, R2 two-module shadow/advisory bridges, R3 support-policy learner only after marginal gain.",
+    "controls": "Cell-free signals, sham delivery, untrained/yoked, frozen decoder, source-separated independent preparations, software oracle.",
+    "sources": "CE-DEV-001 §§4–5, 13–18, 23–24; CE-CRYSTAL-SYS-001 §Architecture and EX01/EX04.",
+    "science": [
+      "S01",
+      "S02",
+      "S03",
+      "S09",
+      "S10"
+    ],
+    "design": "docs/design/CE-A09_main_living_core_Design.docx",
+    "companion": "docs/companion/CE-A09_main_living_core_Companion.docx"
+  },
+  {
+    "id": "CE-A10",
+    "title": "Experience-to-Crystal Compiler",
+    "track": "digital-first",
+    "record": "CrystalManifest",
+    "fields": [
+      [
+        "pack_id",
+        "string"
+      ],
+      [
+        "semver",
+        "string"
+      ],
+      [
+        "kind",
+        "enum"
+      ],
+      [
+        "producer",
+        "string"
+      ],
+      [
+        "build_digest",
+        "sha256"
+      ],
+      [
+        "artifacts",
+        "list[digest]"
+      ],
+      [
+        "lessons",
+        "list"
+      ],
+      [
+        "memory_roots",
+        "list"
+      ],
+      [
+        "license",
+        "object"
+      ],
+      [
+        "reader_contract",
+        "string"
+      ],
+      [
+        "tests",
+        "object"
+      ],
+      [
+        "evidence_tier",
+        "enum"
+      ],
+      [
+        "installable",
+        "boolean"
+      ]
+    ],
+    "process": [
+      "Resolve a declarative build plan naming project, event interval, allowed rights, source roots and target reader.",
+      "Apply revocation and export filters before any text extraction or indexing; produce a redaction report and no hidden copies in assets.",
+      "Deduplicate by content hash, preserve exact citations and include failed/corrected episodes when permitted.",
+      "Build lessons and replay events with signed causal ordering; store evaluation prompts separately with their digest.",
+      "Run deterministic schema validation, declared security and license checks and prospective behavior tests in staging.",
+      "Produce reproducible pack bytes and immutable build receipt including tool versions, input hashes and capabilities proven—not claimed."
+    ],
+    "measure": "Pack_id_hash=SHA256(canonical_manifest_without_signature); reproducibility requires equal content digests, not identical LLM outputs.",
+    "experiment": "Compare a pure asset import, replay-based training and retrieval-only installation on the same sealed held-out task distribution.",
+    "controls": "Permission-denied export; source revocation; malicious script payload; tampered asset; duplicate pack version; unsupported reader.",
+    "sources": "CE-CRYSTAL-SYS-001 R06–R08 and §Records; Physical Learning Device v0.4 §20–21.",
+    "science": [
+      "S03"
+    ],
+    "design": "docs/design/CE-A10_usage_crystal_compiler_Design.docx",
+    "companion": "docs/companion/CE-A10_usage_crystal_compiler_Companion.docx"
+  },
+  {
+    "id": "CE-A11",
+    "title": "Connective Controllers, WindBus and Bridge Endpoints",
+    "track": "digital-first + measured biological adapter",
+    "record": "WindEnvelope",
+    "fields": [
+      [
+        "event_id",
+        "uuid"
+      ],
+      [
+        "trace_id",
+        "uuid"
+      ],
+      [
+        "source_id",
+        "string"
+      ],
+      [
+        "recipient_id",
+        "string"
+      ],
+      [
+        "schema_id",
+        "string"
+      ],
+      [
+        "version",
+        "semver"
+      ],
+      [
+        "kind",
+        "enum"
+      ],
+      [
+        "observed_at",
+        "UTC"
+      ],
+      [
+        "issued_at",
+        "UTC"
+      ],
+      [
+        "expires_at",
+        "UTC"
+      ],
+      [
+        "payload_ref",
+        "sha256"
+      ],
+      [
+        "source_scope",
+        "enum"
+      ],
+      [
+        "signature",
+        "bytes?"
+      ]
+    ],
+    "process": [
+      "Register publisher/subscriber capabilities with declared schema versions and authorized message kinds.",
+      "Validate payload structure, size, freshness, consent, receiver compatibility and recursion depth before enqueue.",
+      "Persist a per-route sequence number and event ID; acknowledge processed messages only after downstream durable commit.",
+      "Use at-least-once delivery with idempotency keys rather than promising unimplementable exactly-once biological effects.",
+      "Measure acquisition→encoding→queue→recipient delivery latencies and log requested versus actual physical delivery separately.",
+      "For each bridge compare isolated, bridged, shuffled, replay and software-teacher conditions; clear queues and cached outputs during disconnect."
+    ],
+    "measure": "L_total=L_acquire+L_encode+L_queue+L_network+L_delivery; P99(L_total) and missed-deadline rate must be measured per route.",
+    "experiment": "Route-failure simulation: duplicate, reorder, stale packet, missing payload, invalid schema and disconnect. For living link require measured bidirectional delivery before any learning claim.",
+    "controls": "Shuffled observation route; fixed-latency replay; software-only bridge; independent sensor; disconnected module baseline.",
+    "sources": "CE-DEV-001 §§5, 18, 21; CE-CRYSTAL-SYS-001 EX09–EX11.",
+    "science": [
+      "S01",
+      "S10"
+    ],
+    "design": "docs/design/CE-A11_connective_controllers_Design.docx",
+    "companion": "docs/companion/CE-A11_connective_controllers_Companion.docx"
+  },
+  {
+    "id": "CE-A12",
+    "title": "Lotus Main Coordinator and Developmental Operating System",
+    "track": "digital-first",
+    "record": "LotusDecision",
+    "fields": [
+      [
+        "decision_id",
+        "uuid"
+      ],
+      [
+        "state_snapshot",
+        "sha256"
+      ],
+      [
+        "candidates",
+        "list"
+      ],
+      [
+        "expected_effects",
+        "vector"
+      ],
+      [
+        "protected_margin",
+        "vector"
+      ],
+      [
+        "uncertainty",
+        "object"
+      ],
+      [
+        "ranking_policy",
+        "string"
+      ],
+      [
+        "veto_receipt",
+        "string"
+      ],
+      [
+        "result",
+        "enum"
+      ],
+      [
+        "review_due",
+        "UTC?"
+      ]
+    ],
+    "process": [
+      "Assemble a state vector from fresh, permissioned observations and explicit missingness.",
+      "Enumerate allowable actions: NO_CHANGE, DEFER_TASK, REQUEST_REVIEW, approved digital alternate route, replay in staging, snapshot, or curriculum evaluation.",
+      "Eliminate actions that violate hard constraints or protected Root noninferiority margins before ranking.",
+      "Use a declared scalar utility for eligible digital actions with uncertainty; if confidence intervals overlap zero choose UNRESOLVED or gather additional evidence.",
+      "Record proposal, alternatives, decision inputs, independent veto and executed receipt as separate events.",
+      "Re-evaluate actions on sealed outcomes; change the planner only via versioned offline deployment, never recursive self-approval."
+    ],
+    "measure": "Allowed(a)=Π_j1[g_j(s,a)≤0]. If allowed: J(a)=Σ_i w_iΔU_i−αC(a)−βRisk(a), with confidence bounds; a veto dominates J.",
+    "experiment": "Compare fixed scheduling against active Lotus on held-out simulated drift while matching resource use; toggle coordinator on/off prospectively to test added contribution.",
+    "controls": "Non-adaptive policy, random admissible policy, blinded holdout, protection veto tests, sealed evaluator.",
+    "sources": "CE-DEV-001 §§17,22; Living Computer Theory Set §§7,15; Formal Models §Lotus scalar correction.",
+    "science": [
+      "S02"
+    ],
+    "design": "docs/design/CE-A12_lotus_coordinator_Design.docx",
+    "companion": "docs/companion/CE-A12_lotus_coordinator_Companion.docx"
+  },
+  {
+    "id": "CE-A13",
+    "title": "Crystal Replication, Versioning and Cloning",
+    "track": "digital-first + research-only physical branch",
+    "record": "CloneReceipt",
+    "fields": [
+      [
+        "parent_pack",
+        "sha256"
+      ],
+      [
+        "child_pack",
+        "sha256"
+      ],
+      [
+        "version",
+        "string"
+      ],
+      [
+        "copy_mode",
+        "enum"
+      ],
+      [
+        "authorizer",
+        "string"
+      ],
+      [
+        "rights_audit",
+        "sha256"
+      ],
+      [
+        "reader",
+        "string"
+      ],
+      [
+        "clone_tests",
+        "object"
+      ],
+      [
+        "isolated_test",
+        "object"
+      ],
+      [
+        "created_at",
+        "UTC"
+      ]
+    ],
+    "process": [
+      "Verify all source assets and license/consent rights before copying.",
+      "Perform digest-addressed copies, then compare child and parent root manifests and their independent signatures.",
+      "If a new reader or software version is specified, record a compatibility migration and do not call it byte-identical.",
+      "Install into a new sandbox whose cache, training data and credentials are isolated from the source.",
+      "Evaluate output equivalence and skill equivalence separately on sealed tasks; report expected nondeterminism and outcome distributions.",
+      "For biological recipient B, require independent-only evaluation after all teacher and shared digital channels are verifiably removed."
+    ],
+    "measure": "ByteClone=1[SHA256(parent_bytes)=SHA256(child_bytes)]; SkillEquivalence_j requires a prespecified noninferiority test, not byte equality.",
+    "experiment": "A→B teaching: living teacher, untrained teacher, shuffled/yoked teacher and equally informed software teacher; B-only delayed testing.",
+    "controls": "Teacher off/uncached; frozen recipient reader; equal exposure accounting; no hidden answer data; isolation log.",
+    "sources": "CE-DEV-001 §20; CE-CRYSTAL-SYS-001 EX10–EX11.",
+    "science": [
+      "S10"
+    ],
+    "design": "docs/design/CE-A13_crystal_replication_and_cloning_Design.docx",
+    "companion": "docs/companion/CE-A13_crystal_replication_and_cloning_Companion.docx"
+  },
+  {
+    "id": "CE-A14",
+    "title": "Crystal Consumption, Experience Replay and Remanifestation",
+    "track": "digital-first + biological study concept",
+    "record": "ConsumptionJob",
+    "fields": [
+      [
+        "job_id",
+        "uuid"
+      ],
+      [
+        "pack_digest",
+        "sha256"
+      ],
+      [
+        "target_reader",
+        "string"
+      ],
+      [
+        "mode",
+        "enum"
+      ],
+      [
+        "state",
+        "enum"
+      ],
+      [
+        "replay_cursor",
+        "uint64"
+      ],
+      [
+        "consent_snapshot",
+        "sha256"
+      ],
+      [
+        "assessment_set",
+        "sha256"
+      ],
+      [
+        "rollback_checkpoint",
+        "sha256"
+      ],
+      [
+        "activation_receipt",
+        "id?"
+      ]
+    ],
+    "process": [
+      "Discover pack and reader; verify signed manifest, complete assets, rights, dependencies and model/hardware compatibility.",
+      "Stage with no access to production secrets or physical actuators; snapshot target digital state.",
+      "Choose a declared consumption mode and create a replay schedule with deterministic order and content-level de-duplication.",
+      "Route Words and correction examples via the target’s supported digital interface; log every replay cue, source, timestamp and output.",
+      "Stop the teacher, clear cached answer-bearing context, freeze the reader and evaluate unseen tasks plus protected skills.",
+      "Promote only when criteria pass; otherwise restore software checkpoint and retain failed attempt as evidence; biological state is never described as rolled back."
+    ],
+    "measure": "TransferGain = P_recipient,alone(after) − P_recipient,alone(before), reported alongside shuffled, untrained and software-teacher controls.",
+    "experiment": "A/B/C: retrieval-only, replay-training and no pack; held-out time-delayed tests; matched compute and access to information.",
+    "controls": "Wrong reader, truncated pack, revoked permission, unsupported physical carrier, corrupted file, protected-task regression, unlearning request.",
+    "sources": "CE-CRYSTAL-SYS-001 EX10–EX12; Technical Companion §What is packed; CE-DEV-001 §20.",
+    "science": [
+      "S01",
+      "S03"
+    ],
+    "design": "docs/design/CE-A14_crystal_consumption_and_replay_Design.docx",
+    "companion": "docs/companion/CE-A14_crystal_consumption_and_replay_Companion.docx"
+  },
+  {
+    "id": "CE-A15",
+    "title": "Organoid Soil Development, Geometry and Morphology",
+    "track": "qualified-lab research only",
+    "record": "PreparationVersion",
+    "fields": [
+      [
+        "prep_id",
+        "string"
+      ],
+      [
+        "source_lineage",
+        "ref"
+      ],
+      [
+        "approval_refs",
+        "list"
+      ],
+      [
+        "organism",
+        "enum"
+      ],
+      [
+        "region",
+        "string"
+      ],
+      [
+        "geometry",
+        "enum"
+      ],
+      [
+        "batch",
+        "string"
+      ],
+      [
+        "received_at",
+        "UTC"
+      ],
+      [
+        "imaging_map_ref",
+        "string"
+      ],
+      [
+        "functional_release",
+        "object"
+      ],
+      [
+        "quality_review",
+        "enum"
+      ]
+    ],
+    "process": [
+      "Create an institution-approved source and consent record, named biological lead and preparation version; block receiving if required documents are absent.",
+      "Capture chamber geometry, optically accessible regions, electrode map, clock synchronization, source identity and sample-level provenance.",
+      "Track viable composition and longitudinal morphology as measurements from qualified assays, not as instructions for inducing cell types.",
+      "Check structural/interface stability with the preparation-specific lab criteria, then verify experimentally distinguishable inputs and responses.",
+      "Keep source-expansion/differentiation service separate from mature learning; physical additions or joining are new research versions.",
+      "Publish only measured observation coverage, released limits, instrument compatibility and unresolved parameters; never infer cognition from size, symmetry or marker intensity."
+    ],
+    "measure": "Coverage = observed_valid_regions / predefined_regions; structural drift and response drift are separate time series, not one maturity score.",
+    "experiment": "Record preparatory baseline trajectories and measured functional responses across independent batches; compare sources while controlling reader and task version.",
+    "controls": "Blank instrument, sham inputs, identical imaging protocol, source lot, batch effect, unobserved cell population declared UNKNOWN.",
+    "sources": "CE-DEV-001 §§6–12 and §27; CE-CRYSTAL-SYS-001 §Physical partitions; Technical Companion §Integration with living computer.",
+    "science": [
+      "S09",
+      "S10",
+      "S11"
+    ],
+    "design": "docs/design/CE-A15_organoid_development_and_shape_Design.docx",
+    "companion": "docs/companion/CE-A15_organoid_development_and_shape_Companion.docx"
+  },
+  {
+    "id": "CE-A16",
+    "title": "Roots Registry, Engram Hypothesis Tracking and Growth Maps",
+    "track": "digital-first + measured research",
+    "record": "RootRecord",
+    "fields": [
+      [
+        "root_id",
+        "string"
+      ],
+      [
+        "task_relation",
+        "string"
+      ],
+      [
+        "learner_id",
+        "string"
+      ],
+      [
+        "context",
+        "list"
+      ],
+      [
+        "acquisition_run",
+        "id"
+      ],
+      [
+        "reader_digest",
+        "sha256"
+      ],
+      [
+        "delay_scores",
+        "dict"
+      ],
+      [
+        "protected",
+        "boolean"
+      ],
+      [
+        "evidence_links",
+        "list"
+      ],
+      [
+        "graph_edges",
+        "list"
+      ],
+      [
+        "access_routes",
+        "list"
+      ],
+      [
+        "status",
+        "enum"
+      ]
+    ],
+    "process": [
+      "Create a Root candidate only from an acquisition run with a locked task, source IDs and valid response.",
+      "Store absolute delayed test outcomes and variability; mark unavailable/undefined ratios instead of pretending a score is zero.",
+      "Attach observed channels and optional image regions as ASSOCIATED_WITH edges, not causal or storage links.",
+      "Generate two alternative cues and separate retrieval tests to discriminate access-path failure from loss of performance; unresolved is allowed.",
+      "Run reversible digital edge masking; report task changes across a prespecified protected skill battery, retaining deleted edge provenance.",
+      "Promote VERIFIED_ROOT only after declared delay and independent confirmation; freeze root status during downstream compilation."
+    ],
+    "measure": "ΔRoot_j=P_j(after)−P_j(before); an influence edge requires a controlled intervention and confound analysis, not correlation alone.",
+    "experiment": "Graph ablation on cloned software modules and alternate cue probes; for neural features compare predictive addition and later selective controlled studies.",
+    "controls": "Shuffled graph edges, identical training baseline, null perturbation, matched environmental state, held-out preparation.",
+    "sources": "CE-DEV-001 §§16,21,25; CE-CRYSTAL-SYS-001 §Records; Formal Models §Retrieval and maintenance.",
+    "science": [
+      "S04",
+      "S05",
+      "S06"
+    ],
+    "design": "docs/design/CE-A16_root_registry_and_mapping_Design.docx",
+    "companion": "docs/companion/CE-A16_root_registry_and_mapping_Companion.docx"
+  },
+  {
+    "id": "CE-A17",
+    "title": "Daily Milk, Water and Support-Dispensing Operations",
+    "track": "qualified-lab support + digital scheduler",
+    "record": "CareServiceReceipt",
+    "fields": [
+      [
+        "service_id",
+        "uuid"
+      ],
+      [
+        "prep_id",
+        "string"
+      ],
+      [
+        "approved_SOP_ref",
+        "string"
+      ],
+      [
+        "requested_at",
+        "UTC"
+      ],
+      [
+        "due_window",
+        "object"
+      ],
+      [
+        "responsible_operator",
+        "string"
+      ],
+      [
+        "supply_lot",
+        "string"
+      ],
+      [
+        "measurements_before",
+        "dict"
+      ],
+      [
+        "authorized",
+        "boolean"
+      ],
+      [
+        "execution_reference",
+        "string?"
+      ],
+      [
+        "measurements_after",
+        "dict"
+      ],
+      [
+        "deviation",
+        "string?"
+      ]
+    ],
+    "process": [
+      "Import site-approved service intervals and task-independent support requirements; validation rejects missing units, out-of-date SOP and incompatible module identity.",
+      "Derive due windows and conflicts across modules without inventing volumes, compositions, concentrations or physical flow.",
+      "Request operator authorization and inventory allocation; log approved supplies and lot identifiers.",
+      "Accept an externally verified delivered-service receipt, preserving intended/delivered timestamps and sampling path.",
+      "Observe freshness and deviations; escalate unresolved faults to the responsible laboratory team.",
+      "Continue approved baseline care during task pause and keep all care events out of training reward computation."
+    ],
+    "measure": "Care compliance = services within approved window / services due; local_support_validity = AND of independently calibrated, fresh measurements.",
+    "experiment": "Cell-free scheduler simulation with missed service, wrong module, wrong lot, stale sensor, duplicate receipt and system restart.",
+    "controls": "Human check against actual procedure; independent instrumentation; no automated adjustment of chemical composition or starvation-based training.",
+    "sources": "CE-DEV-001 §§5,9,22,26; CE-CRYSTAL-SYS-001 R04, §Development sequence.",
+    "science": [
+      "S11",
+      "S12"
+    ],
+    "design": "docs/design/CE-A17_daily_care_and_dispensing_Design.docx",
+    "companion": "docs/companion/CE-A17_daily_care_and_dispensing_Companion.docx"
+  },
+  {
+    "id": "CE-A18",
+    "title": "Bread, Meat, Water and Metabolic Provision Network",
+    "track": "dual-lane: digital curricula + lab-governed biological care",
+    "record": "ProvisionEvent",
+    "fields": [
+      [
+        "event_id",
+        "uuid"
+      ],
+      [
+        "lane",
+        "enum[digital,physical_record]"
+      ],
+      [
+        "category",
+        "enum"
+      ],
+      [
+        "content_or_SOP_ref",
+        "string"
+      ],
+      [
+        "recipient_id",
+        "string"
+      ],
+      [
+        "reason",
+        "string"
+      ],
+      [
+        "rights_or_approval",
+        "string"
+      ],
+      [
+        "delivered_receipt",
+        "string?"
+      ],
+      [
+        "evaluation_id",
+        "string?"
+      ]
+    ],
+    "process": [
+      "Determine the requested lane and refuse any conversion from a digital lesson to a chemical actuation event.",
+      "For a digital provision, resolve prerequisite Roots, source licenses, target reader and sealed assessment.",
+      "Route educational content through WindBus with explicit intended recipient and provide feedback only after task outcome closure.",
+      "Record changes to digital competency and root retention; do not use memory score as a nutritional dose proxy.",
+      "For physical-care metadata, accept only a lab-issued approved formulation/version reference and a qualified service receipt.",
+      "On apparent support effect, compare instrument validity and general excitability before claiming selective teaching or learned knowledge."
+    ],
+    "measure": "Two-lane invariant: DigitalLesson ∩ PhysicalCareCommand = ∅. Support q(t) is measured independently of task-feedback m(t).",
+    "experiment": "Digitally compare prerequisite-bearing vs unordered curriculum; biologically only observe qualified support state versus performance under laboratory review.",
+    "controls": "Permissioned information budgets, fixed support protocol, no task-dependent withholding of essential care.",
+    "sources": "CE-DEV-001 §§9–11; Living Computer Theory Set §3.3–3.4; Formal Models §Milk product audit.",
+    "science": [
+      "S11",
+      "S12"
+    ],
+    "design": "docs/design/CE-A18_bread_meat_water_and_metabolic_Design.docx",
+    "companion": "docs/companion/CE-A18_bread_meat_water_and_metabolic_Companion.docx"
+  },
+  {
+    "id": "CE-A19",
+    "title": "Central Data Router, Host and Internet Integration",
+    "track": "digital-first",
+    "record": "IngressAsset",
+    "fields": [
+      [
+        "asset_id",
+        "sha256"
+      ],
+      [
+        "source_uri",
+        "string"
+      ],
+      [
+        "original_digest",
+        "sha256"
+      ],
+      [
+        "received_at",
+        "UTC"
+      ],
+      [
+        "provenance",
+        "object"
+      ],
+      [
+        "license",
+        "object"
+      ],
+      [
+        "user_scope",
+        "string"
+      ],
+      [
+        "content_type",
+        "MIME"
+      ],
+      [
+        "parse_version",
+        "string"
+      ],
+      [
+        "trust",
+        "enum"
+      ],
+      [
+        "decision",
+        "enum"
+      ]
+    ],
+    "process": [
+      "Allow user-initiated imports or explicit scoped connectors only; enforce domain allowlist, size budgets, MIME sniffing and no untrusted redirects.",
+      "Save original source bytes and digest in quarantine before parsing; sandbox document conversion without executing embedded macros/scripts.",
+      "Attach origin, timestamp, rights, intended recipients, consent and sensitivity to every normalized record.",
+      "Publish a content reference on a versioned typed bus, never an unsanitized command payload.",
+      "Build a selective extraction layer for project-specific knowledge and allow the user to approve any exportable Crystal source.",
+      "When a source changes or consent is withdrawn, retract active indexes and trigger dependent packs for requalification."
+    ],
+    "measure": "End-to-end lineage = content_digest + transform_chain + consent_snapshot + destination_receipt; every stage must be reconstructable.",
+    "experiment": "Security and robustness corpus: path traversal, zip bomb, malicious HTML, bogus MIME, stale URLs, cross-tenant reference and revoked consent.",
+    "controls": "Default-deny remote import and export; digital-only sandbox; content digests verified after each transform.",
+    "sources": "CE-DEV-001 §21; CE-CRYSTAL-SYS-001 R02/R07 and §Records.",
+    "science": [],
+    "design": "docs/design/CE-A19_central_data_router_and_host_Design.docx",
+    "companion": "docs/companion/CE-A19_central_data_router_and_host_Companion.docx"
+  },
+  {
+    "id": "CE-A20",
+    "title": "Filesystem StarChip, Versioned Knowledge and Scheduled Crystallization",
+    "track": "digital-first",
+    "record": "FilesystemSnapshot",
+    "fields": [
+      [
+        "snapshot_id",
+        "sha256"
+      ],
+      [
+        "parent_snapshot",
+        "string?"
+      ],
+      [
+        "root_manifest",
+        "sha256"
+      ],
+      [
+        "project_scope",
+        "string"
+      ],
+      [
+        "policy_digest",
+        "sha256"
+      ],
+      [
+        "file_count",
+        "uint64"
+      ],
+      [
+        "total_bytes",
+        "uint64"
+      ],
+      [
+        "created_at",
+        "UTC"
+      ],
+      [
+        "crystallization_job",
+        "string?"
+      ],
+      [
+        "verified",
+        "boolean"
+      ]
+    ],
+    "process": [
+      "Normalize relative paths, reject traversal and reserved names, enforce per-project namespace and content quotas.",
+      "Write immutable chunk/blob objects by digest and update directory snapshots transactionally.",
+      "Maintain tags and vector/lexical search indexes as derived caches with rebuild logs; never mutate original objects to satisfy a semantic guess.",
+      "Use a snapshot policy triggered by time, meaningful content changes or explicit request; deduplicate hashes and capture a deterministic manifest.",
+      "Construct a Crystal build request from consented objects only and include permission-provenance root and dependency list.",
+      "Verify export against source, restore a snapshot independently and test that revocations invalidate derived indexes and future pack builds."
+    ],
+    "measure": "Snapshot root = SHA256(canonical sorted path→digest map); delta_size = bytes(new objects not reachable from prior snapshot).",
+    "experiment": "Crash/restart at file commit boundaries, object corruption, concurrent writes, differential snapshot, revocation and search-index rebuild.",
+    "controls": "Independent cold restore; file diff; prohibited absolute paths; source redaction; measured storage cost.",
+    "sources": "CE-DEV-001 §21; CE-CRYSTAL-SYS-001 §Records; Physical Learning Device v0.4 §26.",
+    "science": [],
+    "design": "docs/design/CE-A20_filesystem_and_snapshots_Design.docx",
+    "companion": "docs/companion/CE-A20_filesystem_and_snapshots_Companion.docx"
+  },
+  {
+    "id": "CE-A21",
+    "title": "Supportive and Affective Regulation, Honey and Needs Network",
+    "track": "digital-first + hypothesis for tissue states",
+    "record": "SupportInteraction",
+    "fields": [
+      [
+        "interaction_id",
+        "uuid"
+      ],
+      [
+        "need_category",
+        "enum"
+      ],
+      [
+        "explicitly_reported_by_user",
+        "boolean"
+      ],
+      [
+        "user_preference_ref",
+        "string?"
+      ],
+      [
+        "policy_version",
+        "string"
+      ],
+      [
+        "proposed_response",
+        "string"
+      ],
+      [
+        "consent_scope",
+        "string"
+      ],
+      [
+        "outcome_rating",
+        "float?"
+      ],
+      [
+        "distress_inference",
+        "enum[none,unverified]"
+      ]
+    ],
+    "process": [
+      "Receive an explicit need or safe task signal; do not infer a mental-health diagnosis from observed activity.",
+      "Select supportive responses from user-configured options, e.g., explanation pacing, acknowledgment, interruption reduction or task decomposition.",
+      "Apply a consent gate before storing a preference or using it for model adaptation.",
+      "Measure usefulness through volunteered feedback and task completion, not unverifiable claims that tissue feels rewarded.",
+      "Keep ordinary supportive language separate from training labels and biological support processes.",
+      "Refresh or forget a preference on user instruction, and preserve auditable changes to active policy."
+    ],
+    "measure": "Policy utility = user-rated helpfulness − λ interrupt_cost − μ unwanted_personalization; never optimize a biological wellbeing proxy absent valid measures.",
+    "experiment": "Within-subject randomized presentation comparison with opt-in satisfaction measures and task-equivalent difficulty; analyze false personalization and unwanted interruption.",
+    "controls": "Neutral baseline, nonpersonalized support, opt-out and correction tests; no inference of subjective biological pleasure or distress.",
+    "sources": "CE-DEV-001 §17, §22; Technical Companion §Milk/Honey role distinctions and ethical limits.",
+    "science": [
+      "S04",
+      "S05"
+    ],
+    "design": "docs/design/CE-A21_affective_support_and_honey_Design.docx",
+    "companion": "docs/companion/CE-A21_affective_support_and_honey_Companion.docx"
+  },
+  {
+    "id": "CE-A22",
+    "title": "Independent Limit Controller, Governance and Evidence",
+    "track": "digital-first + mandatory lab controls",
+    "record": "PermitReceipt",
+    "fields": [
+      [
+        "receipt_id",
+        "uuid"
+      ],
+      [
+        "action_id",
+        "uuid"
+      ],
+      [
+        "actor",
+        "string"
+      ],
+      [
+        "module",
+        "string"
+      ],
+      [
+        "action_type",
+        "string"
+      ],
+      [
+        "approval_scope",
+        "string"
+      ],
+      [
+        "policy_digest",
+        "sha256"
+      ],
+      [
+        "inputs_valid",
+        "boolean"
+      ],
+      [
+        "state",
+        "enum"
+      ],
+      [
+        "reason_code",
+        "string"
+      ],
+      [
+        "authorized_by",
+        "string?"
+      ],
+      [
+        "timestamp",
+        "UTC"
+      ]
+    ],
+    "process": [
+      "Enumerate allowed actions and risk tiers with default DENY for unknown instructions or undefined physical parameters.",
+      "Verify actor identity and authorization, current lab release, fresh sensors and valid signed policy version.",
+      "Evaluate safety and protected Root constraints before performing any utility ranking.",
+      "Return an immutable permit/veto receipt; a permit is specific to requested action, target and conditions and cannot be replayed.",
+      "For software changes, stage and test, preserve rollback snapshot and independently check effective permissions.",
+      "For living research, allow only device-vendor-supported verified interlocks under site procedure; simulation code contains no live stimulation or pump driver."
+    ],
+    "measure": "Permit(a)=AND_j[c_j(s,a)]; no score, reward or model preference can override a failed c_j.",
+    "experiment": "Property-based negative testing: missing limits, stale sensor, forged role, replayed permit, policy race, host outage and ambiguous action.",
+    "controls": "Independent hardware/vendor response where available; no biological actuation in reference code; protected Root assertions.",
+    "sources": "CE-DEV-001 §22, §27; CE-CRYSTAL-SYS-001 §Architecture and R04/R10/R12.",
+    "science": [
+      "S01"
+    ],
+    "design": "docs/design/CE-A22_independent_limits_and_governance_Design.docx",
+    "companion": "docs/companion/CE-A22_independent_limits_and_governance_Companion.docx"
+  },
+  {
+    "id": "CE-A23",
+    "title": "Physical Crystal Candidates, Molecular Words and Peptides",
+    "track": "research-only",
+    "record": "CrystalCandidate",
+    "fields": [
+      [
+        "candidate_id",
+        "string"
+      ],
+      [
+        "preparation_id",
+        "string"
+      ],
+      [
+        "carrier_class",
+        "enum"
+      ],
+      [
+        "physical_boundary",
+        "string"
+      ],
+      [
+        "learned_relation",
+        "string"
+      ],
+      [
+        "matched_histories",
+        "list"
+      ],
+      [
+        "receiver_contract",
+        "string"
+      ],
+      [
+        "retention_horizon",
+        "string"
+      ],
+      [
+        "observed_measurements",
+        "list"
+      ],
+      [
+        "evidence_tier",
+        "enum"
+      ],
+      [
+        "alternative_explanations",
+        "list"
+      ],
+      [
+        "portability_claim",
+        "boolean"
+      ]
+    ],
+    "process": [
+      "Specify the claimed learned discrimination and frozen reader before measuring carrier properties.",
+      "Catalog verified molecular identity/compartment and receptor context separately from observed network behavior; candidate classes include proBDNF processing, TrkB/SorCS2 interactions, astrocyte state, PSD scaffolds and ECM changes.",
+      "Record a physical boundary, quantifiable packing measure, context and maintenance requirements for each candidate.",
+      "Compare trained histories with matched untrained, activity-matched and alternative-context controls; delayed selective performance is required for content claims.",
+      "Use licensed laboratory measurements to test association; causality and portability are separate, stronger steps requiring qualified studies.",
+      "Block pack installation or food dispensing from any CrystalCandidate claim until a verified biophysical input/reader contract and institutional approval exist."
+    ],
+    "measure": "Evidence ladder: molecular identity → differential receiver effect → retained task relation → carrier association → selective contribution → compatible reader → independent transfer.",
+    "experiment": "CE-CRYSTAL-SYS-001 EX02/EX03 (molecular Words), EX06 (matrix), EX08 (candidate carrier), EX10/EX11 (joining/recipient). Each has distinct endpoint and risk.",
+    "controls": "Alternative receiver states, general excitability, independent preparations, selection bias, unlabeled trial sets, software teacher and contamination of physical media.",
+    "sources": "CE-CRYSTAL-COMP-001 §§3–7; CE-CRYSTAL-SYS-001 EX02–EX12; CE-CRYSTAL-MATH-001 §§Equation audit.",
+    "science": [
+      "S04",
+      "S05",
+      "S07",
+      "S08"
+    ],
+    "design": "docs/design/CE-A23_molecular_word_and_physical_crystal_Design.docx",
+    "companion": "docs/companion/CE-A23_molecular_word_and_physical_crystal_Companion.docx"
+  },
+  {
+    "id": "CE-A24",
+    "title": "Observer Mesh and Monitoring Communities",
+    "track": "digital-first + measured research",
+    "record": "ObserverPrediction",
+    "fields": [
+      [
+        "prediction_id",
+        "uuid"
+      ],
+      [
+        "observer_id",
+        "string"
+      ],
+      [
+        "source_preparation",
+        "string"
+      ],
+      [
+        "feature_cutoff",
+        "UTC"
+      ],
+      [
+        "future_horizon",
+        "ms"
+      ],
+      [
+        "feature_digest",
+        "sha256"
+      ],
+      [
+        "missingness_mask",
+        "object"
+      ],
+      [
+        "predicted_class",
+        "enum"
+      ],
+      [
+        "calibrated_probability",
+        "float?"
+      ],
+      [
+        "observed_outcome_ref",
+        "string?"
+      ],
+      [
+        "advice_type",
+        "enum"
+      ]
+    ],
+    "process": [
+      "Define observation units and immutable sensor cutoff time; remove response outcome and subsequent correction data from O2 features.",
+      "Train O1 on nominal, route loss, support review and UNKNOWN with synthetic fault labels and independent episode splits.",
+      "Train O2 against prospective future failures with time-forward holdout and calibrated uncertainty; count invalid as invalid, not correct abstentions.",
+      "Compare observer results to fixed rules and equally informed digital models, then confirm across batches/preparations.",
+      "Stage advice in shadow mode; introduce approved routing or task deferral only after measured predictive value, with L veto untouched.",
+      "Estimate marginal intervention benefit against fixed schedules and action-matched controls, reporting false-alert burden and protected tasks."
+    ],
+    "measure": "Lead=t_outcome−t_alert >0; alert_precision=TP/(TP+FP); performance must beat matched digital and untrained baselines for the declared claim.",
+    "experiment": "CE-DEV E04 O1, E05 O2, E06 adaptive support; CE-CRYSTAL-SYS EX09. Freeze cutoff and compare independent episodes plus later preparations.",
+    "controls": "Digital classifier, shuffled labels, untrained O, fixed schedule, route faults and missingness, independent evaluator.",
+    "sources": "CE-DEV-001 §§12–13, 17–18; CE-CRYSTAL-SYS-001 EX09.",
+    "science": [
+      "S02",
+      "S03"
+    ],
+    "design": "docs/design/CE-A24_observer_monitoring_communities_Design.docx",
+    "companion": "docs/companion/CE-A24_observer_monitoring_communities_Companion.docx"
+  }
+]

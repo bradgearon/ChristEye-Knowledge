@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "module_id": "CE-D06",
+  "name": "Pixel Art, Animation and Visual Asset Compiler",
+  "version": "1.0.0-proposal",
+  "stage": "DIGITAL-V1",
+  "capabilities": [
+    "pixel-art-animation-and-visual-asset-compiler"
+  ],
+  "integration_refs": [
+    "CE-P11",
+    "CE-D03",
+    "CE-P12"
+  ],
+  "boot_dependencies": [],
+  "ports": {
+    "input": [
+      "WindEnvelope",
+      "CrystalPackManifest"
+    ],
+    "output": [
+      "WindEnvelope",
+      "ActionReceipt"
+    ]
+  },
+  "resources": {
+    "execution_class": "background",
+    "fallback": "Return UNRESOLVED with typed failure receipt"
+  },
+  "evidence_state": "design"
+}

@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0.0",
+  "module_id": "CE-R01",
+  "name": "Living Device Adapter and Electronic Bridge",
+  "version": "1.0.0-proposal",
+  "stage": "LAB-RESEARCH",
+  "capabilities": [
+    "living-device-adapter-and-electronic-bridge"
+  ],
+  "integration_refs": [
+    "CE-P03",
+    "CE-P08",
+    "CE-P09",
+    "CE-P07"
+  ],
+  "boot_dependencies": [],
+  "ports": {
+    "input": [
+      "WindEnvelope",
+      "CrystalPackManifest"
+    ],
+    "output": [
+      "WindEnvelope",
+      "ActionReceipt"
+    ]
+  },
+  "resources": {
+    "execution_class": "research",
+    "fallback": "Defer to reviewed laboratory procedure"
+  },
+  "evidence_state": "design"
+}

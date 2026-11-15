@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "module_id": "CE-R02",
+  "name": "Physical Crystal: Candidate Carrier and Packing",
+  "version": "1.0.0-proposal",
+  "stage": "HYPOTHESIS",
+  "capabilities": [
+    "physical-crystal-candidate-carrier-and-packing"
+  ],
+  "integration_refs": [
+    "CE-R01",
+    "CE-P07",
+    "CE-P09"
+  ],
+  "boot_dependencies": [],
+  "ports": {
+    "input": [
+      "WindEnvelope",
+      "CrystalPackManifest"
+    ],
+    "output": [
+      "WindEnvelope",
+      "ActionReceipt"
+    ]
+  },
+  "resources": {
+    "execution_class": "research",
+    "fallback": "Defer to reviewed laboratory procedure"
+  },
+  "evidence_state": "design"
+}

@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0.0",
+  "module_id": "CE-D01",
+  "name": "Metroidvania Experience Director",
+  "version": "1.0.0-proposal",
+  "stage": "DIGITAL-V1",
+  "capabilities": [
+    "metroidvania-experience-director"
+  ],
+  "integration_refs": [
+    "CE-D02",
+    "CE-D03",
+    "CE-D04",
+    "CE-D05",
+    "CE-D06",
+    "CE-D09",
+    "CE-P12"
+  ],
+  "boot_dependencies": [],
+  "ports": {
+    "input": [
+      "WindEnvelope",
+      "CrystalPackManifest"
+    ],
+    "output": [
+      "WindEnvelope",
+      "ActionReceipt"
+    ]
+  },
+  "resources": {
+    "execution_class": "background",
+    "fallback": "Return UNRESOLVED with typed failure receipt"
+  },
+  "evidence_state": "design"
+}

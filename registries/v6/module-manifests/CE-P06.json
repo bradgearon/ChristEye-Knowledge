@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0.0",
+  "module_id": "CE-P06",
+  "name": "Lotus Mesh Coordination and Planning",
+  "version": "1.0.0-proposal",
+  "stage": "DIGITAL-V1",
+  "capabilities": [
+    "lotus-mesh-coordination-and-planning"
+  ],
+  "integration_refs": [
+    "CE-P03",
+    "CE-P07",
+    "CE-P08",
+    "CE-P09"
+  ],
+  "boot_dependencies": [],
+  "ports": {
+    "input": [
+      "WindEnvelope",
+      "CrystalPackManifest"
+    ],
+    "output": [
+      "WindEnvelope",
+      "ActionReceipt"
+    ]
+  },
+  "resources": {
+    "execution_class": "background",
+    "fallback": "Return UNRESOLVED with typed failure receipt"
+  },
+  "evidence_state": "design"
+}

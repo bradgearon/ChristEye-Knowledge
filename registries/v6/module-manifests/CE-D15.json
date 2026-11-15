@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0.0",
+  "module_id": "CE-D15",
+  "name": "Language, Translation and Conversation",
+  "version": "1.0.0-proposal",
+  "stage": "DIGITAL-V1",
+  "capabilities": [
+    "language-translation-and-conversation"
+  ],
+  "integration_refs": [
+    "CE-P05",
+    "CE-D14"
+  ],
+  "boot_dependencies": [],
+  "ports": {
+    "input": [
+      "WindEnvelope",
+      "CrystalPackManifest"
+    ],
+    "output": [
+      "WindEnvelope",
+      "ActionReceipt"
+    ]
+  },
+  "resources": {
+    "execution_class": "background",
+    "fallback": "Return UNRESOLVED with typed failure receipt"
+  },
+  "evidence_state": "design"
+}

@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0.0",
+  "module_id": "CE-D02",
+  "name": "World Topology and Progression Graph",
+  "version": "1.0.0-proposal",
+  "stage": "DIGITAL-V1",
+  "capabilities": [
+    "world-topology-and-progression-graph"
+  ],
+  "integration_refs": [
+    "CE-P07",
+    "CE-P09"
+  ],
+  "boot_dependencies": [],
+  "ports": {
+    "input": [
+      "WindEnvelope",
+      "CrystalPackManifest"
+    ],
+    "output": [
+      "WindEnvelope",
+      "ActionReceipt"
+    ]
+  },
+  "resources": {
+    "execution_class": "background",
+    "fallback": "Return UNRESOLVED with typed failure receipt"
+  },
+  "evidence_state": "design"
+}

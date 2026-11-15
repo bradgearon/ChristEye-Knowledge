@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0.0",
+  "module_id": "CE-P09",
+  "name": "Observability, Metrics and Evidence Ledger",
+  "version": "1.0.0-proposal",
+  "stage": "DIGITAL-V1",
+  "capabilities": [
+    "observability-metrics-and-evidence-ledger"
+  ],
+  "integration_refs": [
+    "CE-P03",
+    "CE-P11"
+  ],
+  "boot_dependencies": [],
+  "ports": {
+    "input": [
+      "WindEnvelope",
+      "CrystalPackManifest"
+    ],
+    "output": [
+      "WindEnvelope",
+      "ActionReceipt"
+    ]
+  },
+  "resources": {
+    "execution_class": "background",
+    "fallback": "Return UNRESOLVED with typed failure receipt"
+  },
+  "evidence_state": "design"
+}
