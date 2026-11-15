@@ -1,0 +1,62 @@
+{
+  "schema_version": "ce.teacher.vision/1",
+  "session_id": "teacher-demo-session",
+  "client_id": "digital-client-demo-1",
+  "colony_id": "colony-demo-01",
+  "teacher_principal": "reviewed-example-operator",
+  "state": "ACTIVE",
+  "requested_modalities": [
+    "TEXT_IN",
+    "TEXT_OUT",
+    "AUDIO_IN",
+    "AUDIO_OUT",
+    "VIDEO_IN",
+    "SENSORY_FEATURES"
+  ],
+  "granted_modalities": [
+    "TEXT_IN",
+    "TEXT_OUT",
+    "AUDIO_IN",
+    "AUDIO_OUT",
+    "VIDEO_IN",
+    "SENSORY_FEATURES"
+  ],
+  "stream_descriptors": [
+    {
+      "stream_id": "camera-usb3-demo",
+      "direction": "INPUT",
+      "kind": "VIDEO",
+      "codec": "MJPEG",
+      "source_endpoint": "capture-host-a-b5",
+      "clock_domain": "camera-clock",
+      "access_scope": "session/private",
+      "frame_rate_nominal": 30,
+      "max_frame_bytes": 2000000,
+      "bandwidth_bytes_per_second": null,
+      "calibration_digest": null,
+      "last_frame_evidence_ref": null,
+      "drop_count": 0
+    },
+    {
+      "stream_id": "microphone-usb-demo",
+      "direction": "INPUT",
+      "kind": "AUDIO",
+      "codec": "PCM16",
+      "source_endpoint": "host-microphone",
+      "clock_domain": "host-audio-clock",
+      "access_scope": "session/private",
+      "frame_rate_nominal": null,
+      "max_frame_bytes": 4096,
+      "bandwidth_bytes_per_second": null,
+      "calibration_digest": null,
+      "last_frame_evidence_ref": null,
+      "drop_count": 0
+    }
+  ],
+  "created_at": "2026-11-15T21:00:00Z",
+  "closed_at": null,
+  "evidence_scope": "SESSION_PRIVATE",
+  "session_evidence_refs": [],
+  "consent_ref": "synthetic-consent-reference",
+  "biological_action_authority": "NONE"
+}

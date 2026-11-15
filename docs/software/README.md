@@ -8,10 +8,15 @@
 |---|---|---|
 | [CE-SW-01: Native Mesh, WindBus and Evidence Changesets](CE-SW-01_native_mesh_architecture.md) | Cross-platform C++20 core; compact versioned WindPacket; authenticated sessions; interrupt/event-driven transport; weighted endpoint queues; append-only content-addressed WindStore; durable WindChange DAG and provenance; secure replication | **Design only** |
 | [CE-SW-02: Developmental WindBus and Evidence-Guided Integration](CE-SW-02_developmental_windbus_architecture.md) | Read-only developmental observation and evidence records for candidate cell lineage, axons, neurites/spines, local RNA measurements, multirate sensor fusion, developmental hypotheses, experimental case histories, and validated digital-model improvements | **Design only** |
+| [CE-SW-03: Colony Intelligence, Bread/Meat Planner and Support Backplane](CE-SW-03_colony_intelligence_bread_meat_backplane.md) | Live materialized colony state, revisioned push deltas, digital Bread/Meat compilation, source-linked team guidance, read-only serial diagnostics, Ethernet/USB3/fiber board connections and secure plug-in onboarding | **Design only** |
+| [CE-SW-04: Twelve-Axis Control Surface, Crystal Evidence and Teacher Vision](CE-SW-04_control_surface_crystal_vision_teaching.md) | Twelve software preference axes per client/colony, host bounds, switchable teacher/digital CrystalPack strategies, Crystal presence/evidence sessions, voice/text input/output, and camera data/feature routing over USB3/GigE | **Design only** |
+| [CE-SW-05: Modular Audio/Vision/MIDI StarChip and Patchbay](CE-SW-05_modular_audio_vision_midi_starchip.md) | Replaceable power-off analog AFE/op-amp cards, multichannel 24-bit PCM, MIDI 2.0 UMP/MIDI-CI, live teacher voice/speech, secure typed media routing, three board models and verified per-port capabilities | **Design + digital-only admission reference** |
+
+See also [proposed Colony Intelligence and control schemas](../../schemas/software/README.md) for snapshot, board capability, Bread/Meat planning and guidance records.
 
 ## System integration
 
-The two documents extend the existing [v3 architecture](../../specifications/v3/master_architecture.md) without replacing its logical WindEnvelope contract, current Python prototype or laboratory safety boundary.
+These documents extend the existing [v3 architecture](../../specifications/v3/master_architecture.md) without replacing its logical WindEnvelope contract, current Python prototype or laboratory safety boundary.
 
 - **CE-A11** owns typed route contracts and permitted electronic connections; CE-SW-01 specifies future native/distributed implementation.
 - **CE-A19** owns authorized ingress and source quarantine; binary packets cannot bypass its authority.

@@ -1,0 +1,27 @@
+{
+  "schema_version": "ce.colony.guidance/1",
+  "proposal_id": "guidance-example-0001",
+  "colony_id": "colony-demo-a",
+  "category": "EVIDENCE_REVIEW",
+  "requested_review_role": "scientific-reviewer",
+  "summary": "A camera timestamp source is stale; verify the source clock before inferring neurite growth timing.",
+  "alternatives": [
+    "Check device timestamp provenance",
+    "Compare instrument sync anchors"
+  ],
+  "protected_interests": [
+    "Do not alter any physical care settings"
+  ],
+  "suggested_read_only_checks": [
+    "Inspect the camera capture log and synchronization records"
+  ],
+  "priority_score": null,
+  "priority_score_kind": "NOT_SCORED",
+  "uncertainty_state": "INSUFFICIENT_EVIDENCE",
+  "evidence_refs": [
+    "example-capture-gap-0001"
+  ],
+  "created_at": "2026-11-15T20:00:00Z",
+  "expires_at": null,
+  "status": "REVIEW_ONLY"
+}

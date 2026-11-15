@@ -1,0 +1,105 @@
+{
+  "schema_version": "ce.media.module/1",
+  "module_id": "example-avm-software",
+  "model_id": "AVM-SOFTWARE",
+  "hardware_revision": "candidate-rev-a",
+  "serial": "SIM-SOFTWARE-0001",
+  "inventory_epoch": 1,
+  "manifest_revision": 1,
+  "firmware_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+  "device_identity_ref": "EXAMPLE-UNTRUSTED-NOT-A-CREDENTIAL",
+  "verification_state": "UNTRUSTED",
+  "opamp_cards": [],
+  "ports": [
+    {
+      "port_id": "asr-input",
+      "media_kind": "AUDIO_PCM",
+      "direction": "INPUT",
+      "connector": "SOFTWARE_VIRTUAL",
+      "channels": 2,
+      "clock_domain": "avm-local-clock",
+      "state": "INSTALLED",
+      "access_scope": "authorized-session-only",
+      "flow_role": "CONSUMER",
+      "sample_rates_hz": [
+        48000,
+        96000
+      ],
+      "sample_formats": [
+        "PCM_S24_IN32",
+        "PCM_F32"
+      ]
+    },
+    {
+      "port_id": "tts-output",
+      "media_kind": "AUDIO_PCM",
+      "direction": "OUTPUT",
+      "connector": "SOFTWARE_VIRTUAL",
+      "channels": 2,
+      "clock_domain": "avm-local-clock",
+      "state": "INSTALLED",
+      "access_scope": "authorized-session-only",
+      "flow_role": "PRODUCER",
+      "sample_rates_hz": [
+        48000,
+        96000
+      ],
+      "sample_formats": [
+        "PCM_S24_IN32",
+        "PCM_F32"
+      ]
+    },
+    {
+      "port_id": "midi-synth-input",
+      "media_kind": "MIDI_UMP",
+      "direction": "INPUT",
+      "connector": "SOFTWARE_VIRTUAL",
+      "channels": 64,
+      "clock_domain": "midi-local-clock",
+      "state": "INSTALLED",
+      "access_scope": "authorized-session-only",
+      "flow_role": "CONSUMER",
+      "midi_ump_groups": 4,
+      "midi_ci_supported": true,
+      "sample_formats": [
+        "MIDI2_UMP",
+        "MIDI1_IN_UMP"
+      ]
+    }
+  ],
+  "transport_profiles": [
+    "SOFTWARE_LOOPBACK"
+  ],
+  "feature_inventory": [
+    {
+      "feature_id": "AUDIO_LOOPBACK",
+      "state": "INSTALLED"
+    },
+    {
+      "feature_id": "TEACHER_VOICE",
+      "state": "INSTALLED"
+    },
+    {
+      "feature_id": "MIDI_UMP",
+      "state": "INSTALLED"
+    },
+    {
+      "feature_id": "MIDI_CI",
+      "state": "INSTALLED"
+    }
+  ],
+  "supported_media_clock_domains": [
+    "avm-local-clock",
+    "midi-local-clock",
+    "camera-exposure-clock"
+  ],
+  "readout_topics": [
+    "audio.xruns",
+    "audio.clipping",
+    "media.inventory_revision",
+    "media.clock_quality"
+  ],
+  "manifest_digest": null,
+  "signed_manifest_ref": null,
+  "biological_action_authority": "NONE"
+}

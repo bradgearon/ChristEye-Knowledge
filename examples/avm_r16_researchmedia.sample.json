@@ -1,0 +1,196 @@
+{
+  "schema_version": "ce.media.module/1",
+  "module_id": "example-avm-r16",
+  "model_id": "AVM-R16",
+  "hardware_revision": "candidate-rev-a",
+  "serial": "SIM-RESEARCH-0001",
+  "inventory_epoch": 1,
+  "manifest_revision": 1,
+  "firmware_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+  "device_identity_ref": "EXAMPLE-UNTRUSTED-NOT-A-CREDENTIAL",
+  "verification_state": "UNTRUSTED",
+  "opamp_cards": [
+    {
+      "slot_id": "line-in-0",
+      "module_id": "example-line_in",
+      "serial": "SIM-line-in-0",
+      "analog_role": "LINE_IN",
+      "state": "INSTALLED",
+      "power_off_replaceable": true,
+      "electrical_profile_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+      "calibration_digest": null,
+      "compatible_carrier_revisions": [
+        "candidate-rev-a"
+      ],
+      "measured_noise_floor_dbfs": null,
+      "max_verified_gain_db": null,
+      "hot_swap_allowed": false
+    },
+    {
+      "slot_id": "line-out-0",
+      "module_id": "example-line_out",
+      "serial": "SIM-line-out-0",
+      "analog_role": "LINE_OUT",
+      "state": "INSTALLED",
+      "power_off_replaceable": true,
+      "electrical_profile_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+      "calibration_digest": null,
+      "compatible_carrier_revisions": [
+        "candidate-rev-a"
+      ],
+      "measured_noise_floor_dbfs": null,
+      "max_verified_gain_db": null,
+      "hot_swap_allowed": false
+    }
+  ],
+  "ports": [
+    {
+      "port_id": "input-bank-0",
+      "media_kind": "AUDIO_PCM",
+      "direction": "INPUT",
+      "connector": "TRS",
+      "channels": 16,
+      "clock_domain": "avm-local-clock",
+      "state": "INSTALLED",
+      "access_scope": "authorized-session-only",
+      "flow_role": "PRODUCER",
+      "sample_rates_hz": [
+        48000,
+        96000
+      ],
+      "sample_formats": [
+        "PCM_S24_IN32",
+        "PCM_F32"
+      ],
+      "phantom_power_capable": false,
+      "physical_output_role": "NOT_APPLICABLE",
+      "measured_roundtrip_latency_us": null,
+      "calibration_digest": null,
+      "opamp_card_slot": "line-in-0"
+    },
+    {
+      "port_id": "output-bank-0",
+      "media_kind": "AUDIO_PCM",
+      "direction": "OUTPUT",
+      "connector": "TRS",
+      "channels": 16,
+      "clock_domain": "avm-local-clock",
+      "state": "INSTALLED",
+      "access_scope": "authorized-session-only",
+      "flow_role": "CONSUMER",
+      "sample_rates_hz": [
+        48000,
+        96000
+      ],
+      "sample_formats": [
+        "PCM_S24_IN32",
+        "PCM_F32"
+      ],
+      "phantom_power_capable": false,
+      "physical_output_role": "LINE_LEVEL",
+      "measured_roundtrip_latency_us": null,
+      "calibration_digest": null,
+      "opamp_card_slot": "line-out-0"
+    },
+    {
+      "port_id": "midi-0",
+      "media_kind": "MIDI_UMP",
+      "direction": "INPUT",
+      "connector": "USB_MIDI",
+      "channels": 256,
+      "clock_domain": "midi-local-clock",
+      "state": "INSTALLED",
+      "access_scope": "authorized-session-only",
+      "flow_role": "PRODUCER",
+      "midi_ump_groups": 16,
+      "midi_ci_supported": true,
+      "sample_formats": [
+        "MIDI2_UMP"
+      ]
+    },
+    {
+      "port_id": "camera-0",
+      "media_kind": "VIDEO_FRAME",
+      "direction": "INPUT",
+      "connector": "USB3_CAMERA",
+      "channels": 1,
+      "clock_domain": "camera-exposure-clock",
+      "state": "INSTALLED",
+      "access_scope": "consented-camera-session",
+      "flow_role": "PRODUCER",
+      "sample_formats": [
+        "MJPEG"
+      ]
+    },
+    {
+      "port_id": "camera-1",
+      "media_kind": "VIDEO_FRAME",
+      "direction": "INPUT",
+      "connector": "USB3_CAMERA",
+      "channels": 1,
+      "clock_domain": "camera-exposure-clock",
+      "state": "INSTALLED",
+      "access_scope": "consented-camera-session",
+      "flow_role": "PRODUCER",
+      "sample_formats": [
+        "MJPEG"
+      ]
+    },
+    {
+      "port_id": "oem-neural-observation",
+      "media_kind": "NEURAL_OBSERVATION",
+      "direction": "INPUT",
+      "connector": "VENDOR_READ_ONLY",
+      "channels": 1,
+      "clock_domain": "vendor-acquisition-clock",
+      "state": "CATALOG_ONLY",
+      "access_scope": "lab-approval-required",
+      "flow_role": "PRODUCER",
+      "sample_formats": [
+        "NEURAL_OBSERVATION"
+      ]
+    }
+  ],
+  "transport_profiles": [
+    "USB_AUDIO_CLASS_2",
+    "USB_MIDI",
+    "USB3",
+    "ETHERNET_10G"
+  ],
+  "feature_inventory": [
+    {
+      "feature_id": "LINE_CAPTURE",
+      "state": "INSTALLED"
+    },
+    {
+      "feature_id": "LINE_PLAYBACK",
+      "state": "INSTALLED"
+    },
+    {
+      "feature_id": "MIDI_UMP",
+      "state": "INSTALLED"
+    },
+    {
+      "feature_id": "MIDI_CI",
+      "state": "INSTALLED"
+    },
+    {
+      "feature_id": "CAMERA_CAPTURE",
+      "state": "INSTALLED"
+    }
+  ],
+  "supported_media_clock_domains": [
+    "avm-local-clock",
+    "midi-local-clock",
+    "camera-exposure-clock"
+  ],
+  "readout_topics": [
+    "audio.xruns",
+    "audio.clipping",
+    "media.inventory_revision",
+    "media.clock_quality"
+  ],
+  "manifest_digest": null,
+  "signed_manifest_ref": null,
+  "biological_action_authority": "NONE"
+}

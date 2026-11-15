@@ -1,0 +1,29 @@
+{
+  "schema_version": "ce.media.route/1",
+  "route_id": "example-teacher-mic-to-digital-asr",
+  "expected_revision": 0,
+  "source": {
+    "module_id": "example-avm-v1",
+    "port_id": "mic-pair-0"
+  },
+  "destination": {
+    "module_id": "example-avm-software",
+    "port_id": "asr-input"
+  },
+  "media_kind": "AUDIO_PCM",
+  "state": "PROPOSED",
+  "requesting_principal": "example-reviewer",
+  "clock_policy": "EXACT_SAME_CLOCK",
+  "sample_rate_hz": 48000,
+  "channel_map": [
+    0,
+    1
+  ],
+  "access_scope": "authorized-session-only",
+  "teacher_consent_ref": null,
+  "bandwidth_reserved_bytes_s": null,
+  "max_latency_us": null,
+  "driver_build_digest": null,
+  "revision_receipt_ref": null,
+  "biological_action_authority": "NONE"
+}

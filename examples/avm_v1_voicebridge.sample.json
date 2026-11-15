@@ -1,0 +1,147 @@
+{
+  "schema_version": "ce.media.module/1",
+  "module_id": "example-avm-v1",
+  "model_id": "AVM-V1",
+  "hardware_revision": "candidate-rev-a",
+  "serial": "SIM-VOICE-0001",
+  "inventory_epoch": 1,
+  "manifest_revision": 1,
+  "firmware_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+  "device_identity_ref": "EXAMPLE-UNTRUSTED-NOT-A-CREDENTIAL",
+  "verification_state": "UNTRUSTED",
+  "opamp_cards": [
+    {
+      "slot_id": "micpre-0",
+      "module_id": "example-mic_pre",
+      "serial": "SIM-micpre-0",
+      "analog_role": "MIC_PRE",
+      "state": "INSTALLED",
+      "power_off_replaceable": true,
+      "electrical_profile_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+      "calibration_digest": null,
+      "compatible_carrier_revisions": [
+        "candidate-rev-a"
+      ],
+      "measured_noise_floor_dbfs": null,
+      "max_verified_gain_db": null,
+      "hot_swap_allowed": false
+    },
+    {
+      "slot_id": "hphone-0",
+      "module_id": "example-headphone_out",
+      "serial": "SIM-hphone-0",
+      "analog_role": "HEADPHONE_OUT",
+      "state": "INSTALLED",
+      "power_off_replaceable": true,
+      "electrical_profile_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+      "calibration_digest": null,
+      "compatible_carrier_revisions": [
+        "candidate-rev-a"
+      ],
+      "measured_noise_floor_dbfs": null,
+      "max_verified_gain_db": null,
+      "hot_swap_allowed": false
+    }
+  ],
+  "ports": [
+    {
+      "port_id": "mic-pair-0",
+      "media_kind": "AUDIO_PCM",
+      "direction": "INPUT",
+      "connector": "COMBO_XLR_TRS",
+      "channels": 2,
+      "clock_domain": "avm-local-clock",
+      "state": "INSTALLED",
+      "access_scope": "authorized-session-only",
+      "flow_role": "PRODUCER",
+      "sample_rates_hz": [
+        48000,
+        96000
+      ],
+      "sample_formats": [
+        "PCM_S24_IN32"
+      ],
+      "phantom_power_capable": false,
+      "physical_output_role": "NOT_APPLICABLE",
+      "measured_roundtrip_latency_us": null,
+      "calibration_digest": null,
+      "opamp_card_slot": "micpre-0"
+    },
+    {
+      "port_id": "speaker-pair-0",
+      "media_kind": "AUDIO_PCM",
+      "direction": "OUTPUT",
+      "connector": "HEADPHONE_TRS",
+      "channels": 2,
+      "clock_domain": "avm-local-clock",
+      "state": "INSTALLED",
+      "access_scope": "authorized-session-only",
+      "flow_role": "CONSUMER",
+      "sample_rates_hz": [
+        48000,
+        96000
+      ],
+      "sample_formats": [
+        "PCM_S24_IN32"
+      ],
+      "phantom_power_capable": false,
+      "physical_output_role": "HEADPHONE_LEVEL",
+      "measured_roundtrip_latency_us": null,
+      "calibration_digest": null,
+      "opamp_card_slot": "hphone-0"
+    },
+    {
+      "port_id": "midi-0",
+      "media_kind": "MIDI_UMP",
+      "direction": "INPUT",
+      "connector": "USB_MIDI",
+      "channels": 16,
+      "clock_domain": "midi-local-clock",
+      "state": "INSTALLED",
+      "access_scope": "authorized-session-only",
+      "flow_role": "PRODUCER",
+      "midi_ump_groups": 1,
+      "midi_ci_supported": false,
+      "sample_formats": [
+        "MIDI1_IN_UMP"
+      ]
+    }
+  ],
+  "transport_profiles": [
+    "USB_AUDIO_CLASS_2",
+    "USB_MIDI",
+    "ETHERNET_1G"
+  ],
+  "feature_inventory": [
+    {
+      "feature_id": "MIC_CAPTURE",
+      "state": "INSTALLED"
+    },
+    {
+      "feature_id": "HEADPHONE_PLAYBACK",
+      "state": "INSTALLED"
+    },
+    {
+      "feature_id": "MIDI_UMP",
+      "state": "INSTALLED"
+    },
+    {
+      "feature_id": "TEACHER_VOICE",
+      "state": "INSTALLED"
+    }
+  ],
+  "supported_media_clock_domains": [
+    "avm-local-clock",
+    "midi-local-clock",
+    "camera-exposure-clock"
+  ],
+  "readout_topics": [
+    "audio.xruns",
+    "audio.clipping",
+    "media.inventory_revision",
+    "media.clock_quality"
+  ],
+  "manifest_digest": null,
+  "signed_manifest_ref": null,
+  "biological_action_authority": "NONE"
+}

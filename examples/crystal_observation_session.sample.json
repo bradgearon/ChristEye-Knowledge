@@ -1,0 +1,36 @@
+{
+  "schema_version": "ce.crystal.session/1",
+  "session_id": "crystal-study-demo-001",
+  "colony_id": "colony-demo-01",
+  "preparation_id": "synthetic-lab-preparation",
+  "material_id": "unqualified-material-candidate-demo",
+  "material_class": "PHYSICAL_MATERIAL_CANDIDATE",
+  "state": "PRESENCE_CANDIDATE",
+  "presence_method": "OPERATOR_LOG",
+  "presence_quality": "CANDIDATE",
+  "presence_time": null,
+  "exit_time": null,
+  "started_at": "2026-11-15T21:00:00Z",
+  "baseline_evidence_refs": [
+    "synthetic-baseline-record-001"
+  ],
+  "observations": [
+    {
+      "kind": "RNA_INFERRED",
+      "claim_status": "INFERRED",
+      "observed_at": "2026-11-15T21:00:00Z",
+      "source_clock_domain": "sim-clock",
+      "evidence_refs": [
+        "synthetic-analysis-001"
+      ],
+      "model_digest": null,
+      "confidence": null
+    }
+  ],
+  "evidence_refs": [
+    "synthetic-custody-note-001"
+  ],
+  "independent_evaluation_ref": null,
+  "archive_class": "NOT_ARCHIVED",
+  "physical_action_authority": "NONE"
+}

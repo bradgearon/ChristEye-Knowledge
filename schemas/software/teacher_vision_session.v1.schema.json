@@ -1,0 +1,260 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:christeye:software:teacher_vision_session:v1",
+  "title": "Teacher Audio Vision Streaming Session v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "session_id",
+    "client_id",
+    "teacher_principal",
+    "state",
+    "requested_modalities",
+    "granted_modalities",
+    "stream_descriptors",
+    "created_at",
+    "evidence_scope",
+    "biological_action_authority"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "ce.teacher.vision/1"
+    },
+    "session_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "client_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "colony_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "teacher_principal": {
+      "type": "string",
+      "minLength": 1
+    },
+    "state": {
+      "enum": [
+        "NEGOTIATING",
+        "AUTHORIZED",
+        "ACTIVE",
+        "CLOSING",
+        "CLOSED",
+        "REVOKED",
+        "REJECTED"
+      ]
+    },
+    "requested_modalities": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "TEXT_IN",
+          "TEXT_OUT",
+          "AUDIO_IN",
+          "AUDIO_OUT",
+          "VIDEO_IN",
+          "VIDEO_OUT",
+          "SENSORY_FEATURES",
+          "MIDI_IN",
+          "MIDI_OUT"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "granted_modalities": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "TEXT_IN",
+          "TEXT_OUT",
+          "AUDIO_IN",
+          "AUDIO_OUT",
+          "VIDEO_IN",
+          "VIDEO_OUT",
+          "SENSORY_FEATURES",
+          "MIDI_IN",
+          "MIDI_OUT"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "stream_descriptors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "stream_id",
+          "direction",
+          "kind",
+          "codec",
+          "source_endpoint",
+          "clock_domain",
+          "access_scope"
+        ],
+        "properties": {
+          "stream_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "direction": {
+            "enum": [
+              "INPUT",
+              "OUTPUT"
+            ]
+          },
+          "kind": {
+            "enum": [
+              "TEXT",
+              "AUDIO",
+              "VIDEO",
+              "FEATURES",
+              "MIDI"
+            ]
+          },
+          "codec": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_endpoint": {
+            "type": "string",
+            "minLength": 1
+          },
+          "clock_domain": {
+            "type": "string",
+            "minLength": 1
+          },
+          "access_scope": {
+            "type": "string",
+            "minLength": 1
+          },
+          "frame_rate_nominal": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "max_frame_bytes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "bandwidth_bytes_per_second": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "calibration_digest": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "last_frame_evidence_ref": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "drop_count": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "closed_at": {
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "evidence_scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "session_evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "consent_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "biological_action_authority": {
+      "const": "NONE"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "ACTIVE"
+          }
+        },
+        "required": [
+          "state"
+        ]
+      },
+      "then": {
+        "required": [
+          "consent_ref"
+        ],
+        "properties": {
+          "consent_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "REVOKED"
+          }
+        },
+        "required": [
+          "state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "granted_modalities": {
+            "maxItems": 0
+          }
+        }
+      }
+    }
+  ]
+}
