@@ -58,7 +58,9 @@
           "AUDIO_OUT",
           "VIDEO_IN",
           "VIDEO_OUT",
-          "SENSORY_FEATURES"
+          "SENSORY_FEATURES",
+          "MIDI_IN",
+          "MIDI_OUT"
         ]
       },
       "uniqueItems": true
@@ -73,7 +75,9 @@
           "AUDIO_OUT",
           "VIDEO_IN",
           "VIDEO_OUT",
-          "SENSORY_FEATURES"
+          "SENSORY_FEATURES",
+          "MIDI_IN",
+          "MIDI_OUT"
         ]
       },
       "uniqueItems": true
@@ -108,7 +112,8 @@
               "TEXT",
               "AUDIO",
               "VIDEO",
-              "FEATURES"
+              "FEATURES",
+              "MIDI"
             ]
           },
           "codec": {
