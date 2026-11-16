@@ -27,6 +27,7 @@
 
 | [CE-SW-20: Anaiero v0.015 Native C++ Architecture Pass](CE-SW-20_anaiero_v0015_cpp_architecture_pass.md) | Audited dependency map, controller topology, event/outbox ordering, scheduling, security and safe migration roadmap | **Architecture proposal with regression guard; no new daemon or mesh** |
 | [ADR-001: Native Runtime Ownership](ADR-001_native_runtime_ownership.md) | Target ownership boundaries, common observation envelope, source epochs and transactional digital outbox | **Proposed decision; implementation pending** |
+| [ADR-002: First-Class Native Windows and Linux](ADR-002_native_windows_linux_parity.md) | Lightweight portable C++20 controller with equal native Windows/Linux host adapters and release gates | **Accepted platform requirement; native supervisor adapters pending** |
 
 See also [proposed Colony Intelligence and control schemas](../../schemas/software/README.md) for snapshot, board capability, Bread/Meat planning and guidance records.
 
