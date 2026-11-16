@@ -1,0 +1,36 @@
+CEVOBS/1
+name synthetic-test-reference
+origin SYNTHETIC_FIXTURE
+config_sha256 49b4ce5d133739e5f07ea04a43d0dca4bef00f85bfa320696c6100653fd959ee
+source_sha256 39c94b730c93a6e9c1e89c3cc81b7a6d8aa96186cfe6acdce617cb1655086c6b
+units DIMENSIONLESS_PROXY
+row 0 all alive 3 1 train
+row 0 all energy 121 3 train
+row 0 all food 162 4 train
+row 0 all learning 0 2 train
+row 1 all alive 3 1 train
+row 1 all energy 121 3 train
+row 1 all food 164 4 train
+row 1 all learning 1 2 train
+row 2 all alive 4 1 train
+row 2 all energy 141 3 train
+row 2 all food 165 4 train
+row 2 all learning 10 2 train
+row 3 all alive 4 1 holdout
+row 3 all energy 142 3 holdout
+row 3 all food 167 4 holdout
+row 3 all learning 12 2 holdout
+row 4 all alive 4 1 holdout
+row 4 all energy 142 3 holdout
+row 4 all food 168 4 holdout
+row 4 all learning 13 2 holdout
+row 5 all alive 4 1 holdout
+row 5 all energy 142 3 holdout
+row 5 all food 169 4 holdout
+row 5 all learning 14 2 holdout
+row 6 all alive 4 1 holdout
+row 6 all energy 142 3 holdout
+row 6 all food 170 4 holdout
+row 6 all learning 15 2 holdout
+end
+seal 70f11f73a5a3d0fa4149dcba57b6338bd093ffe80bd4f46cad7dc1700404fdaf

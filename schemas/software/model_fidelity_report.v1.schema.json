@@ -1,0 +1,316 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:christeye:sim32:model_fidelity_report:v1",
+  "title": "SIM3.2 synthetic-only model fidelity report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "classification",
+    "independent_holdout_verified",
+    "uncertainty_interpretation",
+    "manifest_sha256",
+    "config_sha256",
+    "source_sha256",
+    "law_sha256",
+    "dataset_sha256",
+    "model_version",
+    "training_p90_abs_error_band",
+    "train",
+    "holdout",
+    "per_metric",
+    "rows"
+  ],
+  "properties": {
+    "schema": {
+      "const": "CEVFIDELITY/1"
+    },
+    "classification": {
+      "const": "SYNTHETIC_ONLY_NOT_BIOLOGICAL_VALIDATION"
+    },
+    "independent_holdout_verified": {
+      "const": false
+    },
+    "uncertainty_interpretation": {
+      "const": "DECLARED_ABSOLUTE_PROXY_BAND"
+    },
+    "manifest_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "config_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "source_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "law_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "dataset_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "model_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "training_p90_abs_error_band": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "train": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "count",
+        "mae",
+        "rmse",
+        "bias",
+        "declared_band_coverage",
+        "training_p90_band_coverage"
+      ],
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "mae": {
+          "type": "number",
+          "minimum": 0
+        },
+        "rmse": {
+          "type": "number",
+          "minimum": 0
+        },
+        "bias": {
+          "type": "number"
+        },
+        "declared_band_coverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "training_p90_band_coverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "holdout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "count",
+        "mae",
+        "rmse",
+        "bias",
+        "declared_band_coverage",
+        "training_p90_band_coverage"
+      ],
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "mae": {
+          "type": "number",
+          "minimum": 0
+        },
+        "rmse": {
+          "type": "number",
+          "minimum": 0
+        },
+        "bias": {
+          "type": "number"
+        },
+        "declared_band_coverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "training_p90_band_coverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "rows": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 512,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "tick",
+          "colony",
+          "metric",
+          "split",
+          "observed",
+          "predicted",
+          "residual",
+          "declared_radius",
+          "within_declared_band"
+        ],
+        "properties": {
+          "tick": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4096
+          },
+          "colony": {
+            "type": "string",
+            "minLength": 1
+          },
+          "metric": {
+            "enum": [
+              "alive",
+              "energy",
+              "learning",
+              "food",
+              "stress",
+              "maturity"
+            ]
+          },
+          "split": {
+            "enum": [
+              "train",
+              "holdout"
+            ]
+          },
+          "observed": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "predicted": {
+            "type": "integer"
+          },
+          "residual": {
+            "type": "integer"
+          },
+          "declared_radius": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "within_declared_band": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "per_metric": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 6,
+      "propertyNames": {
+        "enum": [
+          "alive",
+          "energy",
+          "learning",
+          "food",
+          "stress",
+          "maturity"
+        ]
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "training_band",
+          "train",
+          "holdout"
+        ],
+        "properties": {
+          "training_band": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "train": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "count",
+              "mae",
+              "rmse",
+              "bias",
+              "declared_band_coverage",
+              "training_p90_band_coverage"
+            ],
+            "properties": {
+              "count": {
+                "type": "integer",
+                "minimum": 2
+              },
+              "mae": {
+                "type": "number",
+                "minimum": 0
+              },
+              "rmse": {
+                "type": "number",
+                "minimum": 0
+              },
+              "bias": {
+                "type": "number"
+              },
+              "declared_band_coverage": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "training_p90_band_coverage": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
+          },
+          "holdout": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "count",
+              "mae",
+              "rmse",
+              "bias",
+              "declared_band_coverage",
+              "training_p90_band_coverage"
+            ],
+            "properties": {
+              "count": {
+                "type": "integer",
+                "minimum": 2
+              },
+              "mae": {
+                "type": "number",
+                "minimum": 0
+              },
+              "rmse": {
+                "type": "number",
+                "minimum": 0
+              },
+              "bias": {
+                "type": "number"
+              },
+              "declared_band_coverage": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "training_p90_band_coverage": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -16,3 +16,9 @@ examples/sim3/*.txt -text
 examples/sim3/*.cevmodel -text
 tools/sim3_viewer/*.ndjson -text
 tools/sim3_viewer/*.js -text
+
+# SIM3.2 SHA-256-sealed, byte-exact law and reference observations.
+examples/sim3/*.celaw -text
+examples/sim3/*.cevobs -text
+examples/sim3/*.ceveval -text
+examples/sim3/fidelity-*.json -text
