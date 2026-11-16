@@ -21,7 +21,7 @@
 namespace anaiero {
 namespace fs=std::filesystem;
 struct Module {std::string_view name, backend, purpose, example;};
-constexpr std::array<Module,11> modules{{
+constexpr std::array<Module,12> modules{{
   {"vm","ce_vlm","Virtual Living Machines","anaiero vm inspect examples/vlm/crest-garden.avlm"},
   {"process","ce_vlm_process","Timed VLM2 processes","anaiero process inspect examples/vlm/process-garden.avlm"},
   {"plan","ce_vlm_plan","Crystal/RNA/learning plans","anaiero plan inspect examples/vlm/bread-first.cevplan examples/vlm/plan-garden.avlm ."},
@@ -32,6 +32,7 @@ constexpr std::array<Module,11> modules{{
   {"fidelity","ce_colony_fidelity","Frozen model fidelity evaluation","anaiero fidelity evaluate examples/connected-gardens.cev ./culture-state examples/sim3/baseline.ceveval . fidelity.json"},
   {"select","ce_colony_select","Training-only model selection","anaiero select prepare examples/sim3/model-search.cevselect . ./selection-runs"},
   {"runtime","ce_colony_runtime","Latest ColonyState and weighted Animon status dispatch","anaiero runtime simulate examples/connected-gardens.cev ./state 5"},
+  {"cells","ce_cell_behavior","Behavior atlas and synthetic cell development","anaiero cells execute examples/cells/crest-blood-neural.cevatlas ./digital-culture.cevcells examples/cells/reference-development.cevcellrun"},
   {"sim","ce_living_sim_demo","SIM1 synthetic demonstration","anaiero sim"}
 }};
 const Module* lookup(std::string_view name) noexcept {

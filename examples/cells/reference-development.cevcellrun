@@ -1,0 +1,9 @@
+CEVCELLRUN/1
+name reference-raising-and-learning
+domain SYNTHETIC_ONLY
+atlas_sha256 7d75c51c925cd549a80d1c992fbbed83e7964f33b84480b3f7ffaae2e75073b5
+stage developing 6 75 0 0 0
+stage guided-contact 6 75 0 64 1
+stage retention-probe 6 75 0 0 0
+end
+seal 7b0901cbc157ebf1ff24bf1215882e3a296caa27382d1c21a9104da56b60f62a

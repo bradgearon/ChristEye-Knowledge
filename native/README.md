@@ -115,3 +115,15 @@ The host-only `ce_wind_registry` CLI and `christeye/living/wind_registry.hpp` pr
 The native controller path is `SIM3 -> typed WindPacket/1 -> bounded weighted queue -> ColonyState projector -> post-commit subscriptions`.
 Run `anaiero runtime simulate examples/connected-gardens.cev ./culture-state 5` or start the blocking local event shell with `anaiero runtime serve examples/connected-gardens.cev ./culture-state` and issue `STEP`, `STATE`, `QUIT`.
 The in-RAM bounded latest-state snapshot and individual source cursors are not replacements for authenticated mesh joining, qualified laboratory instruments, or independently managed physical care. See [CE-SW-18](../docs/software/CE-SW-18_colony_state_runtime_projector.md).
+
+## SW5 — digital cell-behavior atlas and development
+
+Use `anaiero cells` as the public CLI. The sealed `CEVCELLATLAS/1` declares bounded, dimensionless illustrative behavior parameters for nine cell archetypes. Its `CEVCELLSOURCE/1` companion records evidence identity; `CEVCELLRUN/1` stages simulated development and learning. Checkpoints (`CEVCELLSTATE/1`) preserve lineage and synthetic network state. See [CE-SW-19](../docs/software/CE-SW-19_cell_behavior_atlas_and_developmental_surrogate.md).
+
+```sh
+anaiero cells sample examples/cells/crest-blood-neural.cevatlas ./example-culture.cevcells
+anaiero cells execute examples/cells/crest-blood-neural.cevatlas ./example-culture.cevcells examples/cells/reference-development.cevcellrun
+anaiero cells inspect examples/cells/crest-blood-neural.cevatlas ./example-culture.cevcells
+```
+
+This is a **synthetic-only simulation**. It does not model culture conditions, biological stimulation, pathogen effects, gene engineering, or proven neural knowledge transfer. The controller's qualified live-observation and physical-care boundaries remain separate.

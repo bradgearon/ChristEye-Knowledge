@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:anaiero:software:cell_behavior_snapshot:v1",
+  "title": "Synthetic cell-behavior checkpoint diagnostic",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "origin",
+    "format",
+    "atlas_sha256",
+    "tick",
+    "cells",
+    "viable",
+    "historical",
+    "links",
+    "energy_proxy",
+    "learning_proxy",
+    "bus_revisions",
+    "plan_sha256"
+  ],
+  "properties": {
+    "origin": {
+      "const": "SIMULATED_UNCALIBRATED"
+    },
+    "format": {
+      "const": "CEVCELLSTATE/1"
+    },
+    "atlas_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "tick": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "cells": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "viable": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "historical": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "links": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "energy_proxy": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "learning_proxy": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "bus_revisions": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "plan_sha256": {
+      "oneOf": [
+        {
+          "const": "none"
+        },
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      ]
+    }
+  }
+}

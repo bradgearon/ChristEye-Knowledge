@@ -29,3 +29,9 @@ examples/sim3/*.cevsplits -text
 examples/sim3/*.cevselect -text
 examples/sim3/*.cevwinner -text
 examples/sim3/*final*.json -text
+
+# SW5 exact-byte signed-by-digest synthetic atlas, evidence and checkpoint formats.
+examples/cells/*.cevatlas -text
+examples/cells/*.cevsource -text
+examples/cells/*.cevcellrun -text
+examples/cells/*.cevcells -text
