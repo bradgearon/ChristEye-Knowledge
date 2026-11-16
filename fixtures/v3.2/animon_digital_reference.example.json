@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0.0",
+  "system_class": "ANIMON",
+  "program": "ChristEye Anaiero",
+  "owner": "We Develop Software LLC",
+  "animon_spec_id": "ANIMON-SPEC-DEMO-01",
+  "candidate_instance_id": null,
+  "digital_model_id": "ANIMON-DIGITAL-REF-01",
+  "embodiment": "DIGITAL_REFERENCE",
+  "evidence_stage": "DIGITAL_REFERENCE",
+  "source_lot_refs": [],
+  "soil_preparation_ref": null,
+  "spinal_root_substrate_refs": [],
+  "axon_projection_refs": [],
+  "functional_root_refs": [],
+  "independent_care_contract_ref": null,
+  "scientific_review_ref": null,
+  "design_source_ref": "ontology/ANIMON_V1.md",
+  "physical_actuation_authorized": false,
+  "created_at": "2026-11-16T00:00:00Z"
+}
