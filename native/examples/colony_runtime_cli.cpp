@@ -38,7 +38,8 @@ inline void print_latest(const rt::RuntimeService& runtime,std::uint64_t now_ns)
   std::cout<<"{\"schema\":\"anaiero.colony.latest/1\",\"origin\":\"SIMULATED_UNCALIBRATED\","
            <<"\"revision\":"<<state.revision<<",\"updates\":"<<state.committed_updates
            <<",\"sequence_gaps\":"<<state.sequence_gaps<<",\"pending\":"<<runtime.pending()
-           <<",\"rejected\":"<<runtime.rejected()<<",\"metrics\":[";
+           <<",\"rejected\":"<<runtime.rejected()
+           <<",\"commit_failures\":"<<runtime.commit_failures()<<",\"metrics\":[";
   for(std::size_t i=0;i<state.count;++i){
     const auto& v=state.values[i];if(i)std::cout<<',';
     std::cout<<"{\"colony\":"<<v.colony<<",\"animon\":"<<v.animon

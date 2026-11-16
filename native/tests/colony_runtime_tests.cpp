@@ -142,7 +142,10 @@ static void test_persistence_and_concurrency(){
   FailingJournal bad;r.set_journal(&bad);
   CHECK(r.post(value(1,1,rt::Metric::energy,rt::Lane::health))==rt::Status::ok);
   CHECK(r.drain()==1);CHECK(r.latest(100,100).revision==0);
+  CHECK(r.pending()==1&&r.commit_failures()==1);
   r.set_journal(nullptr);
+  CHECK(r.drain()==1&&r.pending()==0);
+  CHECK(r.latest(100,100).revision==1);
   std::atomic<bool> running{true}, started{false};std::atomic<unsigned> reads{0};
   std::thread reader([&](){started=true;while(running.load()){
     auto snapshot=r.latest(1000,10000);
@@ -150,7 +153,7 @@ static void test_persistence_and_concurrency(){
     ++reads;
   }});
   while(!started.load())std::this_thread::yield();
-  for(unsigned i=1;i<=100;++i){
+  for(unsigned i=2;i<=100;++i){
     const auto o=value(1,i,rt::Metric::energy,rt::Lane::health,100+i);
     CHECK(r.post(o)==rt::Status::ok);
     if(i%20==0)r.drain(20);
