@@ -70,9 +70,9 @@ The repository now supplies `main: "./worker/index.js"` and `assets.binding: "AS
 
 Cloudflare officially documents the [existing-Worker connection flow](https://developers.cloudflare.com/workers/ci-cd/builds/) and [Worker-script/asset routing](https://developers.cloudflare.com/workers/static-assets/). The exact error string has not been confirmed as a documented Cloudflare bug; if it persists after successful deployment, collect the dashboard page URL and Cloudflare build log without exposing secrets.
 
-## Interest form
+## Interest registration
 
-The passing public React portal is static and does NOT yet collect email interest. No signups are saved. The future service should use a small Worker API, Cloudflare Turnstile server-side verification, an optional D1 database, explicit consent and a properly configured privacy contact and confirmation/unsubscribe process. It should be activated only after those are configured.
+The public React portal now contains a research-interest and privacy page, plus a consent-checked Worker API. **Registration is disabled by default** until a D1 binding, Turnstile keys and an active privacy mailbox are configured. No email is automatically sent. See [INTEREST_ROLLOUT.md](INTEREST_ROLLOUT.md).
 
 ## Subdomains and later expansion
 
