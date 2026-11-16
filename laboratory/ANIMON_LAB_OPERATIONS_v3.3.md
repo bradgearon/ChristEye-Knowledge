@@ -26,6 +26,12 @@ status: "Operational work orders; physical steps depend on locally qualified SOP
 
 If the required role or authorized procedure is missing, the physical work item is **HOLD**. Essential care already assigned to a laboratory must continue independently of a software hold.
 
+## 0A. Phase-specific physical execution order from the original P01 source
+
+**Do not mistake the early planar reference for a 3D Soil organoid.** The [P01 composition and counts](../phases/P01/docs/01_Physical_Module_Composition_and_Counts.md) defines **R0 as all-digital; R1 as a candidate 2D planar C learner**, using a supplier-specific illustrative 24-well MEA co-culture of **80,000 neurons + 20,000 matched astrocytes per well**; R2 optional observer/recipient wells; R3 a support-policy candidate; and **P06 as the later 3D Soil branch** whose cell count is NOT SET. The precise 2D count is not an authorized Animon cell-plating instruction and cannot be applied to 3D.
+
+Read the [source-derived phase and material bill-of-materials](ANIMON_PHASE_AND_MATERIAL_BOM.md) before procurement. A real lab must qualify the selected vendor/cell pair, actual model geometry, source line and medium/care SOP.
+
 ## 1. Site-work order prerequisites and progression
 
 | Gate | Work order | Required record before next stage |

@@ -11,6 +11,10 @@ owner: "Independent culture-care, molecular science, and lab QA leads"
 
 [Lab execution standard](ANIMON_LAB_OPERATIONS_v3.3.md) · [CE-A17](../specifications/v3.2/design/CE-A17_Animon_Care_Design.md) · [BIO-04](../processes/BIO-04-sustibus-chemibus.md) · [BIO-10](../processes/BIO-10-care-health.md).
 
+### Reference from the original P01 care plan
+
+[P01 Daily Care Quality Gates](../phases/P01/docs/04_Daily_Care_Quality_Gates_and_Assays.md) already distinguishes **daily inspection** from **supplier-qualified service intervals**, and names source-specific observations of medium identity/volume/color, environment, optical status, chemical assays and actual service receipts. Use those source-linked instrument/medium classes when preparing the lab-specific table below; do **not** reuse the Axion/BrainXell planar maintenance schedule for a 3D Soil or a different MEA source.
+
 ## 1. Before observing a new preparation
 
 | Item | Document the actual source | Release condition |

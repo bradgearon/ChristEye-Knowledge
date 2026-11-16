@@ -11,6 +11,12 @@ owner: "Qualified organoid scientist, cell-foundry lead and imaging reviewer"
 
 [Lab execution standard](ANIMON_LAB_OPERATIONS_v3.3.md) · [CE-A09 Core](../specifications/v3.2/design/CE-A09_Animon_Core_Design.md) · [BIO-03](../processes/BIO-03-soil-organoid.md).
 
+## 0. The actual construction sequence starts with the P01 planar reference
+
+The original [Physical Module Composition and Counts](../phases/P01/docs/01_Physical_Module_Composition_and_Counts.md) sets **R0 = zero cells, R1 = a candidate 2D planar C learner**, then optional O/B/S comparison wells, and **P06 = prospective 3D organoid Soil** with no assigned cell count. R1 references a specific supplier/platform-compatible **80,000 motor neurons and 20,000 matched astrocytes per well** as illustrative quantities—not a generalized instruction to plate. See [phase-specific materials and counts](ANIMON_PHASE_AND_MATERIAL_BOM.md).
+
+**Execution decision:** a PI must choose which *approved source model* the actual work order describes. For R1, characterize the qualified planar preparation and MEA interface; **do not label its shape or acceptance as 3D Soil**. For P06, separately qualify organoid source, dimensionality, viability, distribution, imaging depth and independent care; **do not reuse** the planar 80k/20k counts, medium formulation or growth history by default.
+
 ## 1. Work before the first physical batch
 
 | Sequence | Exact owner task | Mandatory record and decision |

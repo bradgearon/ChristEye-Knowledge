@@ -23,6 +23,10 @@ owner: "WDS scientific PI and qualified cell-foundry lead"
 
 **Default:** banked, approved, authenticated source; no direct human donor sampling. The program's "Crest" is a *provenance and source governance system*, not a new technology that creates genetically labeled baby neurons by default.
 
+### Reconcile the prior source/model decision with the actual P01 build stage
+
+The [P01 reference source](ANIMON_PHASE_AND_MATERIAL_BOM.md) identifies a **2D planar motor-neuron + matched astrocyte** MEA candidate for R1 and only a later separately sourced P06 **3D Soil**. Before ordering any material, record whether the current work is R1, R2, R3 or P06 and the *prior* approved vendor/method decision. Do not buy organoid reagents assuming R1's planar cells and counts automatically transfer to P06.
+
 ## 2. At material-intake day: check certificates and custody
 
 | Item | Concrete receipt | Release acceptance | Owner |
