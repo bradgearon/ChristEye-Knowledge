@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0.0",
+  "preparation_id": "PREP-NOT-CREATED-SYNTHETIC",
+  "source_lot_id": "LOT-UNASSIGNED-SYNTHETIC",
+  "record_id": "CRYSTAL-EXAMPLE-001",
+  "created_at": "2026-11-16T00:00:00Z",
+  "evidence_status": "DESIGN",
+  "evidence_ref": null,
+  "crystal_id": "CANDIDATE-NO-PHYSICAL-OBJECT",
+  "carrier_class": "UNRESOLVED",
+  "physical_boundary_ref": null,
+  "learned_relation_ref": null,
+  "reader_contract_ref": null,
+  "molecular_state_ref": null,
+  "cell_lineage_ref": null,
+  "delayed_retention_ref": null,
+  "source_teaching_route_status": null,
+  "recipient_only_evaluation_ref": null,
+  "physical_transfer_demonstrated": false,
+  "installable": false
+}
