@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Symbolic molecule definition marker">
+ <rect x="10" y="10" width="108" height="108" rx="20" fill="#3e281a"/>
+ <path d="M42 75 65 44l26 26-27 25Z" fill="none" stroke="#f2b66e" stroke-width="6" stroke-linejoin="round"/>
+ <circle cx="42" cy="75" r="13" fill="#ffca84"/><circle cx="65" cy="44" r="11" fill="#ef9946"/>
+ <circle cx="91" cy="70" r="12" fill="#f6c884"/><circle cx="64" cy="95" r="10" fill="#e58f39"/>
+</svg>
