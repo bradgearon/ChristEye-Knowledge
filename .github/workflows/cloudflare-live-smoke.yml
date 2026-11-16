@@ -2,6 +2,14 @@ name: Anaiero live production smoke test
 on:
   workflow_dispatch:
     inputs:
+      target:
+        description: 'Choose the development workers.dev site or anaiero.io production'
+        type: choice
+        required: true
+        default: development
+        options:
+          - development
+          - production
       require_interest:
         description: 'Require interest-registration configuration to be enabled'
         type: boolean
@@ -21,8 +29,8 @@ jobs:
       - name: Check anaiero.io homepage and public GET endpoints
         if: ${{ !inputs.require_interest }}
         working-directory: website/app
-        run: node scripts/launch-preflight.mjs --live
+        run: node scripts/launch-preflight.mjs --live --target=${{ inputs.target }}
       - name: Require registered-interest service to be enabled
         if: ${{ inputs.require_interest }}
         working-directory: website/app
-        run: node scripts/launch-preflight.mjs --live --require-interest
+        run: node scripts/launch-preflight.mjs --live --target=${{ inputs.target }} --require-interest
