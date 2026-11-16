@@ -1,0 +1,47 @@
+name: Validate React Anaiero Portal
+on:
+  push:
+    branches: [site/react-interactive-portal-v1]
+    paths:
+      - 'website/app/**'
+      - '.github/workflows/react-portal.yml'
+      - 'specifications/**'
+      - 'processes/**'
+      - 'registries/**'
+      - 'schemas/**'
+      - 'research/**'
+  pull_request:
+    paths:
+      - 'website/**'
+      - 'specifications/**'
+      - 'processes/**'
+      - 'registries/**'
+      - 'schemas/**'
+      - 'research/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: website/app/package-lock.json
+      - name: Install site dependencies
+        working-directory: website/app
+        run: npm install --no-audit --no-fund
+      - name: Check source and rights
+        working-directory: website/app
+        run: npm run prepare && npm run test:content
+      - name: Compile React and build GitHub Pages output
+        working-directory: website/app
+        run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: anaiero-react-preview
+          path: website/app/dist
+          retention-days: 7
