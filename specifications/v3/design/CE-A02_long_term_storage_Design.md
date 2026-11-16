@@ -13,6 +13,8 @@ status: "Complete candidate engineering specification; living parameters require
 
 > **Purpose:** proposed spinal Root tissue distinct from verified digital CAS storage. The existing v3 digital architecture is retained in the source-history appendix below. This revision specifies cellular roles, axons, learning, support, joining and growth/evidence decisions; it is not a claim that those biological mechanisms have been demonstrated.
 
+**v3.2 scientific successor:** [Animon long-term retention engineering design](../../v3.2/design/CE-A02_Animon_Long_Term_Retention_Design.md) and [scientific companion](../../v3.2/companion/CE-A02_Animon_Long_Term_Retention_Scientific_Companion.md). Real digital retrieval is distinct from biologically retained learning.
+
 ## 1. Product behavior and acceptance
 
 **Intended outcome:** qualify learning → delayed readout without teaching → alternate cue access → protected-task test → mechanism study.

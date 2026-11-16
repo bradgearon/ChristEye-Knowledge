@@ -11,6 +11,8 @@ status: "Mechanism-by-mechanism research companion; unexecuted where not separat
 
 **Revision 3.1** · [Engineering design](../design/CE-A16_root_registry_and_mapping_Design.md) · [Evidence ledger](../../../research/evidence/anaiero-biology-2026-11.md)
 
+**v3.2 scientific successor:** [Animon spinal Root/axon scientific companion](../../v3.2/companion/CE-A16_Animon_Spinal_Root_Scientific_Companion.md) and [full engineering design](../../v3.2/design/CE-A16_Animon_Spinal_Root_Design.md). The source studies do not by themselves establish a spinal memory location.
+
 ## 1. Testable claim at the correct physical scale
 
 **Proposed ordinary substrate:** physical candidate spinal Root tissue and independent functional retention ledger.
