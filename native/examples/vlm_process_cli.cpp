@@ -98,7 +98,8 @@ static void show(const p::ProcessMachine& m, bool full) {
       started = true;
       std::cout << "{\"task\":" << e.task_id << ",\"weight\":" << e.weight
                 << ",\"progress\":" << e.elapsed << ",\"x\":" << e.x
-                << ",\"y\":" << e.y << ",\"completed\":" << (e.completed ? "true" : "false") << '}';
+                << ",\"y\":" << e.y << ",\"snapshot_hash\":\"" << v::hex64(e.snapshot_hash) << "\""
+                << ",\"completed\":" << (e.completed ? "true" : "false") << '}';
     }
     std::cout << ']';
   }
