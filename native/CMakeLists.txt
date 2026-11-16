@@ -291,3 +291,7 @@ if(CE_WIND_BUILD_TESTS)
     ${CMAKE_CURRENT_SOURCE_DIR}/../examples/connected-gardens.cev
     ${CMAKE_CURRENT_BINARY_DIR}/anaiero-runtime-simulated 2)
 endif()
+
+# The public anaiero target must build/install every listed backend.
+add_dependencies(anaiero ce_colony_runtime)
+install(TARGETS ce_colony_runtime RUNTIME DESTINATION bin)
