@@ -192,3 +192,28 @@ if(CE_WIND_BUILD_TESTS)
   add_test(NAME colony_lab_tests COMMAND ce_colony_lab_tests ${CMAKE_CURRENT_SOURCE_DIR}/..)
   add_test(NAME colony_overlay_tests COMMAND ce_colony_overlay_tests ${CMAKE_CURRENT_SOURCE_DIR}/..)
 endif()
+
+# CE-SW-14 SIM3.2 deterministic, read-only synthetic model fidelity evaluation.
+add_executable(ce_colony_fidelity examples/colony_fidelity_cli.cpp)
+target_link_libraries(ce_colony_fidelity PRIVATE ce_wind_core)
+if(MSVC)
+  target_compile_options(ce_colony_fidelity PRIVATE /W4 /WX)
+else()
+  target_compile_options(ce_colony_fidelity PRIVATE -Wall -Wextra -Wconversion -Werror)
+endif()
+if(CE_WIND_BUILD_TESTS)
+  add_executable(ce_colony_fidelity_tests tests/colony_fidelity_tests.cpp)
+  target_link_libraries(ce_colony_fidelity_tests PRIVATE ce_wind_core)
+  if(MSVC)
+    target_compile_options(ce_colony_fidelity_tests PRIVATE /W4 /WX)
+  else()
+    target_compile_options(ce_colony_fidelity_tests PRIVATE -Wall -Wextra -Wconversion -Werror)
+  endif()
+  add_test(NAME colony_fidelity_tests COMMAND ce_colony_fidelity_tests ${CMAKE_CURRENT_SOURCE_DIR}/..)
+  add_test(NAME colony_fidelity_smoke COMMAND ${CMAKE_COMMAND}
+    -DCE_RUNNER=$<TARGET_FILE:ce_colony_runner>
+    -DCE_FIDELITY=$<TARGET_FILE:ce_colony_fidelity>
+    -DCE_REPO=${CMAKE_CURRENT_SOURCE_DIR}/..
+    -DCE_TEMP=${CMAKE_CURRENT_BINARY_DIR}/sim32-cli-smoke
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/colony_fidelity_smoke.cmake)
+endif()

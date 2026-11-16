@@ -1,0 +1,16 @@
+CELAW/1
+name sim3-default
+domain SYNTHETIC_ONLY
+version 1
+config_sha256 49b4ce5d133739e5f07ea04a43d0dca4bef00f85bfa320696c6100653fd959ee
+parameter food_per_cell 1
+parameter fed_gain 1
+parameter unfed_cost 7
+parameter upkeep_cost 1
+parameter stress_cutoff 20
+parameter stress_cost 4
+parameter maturity_gain 1
+parameter blood_step 1
+parameter learning_gain 1
+end
+seal 061717bd4b8850238936696b97e784afe07c881dbb878b15bf20501fcbd3c1d3
