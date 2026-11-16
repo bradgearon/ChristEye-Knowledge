@@ -1,0 +1,256 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:christeye:software:colony_lab_overlay:v1",
+  "title": "CEVLM/2 read-only source overlay",
+  "type": "object",
+  "required": [
+    "origin",
+    "format",
+    "colony",
+    "source_sha256",
+    "tick",
+    "model_state_hash",
+    "cells",
+    "molecules",
+    "connections",
+    "fields",
+    "active_processes"
+  ],
+  "properties": {
+    "origin": {
+      "const": "SIMULATED_UNCALIBRATED"
+    },
+    "format": {
+      "const": "CEVLMOVERLAY/1"
+    },
+    "colony": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._-]{1,80}$"
+    },
+    "source_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "tick": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "model_state_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{16}$"
+    },
+    "cells": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "parent",
+          "kind",
+          "x",
+          "y",
+          "z",
+          "energy_proxy",
+          "maturity_proxy",
+          "neurite_proxy",
+          "rna_proxy",
+          "learning_proxy",
+          "viable"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "parent": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "kind": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]{1,80}$"
+          },
+          "x": {
+            "type": "integer",
+            "minimum": -1000000000,
+            "maximum": 1000000000
+          },
+          "y": {
+            "type": "integer",
+            "minimum": -1000000000,
+            "maximum": 1000000000
+          },
+          "z": {
+            "type": "integer",
+            "minimum": -1000000000,
+            "maximum": 1000000000
+          },
+          "energy_proxy": {
+            "type": "integer",
+            "minimum": -1000000000,
+            "maximum": 1000000000
+          },
+          "maturity_proxy": {
+            "type": "integer",
+            "minimum": -1000000000,
+            "maximum": 1000000000
+          },
+          "neurite_proxy": {
+            "type": "integer",
+            "minimum": -1000000000,
+            "maximum": 1000000000
+          },
+          "rna_proxy": {
+            "type": "integer",
+            "minimum": -1000000000,
+            "maximum": 1000000000
+          },
+          "learning_proxy": {
+            "type": "integer",
+            "minimum": -1000000000,
+            "maximum": 1000000000
+          },
+          "viable": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "maxItems": 10000
+    },
+    "molecules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "quantity_proxy"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "kind": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]{1,80}$"
+          },
+          "quantity_proxy": {
+            "type": "integer",
+            "minimum": -1000000000,
+            "maximum": 1000000000
+          }
+        },
+        "additionalProperties": false
+      },
+      "maxItems": 10000
+    },
+    "connections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "from",
+          "to",
+          "weight_proxy"
+        ],
+        "properties": {
+          "from": {
+            "type": "integer"
+          },
+          "to": {
+            "type": "integer"
+          },
+          "weight_proxy": {
+            "type": "integer",
+            "minimum": -1000000000,
+            "maximum": 1000000000
+          }
+        },
+        "additionalProperties": false
+      },
+      "maxItems": 10000
+    },
+    "fields": {
+      "type": "object",
+      "required": [
+        "side",
+        "layers"
+      ],
+      "properties": {
+        "side": {
+          "const": 8
+        },
+        "layers": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "values"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9._-]{1,80}$"
+              },
+              "values": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": -1000000000,
+                  "maximum": 1000000000
+                },
+                "minItems": 64,
+                "maxItems": 64
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "active_processes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "elapsed",
+          "x",
+          "y",
+          "completed"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "elapsed": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "x": {
+            "type": "integer",
+            "minimum": -1000000000,
+            "maximum": 1000000000
+          },
+          "y": {
+            "type": "integer",
+            "minimum": -1000000000,
+            "maximum": 1000000000
+          },
+          "completed": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

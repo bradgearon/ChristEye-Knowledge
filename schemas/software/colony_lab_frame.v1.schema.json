@@ -1,0 +1,206 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:christeye:software:colony_lab_frame:v1",
+  "title": "SIM3.1 simulated laboratory replay frame",
+  "description": "Source measurements are simulated, not biological observations. Per-file continuity and uniqueness checked by replay_contract.js.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "origin",
+    "format",
+    "run",
+    "tick",
+    "law_version",
+    "config_sha256",
+    "snapshot_sha256",
+    "colonies",
+    "cells",
+    "links"
+  ],
+  "properties": {
+    "origin": {
+      "const": "SIMULATED_UNCALIBRATED"
+    },
+    "format": {
+      "const": "CEVLABFRAME/1"
+    },
+    "run": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._-]{1,80}$"
+    },
+    "tick": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "law_version": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65535
+    },
+    "config_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "snapshot_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "colonies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "food",
+          "data",
+          "signal",
+          "stress"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]{1,80}$"
+          },
+          "food": {
+            "type": "integer",
+            "minimum": -1000000000,
+            "maximum": 1000000000
+          },
+          "data": {
+            "type": "integer",
+            "minimum": -1000000000,
+            "maximum": 1000000000
+          },
+          "signal": {
+            "type": "integer",
+            "minimum": -1000000000,
+            "maximum": 1000000000
+          },
+          "stress": {
+            "type": "integer",
+            "minimum": -1000000000,
+            "maximum": 1000000000
+          }
+        },
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "maxItems": 64
+    },
+    "cells": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "colony",
+          "id",
+          "parent",
+          "kind",
+          "x",
+          "y",
+          "z",
+          "energy",
+          "maturity",
+          "learning",
+          "birth",
+          "death",
+          "alive"
+        ],
+        "properties": {
+          "colony": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]{1,80}$"
+          },
+          "id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "parent": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "kind": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]{1,80}$"
+          },
+          "x": {
+            "type": "integer",
+            "minimum": -1000000000,
+            "maximum": 1000000000
+          },
+          "y": {
+            "type": "integer",
+            "minimum": -1000000000,
+            "maximum": 1000000000
+          },
+          "z": {
+            "type": "integer",
+            "minimum": -1000000000,
+            "maximum": 1000000000
+          },
+          "energy": {
+            "type": "integer",
+            "minimum": -1000000000,
+            "maximum": 1000000000
+          },
+          "maturity": {
+            "type": "integer",
+            "minimum": -1000000000,
+            "maximum": 1000000000
+          },
+          "learning": {
+            "type": "integer",
+            "minimum": -1000000000,
+            "maximum": 1000000000
+          },
+          "birth": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "death": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "alive": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "maxItems": 10000
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "from",
+          "to",
+          "channel",
+          "units"
+        ],
+        "properties": {
+          "from": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]{1,80}$"
+          },
+          "to": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]{1,80}$"
+          },
+          "channel": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]{1,80}$"
+          },
+          "units": {
+            "type": "integer",
+            "minimum": -1000000000,
+            "maximum": 1000000000
+          }
+        },
+        "additionalProperties": false
+      },
+      "maxItems": 1024
+    }
+  }
+}

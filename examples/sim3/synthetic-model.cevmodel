@@ -1,0 +1,10 @@
+CEVMODEL/1
+name synthetic-lab-reference
+domain SYNTHETIC_ONLY
+source_sha256 39c94b730c93a6e9c1e89c3cc81b7a6d8aa96186cfe6acdce617cb1655086c6b
+reference alive 4 0
+reference energy 140 0
+reference learning 24 0
+reference food 169 0
+reference stress 7 0
+end

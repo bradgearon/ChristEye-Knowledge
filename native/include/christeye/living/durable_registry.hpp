@@ -48,7 +48,8 @@ inline bool valid_id(std::string_view id) noexcept {
 }
 inline bool valid_kind(std::string_view k) noexcept {
   return k=="PLAN_REGISTERED"||k=="RNA_OBSERVATION"||k=="LEARNING_RESULT"||
-         k=="SUPPORT_OBSERVATION"||k=="CRYSTAL_EVIDENCE"||k=="SUCCESSOR_PROPOSED";
+         k=="SUPPORT_OBSERVATION"||k=="CRYSTAL_EVIDENCE"||k=="SUCCESSOR_PROPOSED"||
+         k=="CULTURE_CHECKPOINT"||k=="VLM_OVERLAY_IMPORTED"||k=="MODEL_EVALUATION";
 }
 inline bool valid_origin(std::string_view o) noexcept {
   return o=="SIMULATED"||o=="INFERRED"||o=="IMPORTED_UNVERIFIED";
