@@ -87,3 +87,7 @@ ctest --test-dir build/native -C Release --output-on-failure
 ```
 
 The `stream` output is NDJSON with all synthetic actors, proxy counters and a six-field 8×8 grid per tick, usable by a future visualization. Physics, biology, instruction schedules and constants are arbitrary software assumptions. No automatic stimulation, molecular delivery, physical Crystal learning or operator-free culture intervention is present.
+
+## SW2 reference — WindRegistry
+
+The host-only `ce_wind_registry` CLI and `christeye/living/wind_registry.hpp` provide immutable SHA-256 object identity, a replay-checked append-only evidence journal, per-entity and per-kind pushed subscriptions, stage-to-Crystal/RNA/support mapping and immutable successor proposals. See [CE-SW-10](../docs/software/CE-SW-10_windstore_learning_crystal_registry.md). This is **not** crash-safe production WindStore (no fsync/locking), nor an authenticated multi-host transport or biological action pipeline.

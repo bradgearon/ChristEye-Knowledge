@@ -17,6 +17,8 @@
 
 See also [proposed Colony Intelligence and control schemas](../../schemas/software/README.md) for snapshot, board capability, Bread/Meat planning and guidance records.
 
+| [CE-SW-10: Learning and Crystal/RNA Evidence Registry](CE-SW-10_windstore_learning_crystal_registry.md) | Host-only SHA-256 immutable objects, append-only event journal, stage-to-hash lookup, filtered push inbox, imported plans and non-mutating successor proposals | **Digital-only reference + native tests** |
+
 ## System integration
 
 These documents extend the existing [v3 architecture](../../specifications/v3/master_architecture.md) without replacing its logical WindEnvelope contract, current Python prototype or laboratory safety boundary.

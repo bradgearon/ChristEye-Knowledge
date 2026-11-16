@@ -16,6 +16,8 @@ These schemas document **proposed diagnostic and interchange records** for Chris
 
 The design is described in [CE-SW-03](../../docs/software/CE-SW-03_colony_intelligence_bread_meat_backplane.md). Control/Crystal/vision extensions are described in [CE-SW-04](../../docs/software/CE-SW-04_control_surface_crystal_vision_teaching.md) and have synthetic examples in `examples/`. A valid schema is **not** evidence of lab validation, safe intervention, secure packet authentication or durable delivery. Stream framing, content hashes and cryptographic identity are CE-SW-01 runtime responsibilities.
 
+| [wind_registry_event.v1.schema.json](wind_registry_event.v1.schema.json) | CE-SW-10 hash-linked evidence event with simulation-only provenance, clock and immutable object reference |
+
 ## Verification expectations
 
 Use a Draft 2020-12 JSON Schema validator, plus negative tests for missing source identity, invalid status enums, stale data incorrectly marked live, unknown permission classes, mismatched revisions and malformed digest values. Conformance tests must use canonical binary fixtures before this becomes a wire ABI.

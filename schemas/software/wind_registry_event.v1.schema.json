@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:christeye:software:wind_registry_event:v1",
+  "title": "CE-SW-10 local evidence event diagnostic projection",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "sequence",
+    "previous_sha256",
+    "event_sha256",
+    "kind",
+    "entity",
+    "object_sha256",
+    "origin",
+    "source_tick",
+    "clock",
+    "producer"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "ce.wind_registry.event/1"
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "previous_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "event_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "kind": {
+      "enum": [
+        "PLAN_REGISTERED",
+        "RNA_OBSERVATION",
+        "LEARNING_RESULT",
+        "SUPPORT_OBSERVATION",
+        "CRYSTAL_EVIDENCE",
+        "SUCCESSOR_PROPOSED"
+      ]
+    },
+    "entity": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._-]{1,80}$"
+    },
+    "object_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "origin": {
+      "enum": [
+        "SIMULATED",
+        "IMPORTED_UNVERIFIED",
+        "INFERRED"
+      ]
+    },
+    "source_tick": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "clock": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._-]{1,80}$"
+    },
+    "producer": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._-]{1,80}$"
+    }
+  }
+}
