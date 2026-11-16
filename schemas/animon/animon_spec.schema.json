@@ -1,0 +1,177 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anaiero.io/schemas/animon/animon_spec.schema.json",
+  "title": "ANIMON/1 versioned development-system design identity",
+  "description": "Schema for a proposed Animon design or nonliving reference model. Does not qualify a biological specimen.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "system_class",
+    "program",
+    "owner",
+    "animon_spec_id",
+    "candidate_instance_id",
+    "digital_model_id",
+    "embodiment",
+    "evidence_stage",
+    "source_lot_refs",
+    "soil_preparation_ref",
+    "spinal_root_substrate_refs",
+    "axon_projection_refs",
+    "functional_root_refs",
+    "independent_care_contract_ref",
+    "scientific_review_ref",
+    "design_source_ref",
+    "physical_actuation_authorized",
+    "created_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "system_class": {
+      "const": "ANIMON"
+    },
+    "program": {
+      "const": "ChristEye Anaiero"
+    },
+    "owner": {
+      "const": "We Develop Software LLC"
+    },
+    "animon_spec_id": {
+      "type": "string",
+      "minLength": 3
+    },
+    "candidate_instance_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "digital_model_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "embodiment": {
+      "enum": [
+        "CONCEPT_ONLY",
+        "DIGITAL_REFERENCE",
+        "PROPOSED_LIVING_ASSEMBLY",
+        "HYBRID_RESEARCH_CANDIDATE"
+      ]
+    },
+    "evidence_stage": {
+      "enum": [
+        "DESIGN",
+        "DIGITAL_REFERENCE",
+        "PHYSICAL_CANDIDATE_UNQUALIFIED",
+        "LAB_REVIEW_PENDING",
+        "PHYSICALLY_CHARACTERIZED",
+        "FUNCTION_TESTED",
+        "SCIENTIFICALLY_REVIEWED"
+      ]
+    },
+    "source_lot_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "soil_preparation_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "spinal_root_substrate_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "axon_projection_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "functional_root_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "independent_care_contract_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "scientific_review_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "design_source_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "physical_actuation_authorized": {
+      "const": false
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "embodiment": {
+            "const": "DIGITAL_REFERENCE"
+          }
+        },
+        "required": [
+          "embodiment"
+        ]
+      },
+      "then": {
+        "properties": {
+          "candidate_instance_id": {
+            "type": "null"
+          },
+          "soil_preparation_ref": {
+            "type": "null"
+          },
+          "source_lot_refs": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "evidence_stage": {
+            "const": "DESIGN"
+          }
+        },
+        "required": [
+          "evidence_stage"
+        ]
+      },
+      "then": {
+        "properties": {
+          "candidate_instance_id": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ]
+}

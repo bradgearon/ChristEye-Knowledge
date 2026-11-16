@@ -9,6 +9,8 @@ status: "Mechanism-by-mechanism research companion; unexecuted where not separat
 
 # CE-A17 — Daily Care And Dispensing · Scientific companion
 
+**v3.2 successor:** [Animon Care scientific companion](../../v3.2/companion/CE-A17_Animon_Care_Scientific_Companion.md) and [engineering design](../../v3.2/design/CE-A17_Animon_Care_Design.md). Earlier source remains in place.
+
 **Revision 3.1** · [Engineering design](../design/CE-A17_daily_care_and_dispensing_Design.md) · [Evidence ledger](../../../research/evidence/anaiero-biology-2026-11.md)
 
 ## 1. Testable claim at the correct physical scale

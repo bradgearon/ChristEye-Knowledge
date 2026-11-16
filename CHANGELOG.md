@@ -1,3 +1,11 @@
+## 2026-11-16 — ANIMON/1 and v3.2 pilot dossiers
+
+- Adopted **Animon** as the provisional individual developmental system class; **ChristEye Anaiero** remains the scientific architecture and WDS research program.
+- Published a versioned Animon ontology and nonliving digital-reference identity schema. This does not assert a functioning living individual.
+- Reconciled the ChemiBus, physical Crystal and Crest birth examples with their canonical JSON schemas; added six synthetic, evidence-status-marked fixtures and CI validation.
+- Published distinct v3.2 engineering/scientific dossiers for **CE-A09 Animon Core/Soil** and **CE-A17 independent Animon Care**; preserved original v3.1 design/companion sources with forward links.
+- Qualified laboratory sources, care SOPs, living neurological outcomes, and portable physical memory remain unverified. Patent document excluded.
+
 ## 2026-11-15 — v3.1 rigorous biological and digital systems documentation
 
 - Reworked all **24 design files and 24 companions**, preserving their original full v3.0 texts within revised documents.

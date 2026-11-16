@@ -1,5 +1,7 @@
 # ChristEye Anaiero — v3.1 complete engineering design library
 
+**Naming and version note:** The proposed individual system is now termed **Animon** ([ANIMON/1](../../ontology/ANIMON_V1.md)). A more mechanism-specific [v3.2 pilot](../v3.2/README.md) is available for Core/Soil (A09) and Care (A17). The 24 v3.1 pairs are preserved as a versioned prior edition; no terminology update makes their biological hypotheses verified.
+
 **Revision:** 2026-11-15 · **Owner:** We Develop Software LLC · **Status:** detailed experimental engineering specification, not a validated fabrication SOP.
 
 All **24 engineering designs and 24 scientific companions** are now substantial, current full-text documents. Each design includes source/cell identity, axons and candidate spinal Root tissue, molecules and structure, digital and experimental learning stages, support and chemical buses, Root retention, growth decisions, a required food/peptide review card, failure/acceptance gates, and source links. Each companion separates scientific precedent, hypotheses, controls, alternative explanations, data and uncertainty. The entire older v3.0 source is preserved at the bottom of the relevant current file.

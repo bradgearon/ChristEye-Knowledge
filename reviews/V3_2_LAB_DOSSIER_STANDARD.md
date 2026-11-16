@@ -7,6 +7,8 @@ status: "Proposed engineering/research handoff standard; not a biological SOP"
 
 # V3.2 — a qualified scientist's review packet
 
+**Canonical naming decision:** The proposed target class is **Animon**, described in [ANIMON/1](../ontology/ANIMON_V1.md). Each dossier must identify Animon specification versus nonliving digital reference versus authentic physical candidate; Soil and spinal Root tissue remain subsystems with their own independently reviewed evidence. [v3.2 pilot](../specifications/v3.2/README.md).
+
 **Purpose:** make every module understandable and assessable by a scientific director and engineering team. Preserve original source documents, avoid repeated generic material, and distinguish **research design**, **software tested**, **instrument qualified**, **preparation qualified**, and **local biological result** as different evidence stages.
 
 ## Engineering design — mandatory unique content
