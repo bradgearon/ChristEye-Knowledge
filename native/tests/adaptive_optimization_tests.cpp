@@ -6,6 +6,9 @@
 #include "anaiero/services/runtime_service.hpp"
 #include "anaiero/services/cell_behavior_service.hpp"
 #include <array>
+#ifdef NDEBUG
+#undef NDEBUG
+#endif
 #include <cassert>
 #include <iostream>
 namespace opt=anaiero::optimization;
