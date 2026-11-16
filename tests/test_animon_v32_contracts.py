@@ -14,6 +14,8 @@ CASES = {
     "chemibus_unmeasured.example.json": ("schemas/biology/chemibus_observation.schema.json", "processes/BIO-04-sustibus-chemibus.md"),
     "physical_crystal_unvalidated.example.json": ("schemas/biology/physical_crystal_candidate.schema.json", "processes/BIO-08-crystals.md"),
     "crest_birth_unobserved.example.json": ("schemas/biology/cell_birth_event.schema.json", "processes/BIO-01-crest-lineage.md"),
+    "soil_region_unobserved.example.json": ("schemas/biology/soil_region.schema.json", None),
+    "sustibus_unqualified.example.json": ("schemas/biology/sustibus_care_status.schema.json", None),
 }
 
 def fixture(name):
@@ -79,6 +81,28 @@ class AnimonV32Contracts(unittest.TestCase):
                       {"physical_actuation_authorized": True}]:
             with self.subTest(patch=patch), self.assertRaises(ValidationError):
                 schema.validate({**base, **patch})
+
+    def test_first_two_pilot_dossiers_are_genuinely_module_specific(self):
+        pairs = {
+            "CE-A09_Animon_Core": [
+                "Soil", "spinal Root", "preparation_id", "source", "Animon",
+            ],
+            "CE-A17_Animon_Care": [
+                "ChemiBus", "SustiBus", "care", "analyte", "Animon",
+            ],
+        }
+        for prefix, words in pairs.items():
+            design = (ROOT / "specifications/v3.2/design" /
+                      (prefix + "_Design.md")).read_text(encoding="utf-8")
+            companion = (ROOT / "specifications/v3.2/companion" /
+                         (prefix + "_Scientific_Companion.md")).read_text(encoding="utf-8")
+            self.assertGreater(len(design), 5500, prefix)
+            self.assertGreater(len(companion), 5500, prefix)
+            for word in words:
+                self.assertIn(word.lower(), (design + companion).lower())
+            self.assertIn("v3.2", design.lower())
+            self.assertIn("v3.2", companion.lower())
+            self.assertIn("not", companion.lower())
 
     def test_ontology_source_and_lab_standard_remain_linked(self):
         ontology = (ROOT / "ontology/ANIMON_V1.md").read_text(encoding="utf-8")
