@@ -36,3 +36,7 @@ Run `npm ci && npm run build && npm run test:content` from this directory. The b
 ## Current S07 deployment and verification
 
 See [S07 launch runbook](S07_LAUNCH_RUNBOOK.md), [deployment guide](CLOUDFLARE_DEPLOY.md), and [interest activation](INTEREST_ROLLOUT.md). After a root-domain build, use `node scripts/launch-preflight.mjs --offline`. Once the domain is live, use `node scripts/launch-preflight.mjs --live` or the manual GitHub Actions smoke test. No Cloudflare account credentials are stored in Git.
+
+## Development Worker and safe testing
+
+The owner-reported staging URL is https://anaiero.bradgearon.workers.dev/. Use the **staging Worker config** [wrangler.staging.jsonc](wrangler.staging.jsonc), the [S07 dev checklist](S07_DEV_STAGING.md), and read-only preflight `node scripts/launch-preflight.mjs --live --target=dev`. Do not apply the production D1 database or production Turnstile secrets to the staging Worker. Any actual Cloudflare account deployment must be authorized by the owner.

@@ -3,6 +3,7 @@
  * S07 production preflight:
  *   --offline: validate local React output, corpus, Worker routing, D1 schema.
  *   --live: GET-only checks of anaiero.io after Cloudflare deployment.
+ *   --live --target=dev: check existing anaiero.bradgearon.workers.dev staging host.
  *   --live --require-interest: fail unless interest API is configured.
  * No credentials, personal data or POST requests.
  */
@@ -13,9 +14,13 @@ import {fileURLToPath} from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const flags=new Set(process.argv.slice(2));
 const offline=flags.has('--offline'),live=flags.has('--live'),required=flags.has('--require-interest');
-if(flags.has('--help')){console.log('Usage: node scripts/launch-preflight.mjs --offline | --live [--require-interest]');process.exit(0);}
-if(offline===live || (required&&!live) || [...flags].some(x=>!['--offline','--live','--require-interest'].includes(x))){
-  console.error('Choose exactly one of --offline or --live; --require-interest is live only.');process.exit(2);
+const targetArg=[...flags].find(x=>x.startsWith('--target='));
+const target=targetArg?.slice('--target='.length)||'production';
+const normalizedTarget=target==='development'?'dev':target;
+const validTargets=new Set(['dev','production']);
+if(flags.has('--help')){console.log('Usage: node scripts/launch-preflight.mjs --offline | --live [--target=dev|production] [--require-interest]');process.exit(0);}
+if(offline===live || (required&&!live) || !validTargets.has(normalizedTarget) || (targetArg&&offline) || [...flags].some(x=>!['--offline','--live','--require-interest'].includes(x)&&!x.startsWith('--target='))){
+  console.error('Choose --offline, or --live [--target=dev|production] [--require-interest].');process.exit(2);
 }
 const results=[];
 function pass(key,result){results.push({key,ok:true,result});}
@@ -34,6 +39,22 @@ if(offline){
     assert.deepEqual(w.assets.run_worker_first,['/api/*']);
     assert.ok(existsSync(path.join(root,w.main)));
     return 'Static assets from dist; API Worker only on /api/*';
+  });
+  check('Staging Worker isolation',()=>{
+    const production=json('wrangler.jsonc'),stage=json('wrangler.staging.jsonc');
+    assert.equal(production.name,'anaiero-io');
+    assert.equal(stage.name,'anaiero');
+    assert.equal(stage.vars.ALLOWED_HOSTNAMES,'anaiero.bradgearon.workers.dev');
+    assert.equal(stage.assets.directory,production.assets.directory);
+    assert.deepEqual(stage.assets.run_worker_first,['/api/*']);
+    if(stage.d1_databases){
+      assert.equal(stage.d1_databases.length,1,'Exactly one staging database expected');
+      assert.equal(stage.d1_databases[0].binding,'DB');
+      assert.equal(stage.d1_databases[0].database_name,'anaiero-interest-dev');
+      const prodIds=(production.d1_databases||[]).map(x=>x.database_id).filter(Boolean);
+      assert.ok(!prodIds.includes(stage.d1_databases[0].database_id),'Staging must not share production D1');
+    }
+    return 'Staging and production Worker names/allowed hostnames isolated';
   });
   check('React production HTML at domain root',()=>{
     const html=file('dist/index.html');
@@ -66,9 +87,10 @@ if(offline){
     return 'D1 migration and fail-closed API requirements present';
   });
 }else{
-  const base='https://anaiero.io';
+  const base=normalizedTarget==='dev'?'https://anaiero.bradgearon.workers.dev':'https://anaiero.io';
   async function liveCheck(key,fn){try{pass(key,await fn());}catch(e){fail(key,e);}}
-  const get=route=>fetch(base+route,{method:'GET',redirect:'follow',cache:'no-store',signal:AbortSignal.timeout(12000)});
+  const get=route=>fetch(base+route,{method:'GET',redirect:'follow',cache:'no-store',headers:{'User-Agent':'AnaieroReleasePreflight/1.0 (+https://github.com/bradgearon/ChristEye-Knowledge)'},signal:AbortSignal.timeout(15000)});
+  console.log('Read-only Anaiero smoke target: '+base);
   await liveCheck('HTTPS homepage',async()=>{
     const r=await get('/');
     assert.ok(r.ok,'HTTP '+r.status);
