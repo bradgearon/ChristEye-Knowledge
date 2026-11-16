@@ -19,7 +19,8 @@ int main(int argc,char** argv){
   else if(action=="obj")std::cout<<sim::obj(runner.state(),runner.configuration());
   else if(action=="mapped"){
     sim::MappedCulture mapped;
-    if(!mapped.open(std::filesystem::path(argv[3])/"culture.state"))return 1;
+    // Map the immutable revision; mapping a replaceable HEAD blocks renames on Windows.
+    if(!mapped.open(runner.committed_history_path()))return 1;
     std::cout.write(mapped.bytes().data(),static_cast<std::streamsize>(mapped.bytes().size()));
   }else if(action!="inspect")return 2;
   if(action=="inspect"||action=="step"){

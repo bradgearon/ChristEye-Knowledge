@@ -57,7 +57,7 @@ static void run_tests(const fs::path& base){
     CHECK(read(tmp/"active/frames/tick-000001.svg").starts_with("<svg"));
     CHECK(read(tmp/"active/frames/tick-000002.obj").find("g circuit_crest_receiving_data")!=std::string::npos);
     sim::MappedCulture snapshot;
-    CHECK(snapshot.open(tmp/"active/culture.state"));
+    CHECK(snapshot.open(tmp/"active/history/tick-000002.state"));
     const auto old=std::string(snapshot.bytes().data(),snapshot.bytes().size());
     CHECK(old==read(tmp/"active/culture.state"));
     CHECK(runner.step()==sim::Result::ok);

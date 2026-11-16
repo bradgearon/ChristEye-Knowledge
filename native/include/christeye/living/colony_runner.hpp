@@ -408,6 +408,7 @@ public:
   Runner()=default;Runner(const Runner&)=delete;Runner&operator=(const Runner&)=delete;
   const Snapshot& state() const noexcept{return state_;}
   const Configuration& configuration() const noexcept{return config_;}
+  fs::path committed_history_path() const {return history_path(state_.tick);}
   bool is_open()const noexcept{return open_;}
   Result open(const fs::path& cfg_file,const fs::path& root){
     if(open_)return Result::already_open;
