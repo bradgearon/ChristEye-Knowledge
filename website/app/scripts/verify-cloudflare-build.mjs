@@ -1,0 +1,20 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+
+const root=path.resolve(import.meta.dirname,'..');
+const index=fs.readFileSync(path.join(root,'dist/index.html'),'utf8');
+const config=JSON.parse(fs.readFileSync(path.join(root,'wrangler.jsonc'),'utf8'));
+const manifest=JSON.parse(fs.readFileSync(path.join(root,'dist/content/manifest.json'),'utf8'));
+const release=JSON.parse(fs.readFileSync(path.join(root,'dist/content/release.json'),'utf8'));
+assert.equal(config.assets.directory,'./dist');
+assert.equal(config.assets.not_found_handling,'single-page-application');
+assert.ok(index.includes('/assets/'),'Expected asset paths under domain root');
+assert.ok(!index.includes('/ChristEye-Knowledge/'),'GitHub Pages prefix must not leak into root build');
+assert.ok(manifest.documents.length>=300,'Full technical corpus missing');
+assert.equal(release.patent_included,false);
+assert.equal(release.physical_actuation,false);
+const files=fs.readdirSync(path.join(root,'dist/assets'));
+assert.ok(files.some(x=>x.endsWith('.js')),'JS bundle missing');
+assert.ok(files.some(x=>x.endsWith('.css')),'CSS bundle missing');
+console.log('Cloudflare root-domain release validated: '+manifest.documents.length+' docs, '+files.length+' app assets, patent excluded.');
