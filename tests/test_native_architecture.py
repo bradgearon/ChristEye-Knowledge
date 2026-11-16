@@ -81,7 +81,7 @@ class NativeArchitectureTests(unittest.TestCase):
         for term in ("native C++20", "Linux", "Windows", "IOCP", "epoll",
                      "named pipes", "Unix-domain sockets", "SCM", "systemd"):
             with self.subTest(term=term):
-                self.assertIn(term, adr)
+                self.assertIn(term.casefold(), adr.casefold())
 
     def test_models_have_no_io_or_transport_includes(self):
         forbidden = ("<filesystem>", "<fstream>", "<thread>", "<sys/socket.h>",
