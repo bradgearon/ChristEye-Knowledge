@@ -110,8 +110,8 @@ public:
     const auto change=deviation(decision.baseline,decision.goal.ideal)-
                       deviation(value,decision.goal.ideal);
     // Digital regression check, not a causal interpretation of a living cell.
-    if(change<decision.goal.minimum_gain &&
-       change < -static_cast<std::int64_t>(decision.goal.allowed_regression)){
+    if(change+static_cast<std::int64_t>(decision.goal.allowed_regression)<
+       decision.goal.minimum_gain){
       if(!changes.revert(decision.commit_id))return Status::rollback_failed;
       decision.committed=false;
       notify(contracts::ServicePhase::reverted,decision,Status::reverted);
