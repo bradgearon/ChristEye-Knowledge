@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Symbolic blood carrier movement marker">
+ <circle cx="64" cy="64" r="53" fill="#321725"/><path d="M24 82c21-4 24-29 51-29 18 0 24 13 31 17" fill="none" stroke="#f495a6" stroke-width="5" stroke-linecap="round" stroke-dasharray="7 10"/>
+ <path d="M64 20c16 22 27 37 27 53 0 16-12 28-27 28S37 89 37 73c0-16 11-31 27-53Z" fill="#e34e69" stroke="#ffa5b0" stroke-width="2"/>
+ <ellipse cx="58" cy="70" rx="13" ry="18" fill="#8f1e38"/><path d="m91 69 13 1-8-11" fill="none" stroke="#ffe0e0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,31 @@
+# CEVLM/2: synthetic process-linked garden; no biological kinetics or real feeding.
+CEVLM/2
+name process-garden
+model 1
+assets
+asset crest-glow sprite docs/assets/vlm/crest-glow.svg a6ce313a3247ba73a8ccb5012bcb3283af7716ce64dccaf00548f8495445ed0d
+asset blood-motion sprite docs/assets/vlm/blood-motion.svg 08764fe4f6a77b321df37e80da98e384aaca0d7d3ebeaaa1ebfed4e73b65a87b
+asset support-flow heatmap docs/assets/vlm/support-flow.svg 0f29e943cd260248e02046577f1591b83448f82d1ffc733b5ebcae5d54a3eceb
+asset rna-flow heatmap docs/assets/vlm/rna-flow.svg 7db98318e15738a2be43650607d31a1c5c4ca811f78c213394fd7c25db7d7043
+asset molecule-signal icon docs/assets/vlm/molecule-signal.svg df08bcfae0ee04a83ffabd176033f1c234f83e560605830a5d1c31ba79418991
+endassets
+processes
+process crest-birth spawn 4 850 1 0 crest-glow
+process blood-join spawn 3 600 1 0 blood-motion
+process support-bread deposit 4 720 1 0 support-flow
+process rna-stream deposit 5 440 0 1 rna-flow
+process protein-word molecule 2 360 0 0 molecule-signal
+endprocesses
+image
+spawn 1 neural_progenitor 10 12 0
+differentiate 1 central_neuron
+molecule 100 support 85 1
+endimage
+journal
+start 101 crest-birth spawn 10 crest_progenitor 10 12 0
+start 102 blood-join spawn 11 blood_carrier 3 5 0
+start 103 support-bread deposit support 2 2 400
+start 104 rna-stream deposit rna 3 1 150
+start 105 protein-word molecule 101 protein_proxy 80 1
+advance 2
+endjournal

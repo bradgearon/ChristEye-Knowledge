@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Symbolic crest progenitor process marker">
+ <defs><radialGradient id="g"><stop stop-color="#b4ffff"/><stop offset=".6" stop-color="#62d7f0"/><stop offset="1" stop-color="#13495c"/></radialGradient></defs>
+ <circle cx="64" cy="64" r="50" fill="#0e2738"/><circle cx="64" cy="64" r="41" fill="none" stroke="#4fc7d9" stroke-opacity=".5" stroke-width="2"/>
+ <path d="M64 15C51 37 31 41 38 62c3 14 17 17 26 35 9-18 23-21 26-35 7-21-13-25-26-47Z" fill="url(#g)" stroke="#a9edf2" stroke-width="2"/>
+ <path d="M64 29v63M47 56l17 18 17-18" fill="none" stroke="#f0ffff" stroke-opacity=".8" stroke-width="3" stroke-linecap="round"/>
+</svg>
