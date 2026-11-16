@@ -29,9 +29,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: website/app/package-lock.json
       - name: Install site dependencies
         working-directory: website/app
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
       - name: Check source and rights
         working-directory: website/app
         run: npm run prepare && npm run test:content
