@@ -1,0 +1,9 @@
+CERNA/1
+id rna-17
+origin SIMULATED_UNCALIBRATED
+observation_type RNA_PROXY
+sample_context virtual-garden
+sample_tick 0
+readout method-synthetic-counter
+uncertainty HIGH
+actual_rna_measurement no

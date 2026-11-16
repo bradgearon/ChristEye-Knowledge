@@ -1,0 +1,8 @@
+CECRYSTAL/1
+id crystal-17
+kind DIGITAL_CRYSTAL
+origin SIMULATED_UNCALIBRATED
+lesson lesson-17
+content symbols-A-B-C
+installable no
+research_assertion none
