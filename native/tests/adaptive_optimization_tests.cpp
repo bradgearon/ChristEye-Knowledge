@@ -9,7 +9,9 @@
 #ifdef NDEBUG
 #undef NDEBUG
 #endif
-#include <cassert>
+#include <cstdlib>
+// Assertions must execute in CMake Release builds on GCC, Clang, and MSVC.
+#define assert(expr) do { if(!(expr)) std::abort(); } while(false)
 #include <iostream>
 namespace opt=anaiero::optimization;
 namespace rt=anaiero::runtime;
