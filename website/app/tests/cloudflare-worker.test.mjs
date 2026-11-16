@@ -142,3 +142,44 @@ test('honeypot does not write to D1',async()=>{
   assert.equal(res.status,202);
   assert.equal(statements.length,0);
 });
+
+
+const devOrigin='https://anaiero.bradgearon.workers.dev';
+const devRequest=(method,path,body,headers={})=>new Request(devOrigin+path,{
+  method,
+  headers:{...(body===undefined?{}:{'content-type':'application/json'}),origin:devOrigin,...headers},
+  ...(body===undefined?{}:{body:JSON.stringify(body)})
+});
+
+test('live development hostname remains disabled without its explicit allowlist',async()=>{
+  const {env,statements}=makeEnv();
+  const cfg=await worker.fetch(devRequest('GET','/api/interest/config'),env);
+  assert.equal(cfg.status,200);
+  assert.equal((await cfg.json()).enabled,false);
+  const submit=await worker.fetch(devRequest('POST','/api/interest',form),env);
+  assert.equal(submit.status,503);
+  assert.equal(statements.length,0);
+});
+
+test('explicit workers.dev allowlist enables only the staging hostname',async()=>{
+  const {env}=makeEnv();
+  env.ALLOWED_HOSTNAMES='anaiero.bradgearon.workers.dev';
+  const staging=await (await worker.fetch(devRequest('GET','/api/interest/config'),env)).json();
+  assert.equal(staging.enabled,true);
+  assert.equal(staging.siteKey,'public-site-key');
+  const production=await (await worker.fetch(req('GET','/api/interest/config'),env)).json();
+  assert.equal(production.enabled,false);
+});
+
+test('staging hostname and Turnstile action must match before inserting into staging D1',async()=>{
+  const {env,statements}=makeEnv();
+  env.ALLOWED_HOSTNAMES='anaiero.bradgearon.workers.dev';
+  const valid=await mockVerify(siteverify({hostname:'anaiero.bradgearon.workers.dev'}),()=>worker.fetch(devRequest('POST','/api/interest',form),env));
+  assert.equal(valid.status,202);
+  assert.equal(statements.length,1);
+  const mismatched=await mockVerify(siteverify({hostname:'anaiero.io'}),()=>worker.fetch(devRequest('POST','/api/interest',form),env));
+  assert.equal(mismatched.status,400);
+  assert.equal(statements.length,1,'Mismatched validation must not be stored');
+  const malicious=await worker.fetch(devRequest('POST','/api/interest',form,{origin:'https://untrusted.example'}),env);
+  assert.equal(malicious.status,403);
+});
