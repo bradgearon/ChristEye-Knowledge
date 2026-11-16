@@ -138,3 +138,11 @@ if(CE_WIND_BUILD_TESTS)
   endif()
   add_test(NAME wind_durable_tests COMMAND ce_wind_durable_tests)
 endif()
+
+# SW2.1 full CLI roundtrip: import -> publish -> replay -> ack -> verify.
+if(CE_WIND_BUILD_TESTS)
+  add_test(NAME wind_durable_cli_smoke COMMAND ${CMAKE_COMMAND}
+    -DCE_CLI=$<TARGET_FILE:ce_wind_durable>
+    -DCE_TMP=${CMAKE_CURRENT_BINARY_DIR}/durable-cli-smoke
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/durable_cli_smoke.cmake)
+endif()

@@ -46,10 +46,10 @@ int main(int argc,char** argv){
   if(result.code!=d::Code::ok)return fail(result.code);
   std::cout<<result.hash<<'\n';return 0;
  }
- if(op=="publish"&&argc==10){
+ if(op=="publish"&&argc==9){
   std::uint64_t tick=0;
-  if(!d::parse_u64(argv[8],tick))return fail(d::Code::invalid_argument);
-  auto r=store.publish(argv[3],argv[4],argv[5],argv[6],tick,argv[9]);
+  if(!d::parse_u64(argv[7],tick))return fail(d::Code::invalid_argument);
+  auto r=store.publish(argv[3],argv[4],argv[5],argv[6],tick,argv[8]);
   if(r.code!=d::Code::ok)return fail(r.code);
   std::cout<<"committed_event_sha256 "<<r.hash<<'\n';return 0;
  }
