@@ -1,0 +1,16 @@
+CELAW/1
+name fast_learning
+domain SYNTHETIC_ONLY
+version 1
+config_sha256 a28cd075266ba9358f446324fb481600110ceb209569ae234b908194142bccd1
+parameter food_per_cell 1
+parameter fed_gain 1
+parameter unfed_cost 7
+parameter upkeep_cost 1
+parameter stress_cutoff 20
+parameter stress_cost 4
+parameter maturity_gain 1
+parameter blood_step 1
+parameter learning_gain 2
+end
+seal fde446c6ddbc16279ed2db5b40192f938a58dd08460a29003832b9456fb53dee

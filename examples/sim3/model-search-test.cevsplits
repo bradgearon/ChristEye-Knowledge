@@ -1,0 +1,24 @@
+CEVSPLIT/1
+name untouched-test
+partition TEST_ONLY
+origin SYNTHETIC_FIXTURE
+source_sha256 39c94b730c93a6e9c1e89c3cc81b7a6d8aa96186cfe6acdce617cb1655086c6b
+units DIMENSIONLESS_PROXY
+row 3 all alive 5 1
+row 3 all energy 141 3
+row 3 all food 165 3
+row 3 all learning 15 3
+row 4 all alive 4 1
+row 4 all energy 140 3
+row 4 all food 165 3
+row 4 all learning 16 3
+row 5 all alive 4 1
+row 5 all energy 140 3
+row 5 all food 166 3
+row 5 all learning 18 3
+row 6 all alive 5 1
+row 6 all energy 141 3
+row 6 all food 168 3
+row 6 all learning 21 3
+end
+seal 24de745bc10130eb09f5d0751d19d9cf461715c9ae2e14394936a6752df133d6
