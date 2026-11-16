@@ -40,6 +40,11 @@ inline bool asset_path(std::string_view s) noexcept {
       return false;
   return s.ends_with(".svg") || s.ends_with(".png") || s.ends_with(".webp");
 }
+inline bool valid_digest(std::string_view s) noexcept {
+  if (s.size() != 64) return false;
+  for (char c : s) if (!((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f'))) return false;
+  return true;
+}
 inline void hash_text(std::uint64_t& h, std::string_view s) noexcept {
   detail::hash_u64(h, s.size());
   for (char c : s) detail::hash_u64(h, static_cast<unsigned char>(c));
@@ -59,6 +64,7 @@ struct Asset {
   std::string id;
   std::string role; // icon | sprite | heatmap: viewer contract only
   std::string path; // relative URL in a separately authorized static viewer
+  std::string sha256; // immutable asset digest, checked by renderer after fetch
 };
 struct Definition {
   std::string id;
@@ -219,7 +225,7 @@ public:
     if (catalog_frozen_) return Error::invalid_state;
     if (assets_.size() >= kMaxAssets || !symbol(a.id) ||
         !(a.role == "icon" || a.role == "sprite" || a.role == "heatmap") ||
-        !asset_path(a.path) || has_asset(a.id)) return Error::invalid_task;
+        !asset_path(a.path) || !valid_digest(a.sha256) || has_asset(a.id)) return Error::invalid_task;
     assets_.push_back(a); return Error::ok;
   }
   Error add_definition(const Definition& d) {
@@ -304,7 +310,7 @@ public:
     detail::hash_u64(h, 2);
     hash_text(h, base_.name());
     detail::hash_u64(h, base_.state_hash());
-    for (const auto& a : assets_) { hash_text(h, a.id); hash_text(h, a.role); hash_text(h, a.path); }
+    for (const auto& a : assets_) { hash_text(h, a.id); hash_text(h, a.role); hash_text(h, a.path); hash_text(h, a.sha256); }
     for (const auto& d : defs_) {
       hash_text(h, d.id); hash_text(h, d.operation); hash_text(h, d.asset_id);
       detail::hash_u64(h, d.duration); detail::hash_u64(h, d.weight);
@@ -330,7 +336,7 @@ public:
     std::ostringstream out;
     out << "CEVLM/2\nname " << base_.name() << "\nmodel 1\nassets\n";
     for (const auto& a : assets_)
-      out << "asset " << a.id << ' ' << a.role << ' ' << a.path << '\n';
+      out << "asset " << a.id << ' ' << a.role << ' ' << a.path << ' ' << a.sha256 << '\n';
     out << "endassets\nprocesses\n";
     for (const auto& d : defs_)
       out << "process " << d.id << ' ' << d.operation << ' ' << d.duration << ' '
@@ -382,8 +388,8 @@ public:
         if (line == "assets" && !saw_assets) { saw_assets = true; continue; }
         if (!saw_assets) return {Error::invalid_state, line_no};
         if (line == "endassets") { phase = Phase::processes; continue; }
-        if (t.size() != 4 || t[0] != "asset" ||
-            staged.add_asset({t[1], t[2], t[3]}) != Error::ok)
+        if (t.size() != 5 || t[0] != "asset" ||
+            staged.add_asset({t[1], t[2], t[3], t[4]}) != Error::ok)
           return {Error::malformed, line_no};
       } else if (phase == Phase::processes) {
         if (line == "processes" && !saw_processes) { saw_processes = true; continue; }
