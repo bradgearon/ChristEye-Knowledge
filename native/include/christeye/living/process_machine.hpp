@@ -89,6 +89,7 @@ struct Event {
   std::int32_t x = 0, y = 0;
   std::uint32_t weight = 0;
   bool completed = false;
+  std::uint64_t snapshot_hash = 0; // synthetic source-state hash at the end of tick
 };
 enum class Error : std::uint8_t {
   ok, malformed, invalid_state, unknown_asset, unknown_process,
@@ -116,6 +117,9 @@ class ProcessMachine {
   std::vector<JournalEntry> journal_{};
   bool catalog_frozen_ = false;
   bool image_frozen_ = false;
+  using OnEvent = void (*)(void*, const Event&) noexcept;
+  OnEvent on_event_ = nullptr;
+  void* on_event_context_ = nullptr;
 
   const Definition* find_def(std::string_view id) const noexcept {
     for (const auto& d : defs_) if (d.id == id) return &d;
@@ -163,6 +167,7 @@ class ProcessMachine {
     if (!image_frozen_ || ticks < 1 || ticks > 512 || journal_.size() >= kMaxEntries)
       return Error::invalid_task;
     for (std::int32_t tick = 0; tick < ticks; ++tick) {
+      const auto first_event_this_tick = events_.size();
       if (base_.advance(1) != v::Result::ok) return Error::execution_failed;
       std::vector<std::size_t> active;
       for (std::size_t i = 0; i < tasks_.size(); ++i) if (!tasks_[i].completed) active.push_back(i);
@@ -196,6 +201,9 @@ class ProcessMachine {
         }
         events_.push_back({base_.core().tick(), t.id, t.elapsed, t.x, t.y, d.weight, t.completed});
       }
+      const auto h = base_.state_hash();
+      for (std::size_t i = first_event_this_tick; i < events_.size(); ++i)
+        events_[i].snapshot_hash = h;
     }
     journal_.push_back({false, 0, {}, {}, ticks});
     return Error::ok;
@@ -208,6 +216,10 @@ class ProcessMachine {
     return Error::ok;
   }
 public:
+  void set_process_event_callback(OnEvent callback, void* context) noexcept {
+    on_event_ = callback;
+    on_event_context_ = context;
+  }
   const v::VirtualMachine& base() const noexcept { return base_; }
   const std::vector<Task>& tasks() const noexcept { return tasks_; }
   const std::vector<Event>& events() const noexcept { return events_; }
@@ -261,9 +273,18 @@ public:
     return err;
   }
   Error advance(std::int32_t ticks) {
+    const auto before_events = events_.size();
     ProcessMachine copy = *this;
     const auto err = copy.advance_direct(ticks);
-    if (err == Error::ok) *this = std::move(copy);
+    if (err == Error::ok) {
+      *this = std::move(copy); // commit before any event is observable
+      if (on_event_ != nullptr) {
+        // Borrowed event is valid for the duration of the callback only.
+        // Callbacks must not re-enter the single-owner VLM.
+        for (std::size_t i = before_events; i < events_.size(); ++i)
+          on_event_(on_event_context_, events_[i]);
+      }
+    }
     return err;
   }
   Error clone_image_to(ProcessMachine& output, std::string new_name) const {
