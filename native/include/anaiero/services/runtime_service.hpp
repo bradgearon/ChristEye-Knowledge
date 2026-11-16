@@ -1,6 +1,7 @@
 #pragma once
 // Digital-only coordinator: source policy, weighted dispatch, projector, sinks.
 #include "anaiero/services/colony_projector.hpp"
+#include "anaiero/contracts/service_extension.hpp"
 #include "anaiero/infrastructure/weighted_queue.hpp"
 #include <array>
 #include <cstddef>
@@ -27,6 +28,7 @@ class RuntimeService {
   std::array<SourcePermission,kMaxSources> permissions_{};
   std::size_t permissions_count_=0;
   IUpdateObserver* observer_=nullptr;
+  contracts::IServiceExtension* extension_=nullptr;
   IEventCommit* journal_=nullptr;
   std::optional<Observation> retry_{}; // one reserved in-flight slot, bounded
   void (*wakeup_)(void*) noexcept=nullptr;
@@ -56,6 +58,8 @@ public:
     return Status::ok;
   }
   void set_observer(IUpdateObserver* listener) noexcept {observer_=listener;}
+  // Trusted, nonblocking observer; register before starting the owner loop.
+  void set_extension(contracts::IServiceExtension* ext) noexcept {extension_=ext;}
   void set_journal(IEventCommit* journal) noexcept {
     journal_=journal;
     if(retry_&&wakeup_)wakeup_(wake_context_);
@@ -93,6 +97,8 @@ public:
       if(status!=Status::ok){++rejected_;continue;}
       ++committed_;
       if(observer_)observer_->on_revision(projector_.revision(),o);
+      if(extension_)extension_->on_service_event({contracts::ServiceId::runtime_dispatch,
+        contracts::ServicePhase::committed,projector_.revision(),o.animon,0});
     }
     return handled;
   }

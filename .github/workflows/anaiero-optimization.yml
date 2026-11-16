@@ -1,0 +1,43 @@
+name: Anaiero Adaptive Optimization Services
+on:
+  push:
+    paths:
+      - 'native/include/anaiero/**'
+      - 'native/examples/optimization_cli.cpp'
+      - 'native/tests/adaptive_optimization_tests.cpp'
+      - 'native/CMakeLists.txt'
+      - 'native/examples/anaiero_cli.cpp'
+      - '.github/workflows/anaiero-optimization.yml'
+      - 'docs/software/CE-SW-21_adaptive_optimization_and_service_extensions.md'
+  pull_request:
+    paths:
+      - 'native/include/anaiero/**'
+      - 'native/examples/optimization_cli.cpp'
+      - 'native/tests/adaptive_optimization_tests.cpp'
+      - 'native/CMakeLists.txt'
+      - 'native/examples/anaiero_cli.cpp'
+      - '.github/workflows/anaiero-optimization.yml'
+      - 'docs/software/CE-SW-21_adaptive_optimization_and_service_extensions.md'
+permissions:
+  contents: read
+jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure C++20
+        run: cmake -S native -B build/optimization -DCE_WIND_BUILD_TESTS=ON
+      - name: Build
+        run: cmake --build build/optimization --config Release --target anaiero ce_adaptive_optimization_tests
+      - name: Run synthetic optimization tests
+        run: ctest --test-dir build/optimization -C Release --output-on-failure -R "anaiero_adaptive_optimization"
+      - name: Linux CLI demo
+        if: runner.os != 'Windows'
+        run: ./build/optimization/anaiero optimize demo
+      - name: Windows CLI demo
+        if: runner.os == 'Windows'
+        run: .\\build\\optimization\\Release\\anaiero.exe optimize demo

@@ -2,6 +2,7 @@
 // CE-SW-19: deterministic, illustrative computational behavior rules.
 // No cell culture, differentiation, feeding, disease or electrical protocols.
 #include "anaiero/contracts/cell_behavior.hpp"
+#include "anaiero/contracts/service_extension.hpp"
 #include <algorithm>
 #include <array>
 #include <cstdint>
@@ -28,6 +29,7 @@ class CellBehaviorService final {
   World world_{};
   ISpatialPort& spatial_;
   IEventPort* notifications_=nullptr;
+  contracts::IServiceExtension* extension_=nullptr;
   EventBatch changes_{};
   Cell* find(std::uint32_t id) noexcept {
     for(std::size_t i=0;i<world_.cell_count;++i)
@@ -57,6 +59,7 @@ public:
   const World& world() const noexcept {return world_;}
   const EventBatch& last_events() const noexcept {return changes_;}
   void set_observer(IEventPort* observer) noexcept {notifications_=observer;}
+  void set_extension(contracts::IServiceExtension* extension) noexcept {extension_=extension;}
   Status bind_plan(std::string hash) noexcept {
     if(hash.size()!=64)return Status::invalid;
     for(char c:hash)if(!((c>='0'&&c<='9')||(c>='a'&&c<='f')))return Status::invalid;
@@ -269,6 +272,8 @@ public:
     if(notifications_)
       for(std::size_t i=0;i<changes_.count;++i)
         notifications_->published(changes_.values[i]);
+    if(extension_)extension_->on_service_event({contracts::ServiceId::cell_behavior,
+      contracts::ServicePhase::committed,world_.generation,0,0});
     return Status::ok;
   }
 };
