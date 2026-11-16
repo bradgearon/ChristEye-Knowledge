@@ -131,8 +131,8 @@ struct LawProfile {
   bool matches(const sim::Configuration& configuration) const noexcept {
     if (configuration.hash != configuration_hash ||
         configuration.laws.version != version || parameters.size() != 9) return false;
-    for (const auto& [name, value] : parameters)
-      if (law_value(configuration.laws, name) != static_cast<int>(value)) return false;
+    for (const auto& [parameter_name, value] : parameters)
+      if (law_value(configuration.laws, parameter_name) != static_cast<int>(value)) return false;
     return true;
   }
 };
