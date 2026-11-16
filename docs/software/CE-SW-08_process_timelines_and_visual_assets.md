@@ -45,7 +45,7 @@ A full example lives at [`examples/vlm/process-garden.avlm`](../../examples/vlm/
 
 ### Parser grammar and caps
 
-- `asset <id> <icon|sprite|heatmap> <relative-path.svg|.png|.webp> <sha256>`: inert visual reference with pinned digest. No absolute paths, traversal, URLs, scripts, file reads or untrusted rendering inside the native kernel. The viewer must sanitize/serve its own approved assets and verify their SHA-256 digests before displaying. The native simulator does not fetch images.
+- `asset <id> <icon|sprite|heatmap> <relative-path.svg|.png|.webp> <sha256>`: inert visual reference with pinned digest. No absolute paths, traversal, URLs, scripts, file reads or untrusted rendering inside the native kernel. The viewer must sanitize/serve its own approved assets and verify their SHA-256 digests before displaying. The native simulator does not fetch images. The repo includes read-only Python tests checking file SHA-256, local paths, and the generated NDJSON fixture.
 - `process <id> <spawn|molecule|deposit|differentiate|connect|teach|supply|move> <duration_ticks> <weight> <dx> <dy> <asset_id>`: duration 1–512 synthetic ticks; weight 1–1000 (processing/event order, **not** biological strength); per-tick dx/dy -8..8, finite signed world coordinates.
 - `start <unique_task_id> <process_id> <ordinary_vlm1_action...>`: action must match the process verb; create an **active pending task** whose progress and sprite cursor are visible, not yet mutate its destination cell/field.
 - `advance <ticks>`: advance the simulated world one tick at a time; move active process cursors; resolve simultaneous due process actions in descending weight order, tie-breaking by task ID. Each task completes once. A `spawn` uses the final process cursor as its new synthetic coordinate; a `deposit` affects the final field tile, if in bounds; other VLM1 operations use their declared operands.
@@ -55,9 +55,9 @@ A full example lives at [`examples/vlm/process-garden.avlm`](../../examples/vlm/
 
 ## Observation, movement and visualization
 
-For each tick, the process engine publishes an ordered synthetic timeline entry:
+For each tick, the process engine records an ordered synthetic timeline entry and can push it through a callback **after** a successful atomic advance transaction. Failed advances emit no progress callbacks:
 
-`tick, task_id, process_id, operation, sprite_asset_ref, elapsed, duration, weight, x, y, completed, state_hash`.
+`tick, task_id, process_id, operation, sprite_asset_ref, asset_sha256, elapsed, duration, weight, x, y, completed, synthetic_snapshot_hash`.
 
 `ce_vlm_process stream` produces NDJSON with process progress, sprite file paths, cell positions, SIM1 synthetic neurite/RNA/energy counters, candidate connections, full six-channel 8×8 synthetic field tiles and a state hash. A Pages viewer can draw icons, arrows and heatmaps for each frame; an asset is a viewer reference, **not** a neuron image. No observer may silently label this as direct biology.
 
@@ -102,7 +102,7 @@ CLI `stream` advances a private in-memory copy and does not modify the input fil
 4. Weighted simultaneous completion ordering is deterministic and priority is not confused with scientific evidence or biological strength.
 5. Invalid completion rolls back the entire requested `advance` batch.
 6. Sealed V2 files round-trip byte identically and fail closed when corrupted; `new` resets journal, `fork` retains it.
-7. V1 import preserves cell identity and aggregate proxy fields/lesson outcomes, but deliberately records V2 hashes.
+7. V1 import preserves cell identity and aggregate proxy fields/lesson outcomes, but deliberately records V2 hashes. Process callbacks fire only for committed advances, never for rolled-back failures.
 8. Synthetic events can be encoded as typed WindPacket observations and delivered through the bounded evidence scheduler, with origin classification `SIMULATED_UNCALIBRATED`.
 9. Linux/Windows CI exercises both native V1 regression tests and new V2 process tests; sanitizer validation is a separate hardening gate.
 10. The site renderer receives only process/asset references after path/consent checks; no arbitrary external assets or executable code are loaded from `.avlm` files.
