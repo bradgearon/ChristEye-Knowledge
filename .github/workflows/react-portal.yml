@@ -1,0 +1,59 @@
+name: Validate React Anaiero Portal
+on:
+  push:
+    branches: [site/react-interactive-portal-v1]
+    paths:
+      - 'website/app/**'
+      - '.github/workflows/react-portal.yml'
+      - 'specifications/**'
+      - 'processes/**'
+      - 'registries/**'
+      - 'schemas/**'
+      - 'research/**'
+  pull_request:
+    paths:
+      - 'website/**'
+      - 'specifications/**'
+      - 'processes/**'
+      - 'registries/**'
+      - 'schemas/**'
+      - 'research/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: website/app/package-lock.json
+      - name: Install site dependencies
+        working-directory: website/app
+        run: npm ci --no-audit --no-fund
+      - name: Check source and rights
+        working-directory: website/app
+        run: npm run prepare && npm run test:content
+      - name: Compile React and build GitHub Pages output
+        working-directory: website/app
+        run: npm run build
+      - name: Install Chromium browser for UI checks
+        working-directory: website/app
+        run: npx playwright install --with-deps chromium
+      - name: Smoke-test React routes and interactive labs
+        working-directory: website/app
+        run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: anaiero-react-screenshots
+          path: website/app/test-results
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@v4
+        with:
+          name: anaiero-react-preview
+          path: website/app/dist
+          retention-days: 7

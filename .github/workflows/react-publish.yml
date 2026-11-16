@@ -1,0 +1,51 @@
+name: Publish Anaiero React Portal Preview
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'website/app/**'
+      - '.github/workflows/react-publish.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: anaiero-react-site-publish
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: website/app/package-lock.json
+      - name: Install locked dependencies
+        working-directory: website/app
+        run: npm ci --no-audit --no-fund
+      - name: Compile React into a static portal subsite
+        working-directory: website/app
+        env:
+          ANAIERO_SITE_BASE: /ChristEye-Knowledge/portal/
+        run: npm run build && npm run test:content
+      - name: Compose safe preview alongside existing documentation
+        run: |
+          test -f docs/index.html
+          test -f website/app/dist/index.html
+          mkdir -p docs/portal
+          cp -a website/app/dist/. docs/portal/
+          echo "Generated from website/app. Do not edit compiled files. Original source: https://github.com/bradgearon/ChristEye-Knowledge" > docs/portal/ABOUT.txt
+          test -f docs/portal/content/manifest.json
+          test -f docs/portal/assets/$(ls docs/portal/assets | grep -m1 '^index-.*\.js$')
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+      - id: deployment
+        uses: actions/deploy-pages@v4
