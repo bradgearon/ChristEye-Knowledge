@@ -43,9 +43,33 @@ No lineage barcode automatically assigns a **globally unique** identifier to eve
 - `cell_instance_id`: UUID for a confidently resolved, observed individual at a specified observation event.
 - `cell_track_id`: time-linked imaging track with match confidence and possible identity breaks.
 
-A parent division can create a `CellBirthEvent` with `parent_cell_track_id`, `daughter_observation_ids`, `division_detected_at`, `lineage_confidence`, `imaging_run_id`, `source_lot_id` and `confirmation_method`. When division is not observed, a unique new baby-cell identity is **unknown**, not fabricated.
+An actual observed cell division may create a `CellBirthEvent` with canonical fields `parent_cell_track_id`, `daughter_observation_ids`, `observed_at`, `division_evidence_ref`, `observation_method`, `lineage_confidence`, `source_lot_id` and `reviewer_id`, as defined by the [CellBirthEvent schema](../schemas/biology/cell_birth_event.schema.json). A separate imaging-run reference belongs in qualified source provenance unless explicitly introduced through a versioned schema. When division is not observed, a unique new baby-cell identity is **unknown**, not fabricated.
 
 **Research-only alternative:** validated lineage barcoding could tie descendants to a parent clone, but the barcode is not guaranteed unique to every daughter. Collision, dropout and perturbation must be measured; it is **not** appropriate to prescribe insertion methods or genotype every cell by default. [B04](../research/evidence/anaiero-biology-2026-11.md), [B05](../research/evidence/anaiero-biology-2026-11.md).
+
+### Schematic CellBirthEvent — no daughter cell observed
+
+This [machine-valid design fixture](../fixtures/v3.2/crest_birth_unobserved.example.json) is **not a recorded cell birth**; it deliberately has no parent track, observed daughter or lineage. The timestamp and source labels are synthetic schema placeholders. Only an actual qualified observation may support the status `OBSERVED`.
+
+~~~json
+{
+  "schema_version": "1.0.0",
+  "preparation_id": "PREP-NOT-CREATED-SYNTHETIC",
+  "source_lot_id": "LOT-UNASSIGNED-SYNTHETIC",
+  "record_id": "CREST-EXAMPLE-001",
+  "created_at": "2026-11-16T00:00:00Z",
+  "evidence_status": "DESIGN",
+  "evidence_ref": null,
+  "parent_cell_track_id": null,
+  "daughter_observation_ids": [],
+  "clone_lineage_id": null,
+  "observed_at": "2026-11-16T00:00:00Z",
+  "division_evidence_ref": null,
+  "observation_method": "UNOBSERVED_DESIGN_PLACEHOLDER",
+  "lineage_confidence": null,
+  "reviewer_id": null
+}
+~~~
 
 ## 4. Growth versus delivery distinction
 

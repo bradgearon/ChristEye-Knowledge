@@ -33,22 +33,31 @@ Specify ordinary molecular identity and **proteoform**, compartment, receptor, t
 
 Passing Gate 1 does **not** imply 2–5. Physical carrier transfer and sharing still have no established Anaiero mechanism.
 
-## Example CrystalCarrierRecord
+## Example PhysicalCrystalCandidate (research-only)
+
+The prior example used noncanonical fields. This one matches the [Physical Crystal candidate schema](../schemas/biology/physical_crystal_candidate.schema.json) and the [validated fixture](../fixtures/v3.2/physical_crystal_unvalidated.example.json). It does **not** represent a real object, extracted specimen, transferred knowledge, or installed biological capability. A chemical or scaffold hypothesis is not a memory package.
 
 ~~~json
 {
-  "crystal_id": "research-candidate-1",
-  "kind": "PHYSICAL_RESEARCH_ONLY",
-  "carrier_class": "unresolved",
-  "region_and_boundary": null,
-  "claimed_content_id": "task-relation-1",
+  "schema_version": "1.0.0",
+  "preparation_id": "PREP-NOT-CREATED-SYNTHETIC",
+  "source_lot_id": "LOT-UNASSIGNED-SYNTHETIC",
+  "record_id": "CRYSTAL-EXAMPLE-001",
+  "created_at": "2026-11-16T00:00:00Z",
+  "evidence_status": "DESIGN",
+  "evidence_ref": null,
+  "crystal_id": "CANDIDATE-NO-PHYSICAL-OBJECT",
+  "carrier_class": "UNRESOLVED",
+  "physical_boundary_ref": null,
+  "learned_relation_ref": null,
   "reader_contract_ref": null,
-  "preparation_and_lineage_ref": null,
   "molecular_state_ref": null,
-  "retention_evidence": null,
-  "extraction_or_transfer_qualified": false,
-  "installable": false,
-  "outcome": "UNRESOLVED"
+  "cell_lineage_ref": null,
+  "delayed_retention_ref": null,
+  "source_teaching_route_status": null,
+  "recipient_only_evaluation_ref": null,
+  "physical_transfer_demonstrated": false,
+  "installable": false
 }
 ~~~
 
