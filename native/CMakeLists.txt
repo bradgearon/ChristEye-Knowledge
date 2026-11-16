@@ -217,3 +217,29 @@ if(CE_WIND_BUILD_TESTS)
     -DCE_TEMP=${CMAKE_CURRENT_BINARY_DIR}/sim32-cli-smoke
     -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/colony_fidelity_smoke.cmake)
 endif()
+
+
+# CE-SW-15 SIM3.3 — training-only model selection and frozen final-test evaluation.
+add_executable(ce_colony_select examples/colony_selection_cli.cpp)
+target_link_libraries(ce_colony_select PRIVATE ce_wind_core)
+if(MSVC)
+  target_compile_options(ce_colony_select PRIVATE /W4 /WX)
+else()
+  target_compile_options(ce_colony_select PRIVATE -Wall -Wextra -Wconversion -Werror)
+endif()
+if(CE_WIND_BUILD_TESTS)
+  add_executable(ce_colony_selection_tests tests/colony_selection_tests.cpp)
+  target_link_libraries(ce_colony_selection_tests PRIVATE ce_wind_core)
+  if(MSVC)
+    target_compile_options(ce_colony_selection_tests PRIVATE /W4 /WX)
+  else()
+    target_compile_options(ce_colony_selection_tests PRIVATE -Wall -Wextra -Wconversion -Werror)
+  endif()
+  add_test(NAME sim33_selection_integration COMMAND ${CMAKE_COMMAND}
+    -DCE_RUNNER=$<TARGET_FILE:ce_colony_runner>
+    -DCE_SELECT=$<TARGET_FILE:ce_colony_select>
+    -DCE_TEST=$<TARGET_FILE:ce_colony_selection_tests>
+    -DCE_REPO=${CMAKE_CURRENT_SOURCE_DIR}/..
+    -DCE_TEMP=${CMAKE_CURRENT_BINARY_DIR}/sim33-smoke
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/colony_selection_smoke.cmake)
+endif()

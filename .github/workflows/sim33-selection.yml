@@ -1,0 +1,54 @@
+name: SIM3.3 Frozen Model Selection and Independent Test
+on:
+  push:
+    paths:
+      - 'native/include/christeye/living/model_selection.hpp'
+      - 'native/examples/colony_selection_cli.cpp'
+      - 'native/tests/colony_selection_*'
+      - 'native/CMakeLists.txt'
+      - 'examples/*select-*.cev'
+      - 'examples/sim3/*select*'
+      - 'examples/sim3/model-search*'
+      - 'schemas/software/model_selection_report.v1.schema.json'
+      - 'tests/test_sim33_model_selection.py'
+      - '.github/workflows/sim33-selection.yml'
+  pull_request:
+    paths:
+      - 'native/include/christeye/living/model_selection.hpp'
+      - 'native/examples/colony_selection_cli.cpp'
+      - 'native/tests/colony_selection_*'
+      - 'native/CMakeLists.txt'
+      - 'examples/*select-*.cev'
+      - 'examples/sim3/*select*'
+      - 'examples/sim3/model-search*'
+      - 'schemas/software/model_selection_report.v1.schema.json'
+      - 'tests/test_sim33_model_selection.py'
+      - '.github/workflows/sim33-selection.yml'
+permissions:
+  contents: read
+jobs:
+  native-model-selection:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure C++20
+        run: cmake -S native -B build/sim33 -DCE_WIND_BUILD_TESTS=ON
+      - name: Compile candidate runner, selection and tests
+        run: cmake --build build/sim33 --config Release --target ce_colony_runner ce_colony_select ce_colony_selection_tests
+      - name: Run selection and final-test integration
+        run: ctest --test-dir build/sim33 -C Release --output-on-failure -R "sim33_"
+  frozen-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install schema validation
+        run: python -m pip install 'jsonschema>=4.18,<5'
+      - name: Check immutable manifests and final report schema
+        run: python -m unittest discover -s tests -p test_sim33_model_selection.py -v

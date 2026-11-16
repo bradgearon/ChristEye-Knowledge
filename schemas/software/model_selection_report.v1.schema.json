@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:christeye:software:model_selection_final:v1",
+  "title": "SIM3.3 sealed-law winner independent synthetic final test report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "classification", "independent_holdout_verified", "selection_locked", "model", "selection_sha256", "manifest_sha256", "training_sha256", "test_sha256", "source_sha256", "config_sha256", "law_sha256", "test", "rows"],
+  "properties": {
+    "schema": {"const":"CEVFINAL/1"},
+    "classification": {"const":"SYNTHETIC_ONLY_NOT_BIOLOGICAL_VALIDATION"},
+    "independent_holdout_verified": {"const":false},
+    "selection_locked": {"const":true},
+    "model": {"type":"string","pattern":"^[A-Za-z0-9_-]+$"},
+    "selection_sha256":{"$ref":"#/$defs/sha256"},
+    "manifest_sha256":{"$ref":"#/$defs/sha256"},
+    "training_sha256":{"$ref":"#/$defs/sha256"},
+    "test_sha256":{"$ref":"#/$defs/sha256"},
+    "source_sha256":{"$ref":"#/$defs/sha256"},
+    "config_sha256":{"$ref":"#/$defs/sha256"},
+    "law_sha256":{"$ref":"#/$defs/sha256"},
+    "test": {
+      "type":"object","additionalProperties":false,
+      "required":["count","mae","normalized_mae","declared_band_coverage"],
+      "properties":{
+        "count":{"type":"integer","minimum":2,"maximum":512},
+        "mae":{"type":"number","minimum":0},
+        "normalized_mae":{"type":"number","minimum":0},
+        "declared_band_coverage":{"type":"number","minimum":0,"maximum":1}
+      }
+    },
+    "rows":{
+      "type":"array","minItems":2,"maxItems":512,
+      "items":{
+        "type":"object","additionalProperties":false,
+        "required":["tick","colony","metric","observed","predicted","radius","residual"],
+        "properties":{
+          "tick":{"type":"integer","minimum":0,"maximum":256},
+          "colony":{"type":"string","minLength":1},
+          "metric":{"enum":["alive","energy","learning","food","stress","maturity"]},
+          "observed":{"type":"integer","minimum":0},
+          "predicted":{"type":"integer","minimum":0},
+          "radius":{"type":"integer","minimum":1},
+          "residual":{"type":"integer"}
+        }
+      }
+    }
+  },
+  "$defs":{"sha256":{"type":"string","pattern":"^[a-f0-9]{64}$"}}
+}

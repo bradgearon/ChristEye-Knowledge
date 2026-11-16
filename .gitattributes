@@ -22,3 +22,10 @@ examples/sim3/*.celaw -text
 examples/sim3/*.cevobs -text
 examples/sim3/*.ceveval -text
 examples/sim3/fidelity-*.json -text
+
+# SIM3.3 byte-exact hashed law search datasets and results.
+examples/sim3/*.celaw -text
+examples/sim3/*.cevsplits -text
+examples/sim3/*.cevselect -text
+examples/sim3/*.cevwinner -text
+examples/sim3/*final*.json -text

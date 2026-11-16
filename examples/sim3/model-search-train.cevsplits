@@ -1,0 +1,20 @@
+CEVSPLIT/1
+name selection-training
+partition TRAIN_ONLY
+origin SYNTHETIC_FIXTURE
+source_sha256 39c94b730c93a6e9c1e89c3cc81b7a6d8aa96186cfe6acdce617cb1655086c6b
+units DIMENSIONLESS_PROXY
+row 0 all alive 3 1
+row 0 all energy 120 3
+row 0 all food 160 3
+row 0 all learning 0 3
+row 1 all alive 4 1
+row 1 all energy 121 3
+row 1 all food 163 3
+row 1 all learning 2 3
+row 2 all alive 4 1
+row 2 all energy 140 3
+row 2 all food 163 3
+row 2 all learning 10 3
+end
+seal 1c5fcaa298f7f93a8bcd0ad2b195162df4d33389299fe447a62eb45e66dfadc1
