@@ -42,6 +42,9 @@ jobs:
       - name: Verify root URLs, rights and content
         working-directory: website/app
         run: node scripts/verify-cloudflare-build.mjs
+      - name: S07 local release preflight (no Cloudflare credentials)
+        working-directory: website/app
+        run: node scripts/launch-preflight.mjs --offline
       - name: Test static Worker entrypoint and disabled interest API
         working-directory: website/app
         run: node --test tests/cloudflare-worker.test.mjs
