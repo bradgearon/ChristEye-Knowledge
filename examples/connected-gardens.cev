@@ -1,0 +1,16 @@
+CEVRUN/1
+name connected-gardens
+source synthetic sim3/source-demo.txt 39c94b730c93a6e9c1e89c3cc81b7a6d8aa96186cfe6acdce617cb1655086c6b
+colony crest vlm/process-garden.avlm 9d67ac2eb7057927e05d4caa448d6bf1b443680c2855d8f50b02f490e07414c4
+colony blood vlm/process-garden.avlm 9d67ac2eb7057927e05d4caa448d6bf1b443680c2855d8f50b02f490e07414c4
+seed crest 1 crest_progenitor 10 12 2 0
+seed crest 2 blood_carrier 3 5 2 0
+seed blood 3 neuron 20 17 4 0
+link crest blood food 3
+link crest blood data 4
+link blood crest stimubus 2
+process crest support 0 5 1
+process crest divide 1 4 2
+process blood teach 3 8 2
+process blood foreign_stress 0 13 3
+end

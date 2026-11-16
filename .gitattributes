@@ -5,3 +5,9 @@ examples/vlm/*.cevplan -text
 examples/vlm/*.cevmap -text
 examples/vlm/data/*.txt -text
 docs/assets/vlm/*.svg -text
+
+# SIM3 cross-platform exact-byte golden images and pinned source profiles.
+examples/*.cev -text
+examples/sim3/*.txt -text
+tests/golden/*.svg -text
+tests/golden/*.obj -text

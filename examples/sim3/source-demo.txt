@@ -1,0 +1,7 @@
+CEVSOURCE/1
+source synthetic
+provenance simulated-fixture
+actual-genotype NOT_MEASURED
+observed-cell-properties NOT_MEASURED
+model SIM3_UNCALIBRATED
+privacy no-real-donor-data

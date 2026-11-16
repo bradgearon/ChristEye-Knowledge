@@ -146,3 +146,25 @@ if(CE_WIND_BUILD_TESTS)
     -DCE_TMP=${CMAKE_CURRENT_BINARY_DIR}/durable-cli-smoke
     -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/durable_cli_smoke.cmake)
 endif()
+
+# CE-SW-12 SIM3 persistent multi-colony runner and 3D view.
+add_executable(ce_colony_runner examples/colony_runner_cli.cpp)
+target_link_libraries(ce_colony_runner PRIVATE ce_wind_core)
+if(MSVC)
+  target_compile_options(ce_colony_runner PRIVATE /W4 /WX)
+else()
+  target_compile_options(ce_colony_runner PRIVATE -Wall -Wextra -Wconversion -Werror)
+endif()
+if(CE_WIND_BUILD_TESTS)
+  add_executable(ce_colony_runner_tests tests/colony_runner_tests.cpp)
+  target_link_libraries(ce_colony_runner_tests PRIVATE ce_wind_core)
+  if(MSVC)
+    target_compile_options(ce_colony_runner_tests PRIVATE /W4 /WX)
+  else()
+    target_compile_options(ce_colony_runner_tests PRIVATE -Wall -Wextra -Wconversion -Werror)
+  endif()
+  add_test(NAME sim3_colony_runner COMMAND ce_colony_runner_tests ${CMAKE_CURRENT_SOURCE_DIR}/..)
+  add_test(NAME sim3_example_template COMMAND ce_colony_runner inspect
+    ${CMAKE_CURRENT_SOURCE_DIR}/../examples/connected-gardens.cev
+    ${CMAKE_CURRENT_BINARY_DIR}/sim3-template-smoke)
+endif()

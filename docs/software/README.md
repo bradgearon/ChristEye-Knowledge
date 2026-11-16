@@ -17,6 +17,7 @@
 | [CE-SW-09: CEVPLAN/1 Learning and Crystal/RNA Evidence Manifests](CE-SW-09_learning_crystal_rna_plan_manifests.md) | SHA-256-pinned stage manifests, reverse machine mappings, local plan runner and synthetic receipts | **Digital-only reference + native tests** |
 | [CE-SW-10: Learning and Crystal/RNA Evidence Registry](CE-SW-10_windstore_learning_crystal_registry.md) | Host-only SHA-256 immutable objects, append-only event journal, stage-to-hash lookup, filtered push inbox, imported plans and non-mutating successor proposals | **Digital-only reference + native tests** |
 | [CE-SW-11: Durable WindStore and Evidence Cursors](CE-SW-11_durable_windstore_journal_and_cursors.md) | OS-level exclusive writer lock, committed HEAD, crash-tail recovery, synchronous evidence push, disk audit and durable subscriber cursors | **SW2.1 host-only implementation; cross-platform validation pending** |
+| [CE-SW-12: SIM3 Persistent Multi-Colony Runner and 3D Models](CE-SW-12_persistent_multicolony_runner.md) | Restartable SHA-256-pinned host runner, two-colony synthetic resource/data/Stimubus links, lineage tombstones, read-only mmap checkpoint views, golden SVG/OBJ test artifacts and source-provenance descriptors | **Host-side digital-only prototype and native tests** |
 
 See also [proposed Colony Intelligence and control schemas](../../schemas/software/README.md) for snapshot, board capability, Bread/Meat planning and guidance records.
 
