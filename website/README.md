@@ -1,70 +1,54 @@
-# ChristEye Anaiero — Site Redevelopment S01
+# ChristEye Anaiero — Website and Publishing Program
 
-**Step 1 complete as a planning specification · November 15, 2026**
+**Current status: React/Vite + Cloudflare Workers Static Assets; S07 launch readiness in progress.**  
+**Owner:** We Develop Software LLC · **Site:** https://anaiero.io/ · **Source:** bradgearon/ChristEye-Knowledge · **Revision:** November 15, 2026.
 
-**Site:** [bradgearon.github.io/ChristEye-Knowledge](https://bradgearon.github.io/ChristEye-Knowledge/)  
-**Source:** [ChristEye-Knowledge GitHub](https://github.com/bradgearon/ChristEye-Knowledge)  
-**Rights holder:** We Develop Software LLC · [WDS Public Research Reference License](../LICENSE.md)
+This directory hosts the public Anaiero website, source-linked scientific/engineering documentation, interactive digital prototypes and planned responsible research-interest collection. The physical patent document and private raw conversation logs are excluded.
 
-> This directory describes the **next-generation website plan**. It is not a claim that the Astro implementation, biological demos or redesigned full research atlas have already shipped. The original docs site stays online until a tested and source-complete replacement is ready.
+## Current program
 
-## Objective
-
-Turn the existing large source-controlled Anaiero research corpus into **one composed, accessible, scientific, developer and scholarship site**. Make it possible to understand the Lotus/Heart system, Soil, Spirit, spinal Roots, Crest lineage, axons, learning, Care/Milk/Honey, Chemibus/Sustibus, molecular evidence, growth process, Crystals and specialist StarChips—without compromising source accuracy or inventing living-computer performance.
-
-The site has six reader entrances: **Explore**, **Living Systems**, **Build**, **Science**, **StarChip Studio**, and **Scholarship**, with **Project** for status, licensing and provenance.
-
-## Step 1 deliverables — available now
-
-| Artifact | Technical purpose |
+| Link | Why read it |
 |---|---|
-| [01 — Source and current-site audit](planning/01-source-audit.md) | Real repository inventory, site weaknesses, evidence and missing capabilities |
-| [352-source content registry](planning/content-registry.json) | Every mapped original source path, blob hash, audience, status and unique proposed route |
-| [02 — Information architecture](planning/02-information-architecture.md) | Site navigation, primary audience journeys, canonical routes and cross-link rules |
-| [Editorial sitemap (JSON)](planning/site-map.json) | 22 editorial route families with their source documents |
-| [03 — Visual and scientific design system](planning/03-design-system.md) | Type, layout, colors, interactive components, figure standards, accessibility, wireframes |
-| [Design tokens](planning/design-tokens.json) | Portable color, typography, layout and motion tokens |
-| [04 — Evidence and content model](planning/04-evidence-and-content-model.md) | Source of truth, scientific claim classes, rights, relationships, references and versioning |
-| [Page metadata schema](planning/page-metadata.schema.json) | Validates editorial source paths, statuses, audiences and licenses |
-| [Claim evidence schema](planning/claim-evidence.schema.json) | Evidence class, scope, preparation, alternatives and review provenance |
-| [05 — Interactive demos and StarChip studio](planning/05-interactive-labs-and-starchips.md) | Required honest outputs, test fixtures and separation of executed from proposed chip functions |
-| [Nine-demo catalog](planning/demo-catalog.json) | Input/output contract, actual code availability, source/seed/rights requirements |
-| [06 — Technical site architecture](planning/06-technical-architecture.md) | Astro/Starlight strategy, content import, GitHub Pages base path, CI and safe switchover |
-| [07 — Release stages and evidence gates](planning/07-release-plan.md) | S01–S08 phased build and measurable acceptance checks |
-| [08 — Flagship page storyboards](planning/08-first-page-storyboards.md) | Detailed editorial compositions for architecture, care, growth, A02, molecules, scientist workflow and Studio |
+| [Website phases S01–S08](planning/07-release-plan.md) | Actual technology, phase gates, current status and next work |
+| [S07 production launch runbook](app/S07_LAUNCH_RUNBOOK.md) | Steps to connect Workers, DNS, D1, Turnstile and do safe live checks |
+| [Current site architecture](planning/06-technical-architecture.md) | React/Vite source ingestion, Worker/static boundary and deploy |
+| [Full source inventory](planning/content-registry.json) | Audited project paths and planned page routes |
+| [Design system and storyboards](planning/03-design-system.md) | Visual, typography, accessibility and page UX |
+| [Scientific evidence model](planning/04-evidence-and-content-model.md) | Findings, designs, hypotheses and primary source scope |
+| [Digital/StarChip demos](planning/05-interactive-labs-and-starchips.md) | Browser simulations, fixture/evidence requirements |
+| [Cloudflare deployment instructions](app/CLOUDFLARE_DEPLOY.md) | Main app build and domain guide |
+| [Interest signup checklist](app/INTEREST_ROLLOUT.md) | Explicit consent and D1/Turnstile activation |
+| [Archived S01 architecture proposal](planning/06-technical-architecture-s01-archived.md) | Original Astro/Starlight planning record |
 
-## What Step 1 found
+## Architecture and deployment status
 
-The existing website is a compact, source-based landing page: one primary static HTML file and a small stylesheet. The repository has the far deeper material: 24 technical designs, 24 companions, 12 controlled processes, P01/P02/P02B documents, a research source atlas, typed schemas, 33 StarChip manifests, source Python and recorded CI tests.
+**Already in GitHub:** Vite/React app, corpus importer, technical document reader, Lotus/WindBus/Root demonstrations, the Worker API, D1 migration and consent form. CI tests verify builds and synthetic behavior, but those results **do not prove anaiero.io is deployed**. This session could not externally verify the domain, and no Cloudflare account connector is available here.
 
-The **first implementation target is CE-A02 long-term storage** because it forces a testable full vertical slice: a genuinely readable full engineering document and scientific companion; source-linked spinal Root and axon science; Milk/Chemibus process relationships; readable JSON; a deterministic digital Crystal replay; and correct evidence labeling.
+**Requires owner-controlled configuration:** Cloudflare Worker application with active anaiero.io Custom Domain and HTTPS. To activate signup, also configure the D1 binding and migration, Turnstile widget/site key/secret, monitored WDS privacy contact and one successful controlled registration test. No separate R2/static-storage purchase is required for the site.
 
-## Decisions to carry forward
+**Scientific distinction:** digital prototypes are not evidence that the complete intelligent living Soil, physically copied memory Crystals, or peptide-delivered semantic knowledge have been demonstrated.
 
-1. **Site framework:** Astro + Starlight, with custom Astro pages for diagrams and interactive labs.
-2. **Source:** render existing canonical Markdown and JSON directly from their Git revisions, avoiding divergent hand-maintained copies.
-3. **Publication route:** stay on GitHub Pages at /ChristEye-Knowledge; preview and test the new build before switching away from the current docs-folder deployment.
-4. **Visual:** coherent modern laboratory/editorial style, comfortable reading typography and source-aware diagrams—not a crowded fantasy map or a fake microscope view.
-5. **Claims:** external research, local software, local biological measurements, design, hypothesis and metaphor remain separately labeled.
-6. **Studio:** demonstrate actual digital execution when available; game/music/theory chips are clearly proposal previews until built.
-7. **Values:** care, love and power are explained in physical, human-facing and computational senses without collapsing philosophical language into biological proof.
-8. **Licensing:** publish WDS-owned research with the existing WDS Research Reference License; exclude the separate physical patent document. Personal raw conversation logs are not scraped into the public site.
+## Reproducible validation
 
-## Steps after S01
+From website/app after npm ci and a root-domain Vite build:
 
-**S02** should establish a real Astro/Starlight build and publish a **preview** of CE-A02, BIO-02, one schema and one scientific source before changing the live site. [S03–S08](planning/07-release-plan.md) cover corpus migration, system atlas, runnable demos, science/scholarship and launch verification.
+~~~bash
+ANAIERO_SITE_BASE=/ npm run build
+node scripts/launch-preflight.mjs --offline
+~~~
 
-## S01 acceptance
+After the Cloudflare site is live:
 
-- All planned content routes unique and mapped back to existing source paths.
-- Source counts match the Git tree snapshot used in the audit.
-- Every active demo points at real code; proposal-only chips are labeled unimplemented.
-- All source and doc links in this planning set resolve.
-- Existing WDS license and confidentiality boundary respected.
-- New planning files have no dependency on a new build tool or a fabricated experiment.
+~~~bash
+node scripts/launch-preflight.mjs --live
+# After interest is configured:
+node scripts/launch-preflight.mjs --live --require-interest
+~~~
 
-This is **the editorial and architectural blueprint for the website**, not a replacement for the complete project design documents.
+These are read-only or offline checks. They never collect personal details or deploy to Cloudflare.
 
-## S02 implementation: React portal (now in development)
+## Source of truth and ownership
 
-The original S01 architecture suggested Astro/Starlight, but the working implementation uses **React, TypeScript and Vite** to support a richer interactive atlas and digital laboratories, while keeping the same source-controlled WDS research content. See [React portal architecture](app/ARCHITECTURE.md) and [app build instructions](app/README.md). The new site is built as a static artifact and can be hosted on GitHub Pages under `/ChristEye-Knowledge/portal/` or on an independent web host.
+Project research stays in specifications/, processes/, research/, phases/, schemas/ and registries/. Build-time generated content should not diverge from those sources. © 2026 We Develop Software LLC; [WDS Public Research Reference License](../LICENSE.md). Actual patent documents remain unpublished.
+
+Historical [S01 blueprint](planning/00-s01-original-website-readme.md) is preserved rather than rewritten.
