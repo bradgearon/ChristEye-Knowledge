@@ -1,0 +1,18 @@
+CEVCELLATLAS/1
+name crest-blood-neural
+domain SYNTHETIC_ONLY
+model 1
+reference_sha256 0137a63cf4cb3598ab57c7e9075e7b3a453447f02daf02944507dbbf28ba4de6
+reference_file synthetic-observations.cevsource
+reference_format SYNTHETIC
+cell crest_progenitor 2 4 2 0 0 0 1 0 1
+cell blood_carrier 1 4 1 0 0 0 2 0 1
+cell neural_progenitor 2 4 2 1 0 0 0 0 1
+cell peripheral_neuron 3 4 2 5 4 3 0 9 1
+cell central_neuron 3 4 2 5 5 4 0 9 1
+cell astrocyte 2 3 2 2 2 0 0 5 1
+cell schwann 2 4 2 2 1 0 0 5 1
+cell microglia 2 3 2 1 1 0 1 5 2
+cell endothelial 2 4 2 1 0 0 0 0 1
+end
+seal 0a4cc2284e3f3cb1a0dde826ee37eb51344f9faf212b087bf735294197d68187

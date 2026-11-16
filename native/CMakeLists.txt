@@ -295,3 +295,34 @@ endif()
 # The public anaiero target must build/install every listed backend.
 add_dependencies(anaiero ce_colony_runtime)
 install(TARGETS ce_colony_runtime RUNTIME DESTINATION bin)
+
+# CE-SW-19 evidence-linked, synthetic-only cell-behavior atlas and runner.
+add_executable(ce_cell_behavior examples/cell_behavior_cli.cpp)
+target_link_libraries(ce_cell_behavior PRIVATE ce_wind_core Threads::Threads)
+if(MSVC)
+  target_compile_options(ce_cell_behavior PRIVATE /W4 /WX)
+else()
+  target_compile_options(ce_cell_behavior PRIVATE -Wall -Wextra -Wconversion -Werror)
+endif()
+if(CE_WIND_BUILD_TESTS)
+  add_executable(ce_cell_behavior_tests tests/cell_behavior_tests.cpp)
+  target_link_libraries(ce_cell_behavior_tests PRIVATE ce_wind_core)
+  add_executable(ce_cell_behavior_bus_tests tests/cell_behavior_bus_tests.cpp)
+  target_link_libraries(ce_cell_behavior_bus_tests PRIVATE ce_wind_core Threads::Threads)
+  if(MSVC)
+    target_compile_options(ce_cell_behavior_tests PRIVATE /W4 /WX)
+    target_compile_options(ce_cell_behavior_bus_tests PRIVATE /W4 /WX)
+  else()
+    target_compile_options(ce_cell_behavior_tests PRIVATE -Wall -Wextra -Wconversion -Werror)
+    target_compile_options(ce_cell_behavior_bus_tests PRIVATE -Wall -Wextra -Wconversion -Werror)
+  endif()
+  add_test(NAME anaiero_cells_profile_replay COMMAND ce_cell_behavior_tests ${CMAKE_CURRENT_SOURCE_DIR}/..)
+  add_test(NAME anaiero_cells_windbus COMMAND ce_cell_behavior_bus_tests ${CMAKE_CURRENT_SOURCE_DIR}/..)
+  add_test(NAME anaiero_cells_cli_smoke COMMAND ${CMAKE_COMMAND}
+    -DCE_CELLS=$<TARGET_FILE:ce_cell_behavior>
+    -DCE_ROOT=${CMAKE_CURRENT_SOURCE_DIR}/..
+    -DCE_TMP=${CMAKE_CURRENT_BINARY_DIR}/sw5-cells-smoke
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/cell_behavior_cli_smoke.cmake)
+endif()
+add_dependencies(anaiero ce_cell_behavior)
+install(TARGETS ce_cell_behavior RUNTIME DESTINATION bin)

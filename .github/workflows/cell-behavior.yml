@@ -1,0 +1,51 @@
+name: Anaiero SW5 Cell Behavior Atlas
+on:
+  push:
+    paths:
+      - 'native/include/anaiero/models/cell_behavior.hpp'
+      - 'native/include/anaiero/contracts/cell_behavior.hpp'
+      - 'native/include/anaiero/services/cell_behavior_service.hpp'
+      - 'native/include/anaiero/infrastructure/cell_*'
+      - 'native/examples/cell_behavior_cli.cpp'
+      - 'native/tests/cell_behavior_*'
+      - 'native/examples/anaiero_cli.cpp'
+      - 'native/CMakeLists.txt'
+      - 'examples/cells/**'
+      - 'schemas/software/cell_behavior_*.schema.json'
+      - 'tests/test_sw5_cell_behavior.py'
+      - '.github/workflows/cell-behavior.yml'
+  pull_request:
+    paths:
+      - 'native/**'
+      - 'examples/cells/**'
+      - 'schemas/software/cell_behavior_*.schema.json'
+      - 'tests/test_sw5_cell_behavior.py'
+      - '.github/workflows/cell-behavior.yml'
+permissions:
+  contents: read
+jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S native -B build/sw5 -DCE_WIND_BUILD_TESTS=ON
+      - name: Build cell engine and public CLI
+        run: cmake --build build/sw5 --config Release --target ce_cell_behavior ce_cell_behavior_tests ce_cell_behavior_bus_tests anaiero
+      - name: Validate domain rules and the WindBus bridge
+        run: ctest --test-dir build/sw5 -C Release --output-on-failure -R '^anaiero_cells_'
+  fixtures:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install schema checker
+        run: python -m pip install 'jsonschema>=4.18,<5'
+      - name: Test sealed fixtures and schema
+        run: python -m unittest discover -s tests -p test_sw5_cell_behavior.py -v

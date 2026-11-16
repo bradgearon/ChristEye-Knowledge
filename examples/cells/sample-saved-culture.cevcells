@@ -1,0 +1,13 @@
+CEVCELLSTATE/1
+atlas 7d75c51c925cd549a80d1c992fbbed83e7964f33b84480b3f7ffaae2e75073b5
+tick 18
+generation 23
+plan e65f17a9a4441bc22adce338de1c567d512ddaa4c7dcb825e07e3fba8c8fb8f7
+cell 1 0 crest_progenitor 1 28 12 2 136 36 0 0 0 0 0 1 0
+cell 2 0 blood_carrier 1 39 5 2 154 18 0 0 0 0 0 1 0
+cell 3 0 central_neuron 2 20 17 2 118 36 65 36 20 0 0 1 0
+cell 4 0 central_neuron 2 23 17 2 118 36 65 36 20 0 0 1 0
+link 3 4 710 6
+intent 3 4 700
+end
+seal 7db7d19ecaadaba35e2dad63a15d2d1c1119251bf51f6b71273e012665a6854e
