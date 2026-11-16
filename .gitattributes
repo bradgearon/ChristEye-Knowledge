@@ -11,3 +11,8 @@ examples/*.cev -text
 examples/sim3/*.txt -text
 tests/golden/*.svg -text
 tests/golden/*.obj -text
+examples/*.cev -text
+examples/sim3/*.txt -text
+examples/sim3/*.cevmodel -text
+tools/sim3_viewer/*.ndjson -text
+tools/sim3_viewer/*.js -text
