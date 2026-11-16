@@ -22,8 +22,8 @@ CEVLM/2
 name process-garden
 model 1
 assets
-asset crest-glow sprite docs/assets/vlm/crest-glow.svg
-asset support-flow heatmap docs/assets/vlm/support-flow.svg
+asset crest-glow sprite docs/assets/vlm/crest-glow.svg <sha256-of-SVG>
+asset support-flow heatmap docs/assets/vlm/support-flow.svg <sha256-of-SVG>
 endassets
 processes
 process crest-birth spawn 4 850 1 0 crest-glow
@@ -45,7 +45,7 @@ A full example lives at [`examples/vlm/process-garden.avlm`](../../examples/vlm/
 
 ### Parser grammar and caps
 
-- `asset <id> <icon|sprite|heatmap> <relative-path.svg|.png|.webp>`: inert visual reference. No absolute paths, traversal, URLs, scripts, file reads or untrusted rendering inside the native kernel. The viewer must sanitize/serve its own approved assets.
+- `asset <id> <icon|sprite|heatmap> <relative-path.svg|.png|.webp> <sha256>`: inert visual reference with pinned digest. No absolute paths, traversal, URLs, scripts, file reads or untrusted rendering inside the native kernel. The viewer must sanitize/serve its own approved assets and verify their SHA-256 digests before displaying. The native simulator does not fetch images.
 - `process <id> <spawn|molecule|deposit|differentiate|connect|teach|supply|move> <duration_ticks> <weight> <dx> <dy> <asset_id>`: duration 1–512 synthetic ticks; weight 1–1000 (processing/event order, **not** biological strength); per-tick dx/dy -8..8, finite signed world coordinates.
 - `start <unique_task_id> <process_id> <ordinary_vlm1_action...>`: action must match the process verb; create an **active pending task** whose progress and sprite cursor are visible, not yet mutate its destination cell/field.
 - `advance <ticks>`: advance the simulated world one tick at a time; move active process cursors; resolve simultaneous due process actions in descending weight order, tie-breaking by task ID. Each task completes once. A `spawn` uses the final process cursor as its new synthetic coordinate; a `deposit` affects the final field tile, if in bounds; other VLM1 operations use their declared operands.
