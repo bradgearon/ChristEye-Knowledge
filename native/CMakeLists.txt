@@ -75,3 +75,26 @@ if(CE_WIND_BUILD_TESTS)
   add_test(NAME vlm_process_tests COMMAND ce_vlm_process_tests)
   add_test(NAME vlm_process_template COMMAND ce_vlm_process inspect ${CMAKE_CURRENT_SOURCE_DIR}/../examples/vlm/process-garden.avlm)
 endif()
+
+# CE-SW-09 host-only content-addressed learning and Crystal/RNA plan runner.
+add_executable(ce_vlm_plan examples/vlm_plan_cli.cpp)
+target_link_libraries(ce_vlm_plan PRIVATE ce_wind_core)
+if(MSVC)
+  target_compile_options(ce_vlm_plan PRIVATE /W4 /WX)
+else()
+  target_compile_options(ce_vlm_plan PRIVATE -Wall -Wextra -Wconversion -Werror)
+endif()
+if(CE_WIND_BUILD_TESTS)
+  add_executable(ce_vlm_plan_tests tests/learning_plan_tests.cpp)
+  target_link_libraries(ce_vlm_plan_tests PRIVATE ce_wind_core)
+  if(MSVC)
+    target_compile_options(ce_vlm_plan_tests PRIVATE /W4 /WX)
+  else()
+    target_compile_options(ce_vlm_plan_tests PRIVATE -Wall -Wextra -Wconversion -Werror)
+  endif()
+  add_test(NAME vlm_learning_plan_tests COMMAND ce_vlm_plan_tests ${CMAKE_CURRENT_SOURCE_DIR}/..)
+  add_test(NAME vlm_learning_plan_template COMMAND ce_vlm_plan inspect
+    ${CMAKE_CURRENT_SOURCE_DIR}/../examples/vlm/bread-first.cevplan
+    ${CMAKE_CURRENT_SOURCE_DIR}/../examples/vlm/plan-garden.avlm
+    ${CMAKE_CURRENT_SOURCE_DIR}/..)
+endif()

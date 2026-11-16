@@ -1,0 +1,7 @@
+# Preserve byte-exact, SHA-256-pinned VLM/CEVPLAN fixture files across OSes.
+# In particular, Windows checkout must not convert LF into CRLF.
+examples/vlm/*.avlm -text
+examples/vlm/*.cevplan -text
+examples/vlm/*.cevmap -text
+examples/vlm/data/*.txt -text
+docs/assets/vlm/*.svg -text

@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:christeye:software:learning_plan_progress:v1",
+  "title": "CEVPLAN/1 live synthetic learning progress",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "origin",
+    "event",
+    "stage",
+    "task_id",
+    "tick",
+    "elapsed",
+    "duration",
+    "weight",
+    "x",
+    "y",
+    "completed",
+    "state_hash",
+    "receipt_sha256",
+    "plan_sha256",
+    "base_sha256",
+    "crystal_sha256",
+    "learning_sha256",
+    "rna_sha256",
+    "support_sha256",
+    "visual_sha256",
+    "support_field_proxy",
+    "rna_field_proxy",
+    "learning_proxy",
+    "neurite_proxy"
+  ],
+  "properties": {
+    "origin": {
+      "const": "SIMULATED_UNCALIBRATED"
+    },
+    "event": {
+      "const": "CE.PLAN.PROGRESS/1"
+    },
+    "stage": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_id": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "tick": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "elapsed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "duration": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 512
+    },
+    "weight": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000
+    },
+    "x": {
+      "type": "integer"
+    },
+    "y": {
+      "type": "integer"
+    },
+    "completed": {
+      "type": "boolean"
+    },
+    "state_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{16}$"
+    },
+    "receipt_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "plan_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "base_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "crystal_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "learning_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "rna_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "support_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "visual_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "support_field_proxy": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "rna_field_proxy": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "learning_proxy": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "neurite_proxy": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

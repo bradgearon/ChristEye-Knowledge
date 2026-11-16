@@ -1,0 +1,7 @@
+CESUPPORT/1
+id support-17
+origin SIMULATED_UNCALIBRATED
+profile learning-support-observation
+field_type dimensionless-support-proxy
+biological_recipe none
+physical_delivery_authority NONE

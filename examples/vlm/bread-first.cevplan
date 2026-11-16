@@ -1,0 +1,23 @@
+CEVPLAN/1
+name bread-first
+base_sha256 cd216e98860c8f1f9c26f4ac230ba44361a5daa89dea321f6d265181e5b20a84
+artifacts
+artifact crystal-17 digital_crystal examples/vlm/data/digital-crystal-demo.txt 2805753030e6bceb2ee64587782066c2ad52fe9726f158a5044804bb50d1c2f3
+artifact lesson-17 digital_learning examples/vlm/data/lesson-demo.txt 377f7f90b668a834f27c28759a3a199587bf59b801ca4fbf0a2e60df82ec3339
+artifact rna-17 rna_observation examples/vlm/data/rna-observation-demo.txt 68f231ea5fe72824e4be8be57ec53c6365b6b9202a8f1f4256a7b68a98f20117
+artifact support-17 support_profile examples/vlm/data/support-profile-demo.txt 8418378cfb491aeb392200a6f3e17de7c8c72900f44d46925c7c4e8cd184ef27
+artifact visual-crest visual docs/assets/vlm/crest-glow.svg a6ce313a3247ba73a8ccb5012bcb3283af7716ce64dccaf00548f8495445ed0d
+artifact visual-support visual docs/assets/vlm/support-flow.svg 0f29e943cd260248e02046577f1591b83448f82d1ffc733b5ebcae5d54a3eceb
+artifact visual-rna visual docs/assets/vlm/rna-flow.svg 7db98318e15738a2be43650607d31a1c5c4ca811f78c213394fd7c25db7d7043
+endartifacts
+bindings
+binding b-17 crystal-17 lesson-17 rna-17 support-17
+binding b-18 crystal-17 lesson-17 rna-17 support-17
+binding b-19 crystal-17 lesson-17 rna-17 support-17
+endbindings
+stages
+stage learn-symbol 701 teach-bread b-17 visual-crest 3 750 teach 1 17 25
+stage support-wave 702 support-bread b-18 visual-support 4 720 deposit support 2 2 300
+stage rna-wave 703 rna-stream b-19 visual-rna 5 440 deposit rna 3 1 200
+endstages
+seal 1391c4377e0ab6d1ee2e47b75b6f717c0e22db7f3e3b277f8c602fe6f6512677

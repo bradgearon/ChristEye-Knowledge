@@ -1,0 +1,9 @@
+CELEARN/1
+id lesson-17
+origin SIMULATED_UNCALIBRATED
+crystal crystal-17
+objective classify-symbol-17
+prerequisite baseline-candidate
+mode synthetic-teacher-led
+assessment independent-held-out-test-required
+knowledge_transferred NOT_DEMONSTRATED
