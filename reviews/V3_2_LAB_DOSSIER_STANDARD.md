@@ -7,7 +7,7 @@ status: "Proposed engineering/research handoff standard; not a biological SOP"
 
 # V3.2 — a qualified scientist's review packet
 
-**Canonical naming decision:** The proposed target class is **Animon**, described in [ANIMON/1](../ontology/ANIMON_V1.md). Each dossier must identify Animon specification versus nonliving digital reference versus authentic physical candidate; Soil and spinal Root tissue remain subsystems with their own independently reviewed evidence. [v3.2 pilot](../specifications/v3.2/README.md).
+**Canonical naming decision:** The proposed target class is **Animon**, described in [ANIMON/1](../ontology/ANIMON_V1.md). Each dossier must identify Animon specification versus nonliving digital reference versus authentic physical candidate; Soil and spinal Root tissue remain subsystems with their own independently reviewed evidence. [v3.2 four-module pilot](../specifications/v3.2/README.md).
 
 **Purpose:** make every module understandable and assessable by a scientific director and engineering team. Preserve original source documents, avoid repeated generic material, and distinguish **research design**, **software tested**, **instrument qualified**, **preparation qualified**, and **local biological result** as different evidence stages.
 
@@ -84,3 +84,7 @@ A future qualified scientist should be able to populate or explicitly reject the
 A successful first pilot is an evidence-bearing **LAB-REVIEW READY** dossier — *not* a live tissue recipe or a demonstrated physical Anaiero device.
 
 © 2026 We Develop Software LLC · WDS Public Research Reference License. Patent document excluded.
+
+## 2026-11-16 — First integrated four-pair completion
+
+The [v3.2 Animon pilot index](../specifications/v3.2/README.md) now contains both engineering and scientific companions for A09 Core/Soil, A17 Care/SustiBus/ChemiBus, A16 spinal Root/axons, and A02 long-term retention. [StudyReadinessPacket](../schemas/animon/study_readiness_packet.schema.json) and [RootEvidenceEdge](../schemas/animon/root_evidence_edge.schema.json) are review-only schemas with explicitly unobserved fixtures. All real living-source approvals and physical experimental results remain absent. The next stage is **human scientific review and digital demonstration**, not claiming a living Animon has been constructed.
