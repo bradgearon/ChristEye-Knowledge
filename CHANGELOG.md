@@ -1,3 +1,11 @@
+## 2026-11-16 — v3.2 Animon axonal and long-term retention pilot
+
+- Completed the first **four engineering designs and four scientific companions**: A09 Animon Core/Soil, A17 independent Care, A16 spinal Root/axon mapping, and A02 long-term retention.
+- Added typed Root evidence graphs and a non-executing StudyReadinessPacket; all new fixtures are synthetic with no actual biology.
+- Explicitly separated real digital lexical retrieval/CrystalPack replay, defined digital Root metrics, and *untested* biological retention, axonal connectivity, physical memory carriers and acquired Animon capability.
+- Linked current and historical sources and added documentation/schema/relative-link tests, preserving negative-result and independent-care requirements.
+- No wet-lab recipe, physical patent file, or biological performance claim published.
+
 ## 2026-11-16 — ANIMON/1 and v3.2 pilot dossiers
 
 - Adopted **Animon** as the provisional individual developmental system class; **ChristEye Anaiero** remains the scientific architecture and WDS research program.

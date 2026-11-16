@@ -1,6 +1,6 @@
 # ChristEye Anaiero — v3.1 complete engineering design library
 
-**Naming and version note:** The proposed individual system is now termed **Animon** ([ANIMON/1](../../ontology/ANIMON_V1.md)). A more mechanism-specific [v3.2 pilot](../v3.2/README.md) is available for Core/Soil (A09) and Care (A17). The 24 v3.1 pairs are preserved as a versioned prior edition; no terminology update makes their biological hypotheses verified.
+**Naming and version note:** The proposed individual system is now termed **Animon** ([ANIMON/1](../../ontology/ANIMON_V1.md)). A mechanism-specific [v3.2 four-module pilot](../v3.2/README.md) now covers **Core/Soil (A09), independent Care (A17), spinal Root/axons (A16), and long-term retention (A02)**. The 24 v3.1 pairs are preserved as a versioned prior edition; no terminology update makes their biological hypotheses verified.
 
 **Revision:** 2026-11-15 · **Owner:** We Develop Software LLC · **Status:** detailed experimental engineering specification, not a validated fabrication SOP.
 

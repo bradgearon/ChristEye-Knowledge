@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0.0",
+  "record_id": "EDGE-DESIGN-001",
+  "created_at": "2026-11-16T00:00:00Z",
+  "preparation_ref": null,
+  "source_entity_ref": "UNOBSERVED-SPINAL-REGION",
+  "target_entity_ref": "UNOBSERVED-SOIL-REGION",
+  "edge_class": "STRUCTURAL_CONTACT",
+  "evidence_status": "DESIGN",
+  "observation_ref": null,
+  "source_asset_digest": null,
+  "instrument_calibration_ref": null,
+  "spatial_registration_ref": null,
+  "common_drive_control_ref": null,
+  "reader_version_ref": null,
+  "task_assessment_ref": null,
+  "uncertainty_note": "Candidate structure only; no axon trace, recording, or specimen exists.",
+  "reviewer_ref": null,
+  "claim_promoted": false,
+  "physical_actuation_authorized": false
+}

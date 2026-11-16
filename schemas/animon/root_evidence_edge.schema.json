@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Anaiero v3.2 typed spinal Root evidence edge",
+  "description": "Separate anatomical, statistical, functional and learning claims. Not evidence of actual connectivity on its own.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "record_id",
+    "created_at",
+    "preparation_ref",
+    "source_entity_ref",
+    "target_entity_ref",
+    "edge_class",
+    "evidence_status",
+    "observation_ref",
+    "source_asset_digest",
+    "instrument_calibration_ref",
+    "spatial_registration_ref",
+    "common_drive_control_ref",
+    "reader_version_ref",
+    "task_assessment_ref",
+    "uncertainty_note",
+    "reviewer_ref",
+    "claim_promoted",
+    "physical_actuation_authorized"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "preparation_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source_entity_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_entity_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "edge_class": {
+      "enum": [
+        "STRUCTURAL_CONTACT",
+        "STATISTICAL_ASSOCIATION",
+        "INTERVENTION_SUPPORTED_INFLUENCE",
+        "TASK_RELATION"
+      ]
+    },
+    "evidence_status": {
+      "enum": [
+        "DESIGN",
+        "PROPOSED",
+        "UNRESOLVED",
+        "OBSERVED",
+        "ASSOCIATIONAL",
+        "CAUSAL_RESEARCH",
+        "REJECTED"
+      ]
+    },
+    "observation_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source_asset_digest": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "instrument_calibration_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "spatial_registration_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "common_drive_control_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reader_version_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "task_assessment_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "uncertainty_note": {
+      "type": "string",
+      "minLength": 8
+    },
+    "reviewer_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "claim_promoted": {
+      "type": "boolean"
+    },
+    "physical_actuation_authorized": {
+      "const": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "evidence_status": {
+            "enum": [
+              "DESIGN",
+              "PROPOSED",
+              "UNRESOLVED",
+              "REJECTED"
+            ]
+          }
+        },
+        "required": [
+          "evidence_status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "claim_promoted": {
+            "const": false
+          }
+        }
+      }
+    }
+  ]
+}

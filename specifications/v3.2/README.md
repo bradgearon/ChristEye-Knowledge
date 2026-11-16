@@ -1,70 +1,90 @@
-# ChristEye Anaiero — v3.2 Animon Scientific and Technical Pilot
+# ChristEye Anaiero — v3.2 Animon Scientific & Technical Pilot
 
-**Status:** *Two design/companion pairs drafted for qualified scientific review; the biological system has not been built or validated.*  
-**Revision:** 2026-11-16 · **Owner:** We Develop Software LLC.
+**Revision:** 2026-11-16 · **Owner:** We Develop Software LLC  
+**Status:** **4 detailed design/companion pairs for scientific review**; living Animon construction and neural-learning experiments remain unexecuted.
 
-## What changed: the individual system is an **Animon**
+## The Animon: scope and source precedence
 
-[ANIMON/1](../../ontology/ANIMON_V1.md) defines the target individual developmental system class. **ChristEye Anaiero** remains the scientific architecture/project. An **Animon specification** is a blueprint, a **digital Animon reference** is nonliving software, and an **individual physical candidate** would require its own qualified preparation/source and review. **Soil** is the organoid whole as a possible subsystem, not the full Animon; **spinal Root tissue** is not automatically a demonstrated functional Root.
+An **Animon** is the proposed individual developmental system class described in [ANIMON/1](../../ontology/ANIMON_V1.md). **ChristEye Anaiero** remains the program and underlying WDS architecture. A digital Animon reference is nonliving software, and a proposed Animon physical individual requires real source, qualified tissue and independent laboratory review. **Soil** is the prospective organoid whole; **spinal Root tissue** is a candidate anatomical subsystem; **functional Roots** are separately tested retained relations.
 
-The historical phrase "living computer" can remain as provenance in earlier editions, but is no longer preferred when defining the future system class. Naming does **not** prove consciousness, organism status or legal trademark availability.
+The previous [v3.1 complete library](../v3/README.md) remains intact with all 24 designs, 24 scientific companions and their historical source editions. The current v3.2 pilot is a **more mechanism-specific successor**, not a replacement for unrelated modules or proof of new biological results.
 
-## Pilot: source → Soil → care → Roots → evidence
+## The complete first pilot: Core → Care → Axon/Root → Retention
 
 ~~~mermaid
 flowchart LR
-  A["ANIMON/1 identity"] --> B["CE-A09 Animon Core / Soil"]
-  B --> C["CE-A17 independent care"]
-  C --> D["CE-A16 axon and spinal Root / next"]
-  D --> E["CE-A02 retained functional Root / next"]
-  B --> F["Actual qualified observation"]
+  A["ANIMON/1 spec and source"] --> B["CE-A09 Core / Soil"]
+  B --> C["CE-A17 independent Care / SustiBus"]
+  C --> D["CE-A16 spinal Root/axon evidence"]
+  D --> E["CE-A02 learning & delayed retention"]
+  B --> F["Measured source or explicitly unknown"]
   C --> F
   D --> F
   E --> F
-  F --> G["Human scientific review: finding, hypothesis, or unresolved"]
+  F --> G{"Scientific evidence review"}
+  G --> H["Claim scoped to actual preparation"]
+  G --> I["UNRESOLVED, negative or untested"]
 ~~~
 
-The arrows are **review/design dependencies**, not an executable tissue-generation or feeding protocol. All biological steps remain under source-specific qualified laboratory SOPs and independent approvals.
+**This is a dependency and data-evidence graph, not a tissue-development or stimulation procedure.** Any physical biological operations require a real qualified facility and separate SOP/ethics approvals. No live preparation was supplied to this project in these documents.
 
-| Component | Engineering Design | Scientific Companion | Current maturity |
+| Module | v3.2 Engineering Design | v3.2 Scientific Companion | Specific deliverable |
 |---|---|---|---|
-| **CE-A09** Animon Core and Soil | [Full v3.2 design](design/CE-A09_Animon_Core_Design.md) | [Source-specific companion](companion/CE-A09_Animon_Core_Scientific_Companion.md) | D1 detailed technical/scientific design |
-| **CE-A17** Animon Care, SustiBus and ChemiBus | [Full v3.2 design](design/CE-A17_Animon_Care_Design.md) | [Molecular support & confounds](companion/CE-A17_Animon_Care_Scientific_Companion.md) | D1 detailed technical/scientific design |
-| **CE-A16** spinal Root/axon mapping | [v3.1 source](../v3/design/CE-A16_root_registry_and_mapping_Design.md) | [v3.1 source](../v3/companion/CE-A16_root_registry_and_mapping_Companion.md) | v3.2 pilot work planned |
-| **CE-A02** long-term functional retention | [v3.1 source](../v3/design/CE-A02_long_term_storage_Design.md) | [v3.1 source](../v3/companion/CE-A02_long_term_storage_Companion.md) | v3.2 pilot work planned |
+| **CE-A09** Core and Soil | [Full design](design/CE-A09_Animon_Core_Design.md) | [Scientific companion](companion/CE-A09_Animon_Core_Scientific_Companion.md) | Individual Animon vs living Soil identity, source/region/assay gates |
+| **CE-A17** Independent care | [Full design](design/CE-A17_Animon_Care_Design.md) | [Scientific companion](companion/CE-A17_Animon_Care_Scientific_Companion.md) | Milk vs Honey, ChemiBus/SustiBus, continuous care and fault tests |
+| **CE-A16** Axon and spinal Root | [Full design](design/CE-A16_Animon_Spinal_Root_Design.md) | [Scientific companion](companion/CE-A16_Animon_Spinal_Root_Scientific_Companion.md) | Four typed evidence edges, candidate source/axon map, causal/task alternatives |
+| **CE-A02** Long-term retention | [Full design](design/CE-A02_Animon_Long_Term_Retention_Design.md) | [Scientific companion](companion/CE-A02_Animon_Long_Term_Retention_Scientific_Companion.md) | Digital memory/replay, independent Root tests, source-scoped biology, retention/access |
 
-## Wave 0 data-contract fixes
+### What is already implemented in code?
 
-The prior source review found three mismatches between published process examples and canonical JSON schemas. All three have been rewritten as **explicitly synthetic, machine-validated** JSON examples, while the v1 schemas remain stable:
+The reference [MemoryBank](../../anaiero/memory.py) supports permissioned lexical retrieval. [CrystalPack](../../anaiero/crystal.py) supports source-hashed, permission-scoped **digital** clones and replay. The [Root metrics](../../anaiero/roots.py) implement macro recall and a chance-corrected retention ratio with guards. The [Lotus](../../anaiero/lotus.py) permits only specific digital actions. These are **not** a living spinal network, verified task-learning organoid or physical memory carrier.
 
-| Process issue | Canonical schema | Current example |
+## Typed data records and honest synthetic fixtures
+
+### New v3.2 review and evidence contracts
+
+| Contract | Purpose | Design-only example |
 |---|---|---|
-| ChemiBus version and chemical name | [chemibus_observation](../../schemas/biology/chemibus_observation.schema.json) | [no-sample fixture](../../fixtures/v3.2/chemibus_unmeasured.example.json) |
-| Physical Crystal example used noncanonical fields | [physical_crystal_candidate](../../schemas/biology/physical_crystal_candidate.schema.json) | [unvalidated carrier](../../fixtures/v3.2/physical_crystal_unvalidated.example.json) |
-| Crest birth event vocabulary drifted | [cell_birth_event](../../schemas/biology/cell_birth_event.schema.json) | [unobserved birth fixture](../../fixtures/v3.2/crest_birth_unobserved.example.json) |
+| [StudyReadinessPacket](../../schemas/animon/study_readiness_packet.schema.json) | Explicit preparation/PI/assay/control/care/analysis dependencies and no physical execution rights | [Unapproved packet](../../fixtures/v3.2/study_readiness_unapproved.example.json) |
+| [RootEvidenceEdge](../../schemas/animon/root_evidence_edge.schema.json) | Distinguishes structure, statistics, influence and task claims in one versioned graph | [Unobserved candidate edge](../../fixtures/v3.2/spinal_root_edge_unobserved.example.json) |
+| [AxonProjection](../../schemas/biology/axon_projection.schema.json) | Source/target candidate and qualified spatial/functional observation fields | [No axon observed](../../fixtures/v3.2/axon_projection_unobserved.example.json) |
+| [FunctionalRootAssessment](../../schemas/biology/functional_root_assessment.schema.json) | Frozen evaluator, actual task/score/delay, controls and protected old skills | [No Root measured](../../fixtures/v3.2/functional_root_unobserved.example.json) |
 
-Further valid examples: [Animon digital reference](../../fixtures/v3.2/animon_digital_reference.example.json) · [Soil source unknown](../../fixtures/v3.2/soil_region_unobserved.example.json) · [SustiBus unqualified](../../fixtures/v3.2/sustibus_unqualified.example.json). These are **not real cell, tissue or chemical observations**.
+**Important:** Fixtures contain fake sources, null observations and explicit DESIGN/UNRESOLVED statuses. They are tested for schema consistency, not offered as actual measurements. The all-zero SHA-256 string in the functional Root fixture is a **synthetic placeholder**, not the digest of a real reader artifact.
 
-[JSON Schema contract tests](../../tests/test_animon_v32_contracts.py) use Draft 2020-12 and a date-time format checker, and check that the process-embedded examples match the canonical fixtures. They do **not** certify any biological outcome.
+### Prior v3.2 Wave 0 contract repairs
 
-## Scientific review and evidence
+| Earlier drift | Resolved source record | Valid illustrative record |
+|---|---|---|
+| ChemiBus version and chemical fields | [ChemiBus schema](../../schemas/biology/chemibus_observation.schema.json) | [Unmeasured observation](../../fixtures/v3.2/chemibus_unmeasured.example.json) |
+| Physical Crystal noncanonical fields | [Crystal candidate schema](../../schemas/biology/physical_crystal_candidate.schema.json) | [Unvalidated candidate](../../fixtures/v3.2/physical_crystal_unvalidated.example.json) |
+| Crest cell-birth names | [CellBirthEvent schema](../../schemas/biology/cell_birth_event.schema.json) | [Unobserved birth](../../fixtures/v3.2/crest_birth_unobserved.example.json) |
+| Overall identity | [Animon spec](../../schemas/animon/animon_spec.schema.json) | [Nonliving digital reference](../../fixtures/v3.2/animon_digital_reference.example.json) |
+| Soil and care | [Soil schema](../../schemas/biology/soil_region.schema.json) and [SustiBus schema](../../schemas/biology/sustibus_care_status.schema.json) | [Unobserved Soil](../../fixtures/v3.2/soil_region_unobserved.example.json) and [unqualified care](../../fixtures/v3.2/sustibus_unqualified.example.json) |
 
-- [v3.1 lab-readiness assessment](../../reviews/V3_1_LAB_READINESS_ASSESSMENT_2026-11-16.md).
-- [v3.2 dossier acceptance standard](../../reviews/V3_2_LAB_DOSSIER_STANDARD.md).
-- [Controlled scientist workflow](../../processes/SCIENTIST_WORKFLOW.md) and [source-limited bibliography](../../research/evidence/anaiero-biology-2026-11.md).
-- [ISSCR stem-cell based model standards](https://www.isscr.org/basic-research-standards/stem-cell-based-model-systems) support source, model, phenotype, variability and experimental-unit qualification.
-- [Robbins et al., *Cell Reports* 2026](https://pubmed.ncbi.nlm.nih.gov/41720084/) reports bounded cortical-organoid learning with a stated retention limitation; it is **not** evidence that an Animon physical memory has been constructed.
+All current fixtures have tests under [test_animon_v32_contracts.py](../../tests/test_animon_v32_contracts.py). Valid JSON shape is not scientific validation; real source/assay/unit/clock/approval evidence remains separately necessary.
 
-## Explicitly not completed
+## Review versus laboratory operation
 
-No live source line or culture preparation, no qualified institutional feeding/care SOP, no integrated axon circuit, no verified biological retained Root, no physical Crystal transfer and no genetically encoded unique birth ID have been provided in this pilot. **No cell-growth/stimulation/peptide operation can be executed from these documents.**
+**D1 technical specification:** typed records and source-linked distinctions can be reviewed and validated as software/documentation.
 
-## Next scientific writing wave
+**D2 pre-experimental handoff:** a named, approved institution must choose real source model, instrumentation, primary question, independent biological unit and statistics, qualified care, controls and owners. The [StudyReadinessPacket](../../schemas/animon/study_readiness_packet.schema.json) has all these fields but does not fill them with fabricated values.
 
-1. Integrate the *proposed* spinal Root with actual axonal observation evidence classes (CE-A16 v3.2).
-2. Distinguish stored digital bytes, recalled capability, neural task retention and physical carrier evidence (CE-A02 v3.2).
-3. Create a machine-typed pre-experimental **StudyReadinessPacket** with unfilled institutional source/approval/assay/replicate fields; require human scientific review.
-4. Scale the module-specific rewrite to the remaining pairs while migrating shared repeated prose into the canonical standards.
-5. Independently verify every primary-paper claim and its stated preparation, not merely the reference link.
+**D3 physical protocol and D4 data:** not provided or claimed. A written study plan does **not** authorize a lab to grow tissue, change molecular conditions or perform neural stimulation.
 
-All research ownership remains We Develop Software LLC under the [WDS Public Research Reference License](../../LICENSE.md). The confidential physical patent document remains excluded.
+## Sources and professional standards
+
+- [v3.1 lab-readiness review](../../reviews/V3_1_LAB_READINESS_ASSESSMENT_2026-11-16.md) and [v3.2 scientific dossier standard](../../reviews/V3_2_LAB_DOSSIER_STANDARD.md)
+- [12-stage scientist workflow](../../processes/SCIENTIST_WORKFLOW.md), [BIO-02 axons](../../processes/BIO-02-axon-spinal-root.md), [BIO-06 teaching](../../processes/BIO-06-teaching.md), [BIO-07 joining](../../processes/BIO-07-joining.md)
+- [Gibbons et al. 2026 corticospinal connectoid](https://pubmed.ncbi.nlm.nih.gov/42201810/) and [Robbins et al. 2026 bounded organoid learning](https://pubmed.ncbi.nlm.nih.gov/41720084/)
+- [ISSCR stem-cell-based model standards](https://www.isscr.org/basic-research-standards/stem-cell-based-model-systems) and [ISSCR reporting standards](https://www.isscr.org/basic-research-standards/reporting)
+
+## Following science work
+
+1. **Scientific-review packet evaluation:** have the designated PI, neuroscience investigator, cell-care lead, biosafety role and embedded engineer review the four module dossiers and source/model uncertainties.
+2. **Digital graph proof:** add an actual append-only, evidence-status-enforcing graph in software and test contradictory/expired evidence, without any physical device commands.
+3. **Digital retained-Root demonstration:** build a true independent held-out/delayed reference test; currently replay and lexical retrieval alone do not establish learned competence.
+4. **Module expansion:** use the same evidence matrix and schema-valid fixture standard for CE-A11, A06, A07, A04 and the remaining v3.1 pairs.
+5. **Specimen-specific biology:** the institution must independently choose a source, equipment and approved methods before any living study.
+
+WDS owns this research under the [WDS Public Research Reference License](../../LICENSE.md). The confidential physical patent file is excluded; any commercial Animon branding requires separate trademark review.

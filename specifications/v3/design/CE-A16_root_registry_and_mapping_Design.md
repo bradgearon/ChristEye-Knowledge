@@ -13,6 +13,8 @@ status: "Complete candidate engineering specification; living parameters require
 
 > **Purpose:** physical candidate spinal Root tissue and independent functional retention ledger. The existing v3 digital architecture is retained in the source-history appendix below. This revision specifies cellular roles, axons, learning, support, joining and growth/evidence decisions; it is not a claim that those biological mechanisms have been demonstrated.
 
+**v3.2 scientific successor:** [Animon spinal Root and axon evidence engineering design](../../v3.2/design/CE-A16_Animon_Spinal_Root_Design.md) and [mechanism companion](../../v3.2/companion/CE-A16_Animon_Spinal_Root_Scientific_Companion.md). The v3.1 source and historical text remain preserved; no new biological observation is claimed.
+
 ## 1. Product behavior and acceptance
 
 **Intended outcome:** declare relation → map source region → four-edge evidence → delayed task → protected skill check.
