@@ -63,6 +63,26 @@ class NativeArchitectureTests(unittest.TestCase):
             "new reverse dependencies require architecture review.",
         )
 
+    def test_os_specific_headers_stay_out_of_portable_layers(self):
+        forbidden = ("windows.h", "winsock2.h", "sys/epoll.h",
+                     "sys/eventfd.h", "sys/socket.h", "sys/mman.h", "unistd.h")
+        for layer in ("models", "contracts", "services"):
+            for path in (ROOT / layer).rglob("*.hpp"):
+                for line in path.read_text(encoding="utf-8").splitlines():
+                    if not line.lstrip().startswith("#include"):
+                        continue
+                    for header in forbidden:
+                        with self.subTest(path=path.name, header=header):
+                            self.assertNotIn(header, line)
+
+    def test_windows_linux_parity_adr(self):
+        adr = (Path(__file__).resolve().parents[1] /
+               "docs/software/ADR-002_native_windows_linux_parity.md").read_text(encoding="utf-8")
+        for term in ("native C++20", "Linux", "Windows", "IOCP", "epoll",
+                     "named pipes", "Unix-domain sockets", "SCM", "systemd"):
+            with self.subTest(term=term):
+                self.assertIn(term.casefold(), adr.casefold())
+
     def test_models_have_no_io_or_transport_includes(self):
         forbidden = ("<filesystem>", "<fstream>", "<thread>", "<sys/socket.h>",
                      '"christeye/wind/', '"anaiero/infrastructure/')

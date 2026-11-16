@@ -13,7 +13,7 @@ related: "CE-SW-01, CE-SW-03, CE-SW-11, CE-SW-12, CE-SW-18, CE-SW-19, CE-A09, CE
 
 ## 1. Decision summary
 
-Anaiero will be a **modular C++20 controller runtime** with one public command, explicit application use cases, small passive models, deterministic simulation engines, typed observation/movement contracts, and infrastructure adapters. A resource-constrained Linux host is the default full-controller deployment. Components retain freestanding-compatible, bounded cores where useful.
+Anaiero will be a **modular C++20 controller runtime** with one public command, explicit application use cases, small passive models, deterministic simulation engines, typed observation/movement contracts, and infrastructure adapters. **Linux and Windows are equal first-class, lightweight native controller deployments.** They share one portable C++20 runtime core, contracts, deterministic engines, and bounded resource policies; distinct infrastructure adapters implement each OS's event loop, IPC, persistence, identity checks, and service lifecycle. No WSL or container is needed. Components retain freestanding-compatible, bounded cores where useful.
 
 **No big-bang rewrite.** Preserve the tested SIM1/VLM1/VLM2/SIM3/SW4/SW5 functionality and wire formats while introducing a single composition root, canonical observation model, and transactional outbox. The first target runs **simulated cells and digital models**. Qualified instruments may later produce **read-only observations** via separately authenticated, reviewed adapters. It is neither a biological culture controller nor evidence of real-cell learning.
 
@@ -44,7 +44,7 @@ The public **anaiero** command is currently a dispatcher to ce_* programs. A fut
 5. native/include/anaiero/infrastructure/windstore_sink.hpp publishes each metric frame using the event kind CULTURE_CHECKPOINT, which conflates individual observations with full culture checkpoints, and syncs files on a dispatch path.
 6. native/include/anaiero/infrastructure/movement_router.hpp maps distinct digital transfer kinds into a generic connection metric. Movement semantics should remain typed end to end.
 7. The SW4 queue scans the bounded slot array against itself for source ordering; latency is deterministic in bound but not an acceptable scaling design without target benchmarks.
-8. The controller has no trusted real acquisition adapter, Linux socket service, durable projector rebuild or authenticated mesh. GitHub CI success does not qualify these absent features.
+8. The controller has no trusted real acquisition adapter, native Linux/Windows IPC service, durable projector rebuild or authenticated mesh. GitHub CI success does not qualify these absent features.
 
 ## 3. Bounded-context map
 
@@ -88,7 +88,7 @@ Never merge SIM3 and SW5 cell structs by field name or equal numeric cell ID. Us
                                      +----------------+--------------+
                                      |       Infrastructure          |
                                      | WindPacket, bounded queues    |
-                                     | WindStore, mmap, Linux epoll  |
+                                     | WindStore, host I/O adapters  |
                                      | Unix sockets, TLS/mesh        |
                                      | Sensor ingress (read-only)    |
                                      +-------------------------------+
@@ -106,7 +106,9 @@ anaiero_application            (transaction / runtime coordination)
 anaiero_simulators             (SIM1, VLM, SIM3, cell-atlas adapters)
 anaiero_infra_wire             (WindPacket codecs, digital patchbay)
 anaiero_infra_storage          (WindStore, durable I/O, checkpoint adapters)
-anaiero_infra_linux            (epoll, UDS, service lifecycle)
+anaiero_infra_host             (portable host interfaces)
+anaiero_infra_linux            (epoll, UDS, systemd)
+anaiero_infra_windows          (IOCP, named pipes, Windows services)
 anaiero_infra_secure_mesh      (later: authenticated peer transport)
 anaiero                       (CLI + composition root)
 anaiero_testkit                (synthetic fixtures / fault injection)
@@ -161,26 +163,36 @@ Proposed runtime dispatch architecture:
 - Fault/status, health observations, digital desires, evidence and telemetry use independently bounded admission pools. Fault reports may preempt but must not starve unrelated work without a maximum residency policy.
 - Smooth weighted round robin or deficit round robin applies across eligible lane heads. Urgency+age+deadline ranks only eligible work within a lane. Per-source credits and per-peer byte quotas control flooding.
 - For capacity exhaustion: reject new requests with explicit receipt; retain committed outbox entries; coalesce only designated replaceable telemetry; never drop source sequence gaps invisibly.
-- Budget fixed work units per wakeup, yield to the Linux event loop; expensive JSON, SHA, disk sync and large imaging conversions do not run on time-critical lanes.
+- Budget fixed work units per wakeup, yield to the host event loop; expensive JSON, SHA, disk sync and large imaging conversions do not run on time-critical lanes.
 
 Ownership: one writer per culture/projector, many immutable readers. Use an ordinary mutex and bounded copy while contention is low; optional double buffering / RCU only after profiling. Memory-mapped snapshots are for immutable views and do not replace transactional persistence.
 
-## 8. The Linux controller topology
+## 8. Lightweight native host topology: Windows and Linux
 
-Start with **one supervisor process plus bounded workers**, not a microservice fleet:
+**Equal platform requirement:** `anaiero runtime start` must work natively on **Windows and Linux**, with the same C++20 domain/application core, binary wire format, source-epoch semantics, bounded queues, culture recovery, projection, and public CLI. Both are complete supported controller targets. Neither needs WSL, Docker, Cygwin, Python/Node, or an embedded web server for headless operation. OS-specific headers belong only in infrastructure adapters selected by the composition root.
 
-- **Ingress/event-loop thread**: epoll over Unix sockets, eventfd, timerfd, signal handling; authenticate local clients with SO_PEERCRED and explicit access scopes; never trust socket-path permissions alone.
-- **Single domain owner**: executes simulation or projector mutations in serial order; no blocking network or disk calls.
-- **Persistence worker**: journals bounded immutable events, commits outbox and snapshots, signals completion through eventfd; admission always bounded.
-- **Reader/view subscribers**: load immutable read models, receive revisioned deltas, handle reconnect with snapshot+cursor.
-- **Optional network worker** (later): authenticated TLS/QUIC with identity verification, ACLs, replay protection and byte-credit backpressure.
-- **Optional read-only acquisition worker** (later): vendor-supported sensor ingestion, raw assets outside the tiny control queue, metadata and hashes in WindBus.
+| Host concern | Linux | Windows |
+|---|---|---|
+| Event-loop wake / timers | `epoll`, `eventfd`, `timerfd` | IOCP, overlapped I/O, events, waitable timers |
+| Local IPC | Unix-domain sockets | Named pipes with overlapped I/O |
+| Local identity | `SO_PEERCRED` plus authorization policy | Pipe ACL, access tokens, impersonation validation |
+| Process lifetime | systemd, signal handling | Service Control Manager (SCM), service control events |
+| Storage lock | `flock` | `LockFileEx` |
+| Durable files | `fsync`, rename, supported directory sync | `FlushFileBuffers`, write-through replacement |
+| Memory maps | `mmap` | `CreateFileMappingW`, `MapViewOfFile` |
+| Clock | `CLOCK_MONOTONIC` | `QueryPerformanceCounter` or appropriate monotonic timer |
+| Diagnostics | bounded structured logs/journald | bounded structured logs/Windows Event Log |
+| Packaging | native ELF package | native PE/EXE (MSVC) package |
 
-Use systemd supervision, dedicated unprivileged user, a dedicated StateDirectory, restricted Unix sockets, no ambient privileged capabilities, watchdog with independent health reporting, explicit recovery state, journald diagnostics, and bounded log verbosity. No timer-driven application polling for new data; timers may manage deadlines, lease expiry and watchdogs.
+A Windows named-pipe client ID is not authentication: verify its security token and effective scope. A Unix socket path is not authorization: verify peer credentials and effective scope. The transport-independent source/epoch identity contract remains authoritative.
 
-Initial **engineering budgets to validate**, not performance claims: target a lean supervisor RSS cap around 64 MiB excluding simulator heap, large raw assets and network libraries; bounded hot-path allocations; no high-resolution images in the control message payload; measure p50/p95/p99 and worst-case dispatch, queue occupancy, missed deadlines, disk sync and recovery latency on the actual controller. Keep current limits visible (e.g. SW4 96 work items, 256 projector metrics, 32 sources; SW5 64 cells/128 links; WindStore 4 MiB journal and 4096 events). These are prototype caps, not indefinite production retention.
+**Topology:** one low-overhead headless supervisor process with an event/IPC owner, a single domain mutation owner, and a bounded asynchronous persistence worker. Remote mesh, viewers, imaging and scientific importers are optional adapters, not compulsory resident dependencies.
 
-For large microscopy/audio/3D sources, store chunked immutable objects through a separate bulk plane. Provide content hashes and viewer indexes via the control bus.
+**Memory and CPU budgets:** provisional starting goal ~64 MiB *supervisor* memory, excluding simulation heaps and bulk sensor/media assets; this is not a measured guarantee. On Linux report RSS/PSS; on Windows report Private Bytes and Working Set. Benchmark allocations, CPU wakeups, queue residency, p50/p95/p99 latency, replay and abrupt-exit recovery on representative Windows and Linux controller hardware. No busy polling, no unbounded buffers and no disk flush on latency-critical threads. OS process overhead differs, but functional limits and bounded policies must be equivalent.
+
+**Release gate:** a new controller feature is incomplete until both native host adapters (or an explicitly approved portable implementation) pass shared admission, restart, state freshness, epoch, security scope, backpressure, and IPC tests. Windows CI uses MSVC; Linux CI uses GCC/Clang. Hardware benchmarks are separate from CI and must be reported per OS. The existing Windows/Linux C++ test suite is not proof that the future Windows/Linux service hosts are already built.
+
+Choose the controller OS based on deployment needs, never on a Linux-first architectural assumption. See [ADR-002](ADR-002_native_windows_linux_parity.md).
 
 ## 9. Simulation versus qualified observation
 
@@ -231,7 +243,7 @@ A device's valid WindPacket or SHA-256 hash does not grant a trusted identity.
 | 0.015.x | Architecture decisions, source map, dependency guard | Documentation and test baseline green |
 | 0.016 | Canonical envelope, source epoch and transactional digital outbox | Recovery/duplicate/gap tests across kill points |
 | 0.017 | Application coordinator and SIM3/SW5 adapters behind common ports | Golden outputs unchanged; no post-commit lost events |
-| 0.018 | Linux epoll/UDS controller, supervised daemon, durable projector rebuild | Local reconnection, staleness and board benchmarks |
+| 0.018 | Equal native Linux/Windows supervisor, host IPC and durable projector rebuild | Cross-platform conformance and per-OS controller benchmarks |
 | 0.019 | Secure mesh identities, scopes and authenticated replication | Negative security and partition tests |
 | 0.020 | Read-only qualified acquisition and calibration intake | Data provenance, uncertainty and independent review gates |
 
@@ -242,7 +254,7 @@ Do not promote an implementation maturity version merely because architectural m
 **P0**: Correct observable consistency: outbox/atomic commit, source epoch, replaying projector, proper event types, no post-mutation silent bus failure.  
 **P0**: Define composition root, canonical IDs and contracts; maintain a single writer per culture.  
 **P1**: Untangle includes and CMake targets, migrate SIM3/SW5 through adapters, retain binary/schema compatibility.  
-**P1**: Linux event-loop IPC and bounded bulk-data path; queue scalability and backpressure tests.  
+**P1**: Windows/Linux native event-loop IPC and bounded bulk-data path; queue scalability and backpressure tests.  
 **P1**: Signed trust, authenticated mesh and scoped subscriptions before remote access.  
 **P2**: Scientific observation importers, parameter calibration, visualization integration and richer simulation laws only after provenance/uncertainty gates.
 

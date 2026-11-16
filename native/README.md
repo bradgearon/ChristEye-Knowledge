@@ -2,6 +2,8 @@
 
 ## Public executable: anaiero
 
+**Native host parity:** Anaiero's planned lightweight long-running controller is a **native Windows and native Linux** application with one portable C++20 core. Both platforms are first-class, using IOCP/named pipes/SCM or epoll/Unix-domain sockets/systemd in infrastructure adapters. It will not require WSL, containers or a scripting runtime. Today's CLI/tools already build on Windows and Linux; full supervised host adapters are planned, not yet delivered. See [ADR-002](../docs/software/ADR-002_native_windows_linux_parity.md).
+
 Use **`anaiero`** as the single public native command. The old `ce_*` programs remain as internal backends for compatibility, but new user scripts should call `anaiero`:
 
 ```sh

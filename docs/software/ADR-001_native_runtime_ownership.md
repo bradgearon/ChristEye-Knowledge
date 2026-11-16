@@ -21,6 +21,10 @@ reviewed_commit: "5f5ab33a6668b712c54dc15327a568e77af67a98"
 
 Existing code has split simulation models, post-mutation callback failures, and a volatile projector without replay. The SW4 RuntimeService directly includes WeightedQueue; WindBus adapter imports RuntimeService; the SW5 checkpoint adapter imports CellBehaviorService. These are documented migration debts, not reasons to rewrite all simulation logic.
 
+## Host parity
+
+[ADR-002](ADR-002_native_windows_linux_parity.md) requires Linux and Windows to be equally supported low-resource, native C++20 controller hosts. OS-specific APIs live only in infrastructure. Neither host is a second-tier fallback.
+
 ## Lifecycle
 
 ~~~text
@@ -57,9 +61,9 @@ These are target interfaces; existing IEventCommit, ISpatialPort and IMovementPo
 - Backward compatibility requires adapters and a versioned migration map rather than direct renaming of legacy serialized objects.
 - Persistence incurs I/O cost; the event-loop thread never blocks on fsync.
 - Backpressure requires explicit credit and replay. No unbounded memory queue or dropped lineage event.
-- One Linux supervisor simplifies failure domains and fits limited controller resources.
+- One lightweight native **Windows or Linux** supervisor per controller simplifies failure domains. Platform adapters provide IOCP/named pipes/SCM or epoll/Unix-domain sockets/systemd, with shared C++20 business logic and no emulation.
 - Authentication, source qualification and biological validity remain separate concerns.
 
 ## Revisit
 
-Reconsider this ADR after the 0.018 Linux service has measured end-to-end p99 latency, memory, crash recovery and source synchronization on target hardware. Until then, limits are engineering targets, not qualified real-time guarantees.
+Reconsider this ADR after the 0.018 native Linux and Windows services has measured end-to-end p99 latency, memory, crash recovery and source synchronization on target hardware. Until then, limits are engineering targets, not qualified real-time guarantees.

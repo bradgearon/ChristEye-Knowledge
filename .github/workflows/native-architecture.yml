@@ -7,6 +7,7 @@ on:
       - '.github/workflows/native-architecture.yml'
       - 'docs/software/CE-SW-20_anaiero_v0015_cpp_architecture_pass.md'
       - 'docs/software/ADR-001_native_runtime_ownership.md'
+      - 'docs/software/ADR-002_native_windows_linux_parity.md'
   pull_request:
     paths:
       - 'native/include/anaiero/**'
@@ -14,11 +15,16 @@ on:
       - '.github/workflows/native-architecture.yml'
       - 'docs/software/CE-SW-20_anaiero_v0015_cpp_architecture_pass.md'
       - 'docs/software/ADR-001_native_runtime_ownership.md'
+      - 'docs/software/ADR-002_native_windows_linux_parity.md'
 permissions:
   contents: read
 jobs:
   native-boundaries:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
