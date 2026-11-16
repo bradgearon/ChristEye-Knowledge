@@ -1,5 +1,8 @@
 # ChristEye Anaiero — v3.2 Animon Scientific & Technical Pilot
 
+**Operational science work orders (v3.3):** the [laboratory execution packet](../../laboratory/README.md) supplies the previously missing actual roles, source/genetic material requirements, daily physical care receipts, previous-day readings/limits, source/stage measurement handoffs, axonal trace evidence and independent retention study gates. All eight A09/A17/A16/A02 design/companion documents now embed their own module-specific operating checklists. [Read-only QC program](../../qa/daily_qc.py) and [34-task execution register](../../laboratory/EXECUTION_TASKS.json) provide digital/operational validation. This does not authorize unqualified physical cell procedures or validate a living Animon.
+
+
 **Revision:** 2026-11-16 · **Owner:** We Develop Software LLC  
 **Status:** **4 detailed design/companion pairs for scientific review**; living Animon construction and neural-learning experiments remain unexecuted.
 

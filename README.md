@@ -1,5 +1,8 @@
 # ChristEye Anaiero
 
+**Laboratory execution work orders (v3.3):** [Animon source/genetics, Soil, independent care, spinal axons and retention](laboratory/README.md) now have operational steps, measurable fields, daily QC rules, source and SOP release gates, and 34 assigned-role task specifications. Actual physical procedures require qualified laboratory approval; the P01 R1 2D 80k/20k cell reference cannot be treated as a P06 3D organoid recipe.
+
+
 **Animon** is the proposed individual developmental system class; **ChristEye Anaiero** is the architecture and WDS research program. [Read the ANIMON/1 definition](ontology/ANIMON_V1.md) and the [v3.2 scientific pilot](specifications/v3.2/README.md). The digital reference is not a living Animon and the physical candidate has not been validated.
 
 **We Develop Software LLC · Scientific research and Animon developmental systems architecture · November 15, 2026**
