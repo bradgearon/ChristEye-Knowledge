@@ -5,6 +5,16 @@
 
 The current application is a React/Vite static site with a Cloudflare Worker for /api/* and a private optional D1 interest database. There is **no separate object storage bucket to purchase** for these compiled static assets. Use the existing GitHub repository as the deployment source and keep the existing GitHub Pages documentation as a fallback.
 
+## Development site now available for staging
+
+**Owner-reported URL:** https://anaiero.bradgearon.workers.dev/  
+**Staging documentation:** [S07_DEV_STAGING.md](S07_DEV_STAGING.md)  
+**Development Worker config:** [wrangler.staging.jsonc](wrangler.staging.jsonc).
+
+This site is suitable for testing the existing React experience and, once separately configured, an opt-in registration backed by **anaiero-interest-dev**. It is not proof that the custom production domain anaiero.io or production D1 is live.
+
+Run **node scripts/launch-preflight.mjs --live --target=dev**, or choose **development** in the manual [live smoke test](https://github.com/bradgearon/ChristEye-Knowledge/actions/workflows/cloudflare-live-smoke.yml). Both perform GET-only checks. Cloudflare's workers.dev zone can challenge scripted access.
+
 ## 1. Do not skip the production boundary
 
 The GitHub build is a *candidate artifact*. Until anaiero.io is linked in Cloudflare, **nobody has demonstrated that the current app is live at that hostname**. A green GitHub Actions run or Wrangler dry-run is not a live deployment.

@@ -26,6 +26,14 @@ Every phase has an outcome and a proof gate. A passing simulated or software tes
 
 The readiness state above is not a numerical percent. **Main's current CI** is the authoritative test status; a green build is distinct from Cloudflare deployment or actual data collection.
 
+## S07 development staging — existing workers.dev site
+
+The WDS owner reports a live development site at **https://anaiero.bradgearon.workers.dev/**. Treat it as staging, not proof of the separate production custom domain. The dedicated [development Worker configuration](../app/wrangler.staging.jsonc) targets Worker **anaiero**, while [production](../app/wrangler.jsonc) targets **anaiero-io**.
+
+The new launch preflight supports **--live --target=dev**; the manual GitHub live smoke workflow has a development/production selector. Cloudflare's workers.dev Browser Integrity Check may challenge automatic clients, so a script error must be compared with ordinary browser access before diagnosing site failure.
+
+An optional real staging opt-in requires an isolated D1 database named **anaiero-interest-dev**, staging-only Turnstile widget and a monitored WDS privacy contact. No staging D1 ID, secret or company address has been configured in this repository. See the [development runbook](../app/S07_DEV_STAGING.md).
+
 ## S07 — the active launch gate
 
 | Gate | Required result | Proof | Current status |

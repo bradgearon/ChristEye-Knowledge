@@ -20,6 +20,10 @@ This directory hosts the public Anaiero website, source-linked scientific/engine
 | [Interest signup checklist](app/INTEREST_ROLLOUT.md) | Explicit consent and D1/Turnstile activation |
 | [Archived S01 architecture proposal](planning/06-technical-architecture-s01-archived.md) | Original Astro/Starlight planning record |
 
+## Staging environment
+
+The project owner reports a live dev site at https://anaiero.bradgearon.workers.dev/. Its staging config and isolated-test checklist live in [S07_DEV_STAGING.md](app/S07_DEV_STAGING.md). Cloudflare account resources and staging interest submissions have not been verified with a connector. The intended anaiero.io production site remains a separate release target.
+
 ## Architecture and deployment status
 
 **Already in GitHub:** Vite/React app, corpus importer, technical document reader, Lotus/WindBus/Root demonstrations, the Worker API, D1 migration and consent form. CI tests verify builds and synthetic behavior, but those results **do not prove anaiero.io is deployed**. This session could not externally verify the domain, and no Cloudflare account connector is available here.
