@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Symbolic RNA proxy tracking marker">
+ <rect x="10" y="10" width="108" height="108" rx="20" fill="#1b2340"/>
+ <path d="M32 23c50 25 14 49 61 82M94 23C44 48 80 72 35 105" stroke="#9e91f3" fill="none" stroke-width="5" stroke-linecap="round"/>
+ <path d="M42 33h43M49 53h31M50 73h29M42 93h43" stroke="#d0c9ff" fill="none" stroke-width="3" stroke-linecap="round"/>
+ <circle cx="31" cy="23" r="5" fill="#e7d5ff"/><circle cx="93" cy="105" r="5" fill="#e7d5ff"/>
+</svg>
