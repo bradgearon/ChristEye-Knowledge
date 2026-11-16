@@ -1,5 +1,23 @@
 # Anaiero native WindBus SW1 prototype
 
+## Public executable: anaiero
+
+Use **`anaiero`** as the single public native command. The old `ce_*` programs remain as internal backends for compatibility, but new user scripts should call `anaiero`:
+
+```sh
+cmake -S native -B build/native -DCE_WIND_BUILD_TESTS=ON
+cmake --build build/native --config Release --target anaiero
+./build/native/anaiero help
+./build/native/anaiero doctor
+./build/native/anaiero vm inspect examples/vlm/crest-garden.avlm
+./build/native/anaiero colony step examples/connected-gardens.cev ./culture-state 5
+./build/native/anaiero store verify ./durable-store
+./build/native/anaiero select prepare examples/sim3/model-search.cevselect . ./selection-runs
+```
+
+On Windows, the executable is generally under `build/native/Release/anaiero.exe`.
+See [CE-SW-17](../docs/software/CE-SW-17_anaiero_unified_native_cli.md).
+
 **Status: digital-only portable C++20 reference implementation; not a security/biological-control release.**
 
 This directory implements the initial **SW1** scope from [CE-SW-01](../docs/software/CE-SW-01_native_mesh_architecture.md):
