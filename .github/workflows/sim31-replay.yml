@@ -22,6 +22,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Validate browser JavaScript syntax
+        run: |
+          node --check tools/sim3_viewer/replay_contract.js
+          node --check tools/sim3_viewer/viewer.js
       - name: Validate fixture and negative replay cases
         run: node tests/test_sim31_viewer_contract.cjs
       - uses: actions/setup-python@v5
