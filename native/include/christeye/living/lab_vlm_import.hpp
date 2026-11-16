@@ -18,12 +18,12 @@ inline OverlayResult read_overlay(const sim::Configuration& config,
   (void)config;
   std::filesystem::path source;
   if(!sim::bound_path(config_file.parent_path(),colony.source_path,source))
-    return {Code::invalid_config};
+    return {Code::invalid_config,{},{},0};
   std::string bytes;
   if(!sim::bounded_read(source,sim::kMaxSourceBytes,bytes)||
-     pl::sha256_hex(bytes)!=colony.source_sha)return {Code::invalid_config};
+     pl::sha256_hex(bytes)!=colony.source_sha)return {Code::invalid_config,{},{},0};
   vp::ProcessMachine machine;
-  if(vp::read_file(source,machine).error!=vp::Error::ok)return {Code::invalid_config};
+  if(vp::read_file(source,machine).error!=vp::Error::ok)return {Code::invalid_config,{},{},0};
   std::set<std::uint32_t> cells,molecules;
   const auto collect=[&](const v::Action& action) {
     if(action.is_deposit)return;
@@ -43,7 +43,8 @@ inline OverlayResult read_overlay(const sim::Configuration& config,
   for(auto id:cells){
     const auto* c=machine.base().core().cell(id);
     if(!c)continue;
-    if(!first)out<<',';first=false;
+    if(!first)out<<',';
+    first=false;
     out<<"{\"id\":"<<c->id<<",\"parent\":"<<c->parent_id<<",\"kind\":\""<<v::cell_name(c->kind)
        <<"\",\"x\":"<<c->x<<",\"y\":"<<c->y<<",\"z\":0,\"energy_proxy\":"<<c->energy
        <<",\"maturity_proxy\":"<<c->maturity<<",\"neurite_proxy\":"<<c->neurite_proxy
@@ -55,7 +56,8 @@ inline OverlayResult read_overlay(const sim::Configuration& config,
   for(auto id:molecules){
     const auto* m=machine.base().core().molecule(id);
     if(!m)continue;
-    if(!first)out<<',';first=false;
+    if(!first)out<<',';
+    first=false;
     out<<"{\"id\":"<<m->id<<",\"kind\":\""<<v::molecule_name(m->kind)
        <<"\",\"quantity_proxy\":"<<m->quantity<<'}';
   }
@@ -80,7 +82,8 @@ inline OverlayResult read_overlay(const sim::Configuration& config,
   out<<"]},\"active_processes\":[";
   first=true;
   for(const auto& t:machine.tasks()){
-    if(!first)out<<',';first=false;
+    if(!first)out<<',';
+    first=false;
     out<<"{\"id\":"<<t.id<<",\"elapsed\":"<<t.elapsed<<",\"x\":"<<t.x<<",\"y\":"<<t.y
        <<",\"completed\":"<<(t.completed?"true":"false")<<'}';
   }

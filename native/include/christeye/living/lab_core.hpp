@@ -41,14 +41,16 @@ inline std::string frame(const sim::Configuration& cfg,const sim::Snapshot& stat
      <<"\",\"law_version\":"<<cfg.laws.version<<",\"colonies\":[";
   bool first=true;
   for(const auto& c:state.colonies){
-    if(!first)out<<',';first=false;
+    if(!first)out<<',';
+    first=false;
     out<<"{\"id\":\""<<json_escape(c.id)<<"\",\"food\":"<<c.food<<",\"data\":"<<c.data
        <<",\"signal\":"<<c.signal<<",\"stress\":"<<c.stress<<'}';
   }
   out<<"],\"cells\":[";
   first=true;
   for(const auto& c:state.cells){
-    if(!first)out<<',';first=false;
+    if(!first)out<<',';
+    first=false;
     out<<"{\"colony\":\""<<json_escape(c.colony)<<"\",\"id\":"<<c.id<<",\"parent\":"<<c.parent
        <<",\"kind\":\""<<json_escape(c.kind)<<"\",\"x\":"<<c.x<<",\"y\":"<<c.y<<",\"z\":"<<c.z
        <<",\"energy\":"<<c.energy<<",\"maturity\":"<<c.maturity<<",\"learning\":"<<c.learning
@@ -57,7 +59,8 @@ inline std::string frame(const sim::Configuration& cfg,const sim::Snapshot& stat
   out<<"],\"links\":[";
   first=true;
   for(const auto& link:cfg.links){
-    if(!first)out<<',';first=false;
+    if(!first)out<<',';
+    first=false;
     out<<"{\"from\":\""<<json_escape(link.from)<<"\",\"to\":\""<<json_escape(link.to)
        <<"\",\"channel\":\""<<sim::channel_text(link.channel)<<"\",\"units\":"<<link.units<<'}';
   }
@@ -137,7 +140,8 @@ inline std::string compare(const Profile& profile,const sim::Configuration& conf
      <<"\",\"tick\":"<<state.tick<<",\"config_sha256\":\""<<config.hash<<"\",\"observations\":[";
   bool first=true;
   for(const auto& reference:profile.references){
-    if(!first)out<<',';first=false;
+    if(!first)out<<',';
+    first=false;
     const auto actual=measurement(reference.metric,state);
     const auto delta=actual-reference.expected;
     const auto pass=delta>=-reference.tolerance && delta<=reference.tolerance;
