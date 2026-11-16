@@ -7,7 +7,7 @@ status: "Operational work orders; physical steps depend on locally qualified SOP
 
 # Animon Laboratory Operations — v3.3
 
-**The purpose of this release is real scientist-facing work, not another conceptual glossary.** Every activity below has an owner, input, physical/digital evidence, decision, response to failure, and handoff. The [existing v3.2 designs](../../specifications/v3.2/README.md) remain the scientific architecture. This work-order set is the *execution and QC layer*.
+**The purpose of this release is real scientist-facing work, not another conceptual glossary.** Every activity below has an owner, input, physical/digital evidence, decision, response to failure, and handoff. The [existing v3.2 designs](../specifications/v3.2/README.md) remain the scientific architecture. This work-order set is the *execution and QC layer*.
 
 **Three work classes:** DOCUMENT/DIGITAL (can be executed with current software and source records), PHYSICAL LAB/SOP (only after a chosen institutional procedure and qualified personnel are authorized), and RESEARCH HYPOTHESIS (no actual procedure known or validated). DNA extraction, cell culture/differentiation, changing nutrient/peptide conditions, tissue sampling and electrical interventions belong to the second or third category. This document does not substitute guessed settings for an actual protocol.
 
