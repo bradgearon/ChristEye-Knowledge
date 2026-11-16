@@ -1,15 +1,19 @@
 #pragma once
 // Single-writer materialization service; concurrent bounded snapshot readers.
 #include "anaiero/contracts/runtime_events.hpp"
+#include "anaiero/contracts/service_extension.hpp"
 #include <mutex>
 namespace anaiero::runtime {
 class ColonyProjector {
   mutable std::mutex mutex_;
   ColonyState state_{};
+  contracts::IServiceExtension* extension_=nullptr;
   static bool same_key(const MetricValue& a, const Observation& b) noexcept {
     return a.colony==b.colony&&a.animon==b.animon&&a.metric==b.metric&&a.source==b.source;
   }
 public:
+  // Configure extension before starting threads. Never invoke it under lock.
+  void set_extension(contracts::IServiceExtension* ext) noexcept {extension_=ext;}
   // Single-owner admission check: do not append an impossible observation to
   // the durable evidence log. Apply must follow on the same writer owner.
   Status can_apply(const Observation& o) const noexcept {
@@ -33,6 +37,8 @@ public:
   }
   Status apply(const Observation& o) noexcept {
     if(!valid_observation(o))return Status::invalid;
+    std::uint64_t revision=0;
+    {
     std::lock_guard<std::mutex> lock(mutex_);
     std::size_t source_index=state_.sources;
     for(std::size_t i=0;i<state_.sources;++i)
@@ -66,6 +72,10 @@ public:
     m={o.colony,o.animon,o.source,o.metric,o.value,o.origin,
        gap?Quality::degraded:Quality::current,o.sequence,o.acquired_ns,o.evidence_tag};
     ++state_.committed_updates;++state_.revision;
+    revision=state_.revision;
+    } // Release the mutex before notifying extensions.
+    if(extension_)extension_->on_service_event({contracts::ServiceId::colony_projector,
+      contracts::ServicePhase::committed,revision,o.animon,0});
     return Status::ok;
   }
   // A copy under a short mutex hold gives readers a consistent revision;

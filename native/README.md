@@ -129,3 +129,7 @@ anaiero cells inspect examples/cells/crest-blood-neural.cevatlas ./example-cultu
 ```
 
 This is a **synthetic-only simulation**. It does not model culture conditions, biological stimulation, pathogen effects, gene engineering, or proven neural knowledge transfer. The controller's qualified live-observation and physical-care boundaries remain separate.
+
+## Adaptive Optimization (v0.015)
+
+`anaiero optimize demo` runs a synthetic digital route-selection/feedback example via a service, a trial port and an in-memory digital route store. ColonyState remains only the read model. Extensibility hooks are defined by `IServiceExtension` and opt-in service-specific strategy ports. No real cells or physical actuators are controlled. See [CE-SW-21](../docs/software/CE-SW-21_adaptive_optimization_and_service_extensions.md).
