@@ -140,7 +140,7 @@ int run(int argc,char**argv) {
   if(cmd.empty()||cmd=="help"||cmd=="--help"){
     if(argc>2){
       if(const auto* m=lookup(argv[2])){
-        std::cout<<"Module: "<<m->name<<"\nPurpose: "<<m.purpose<<"\nExample: "<<m->example<<'\n';return 0;
+        std::cout<<"Module: "<<m->name<<"\nPurpose: "<<m->purpose<<"\nExample: "<<m->example<<'\n';return 0;
       }
       return 64;
     }
