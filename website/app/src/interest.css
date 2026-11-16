@@ -1,0 +1,43 @@
+
+/* WDS research interest / privacy routes — complements the technical portal */
+.header-follow{display:inline-flex;align-items:center;gap:5px;color:var(--mint);font-size:11px;font-weight:700;white-space:nowrap;border:1px solid var(--line2);padding:8px 11px;border-radius:7px}
+.header-follow:hover{background:var(--panel)}
+.interest-view{max-width:1290px}
+.interest-intro{padding:12px 0 24px;max-width:830px}
+.interest-intro h1{margin:25px 0 22px}
+.interest-intro>p{font-size:16px;max-width:730px}
+.interest-grid{display:grid;grid-template-columns:1fr minmax(340px,1fr);gap:38px;align-items:start}
+.interest-benefits{display:grid;gap:21px;padding:15px 4px}
+.interest-benefits>div{padding:21px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+.interest-benefits svg{color:var(--mint);margin-bottom:11px}
+.interest-benefits h3{font-size:16px;margin-bottom:7px}
+.interest-benefits p{font-size:12px;line-height:1.75;margin:0}
+.interest-disclosure{display:flex;align-items:flex-start;gap:9px;margin-top:8px;line-height:1.75;font-size:12px}
+.interest-disclosure svg{margin-top:2px;flex:none}
+.interest-card{border:1px solid var(--line2);border-radius:16px;background:var(--surface);padding:32px 35px;box-shadow:0 14px 36px #0002}
+.interest-card h2{font-size:31px;margin:14px 0 25px}
+.interest-form{display:flex;flex-direction:column;gap:10px}
+.interest-form>label:not(.interest-consent){font-size:12px;font-weight:700;color:var(--ink);margin-top:8px}
+.interest-form>input,.interest-form>select{width:100%;padding:12px 13px;background:var(--canvas);color:var(--ink);border:1px solid var(--line2);border-radius:8px;min-height:45px}
+.interest-form>input:focus,.interest-form>select:focus{border-color:var(--mint)}
+.interest-consent{display:flex;align-items:flex-start;gap:12px;font-size:11.5px;color:var(--muted);line-height:1.65;margin:12px 0 6px}
+.interest-consent input{margin-top:4px;accent-color:var(--mint);flex:none}
+.interest-consent a{font-weight:700;text-decoration:underline;text-underline-offset:2px}
+.interest-turnstile{min-height:63px;display:flex;align-items:center}
+.interest-form .btn{width:100%;margin-top:6px}
+.interest-fineprint{font-size:10.5px!important;color:var(--dim)!important;margin:6px 0 0}
+.interest-honeypot{position:absolute!important;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.interest-standby,.interest-success{border:1px solid var(--line);border-radius:12px;padding:27px;background:var(--panel);font-size:13px;color:var(--muted);line-height:1.85}
+.interest-standby>svg,.interest-success>svg{color:var(--mint);margin-bottom:11px}
+.interest-standby h3,.interest-success h3{font-size:20px;color:var(--ink);margin-bottom:10px}
+.interest-standby p,.interest-success p{margin:0 0 14px}
+.interest-error{padding:12px;background:#ad4c4518;color:var(--rose);border:1px solid #b85d5955;border-radius:8px;font-size:12px}
+.privacy-view{max-width:840px}
+.privacy-view>p{font-size:16px;line-height:1.85;margin-bottom:30px}
+.privacy-view h1{margin-top:22px}
+.privacy-view section{margin:0 0 25px;border-top:1px solid var(--line);padding-top:23px}
+.privacy-view h2{font-size:23px}
+.privacy-view p{font-size:13px;line-height:1.85}
+@media(max-width:1080px){.header-follow{display:none}}
+@media(max-width:830px){.interest-grid{grid-template-columns:1fr}.interest-card{padding:27px}.interest-benefits{order:2}.interest-card{order:1}}
+@media(max-width:500px){.interest-card{padding:20px}.interest-intro h1{font-size:2.45rem}.interest-card h2{font-size:26px}}
