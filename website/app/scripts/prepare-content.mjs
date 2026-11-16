@@ -72,13 +72,13 @@ for(const r of SOURCES.sources){
  if(raw.length>4_000_000) throw Error('Source too large for static site: '+source);
  let content=clean(raw);
  // Pandoc DOCX conversion preserved figures as HTML <img> tags.
- content=content.replace(/<img\\b[^>]*>/gi,tag=>{
-  const src=tag.match(/\\bsrc=[\"']([^\"']+)[\"']/i)?.[1];
-  const alt=tag.match(/\\balt=[\"']([^\"']*)[\"']/i)?.[1]||'Source scientific figure';
+ content=content.replace(/<img\b[^>]*>/gi,tag=>{
+  const src=tag.match(/\bsrc=["']([^"']+)["']/i)?.[1];
+  const alt=tag.match(/\balt=["']([^"']*)["']/i)?.[1]||'Source scientific figure';
   return src?safeMedia(source,src,alt):'[Source figure without image path]';
  });
  // Original Markdown image syntax is also normalized when locally accessible.
- content=content.replace(/!\\[([^\\]]*)\\]\\(([^)]+)\\)/g,(all,alt,ref)=>
+ content=content.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,(all,alt,ref)=>
    ref.startsWith('content/media/')?all:safeMedia(source,ref,alt));
  const id=sha(source).slice(0,16);
  const ext=path.extname(source).toLowerCase();
