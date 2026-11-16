@@ -39,6 +39,7 @@ static void show(const p::ProcessMachine& m, bool full) {
     std::cout << "{\"id\":" << task.id << ",\"process\":\"" << def.id
               << "\",\"operation\":\"" << def.operation
               << "\",\"asset\":\"" << (asset ? asset->path : "")
+              << "\",\"asset_sha256\":\"" << (asset ? asset->sha256 : "")
               << "\",\"asset_role\":\"" << (asset ? asset->role : "")
               << "\",\"duration\":" << def.duration << ",\"elapsed\":" << task.elapsed
               << ",\"weight\":" << def.weight << ",\"x\":" << task.x
