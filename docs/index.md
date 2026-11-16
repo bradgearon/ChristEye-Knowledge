@@ -1,5 +1,8 @@
 # ChristEye Anaiero — documentation
 
+**New laboratory operations layer:** [Animon v3.3 full work-order packet](../laboratory/README.md) gives scientific operators source/genetic qualification, daily care checks, longitudinal measurements, axonal evidence and retention-test task forms. [Read-only daily QC code](../qa/daily_qc.py). Physical procedures still require selected approved local SOPs.
+
+
 **Current naming:** an **Animon** is the proposed individually traceable developmental system. [ANIMON/1 ontology](../ontology/ANIMON_V1.md) · [v3.2 Core/Care/Root/Retention pilot](../specifications/v3.2/README.md).
 
 **15 November 2026 · © 2026 We Develop Software LLC · WDS Public Research Reference License**

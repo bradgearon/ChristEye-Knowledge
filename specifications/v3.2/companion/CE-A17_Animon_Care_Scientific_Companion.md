@@ -104,3 +104,17 @@ For any actual neural preparation, the care lead must assess authorized source m
 Further sources: [BIO-04 SustiBus/ChemiBus](../../../processes/BIO-04-sustibus-chemibus.md) · [BIO-10 independent care](../../../processes/BIO-10-care-health.md) · [v3.2 scientific dossier standard](../../../reviews/V3_2_LAB_DOSSIER_STANDARD.md) · [CE-A09 Core companion](CE-A09_Animon_Core_Scientific_Companion.md).
 
 © 2026 We Develop Software LLC · [WDS license](../../../LICENSE.md). Patent document excluded.
+
+
+## V3.3 laboratory interpretation sequence — CE-A17 physiology and chemical observations
+
+1. **Formulate the actual question before sampling.** Are we testing essential maintenance, extracellular chemistry, assay stability, or a specific proposed support-related learning mechanism? Do not combine them into one "Animon mood" or "health score".
+2. **Qualify source and process.** Use [WO-00](../../../laboratory/WO-00-source-and-genomic-qc.md) and the approved maintenance SOP selected by the institution. Identify the actual matrix/compartment and sample type; RNA/protein tissue samples and conditioned medium measurements are not interchangeable.
+3. **Obtain real observations.** For each permitted assay, retain exact analyte/form, sample position, measurement units, assay calibration, raw source and time relative to actual service. Missing/invalid measurements remain NOT_MEASURED.
+4. **Compare** to prior valid comparable day, stage-matched controls and source-qualified critical/warning limits. If external medium lot, sampling or instrument changed, classify the measurement NONCOMPARABLE unless an approved bridge exists.
+5. **Test alternatives:** a changed lactate concentration may reflect sampling, exchange, cell loss, production/uptake or source stage. A task score change may reflect decoder access or health rather than a specific biochemical memory mechanism.
+6. **If a novel molecule/peptide proposal arises**, open [deviation/change control](../../../laboratory/forms/CHANGE_AND_DEVIATION.md) and demand actual source, molecular form/receptor, qualified control, protected prior tasks and PI/cell/safety signatures. Without approved site SOP the action remains NOT_APPROVED.
+7. **Conclude narrowly:** VALID_CARE_OBSERVATION, VALID_CHEMICAL_MEASUREMENT, SOURCE/METHOD_CONFOUNDED, UNRESOLVED or NEGATIVE. A supported chemical effect is not a portable Word or physical Crystal.
+
+**Actual data packet:** [daily shift record](../../../laboratory/forms/DAILY_SHIFT_SHEET.md), [WO-02](../../../laboratory/WO-02-daily-care-and-chemistry.md), specimen source IDs and signed assay/health interpretation. A non-actuating QC script can calculate daily deltas but **never** issue a culture recipe, life-support command or automatic neural intervention.
+

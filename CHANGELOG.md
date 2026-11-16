@@ -1,3 +1,10 @@
+## 2026-11-16 — v3.3 laboratory operational work orders and scientist execution controls
+
+- Added numbered WO-00 to WO-04 work orders for source/genomic QC, development/Soil observations, daily care/ChemiBus, spinal Root/axon evidence and delayed retention.
+- Published P01 source-specific 2D R1 physical counts (80k neurons/20k matched astrocytes per reference well) separately from later P06 3D Soil with unassigned counts.
+- Added 34 assignable work items, real source/shift/deviation forms, typed daily QC records, a read-only previous-day comparison engine and twelve automated QA cases.
+- Linked genuine operational steps into all four v3.2 engineering designs and four scientific companions. Physical material methods and safe operating thresholds still require a named qualified laboratory and approved SOP.
+
 ## 2026-11-16 — v3.2 Animon axonal and long-term retention pilot
 
 - Completed the first **four engineering designs and four scientific companions**: A09 Animon Core/Soil, A17 independent Care, A16 spinal Root/axon mapping, and A02 long-term retention.

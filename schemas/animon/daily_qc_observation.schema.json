@@ -1,0 +1,190 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ANIMON v3.3 Read-only Daily Laboratory QC Data",
+  "description": "Audit data only. Critical and warning limits are supplied from a separately approved lab SOP; this schema cannot determine safe culture conditions.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "current",
+    "previous",
+    "approved_limits",
+    "qualified_baseline"
+  ],
+  "properties": {
+    "current": {
+      "$ref": "#/$defs/observation"
+    },
+    "previous": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/observation"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "approved_limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "critical_low",
+        "critical_high",
+        "warning_low",
+        "warning_high",
+        "approved_sop_ref"
+      ],
+      "properties": {
+        "critical_low": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "critical_high": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "warning_low": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "warning_high": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "approved_sop_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "qualified_baseline": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    }
+  },
+  "$defs": {
+    "observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "preparation_id",
+        "source_lot_id",
+        "culture_stage",
+        "measurement_name",
+        "value",
+        "unit",
+        "sample_location",
+        "method_ref",
+        "instrument_ref",
+        "calibration_version",
+        "medium_lot",
+        "timestamp",
+        "validity",
+        "calibration_valid",
+        "raw_data_ref",
+        "care_due",
+        "verified_care_receipt",
+        "change_event_ref",
+        "method_bridge_approved"
+      ],
+      "properties": {
+        "preparation_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_lot_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "culture_stage": {
+          "type": "string",
+          "minLength": 1
+        },
+        "measurement_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sample_location": {
+          "type": "string",
+          "minLength": 1
+        },
+        "method_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "instrument_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "calibration_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "medium_lot": {
+          "type": "string",
+          "minLength": 1
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validity": {
+          "enum": [
+            "VALID",
+            "INVALID",
+            "UNMEASURED"
+          ]
+        },
+        "calibration_valid": {
+          "type": "boolean"
+        },
+        "raw_data_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "care_due": {
+          "type": "boolean"
+        },
+        "verified_care_receipt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "change_event_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "method_bridge_approved": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

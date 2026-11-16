@@ -107,3 +107,23 @@ The *Animon* is an individual developmental system concept, while care is attach
 Related: [Animon Core design](CE-A09_Animon_Core_Design.md) · [CE-A17 companion](../companion/CE-A17_Animon_Care_Scientific_Companion.md) · [BIO-10 care](../../../processes/BIO-10-care-health.md) · [BIO-09 change review](../../../processes/BIO-09-growth-control.md).
 
 © 2026 We Develop Software LLC · [WDS license](../../../LICENSE.md). Patent document excluded.
+
+
+## V3.3 operating work package — CE-A17 daily care
+
+This is what the **assigned care lead** checks on every actual observation shift; follow [WO-02](../../../laboratory/WO-02-daily-care-and-chemistry.md) and record results on the [daily shift form](../../../laboratory/forms/DAILY_SHIFT_SHEET.md).
+
+| Exact shift sequence | Required record | Deviation response |
+|---|---|---|
+| A17-01 Verify prior signed handoff and current prep/lot/stage | source identity, old exception IDs, actual authorized maintenance SOP | identity mismatch → HOLD_NEW_EXPERIMENT |
+| A17-02 Verify current care is physically delivered | actual operator/service receipt, qualified source medium lot and approved due time | missing receipt → escalate to independent care lead |
+| A17-03 Validate chemical/environmental readout | instrument/method/calibration, sample compartment/time, analyte/form/unit and raw digest | wrong source or expired calibration → INVALID_MEASUREMENT |
+| A17-04 Compare with previous valid comparable day | absolute and percentage deltas, approved reference baseline, method/source/lot/stage comparability | changed lot/assay → NONCOMPARABLE |
+| A17-05 Compare with approved SOP critical and warning bands | true SOP reference and signed threshold version | critical deviation → HOLD new experiment and qualified site contingency; warning → REVIEW_TREND |
+| A17-06 Evaluate any proposed food/peptide change | real source and target, receptor/chemical form, health/older tasks, comparator and signed [change card](../../../laboratory/forms/CHANGE_AND_DEVIATION.md) | unapproved → no physical action |
+| A17-07 Sign end-of-shift handoff | ongoing independent care, invalid/unresolved data, next authorized observation and reviewers | no auto-status promotion |
+
+**Critical design behavior:** if an Animon fails a task, SustiBus support **continues through its independent qualified service**; Honey feedback cannot change Milk, chemistry or medium. A measured lactate or glucose amount is not evidence of learned content and cannot select a peptide dose. See the executable [read-only daily QC tool](../../../qa/daily_qc.py); it cannot actuate lab hardware.
+
+**No universal daily nutrient schedule is specified.** The [original P01 care plan](../../../phases/P01/docs/04_Daily_Care_Quality_Gates_and_Assays.md) distinguishes daily inspection from supplier-specific service cadence, and a different P06 3D Soil cannot inherit a planar culture SOP.
+

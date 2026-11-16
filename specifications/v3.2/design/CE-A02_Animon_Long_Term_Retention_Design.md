@@ -180,3 +180,25 @@ The scientist receives: [v3.2 study readiness schema](../../../schemas/animon/st
 **Related:** [CE-A02 scientific companion](../companion/CE-A02_Animon_Long_Term_Retention_Scientific_Companion.md) · [CE-A16 Root/axon design](CE-A16_Animon_Spinal_Root_Design.md) · [CE-A09 Core](CE-A09_Animon_Core_Design.md) · [CE-A17 Care](CE-A17_Animon_Care_Design.md) · [BIO-06 teaching](../../../processes/BIO-06-teaching.md) · [BIO-08 Crystal research](../../../processes/BIO-08-crystals.md).
 
 © 2026 We Develop Software LLC · [WDS Public Research Reference License](../../../LICENSE.md). Physical patent document excluded.
+
+
+## V3.3 operating work package — acquired and delayed Root evidence
+
+This module has an actual *digital* training/replay implementation, plus an **unexecuted biological study**. Follow [WO-04](../../../laboratory/WO-04-learning-and-delayed-retention.md). Do not confuse the reference MemoryBank's stored lexical events with an independently learned neural capability.
+
+| Research phase | Exact work and record | Gate |
+|---|---|---|
+| A02-01 | Declare one task, source/label rights, X/Y/HOLD or other valid response classes, chance and constant-response baseline | independent evaluator/PI signs source split and primary endpoint |
+| A02-02 | Confirm actual source and care/reader readiness via WO-00/01/02, with source/lot/region/qualified instrument | missing source, calibration or actual care → HOLD |
+| A02-03 | Record valid **previous-day or approved baseline** task results and protected earlier capabilities | original per-class counts, frozen reader checksum and true input receipt |
+| A02-04 | Under an actual qualified lab procedure, document intended versus *physically delivered* teaching events and whether response feedback/labels were available | physical delivery receipt and source/acquisition controls |
+| A02-05 | Record immediate valid responses with fixed decoder, selected comparator and blinded/independent evaluator | per-class confusion matrix and invalid-trial count, not raw firing-rate guess |
+| A02-06 | At predeclared delay, verify teacher/answer-bearing channels are off; use identical or justified bridged readout under approved conditions | true delayed task outcome and existing-care context |
+| A02-07 | Compare delayed to immediate, matched control and protected earlier skills, with independent biological unit and statistical rationale | support bounded retention, no retention in tested horizon, access-confounded or UNRESOLVED |
+| A02-08 | Review nominated spindle/spinal Root or chemical mechanism separately using CE-A16 | anatomical/biochemical contribution **not** inferred from a delayed score |
+| A02-09 | PI and statistician sign claim and all negative results; preserve digital results as distinct evidence | source-scoped release or HOLD/REJECTED |
+
+**If performance is lower than yesterday:** first verify the same source, physical cue delivery, calibration, codebook/decoder, medium/care history and task-class balance. Missing or changed readers produce ACCESS_CONFOUNDED/NONCOMPARABLE, not automatic memory-erasure or new-growth decisions.
+
+**Physical molecule/peptide "Crystal" update:** not supported by these records. A protein, axon or media change cannot be commanded to restore a low Root score. The [v3.3 controlled change form](../../../laboratory/forms/CHANGE_AND_DEVIATION.md) is mandatory for any proposed source/measurement/physical study adjustment.
+

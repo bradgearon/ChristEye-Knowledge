@@ -161,3 +161,21 @@ The [StudyReadinessPacket](../../../schemas/animon/study_readiness_packet.schema
 **Related:** [CE-A02 engineering design](../design/CE-A02_Animon_Long_Term_Retention_Design.md) · [CE-A16 axon companion](CE-A16_Animon_Spinal_Root_Scientific_Companion.md) · [BIO-06 learning](../../../processes/BIO-06-teaching.md) · [BIO-08 Crystals](../../../processes/BIO-08-crystals.md) · [v3.1 formal reconciliation](../../../research/full-markdown/R03_03_Formal_Models_and_Reconciliation_1_.md).
 
 © 2026 We Develop Software LLC · [WDS Public Research Reference License](../../../LICENSE.md). Physical patent document excluded.
+
+
+## V3.3 scientist's actual retention study and negative-result review
+
+The necessary work is more than checking spontaneous neural activity. An independent researcher must:
+1. Register the **real** approved source/preparation, source cell/phenotype and authorized care [WO-00](../../../laboratory/WO-00-source-and-genomic-qc.md) and [WO-02](../../../laboratory/WO-02-daily-care-and-chemistry.md).
+2. Predeclare primary hypothesis, task/labeling and held-out split, actual biological experimental unit, matched noncontingent controls, reader/cue version and scientifically justified evaluation horizons.
+3. Verify the previous qualified baseline and ongoing care state. Any new source, medium lot, assay, channel map or decoder that is not independently bridged can confound the comparison.
+4. During an approved trial, distinguish planned versus **actually delivered** cue and actual response, input source, channel artifacts, feedback/teacher availability and any invalid trials.
+5. Evaluate immediate and delayed responses under a locked independent codebook with answer-bearing teacher path absent. Publish per-class results, invalid counts, uncertainty and protected old tasks, not a single "memory score".
+6. Test access loss separately from learned-relation loss: a changed cue/reader may suppress expression without proving the relation has been erased.
+7. If spinal tissue is nominated as the carrier, demand [WO-03](../../../laboratory/WO-03-axon-and-spinal-root-evidence.md) structural and functional source evidence independent of the task score. Candidate peptides/scaffolds remain hypothesis-only.
+8. Report actual negative or inconclusive retention, including failure at the specified delay, instead of silently choosing a shorter delay to secure success.
+
+**Scientific result packet:** [WO-04](../../../laboratory/WO-04-learning-and-delayed-retention.md), source/care qualification, fixed evaluator digest, previous and delayed true task records, matched control/replicate hierarchy, CE-A16 if relevant, and signed PI/statistical review.
+
+The [2026 organoid learning report](https://pubmed.ncbi.nlm.nih.gov/41720084/) documented a task-specific improvement with limited persistence after 45 minutes; it is evidence that delayed evaluation matters, not evidence that the Animon currently retains a physical Root.
+

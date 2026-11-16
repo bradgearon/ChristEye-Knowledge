@@ -126,3 +126,17 @@ SustiBus and care remain independent of Honey/reward. Any change to growth, feed
 **Linked source set:** [CE-A16 design](../design/CE-A16_Animon_Spinal_Root_Design.md) · [BIO-02](../../../processes/BIO-02-axon-spinal-root.md) · [BIO-07](../../../processes/BIO-07-joining.md) · [CE-A02 long-term retention](../design/CE-A02_Animon_Long_Term_Retention_Design.md) · [WDS research register](../../../research/evidence/anaiero-biology-2026-11.md).
 
 © 2026 We Develop Software LLC · [WDS Public Research Reference License](../../../LICENSE.md). Physical patent document excluded.
+
+
+## V3.3 scientist's controlled observation and interpretation workflow
+
+1. **Define the narrow claim:** what source, anatomy and test would make it structural, correlated, influenced or task-related? A statement such as "the Roots now understand" is not a measurement.
+2. **Authenticate sample:** actual qualified spinal tissue/source, developmental stage, source lot, approved care and consent from [WO-00](../../../laboratory/WO-00-source-and-genomic-qc.md). Do not substitute mouse or external connectoid data for a WDS preparation.
+3. **Acquire qualified observations:** source- and compartment-appropriate RNA/protein cell identity or instrument imaging/recordings under the actual lab SOP. Maintain true source/target spatial transform, optical depth, method, clock and raw trace.
+4. **Perform the correct comparison:** source-matched negative regions, appropriate source and target instrumentation controls and possible common electrical or environmental drive. One co-varying waveform is not a synapse.
+5. **Inspect yesterday or previous registered stage:** source identity, sampling depth, region registration and instrument version must match, or the apparent structural change becomes NONCOMPARABLE. Separate maturation from task learning.
+6. **For a physical retained-Root proposal:** require independently evaluated [WO-04 delayed learning](../../../laboratory/WO-04-learning-and-delayed-retention.md), fixed reader, separate actual tissue contribution and prior task protection.
+7. **Release only the supported evidence layer:** anatomical, associational, candidate functional influence, task-related, invalid or UNRESOLVED. Retain original negative and ambiguous data.
+
+**Required scientist file:** [WO-03](../../../laboratory/WO-03-axon-and-spinal-root-evidence.md), genuine source data, matched controls, signed graph edge, actual care state and identified uncertainty. An observed new neuronal process is not a cloned cell and does not demonstrate a newly installed memory.
+

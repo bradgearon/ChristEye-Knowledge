@@ -123,3 +123,24 @@ The laboratory receives a **StudyReadinessPacket** with actual source and consen
 **Related:** [scientific companion](../companion/CE-A09_Animon_Core_Scientific_Companion.md) · [Animon care design](CE-A17_Animon_Care_Design.md) · [original CE-A16 Root mapping](../../v3/design/CE-A16_root_registry_and_mapping_Design.md) · [original CE-A02 retention](../../v3/design/CE-A02_long_term_storage_Design.md).
 
 © 2026 We Develop Software LLC · [WDS license](../../../LICENSE.md). No confidential physical patent document published.
+
+
+## V3.3 operating work package — CE-A09 Soil/Core (scientist execution)
+
+**This section is the operating layer, not another architecture diagram.** Start at [WO-00 qualified source/genetic material](../../../laboratory/WO-00-source-and-genomic-qc.md), then [WO-01 Soil/model development](../../../laboratory/WO-01-soil-development-and-maturation.md), while [WO-02 care](../../../laboratory/WO-02-daily-care-and-chemistry.md) runs independently.
+
+| Actual sequence | What to obtain/do at the proper authorized stage | Evidence that must be checked before progression |
+|---|---|---|
+| A09-01 | Select PI/institution, the approved R1 2D reference or a distinct P06 3D source model; register cell-bank lot, legal use and approved SOP | signed [source form](../../../laboratory/forms/SOURCE_RELEASE_FORM.md), applicable STR/SNP/genome stability/contamination/source phenotype evidence |
+| A09-02 | Identify and record independent batch, living preparation, source and region; do not invent an individual Animon specimen | actual traceability ledger, protocol and source lineage, bank/passage |
+| A09-03 | Under the institution SOP, document the actual initiated preparation, first source-qualified care and earliest valid observation | real physical service receipt; raw image or assay source ID; source-specific measurement range |
+| A09-04 | Record stage-qualified morphology, viability, regional cell identity and 3D coverage **where applicable**, with true sample/method | current vs prior comparable stage/valid day, source variation and unobserved internal tissue |
+| A09-05 | At an approved stage, document neuron/glia identities and actual axon/dendrite processes; separate imaging from functional inference | marker panel/reference, spatial transformation, instrument limitations, sampled biological unit |
+| A09-06 | Allow a proposed circuit/learning study only if actual source/care/instrument/PI gates are valid | signed qualification result; otherwise HOLD_NEW_EXPERIMENT and maintain independent care |
+
+**Phases and physical materials:** [P01 source-derived count/BOM](../../../laboratory/ANIMON_PHASE_AND_MATERIAL_BOM.md) documents the R1 **illustrative 80,000 motor neurons + 20,000 matched astrocytes** in one specific 2D supplier/MEA context. It does **not** set a 3D Soil cell count or approve a plating protocol.
+
+**Daily action:** the operator uses the [daily shift form](../../../laboratory/forms/DAILY_SHIFT_SHEET.md) and compares each actual valid measurement to a prior comparable day and approved source/stage reference. A new morphology, different medium lot or assay does not by itself establish a new developmental capability. Trigger a [deviation/change card](../../../laboratory/forms/CHANGE_AND_DEVIATION.md) when source, care, assay or tissue status is uncertain. No automatic growth-factor/peptide/genetic change.
+
+**Release output:** actual source-qualified preparation identity, cell/region characterization, approved care records, measured unknowns and PI/QA signatures. If no live material exists, release only a digitally tested *Animon specification*, not a physically created Animon.
+

@@ -107,3 +107,18 @@ Before an actual experiment, the designated institution must select a source/mod
 **References:** [CE-A09 design](../design/CE-A09_Animon_Core_Design.md) · [Animon ontology](../../../ontology/ANIMON_V1.md) · [source evidence index](../../../research/evidence/anaiero-biology-2026-11.md) · [ISSCR model standards](https://www.isscr.org/basic-research-standards/stem-cell-based-model-systems).
 
 © 2026 We Develop Software LLC · [WDS license](../../../LICENSE.md). Patent document excluded.
+
+
+## V3.3 scientist procedure — how a Core claim would be tested and rejected
+
+**Primary scientific question:** does the actual chosen source preparation contain the asserted regional neuron/glia identity and a qualified response beyond ordinary source development, sample handling or the electronic reader?
+
+1. **Select source** using [WO-00](../../../laboratory/WO-00-source-and-genomic-qc.md). Request relevant source-line genetic identity report, genome stability and contamination/phenotype certificates, with donor privacy restrictions. Document source-line differences and actual independent biological units.
+2. **Record first authorized observation** using [WO-01](../../../laboratory/WO-01-soil-development-and-maturation.md). Capture actual preparation and spatial region, stage, raw images, viability method, assay control and surface/deep coverage.
+3. **At lab-approved stage milestones**, obtain the source-appropriate RNA/protein/structural cell-state evidence under the institution SOP. Candidate panels include source/context-dependent neuronal, spinal and glial markers; no single marker determines a fully functioning circuit.
+4. **Compare to the right reference:** previous valid same-preparation observation *and* stage/source-matched independent preparations. Check whether a medium, source, imaging or readout method changed and whether an interior region is unobserved.
+5. **Before any task claim**, request independently qualified I/O instrumentation, care and cue/decoder reference; report whether the task effect could be source maturation or host decoder adaptation.
+6. **Issue a source-scoped result:** SOURCE_QUALIFIED, REGION_OBSERVED, CELL_IDENTITY_SUPPORTED, FUNCTIONAL_BASELINE_SUPPORTED, NEGATIVE or UNRESOLVED. No living-Animon maturity conclusion follows from a beautiful organoid shape alone.
+
+**Required scientist deliverable:** [source-release form](../../../laboratory/forms/SOURCE_RELEASE_FORM.md), raw sample/assay provenance, stage comparison chart, actual care/incident status, and signed source-specific interpretation. The separate P06 3D Soil model must never inherit the R1 planar cell counts or claimed chemistry without a new laboratory qualification.
+
