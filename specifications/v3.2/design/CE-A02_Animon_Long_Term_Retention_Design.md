@@ -180,3 +180,19 @@ The scientist receives: [v3.2 study readiness schema](../../../schemas/animon/st
 **Related:** [CE-A02 scientific companion](../companion/CE-A02_Animon_Long_Term_Retention_Scientific_Companion.md) · [CE-A16 Root/axon design](CE-A16_Animon_Spinal_Root_Design.md) · [CE-A09 Core](CE-A09_Animon_Core_Design.md) · [CE-A17 Care](CE-A17_Animon_Care_Design.md) · [BIO-06 teaching](../../../processes/BIO-06-teaching.md) · [BIO-08 Crystal research](../../../processes/BIO-08-crystals.md).
 
 © 2026 We Develop Software LLC · [WDS Public Research Reference License](../../../LICENSE.md). Physical patent document excluded.
+
+## Technician/evaluator execution addendum — A02 acquisition and delayed assessment
+
+**Controlled source:** [LAB-R1-03 task and MEA procedure](../../../lab/03_MEA_AND_EVALUATION.md) and [session form](../../../lab/forms/mea_session_template.csv). First demonstrate the software source/replay/metric path without living preparations.
+
+1. **Freeze study:** specific X/Y/HOLD task, rights-scoped teaching sources, group allocation, codebook, decoder/source hash, blinded evaluator, predeclared controls and delayed test horizon.
+2. **Check G1–G3:** actual cell/lot identity, signed daily care/viability, MEA reference and clocks, artifact/noise limits. A source or care defect results in HOLD before teaching.
+3. **Record baseline:** actual input/received cue, reader version, per-class valid trials, confusion matrix and chance/matched-control comparison. Never credit spontaneous spikes with a semantic answer.
+4. **Training:** use only a separately approved lab stimulus method; record **actual delivered** events, source and feedback information. A planned but undelivered message does not count.
+5. **Immediate test:** teacher answer channel unavailable to the independent evaluator before response; preserve raw decisions, class denominators and actual reader hash.
+6. **Delayed test:** after the declared interval, record feedback/teacher-off verification, repeat with the *same frozen readout*, and retest protected prior tasks. No valid delayed record means NOT_TESTED.
+7. **Day-to-day interpretation:** only compare sessions with comparable cell source, actual care, exposure, acquisition and decoder; otherwise ACCESS_CONFOUNDED/REBASELINE. Report actual uncertainty and independent biological preparation count.
+8. **If decline/abnormal:** check source rights, raw delivery, reader and physical care first; hold additional teaching if unqualified. No nutrient, peptide or neuron-growth intervention follows automatically.
+
+**Output:** TrialRecords, actual delivery receipts, immediate/delayed score and absolute controls, protected-task review, uncertainty, independent PI disposition. Any anatomical localization requires separate CE-A16 evidence.
+

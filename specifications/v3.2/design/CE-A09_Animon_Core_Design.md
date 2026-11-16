@@ -123,3 +123,17 @@ The laboratory receives a **StudyReadinessPacket** with actual source and consen
 **Related:** [scientific companion](../companion/CE-A09_Animon_Core_Scientific_Companion.md) · [Animon care design](CE-A17_Animon_Care_Design.md) · [original CE-A16 Root mapping](../../v3/design/CE-A16_root_registry_and_mapping_Design.md) · [original CE-A02 retention](../../v3/design/CE-A02_long_term_storage_Design.md).
 
 © 2026 We Develop Software LLC · [WDS license](../../../LICENSE.md). No confidential physical patent document published.
+
+## Technician execution addendum — A09 source, genetics, cell state and Soil
+
+**Controlled runbooks:** [source and genomic receipt](../../../lab/01_SOURCE_AND_MATERIAL_RELEASE.md), [daily checks](../../../lab/02_DAILY_OPERATION_AND_QC.md), [MEA baseline](../../../lab/03_MEA_AND_EVALUATION.md).
+
+1. **Before release (G0/G1):** obtain actual BrainXell BX-0100-XX spinal motor-neuron and matched BX-06XX-XX astrocyte source lots, COAs, research-use permissions, authenticated genetic identity/STR result or approved reference sample, and qualified source storage/handling SOP. Do not collect unconsented donor tissue or engineer cell barcodes.
+2. **Day 0:** a qualified facility operator executes the approved current vendor cell procedure. Record real viable neuron and astrocyte input counts (P01's 80k+20k is only a supplier-model example), medium/surface lot, MEA well assignment, operator, time and initial registered image.
+3. **Every day:** inspect the same physical well for morphology, visible attachment/detachment/debris, contamination concern, medium/volume changes and source-qualified environmental observations. Link to yesterday's *comparable valid* image/assay and document the delta or the new service/assay epoch. A missed reading is NOT_MEASURED.
+4. **At identity/structural release:** compare source/region-specific neuronal, glial and spinal candidate markers from a lab-approved matched genetic/RNA/protein sample; record assay method, specimen, spatial coverage and confidence. Cell birth is not inferred from neurite extension.
+5. **When abnormal:** suspected contamination → facility quarantine protocol; source or genetic identity mismatch → HOLD_G1; physiological quality/assay invalid → HOLD_NEW_LEARNING and notify care lead. Maintain independent approved care.
+6. **Before 3D Soil:** select a different source-approved organoid model, new geometry/diffusion/assay SOP and qualified 3D counts. The Axion 2D maintenance schedule does not transfer.
+
+**Output:** SourceReceipt, DayObservation, microscopy/genomics evidence, source/Soil qualification status, deviations and two signatures. No actual Animon specimen is claimed by the paperwork.
+

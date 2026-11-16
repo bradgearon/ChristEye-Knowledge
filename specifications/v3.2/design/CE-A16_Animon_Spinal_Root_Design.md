@@ -152,3 +152,17 @@ Refer to [BIO-09 growth governance](../../../processes/BIO-09-growth-control.md)
 **Next integration:** [CE-A16 scientific companion](../companion/CE-A16_Animon_Spinal_Root_Scientific_Companion.md) and [CE-A02 retention design](CE-A02_Animon_Long_Term_Retention_Design.md).
 
 **Rights:** © 2026 We Develop Software LLC · [WDS Public Research Reference License](../../../LICENSE.md). Confidential physical patent document excluded.
+
+## Technician execution addendum — A16 structural and functional evidence
+
+The R1 BrainXell motor-neuron/astrocyte MEA can qualify **spinal-derived cell identity and neuronal observations**; it is **not** proof of an organized spinal Root organoid. Use [LAB-R1-03](../../../lab/03_MEA_AND_EVALUATION.md) and [BIO-02](../../../processes/BIO-02-axon-spinal-root.md).
+
+1. **At each planned microscopy/MEA observation:** register actual source/lot, well, DIV, independent care receipt, selected instrument/calibration, image/recording raw IDs and operator.
+2. **Collect geometry/source evidence:** lab-approved spinal and neuronal identity/axon marker assays, cell soma/process location, candidate axon trajectory and recipient region with observed depth and uncertainty. An axon is a neuronal process, not another cell clone.
+3. **Compare prior valid same-region observation:** image registration/segmentation, change in neurite morphology, differences in source/medium/assay and unobserved area. If registration fails, return UNRESOLVED rather than "new connection".
+4. **Separate evidence claims:** STRUCTURAL_CONTACT from imaging; STATISTICAL_ASSOCIATION from valid recordings; INTERVENTION_SUPPORTED_INFLUENCE only from an independently reviewed qualified functional study; TASK_RELATION only with CE-A02 independent delayed assessment.
+5. **Check alternatives:** shared electrode field, source-independent digital bridge, environmental/medium coupling, clock drift, tissue maturation and changing reader. Do not assign a Root to a spinal cell from correlated spikes.
+6. **When missing/abnormal:** preserve raw data, HOLD promotion and notify the assay/care lead. A proposed genetic/axon-growth/peptide adjustment is a new separate lab study, not a repair command.
+
+**Output:** original image/trace hash, registered region/axon IDs, method/clock/source/care, typed candidate edge and scientific reviewer disposition with uncertainties.
+

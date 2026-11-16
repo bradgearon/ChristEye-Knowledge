@@ -107,3 +107,23 @@ The *Animon* is an individual developmental system concept, while care is attach
 Related: [Animon Core design](CE-A09_Animon_Core_Design.md) · [CE-A17 companion](../companion/CE-A17_Animon_Care_Scientific_Companion.md) · [BIO-10 care](../../../processes/BIO-10-care-health.md) · [BIO-09 change review](../../../processes/BIO-09-growth-control.md).
 
 © 2026 We Develop Software LLC · [WDS license](../../../LICENSE.md). Patent document excluded.
+
+## Technician execution addendum — A17 daily sustaining care and correction
+
+**Daily work:** [LAB-R1-02](../../../lab/02_DAILY_OPERATION_AND_QC.md), [deviation/SOP review](../../../lab/04_DEVIATIONS_AND_CHANGE_CONTROL.md), [culture-service form](../../../lab/forms/culture_service_template.csv), [quantitative log](../../../lab/forms/numeric_observation_template.csv).
+
+At each shift, the culture lead (1) verifies source/plate/well/lot and signed care plan; (2) verifies the most recent **actually performed** service and what care is due; (3) observes appearance, volume, morphology and contamination signs; (4) records actual qualified temperature/CO2 and any laboratory-calibrated pH, osmolality, glucose or lactate **with location, unit, sample and method**; (5) compares each valid measurement with yesterday's comparable same-well record, signed lower/upper bands and allowable drift; (6) documents deviations, actions by the external care operator, post-service verification and next review.
+
+**Supplier-specific source schedule:** P01 cites a 24-well BrainXell/Axion **Day 0, Day 1, Day 4, Day 7+** care progression. Before any service the lab must freeze the current supplier revision (BrainXell lists v10.1) and exact complete formulation/volume SOP. Do not apply that source model to 3D organoids or MaxOne.
+
+| Trigger | Required review and actual work authority |
+|---|---|
+| Due service with signed SOP | qualified operator performs the pre-approved care, records medium and supplement lot, requested/actual volumes, time and signed physical receipt |
+| Early yellowing or volume loss | inspect prior care/sample/environment, open deviation and notify care lead; any early maintenance must follow that approved SOP |
+| Out-of-band actual sensor/analyte | DEVIATION_REVIEW/HOLD_NEW_EXPERIMENT, care team assesses under qualified method; no autonomous media change |
+| Missing method, control band or stale sensor | NOT_MEASURED/UNQUALIFIED rather than a guessed safe result |
+| Low response/poor task score | verify readout and care separately; essential Milk continues, no score-driven feeding or peptide |
+| Change to medium/growth/peptide considered | separate source/target/mechanism StudyReadinessPacket and PI/cell/safety signoff; no physical execution command |
+
+**Daily acceptance:** all available observations have provenance and signed bands, no unresolved care risks, real service receipts and traceable review. The [read-only QC program](../../../lab/scripts/check_daily_records.py) flags exceptions but cannot authorize care.
+
