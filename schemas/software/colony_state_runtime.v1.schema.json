@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:anaiero:software:colony_state_runtime:v1",
+  "title": "Anaiero volatile controller ColonyState diagnostic snapshot",
+  "description": "Latest qualified-or-unverified observation values, always tagged with source origin and freshness; not physical care authorization",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "origin", "revision", "updates", "sequence_gaps", "pending", "rejected", "commit_failures", "metrics"],
+  "properties": {
+    "schema": {"const": "anaiero.colony.latest/1"},
+    "origin": {"const": "SIMULATED_UNCALIBRATED"},
+    "revision": {"type": "integer", "minimum": 0},
+    "updates": {"type": "integer", "minimum": 0},
+    "sequence_gaps": {"type": "integer", "minimum": 0},
+    "pending": {"type": "integer", "minimum": 0, "maximum": 96},
+    "rejected": {"type": "integer", "minimum": 0},
+    "commit_failures": {"type": "integer", "minimum": 0},
+    "metrics": {
+      "type": "array", "maxItems": 256,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["colony", "animon", "metric", "value", "quality", "source", "origin", "sequence", "evidence_tag", "acquired_ns"],
+        "properties": {
+          "colony": {"type": "integer", "minimum": 1},
+          "animon": {"type": "integer", "minimum": 0},
+          "source": {"type": "integer", "minimum": 1},
+          "metric": {"enum": ["viability", "energy", "support", "stress", "activity", "digital_learning", "digital_desire", "connection", "acquisition_health"]},
+          "value": {"type": "integer"},
+          "quality": {"enum": ["CURRENT", "STALE", "DEGRADED", "UNKNOWN"]},
+          "origin": {"enum": ["SIMULATED", "EXTERNAL_UNVERIFIED_READONLY"]},
+          "sequence": {"type": "integer", "minimum": 1},
+          "evidence_tag": {"type": "integer", "minimum": 0},
+          "acquired_ns": {"type": "integer", "minimum": 0}
+        }
+      }
+    }
+  }
+}
