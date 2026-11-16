@@ -5,6 +5,8 @@ const manifest=JSON.parse(fs.readFileSync(path.join(root,'manifest.json'),'utf8'
 const modules=JSON.parse(fs.readFileSync(path.join(root,'modules.json'),'utf8'));
 const chips=JSON.parse(fs.readFileSync(path.join(root,'chips.json'),'utf8'));
 const molecules=JSON.parse(fs.readFileSync(path.join(root,'molecules.json'),'utf8'));
+const release=JSON.parse(fs.readFileSync(path.join(root,'release.json'),'utf8'));
+if(release.media_assets<5)throw Error('Scientific figures were not included');
 const unique=new Set(manifest.documents.map(x=>x.id));
 if(unique.size!==manifest.documents.length)throw Error('Duplicate content IDs');
 if(manifest.documents.length<300)throw Error('Incomplete corpus');

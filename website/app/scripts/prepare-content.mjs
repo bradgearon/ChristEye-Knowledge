@@ -23,6 +23,7 @@ const deniedFilename=/(^|\/)[^.]*patent[^/]*\.(pdf|docx|md|txt|json)$/i;
 if(!Array.isArray(SOURCES.sources)||SOURCES.sources.length<300) throw new Error('Source registry absent or unexpectedly small');
 fs.rmSync(PUBLIC,{recursive:true,force:true});
 fs.mkdirSync(path.join(PUBLIC,'documents'),{recursive:true});
+fs.mkdirSync(path.join(PUBLIC,'media'),{recursive:true});
 const sha=(text)=>crypto.createHash('sha256').update(text).digest('hex');
 const clean=(text)=>text
   .replace(/^---\s*\n[\s\S]*?\n---\s*\n/,'')
@@ -43,6 +44,23 @@ const safePath=(source)=>{
  if(!absolute.startsWith(ROOT+path.sep)||!fs.statSync(absolute).isFile()) throw Error('Missing/unsafe file: '+source);
  return absolute;
 };
+const assets=new Set();
+const imageExt=new Set(['.png','.jpg','.jpeg','.webp','.gif','.svg']);
+function safeMedia(source,ref,alt='Source illustration'){
+ if(/^https?:\/\//i.test(ref))return '!['+alt+']('+ref+')';
+ const local=decodeURIComponent(ref.split('#')[0].split('?')[0]);
+ if(local.startsWith('/')||local.includes('\\')||local.split('/').includes('..')&&local.startsWith('..'))return '[Figure link withheld: unsafe path]';
+ const absolute=path.resolve(ROOT,path.dirname(source),local);
+ if(!absolute.startsWith(ROOT+path.sep)||!fs.existsSync(absolute)||!fs.statSync(absolute).isFile())return '[Figure source unavailable]';
+ const ext=path.extname(absolute).toLowerCase();
+ if(!imageExt.has(ext)||fs.statSync(absolute).size>10_000_000)return '[Figure format unavailable]';
+ if(RESTRICTED.test(absolute.slice(ROOT.length+1))||deniedFilename.test(absolute))return '[Figure withheld from publication]';
+ const digest=sha(fs.readFileSync(absolute));
+ const name=digest.slice(0,24)+ext;
+ const dest=path.join(PUBLIC,'media',name);
+ if(!assets.has(name)){fs.copyFileSync(absolute,dest);assets.add(name)}
+ return '!['+alt.replaceAll(']','')+'](content/media/'+name+')';
+}
 const records=[],searchIndex=[],seenSrc=new Set(),seenRoute=new Set();
 for(const r of SOURCES.sources){
  const source=r.source_path;
@@ -52,7 +70,16 @@ for(const r of SOURCES.sources){
  const src=safePath(source);
  const raw=fs.readFileSync(src,'utf8');
  if(raw.length>4_000_000) throw Error('Source too large for static site: '+source);
- const content=clean(raw);
+ let content=clean(raw);
+ // Pandoc DOCX conversion preserved figures as HTML <img> tags.
+ content=content.replace(/<img\\b[^>]*>/gi,tag=>{
+  const src=tag.match(/\\bsrc=[\"']([^\"']+)[\"']/i)?.[1];
+  const alt=tag.match(/\\balt=[\"']([^\"']*)[\"']/i)?.[1]||'Source scientific figure';
+  return src?safeMedia(source,src,alt):'[Source figure without image path]';
+ });
+ // Original Markdown image syntax is also normalized when locally accessible.
+ content=content.replace(/!\\[([^\\]]*)\\]\\(([^)]+)\\)/g,(all,alt,ref)=>
+   ref.startsWith('content/media/')?all:safeMedia(source,ref,alt));
  const id=sha(source).slice(0,16);
  const ext=path.extname(source).toLowerCase();
  const title=titleFor(raw,source);
@@ -94,5 +121,5 @@ if(molecules.length<20)throw Error('Molecular inventory was not correctly import
 fs.writeFileSync(path.join(PUBLIC,'molecules.json'),JSON.stringify(molecules));
 
 const groups=Object.fromEntries([...new Set(records.map(x=>x.group))].map(g=>[g,records.filter(x=>x.group===g).length]));
-fs.writeFileSync(path.join(PUBLIC,'release.json'),JSON.stringify({source_commit:manifest.generated_from,count:records.length,groups,modules:modules.length,chips:chips.length,molecules:molecules.length,physical_actuation:false,patent_included:false}));
-console.log('Anaiero static corpus prepared:',JSON.stringify({documents:records.length,groups,modules:modules.length,chips:chips.length,molecules:molecules.length}));
+fs.writeFileSync(path.join(PUBLIC,'release.json'),JSON.stringify({source_commit:manifest.generated_from,count:records.length,groups,modules:modules.length,chips:chips.length,molecules:molecules.length,media_assets:assets.size,physical_actuation:false,patent_included:false}));
+console.log('Anaiero static corpus prepared:',JSON.stringify({documents:records.length,groups,modules:modules.length,chips:chips.length,molecules:molecules.length,media_assets:assets.size}));

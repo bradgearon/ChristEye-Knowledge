@@ -8,7 +8,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import rehypeSlug from 'rehype-slug';
 import type {DocBody,DocMeta,Manifest} from './data';
-import {getData,readRoute,resolveRelative,sourceLink,groupNames} from './data';
+import {BASE,getData,readRoute,resolveRelative,sourceLink,groupNames} from './data';
 
 const slug=(s:string)=>s.toLowerCase().replace(/<[^>]+>/g,'').replace(/[^\w\s-]/g,'').replace(/\s+/g,'-');
 const clean=(s:string)=>s.replace(/^---\s*\n[\s\S]*?\n---\s*\n/,'').replace(/<details><summary>([^<]*)<\/summary>/gi,'\n\n---\n\n### $1\n\n').replace(/<\/details>/gi,'');
@@ -62,7 +62,7 @@ export function DocReader({manifest}:{manifest:Manifest}){
     {doc&&tab==='source'&&<div className="raw-source"><div className="code-header"><span>Canonical source · {meta.ext.toUpperCase()}</span><button className="subtle-btn" onClick={()=>void navigator.clipboard.writeText(doc.content)}>Copy source</button></div><pre>{doc.content}</pre></div>}
     {doc&&tab==='read'&&<article className="technical-article">
       {meta.ext==='.md'?
-       <ReactMarkdown remarkPlugins={[remarkGfm,remarkMath]} rehypePlugins={[rehypeSlug,rehypeKatex]} components={{a:renderLink}}>{clean(doc.content)}</ReactMarkdown>:
+       <ReactMarkdown remarkPlugins={[remarkGfm,remarkMath]} rehypePlugins={[rehypeSlug,rehypeKatex]} components={{a:renderLink,img:({src,alt})=><img loading="lazy" src={src?.startsWith('content/media/')?BASE+src:src} alt={alt||'Scientific source illustration'}/>}}>{clean(doc.content)}</ReactMarkdown>:
        <pre className="code-json">{meta.ext==='.json'?(()=>{try{return JSON.stringify(JSON.parse(doc.content),null,2)}catch{return doc.content}})():doc.content}</pre>}
     </article>}
     <div className="source-footer"><ShieldCheck size={18}/><span>© 2026 We Develop Software LLC · WDS Public Research Reference License. Source-linked research; biological interventions require independent qualification.</span></div>
