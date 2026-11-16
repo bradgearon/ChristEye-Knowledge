@@ -1,0 +1,31 @@
+name: Anaiero Unified CLI
+on:
+  push:
+    paths:
+      - 'native/examples/anaiero_cli.cpp'
+      - 'native/tests/anaiero_dispatch_smoke.cmake'
+      - 'native/CMakeLists.txt'
+      - '.github/workflows/anaiero-cli.yml'
+  pull_request:
+    paths:
+      - 'native/examples/anaiero_cli.cpp'
+      - 'native/tests/anaiero_dispatch_smoke.cmake'
+      - 'native/CMakeLists.txt'
+      - '.github/workflows/anaiero-cli.yml'
+permissions:
+  contents: read
+jobs:
+  cli-native:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure C++20 native modules
+        run: cmake -S native -B build/anaiero -DCE_WIND_BUILD_TESTS=ON
+      - name: Build native Anaiero and all backends
+        run: cmake --build build/anaiero --config Release --target anaiero
+      - name: Verify command routing
+        run: ctest --test-dir build/anaiero -C Release --output-on-failure -R anaiero_dispatch_smoke

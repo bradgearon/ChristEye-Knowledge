@@ -4,6 +4,10 @@ option(CE_WIND_BUILD_TESTS "Build native WindBus codec/scheduler tests" ON)
 add_library(ce_wind_core INTERFACE)
 target_include_directories(ce_wind_core INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_compile_features(ce_wind_core INTERFACE cxx_std_20)
+
+# SIM1 demo is part of the installed runtime, even with tests disabled.
+add_executable(ce_living_sim_demo examples/living_sim_demo.cpp)
+target_link_libraries(ce_living_sim_demo PRIVATE ce_wind_core)
 if(CE_WIND_BUILD_TESTS)
   enable_testing()
   add_executable(ce_wind_core_tests tests/core_tests.cpp)
@@ -33,8 +37,6 @@ if(CE_WIND_BUILD_TESTS)
     target_compile_options(ce_living_sim_tests PRIVATE -Wall -Wextra -Wconversion -Werror)
   endif()
   add_test(NAME living_sim_tests COMMAND ce_living_sim_tests)
-  add_executable(ce_living_sim_demo examples/living_sim_demo.cpp)
-  target_link_libraries(ce_living_sim_demo PRIVATE ce_wind_core)
   add_test(NAME living_sim_demo COMMAND ce_living_sim_demo)
   add_executable(ce_vlm_tests tests/virtual_machine_tests.cpp)
   target_link_libraries(ce_vlm_tests PRIVATE ce_wind_core)
@@ -242,4 +244,27 @@ if(CE_WIND_BUILD_TESTS)
     -DCE_REPO=${CMAKE_CURRENT_SOURCE_DIR}/..
     -DCE_TEMP=${CMAKE_CURRENT_BINARY_DIR}/sim33-smoke
     -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/colony_selection_smoke.cmake)
+endif()
+
+# CE-SW-17 public native Anaiero CLI; historical ce_* executables are internal.
+add_executable(anaiero examples/anaiero_cli.cpp)
+target_compile_features(anaiero PRIVATE cxx_std_20)
+if(MSVC)
+  target_compile_options(anaiero PRIVATE /W4 /WX)
+else()
+  target_compile_options(anaiero PRIVATE -Wall -Wextra -Wconversion -Werror)
+endif()
+set(ANA_MODULES
+  ce_vlm ce_vlm_process ce_vlm_plan ce_wind_registry ce_wind_durable
+  ce_colony_runner ce_colony_lab ce_colony_fidelity ce_colony_select
+  ce_living_sim_demo
+)
+add_dependencies(anaiero ${ANA_MODULES})
+install(TARGETS anaiero ${ANA_MODULES} RUNTIME DESTINATION bin)
+if(CE_WIND_BUILD_TESTS)
+  add_test(NAME anaiero_dispatch_smoke COMMAND ${CMAKE_COMMAND}
+    -DCE_ANA=$<TARGET_FILE:anaiero>
+    -DCE_REPO=${CMAKE_CURRENT_SOURCE_DIR}/..
+    -DCE_TEMP=${CMAKE_CURRENT_BINARY_DIR}/anaiero-smoke
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/anaiero_dispatch_smoke.cmake)
 endif()
