@@ -120,6 +120,28 @@ inline bool process_from(std::string_view s, ProcessKind& k){
     if(s==process_text(p)){k=p;return true;}
   return false;
 }
+// SIM3.1 versioned symbolic laws, not biological rates or intervention instructions.
+struct ModelLaws {
+  std::uint32_t version=1;
+  std::int32_t food_per_cell=1, fed_gain=1, unfed_cost=7, upkeep_cost=1;
+  std::int32_t stress_cutoff=20, stress_cost=4, maturity_gain=1;
+  std::int32_t blood_step=1, learning_gain=1;
+  bool set(std::string_view name,std::uint32_t value) noexcept {
+    if(value>100)return false;
+    const auto n=static_cast<std::int32_t>(value);
+    if(name=="food_per_cell")food_per_cell=n;
+    else if(name=="fed_gain")fed_gain=n;
+    else if(name=="unfed_cost")unfed_cost=n;
+    else if(name=="upkeep_cost")upkeep_cost=n;
+    else if(name=="stress_cutoff")stress_cutoff=n;
+    else if(name=="stress_cost")stress_cost=n;
+    else if(name=="maturity_gain")maturity_gain=n;
+    else if(name=="blood_step")blood_step=n;
+    else if(name=="learning_gain")learning_gain=n;
+    else return false;
+    return true;
+  }
+};
 struct ColonyConfig {std::string id, source_path, source_sha;};
 struct Seed {std::string colony, kind;std::uint32_t id=0,parent=0;
   std::int32_t x=0,y=0,z=0;};
@@ -128,6 +150,7 @@ struct Process {std::string colony;ProcessKind kind=ProcessKind::support;
   std::uint32_t subject=0,value=0,at=0;};
 struct Configuration {
   std::string name, material_role, material_path, material_sha, hash;
+  ModelLaws laws{};
   std::vector<ColonyConfig> colonies;std::vector<Seed> seeds;
   std::vector<Link> links;std::vector<Process> processes;
   static Result load(const fs::path& file, Configuration& result) {
@@ -136,6 +159,8 @@ struct Configuration {
     Configuration candidate;
     std::istringstream in(input);std::string line;unsigned section=0;
     bool saw_end=false;
+    bool law_version_seen=false;
+    std::set<std::string> law_keys;
     while(std::getline(in,line)) {
       if(!line.empty() && line.back()=='\r')line.pop_back();
       if(line.empty() || line.front()=='#')continue;
@@ -144,6 +169,12 @@ struct Configuration {
       if(t[0]=="end") {if(t.size()!=1 || saw_end)return Result::bad_config;saw_end=true;section=2;continue;}
       if(section!=1)return Result::bad_config;
       if(t[0]=="name"&&t.size()==2&&ident(t[1]))candidate.name=t[1];
+      else if(t[0]=="law_version"&&t.size()==2&&!law_version_seen&&t[1]=="1") {
+        candidate.laws.version=1;law_version_seen=true;
+      } else if(t[0]=="law"&&t.size()==3&&law_version_seen) {
+        std::uint32_t n=0;
+        if(!law_keys.insert(t[1]).second||!parse_u32(t[2],n)||!candidate.laws.set(t[1],n))return Result::bad_config;
+      }
       else if(t[0]=="source"&&t.size()==4&&ident(t[1])&&safe_relative(t[2])&&digest(t[3])){
         if(!candidate.material_role.empty()||
            !(t[1]=="synthetic"||t[1]=="blood"||t[1]=="hair"||t[1]=="engineered"))return Result::bad_config;
@@ -395,12 +426,13 @@ class Runner {
     for(auto& c:next.cells){if(!c.alive)continue;
       auto* col=find_colony(next,c.colony);if(!col)return Result::corruption;
       const bool fed=col->food>0;
-      if(fed)--col->food;
-      c.energy=clamp(std::int64_t(c.energy)+(fed?1:-7)-(col->stress>20?4:1));
+      if(fed)col->food=clamp(std::int64_t(col->food)-config_.laws.food_per_cell);
+      c.energy=clamp(std::int64_t(c.energy)+(fed?config_.laws.fed_gain:-config_.laws.unfed_cost)-
+        (col->stress>config_.laws.stress_cutoff?config_.laws.stress_cost:config_.laws.upkeep_cost));
       if(c.energy==0){c.alive=false;c.death=next.tick;continue;}
-      if(fed)c.maturity=clamp(std::int64_t(c.maturity)+1);
-      if(c.kind=="blood_carrier")c.x=(c.x+1)%256;
-      if(c.kind=="neuron" && col->data>0)c.learning=clamp(std::int64_t(c.learning)+1);
+      if(fed)c.maturity=clamp(std::int64_t(c.maturity)+config_.laws.maturity_gain);
+      if(c.kind=="blood_carrier")c.x=static_cast<std::int32_t>((std::int64_t(c.x)+config_.laws.blood_step)%256);
+      if(c.kind=="neuron"&&col->data>0)c.learning=clamp(std::int64_t(c.learning)+config_.laws.learning_gain);
     }
     return Result::ok;
   }
