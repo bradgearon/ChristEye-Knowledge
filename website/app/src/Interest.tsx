@@ -1,4 +1,5 @@
 import {useEffect,useRef,useState} from 'react';
+import type {FormEvent} from 'react';
 import {Link} from 'react-router-dom';
 import {ArrowRight,BookOpen,CheckCircle2,FlaskConical,HeartHandshake,LockKeyhole,Mail,ShieldCheck} from 'lucide-react';
 
@@ -77,7 +78,7 @@ export function InterestPage(){
       .catch(()=>{if(alive)setStatus('standby');});
     return ()=>{alive=false;};
   },[]);
-  async function submit(e:React.FormEvent<HTMLFormElement>){
+  async function submit(e:FormEvent<HTMLFormElement>){
     e.preventDefault();
     if(!config?.enabled||!consent||!token||status==='sending')return;
     setStatus('sending');
