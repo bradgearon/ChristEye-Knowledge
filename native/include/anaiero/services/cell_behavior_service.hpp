@@ -67,7 +67,7 @@ public:
     return Status::ok;
   }
   Status restore(const World& state) noexcept {
-    const auto* terminator=std::find(state.run_plan_digest.begin(),
+    const auto terminator=std::find(state.run_plan_digest.begin(),
                                     state.run_plan_digest.end(),'\0');
     if(terminator==state.run_plan_digest.end()||
        (terminator!=state.run_plan_digest.begin()&&
