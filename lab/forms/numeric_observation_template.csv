@@ -1,0 +1,1 @@
+campaign_id,observation_id,observed_at_utc,plate_id,well_id,source_lot_id,day_in_vitro,parameter,value,unit,measurement_status,assay_id,instrument_id,sample_location,calibration_ref,raw_data_ref,care_receipt_ref,comparability_epoch,operator_id,reviewer_id,notes

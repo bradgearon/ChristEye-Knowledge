@@ -1,0 +1,84 @@
+{
+  "schema_version": "0.1",
+  "status": "UNQUALIFIED_EXAMPLE",
+  "campaign_id": null,
+  "source_model": "BrainXell spinal motor neuron/astrocyte 24-well Axion MEA reference",
+  "selected_vendor_protocol_ref": null,
+  "approved_local_sop_ref": null,
+  "owner": null,
+  "approved_at_utc": null,
+  "parameters": {
+    "incubator_temperature": {
+      "unit": "degC",
+      "assay_id": null,
+      "sample_location": "incubator_probe",
+      "lower": null,
+      "upper": null,
+      "max_abs_day_change": null,
+      "critical": true
+    },
+    "co2_environment": {
+      "unit": "percent",
+      "assay_id": null,
+      "sample_location": "incubator_probe",
+      "lower": null,
+      "upper": null,
+      "max_abs_day_change": null,
+      "critical": true
+    },
+    "well_volume": {
+      "unit": "uL",
+      "assay_id": null,
+      "sample_location": "well",
+      "lower": null,
+      "upper": null,
+      "max_abs_day_change": null,
+      "critical": true
+    },
+    "medium_pH": {
+      "unit": "pH",
+      "assay_id": null,
+      "sample_location": "well_sample",
+      "lower": null,
+      "upper": null,
+      "max_abs_day_change": null,
+      "critical": false
+    },
+    "osmolality": {
+      "unit": "mOsm/kg",
+      "assay_id": null,
+      "sample_location": "well_sample",
+      "lower": null,
+      "upper": null,
+      "max_abs_day_change": null,
+      "critical": false
+    },
+    "glucose": {
+      "unit": "mmol/L",
+      "assay_id": null,
+      "sample_location": "well_sample",
+      "lower": null,
+      "upper": null,
+      "max_abs_day_change": null,
+      "critical": false
+    },
+    "lactate": {
+      "unit": "mmol/L",
+      "assay_id": null,
+      "sample_location": "well_sample",
+      "lower": null,
+      "upper": null,
+      "max_abs_day_change": null,
+      "critical": false
+    },
+    "mea_noise": {
+      "unit": "uV",
+      "assay_id": null,
+      "sample_location": "electrode",
+      "lower": null,
+      "upper": null,
+      "max_abs_day_change": null,
+      "critical": true
+    }
+  }
+}
