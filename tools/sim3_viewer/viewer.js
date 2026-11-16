@@ -1,18 +1,17 @@
 "use strict";
 (() => {
 const byId=id=>document.getElementById(id),canvas=byId("scene"),ctx=canvas.getContext("2d");
+const replay=window.CEVLabReplay;
+if(!replay)throw Error("SIM3.1 replay validator not loaded");
 const v={yaw:-.65,pitch:.43,zoom:1.45,frames:[],idx:0,colony:"all",selected:null,points:[],overlay:[],playing:false,last:0};
 const color=c=>!c.alive?"#738598":c.kind==="blood_carrier"?"#f17b8d":c.kind.includes("neuron")?"#6fdce8":"#cce79b";
 const demo=[0,1].map(t=>({origin:"SIMULATED_UNCALIBRATED",format:"CEVLABFRAME/1",run:"viewer-preview",tick:t,law_version:1,
   config_sha256:"0".repeat(64),snapshot_sha256:"0".repeat(64),
   colonies:[{id:"crest",food:70-t,data:0,signal:0,stress:0},{id:"blood",food:90,data:t,signal:0,stress:0}],
-  cells:[{colony:"crest",id:1,parent:0,kind:"crest_progenitor",x:10,y:12,z:2,energy:40,learning:0,birth:0,death:0,alive:true},
-         {colony:"crest",id:2,parent:1,kind:"blood_carrier",x:3+t,y:5,z:2,energy:40,learning:0,birth:0,death:0,alive:true},
-         {colony:"blood",id:3,parent:0,kind:"neuron",x:20,y:17,z:4,energy:40,learning:t,birth:0,death:0,alive:true}],
+  cells:[{colony:"crest",id:1,parent:0,kind:"crest_progenitor",x:10,y:12,z:2,energy:40,maturity:t,learning:0,birth:0,death:0,alive:true},
+         {colony:"crest",id:2,parent:1,kind:"blood_carrier",x:3+t,y:5,z:2,energy:40,maturity:t,learning:0,birth:0,death:0,alive:true},
+         {colony:"blood",id:3,parent:0,kind:"neuron",x:20,y:17,z:4,energy:40,maturity:t,learning:t,birth:0,death:0,alive:true}],
   links:[{from:"crest",to:"blood",channel:"food",units:3},{from:"blood",to:"crest",channel:"data",units:2}]}));
-function valid(f){return f&&f.origin==="SIMULATED_UNCALIBRATED"&&f.format==="CEVLABFRAME/1"&&
-  Number.isSafeInteger(f.tick)&&Array.isArray(f.cells)&&Array.isArray(f.colonies)&&Array.isArray(f.links)&&
-  f.cells.length<=10000&&f.links.length<=1000;}
 function renderMetrics(){const f=v.frames[v.idx];if(!f)return;const cells=f.cells;
   byId("metrics").textContent="Tick "+f.tick+" · "+f.colonies.length+" colonies · "+cells.length+" cells · "+
     cells.filter(c=>c.alive).length+" viable · "+cells.filter(c=>!c.alive).length+" historical tombstones";
@@ -21,8 +20,7 @@ function renderMetrics(){const f=v.frames[v.idx];if(!f)return;const cells=f.cell
     " · energy proxy "+c.energy+" · learning proxy "+c.learning+
     (c.alive?" · viable":" · tombstone, death tick "+c.death):"Click a cell.";
 }
-function setFrames(frames,title){if(!frames.length||frames.some(f=>!valid(f)))throw Error("Unsupported replay");
-  frames.sort((a,b)=>a.tick-b.tick);if(frames.some((f,i)=>i>0&&f.tick===frames[i-1].tick))throw Error("Duplicate tick");
+function setFrames(frames,title){replay.validateTimeline(frames);
   v.frames=frames;v.idx=0;v.selected=null;v.colony="all";v.playing=false;byId("play").textContent="Play";
   byId("source").textContent=title+" · "+frames.length+" frames";
   byId("time").max=String(frames.length-1);byId("time").value="0";
@@ -76,14 +74,12 @@ byId("colony").onchange=e=>{v.colony=e.target.value;v.selected=null;renderMetric
 for(const key of ["lineage","wiring","showOverlay"])byId(key).onchange=draw;
 byId("play").onclick=()=>{v.playing=!v.playing;byId("play").textContent=v.playing?"Pause":"Play";v.last=0;};
 byId("reset").onclick=()=>{v.yaw=-.65;v.pitch=.43;v.zoom=1.45;draw();};
-async function readJsonLines(file,max=10000){const data=(await file.text()).split(/\r?\n/).filter(Boolean);
-  if(data.length>max)throw Error("Too many records");return data.map(x=>JSON.parse(x));}
+async function readJsonLines(file,max=10000){return replay.parseNDJSON(await file.text(),max);}
 byId("input").onchange=async e=>{const file=e.target.files?.[0];if(!file)return;
   try{setFrames(await readJsonLines(file),file.name);}catch(error){byId("source").textContent="Rejected: "+error.message;}};
 byId("overlay").onchange=async e=>{const file=e.target.files?.[0];if(!file)return;
   try{const imported=await readJsonLines(file,32);
-    if(imported.some(o=>o.origin!=="SIMULATED_UNCALIBRATED"||o.format!=="CEVLMOVERLAY/1"||
-      !Array.isArray(o.cells)||!Array.isArray(o.molecules)||!o.fields))throw Error("Invalid source overlay");
+    replay.validateOverlays(imported);
     v.overlay=imported;draw();
   }catch(error){byId("source").textContent="Rejected overlay: "+error.message;}};
 function animate(t){if(v.playing){if(!v.last)v.last=t;if(t-v.last>340){

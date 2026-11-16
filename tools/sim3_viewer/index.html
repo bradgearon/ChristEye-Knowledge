@@ -16,7 +16,7 @@ aside{padding:20px;background:#0c1a2a;border-left:1px solid var(--line);display:
 label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
 input[type=file],select,button{width:100%;background:#17283a;border:1px solid #365067;border-radius:8px;color:var(--fg);padding:8px}
 input[type=range]{width:100%;accent-color:#6fdce8}
-button{cursor:pointer}button:hover{border-color:#74dce8}
+button{cursor:pointer}button:hover{border-color:#74dce8}a{color:#9ad9f8}
 .controls{display:flex;gap:8px}.controls>*{flex:1}
 h2{font-size:13px;margin:0 0 8px}.meta{font-size:12px;color:var(--muted);line-height:1.7}
 footer{font-size:11px;color:var(--muted);border-top:1px solid var(--line);padding:12px 22px}
@@ -25,7 +25,7 @@ footer{font-size:11px;color:var(--muted);border-top:1px solid var(--line);paddin
 <header><div><h1>ChristEye Anaiero / Unified Living Laboratory</h1><small>SIM3.1 — synthetic multi-colony process replay</small></div><div class="flag">NOT BIOLOGICAL EVIDENCE</div></header>
 <main><section class="scene"><canvas id="scene" aria-label="Interactive 3D projection of synthetic colonies"></canvas><p>Drag to orbit • mouse wheel to zoom • click a cell to inspect</p></section>
 <aside>
-<div><h2>Replay source</h2><label for="input">Load CEVLABFRAME/1 NDJSON</label><input id="input" type="file" accept=".ndjson,.jsonl,.txt"><p class="meta" id="source">Built-in synthetic UI preview. For actual simulator frames, use ce_colony_lab export.</p></div>
+<div><h2>Replay source</h2><label for="input">Load CEVLABFRAME/1 NDJSON</label><input id="input" type="file" accept=".ndjson,.jsonl,.txt"><p class="meta" id="source">Built-in synthetic UI preview. For actual simulator frames, use ce_colony_lab export.</p><p class="meta"><a href="viewer-demo.ndjson" download>Download a 4-frame UI-only fixture</a> (zero hashes; not a runner output).</p></div>
 <div><h2>Timeline</h2><input id="time" type="range" min="0" max="1" value="0"><div class="controls"><button id="play">Play</button><button id="reset">Reset view</button></div></div>
 <div><h2>Colony</h2><select id="colony"><option value="all">All</option></select></div>
 <div><h2>Source model</h2><label for="overlay">Optional VLM2 projection NDJSON</label><input id="overlay" type="file" accept=".ndjson,.jsonl,.txt"><label><input id="showOverlay" type="checkbox" checked> Show read-only source overlay</label></div>
@@ -34,4 +34,4 @@ footer{font-size:11px;color:var(--muted);border-top:1px solid var(--line);paddin
 <div><h2>Snapshot metrics</h2><div class="meta" id="metrics"></div></div>
 </aside></main>
 <footer>Digital-only visualization. Source hashes establish byte identity, not biological similarity or phenotype. No instrument commands are issued.</footer>
-<script src="viewer.js"></script></body></html>
+<script src="replay_contract.js"></script><script src="viewer.js"></script></body></html>
