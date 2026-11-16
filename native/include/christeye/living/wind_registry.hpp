@@ -123,6 +123,9 @@ public:
     // Reopening never leaves a previously open registry active on failure.
     open_ = false; events_.clear(); subscribers_.clear(); root_ = root;
     std::error_code ec;
+    // SW2.1 roots require the exclusive lock and committed HEAD; V1 must not
+    // bypass it by opening/writing the same directory.
+    if (fs::exists(root / "HEAD", ec) || ec) return Code::io_error;
     fs::create_directories(root / "objects", ec);
     if (ec) return Code::io_error;
     const fs::path journal = root / "events.log";

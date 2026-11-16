@@ -14,10 +14,12 @@
 | [CE-SW-06: SIM1 Living-System Instruction Simulator](CE-SW-06_living_surrogate_instruction_simulator.md) | Bounded executable C++20 symbolic crest/blood/neuron/glia model, 32-byte instruction codec, moving synthetic participants, molecular proxy registry, event replay and WindPacket integration tests | **Software surrogate implemented; biological fidelity unvalidated** |
 | [CE-SW-07: Virtual Living Machines, Portable Setup Files and Replay](CE-SW-07_virtual_living_machine_bundles.md) | Docker-like host-side VLM1 images, single-file machine bundles, instruction journals, conservative 8×8 Soil proxy movement, clone/fork/verify/stream CLI and deterministic tests | **Digital-only machine implemented; biology uncalibrated** |
 | [CE-SW-08: Process-linked VLM2 Timelines and Visual Assets](CE-SW-08_process_timelines_and_visual_assets.md) | Extended single-file CEVLM/2 process catalog, duration/weight/movement, synthetic process image refs, timed action scheduling, legacy VLM1 upgrade, NDJSON render frames, and WindPacket integration tests | **Native deterministic surrogate implemented; not biological validation** |
+| [CE-SW-09: CEVPLAN/1 Learning and Crystal/RNA Evidence Manifests](CE-SW-09_learning_crystal_rna_plan_manifests.md) | SHA-256-pinned stage manifests, reverse machine mappings, local plan runner and synthetic receipts | **Digital-only reference + native tests** |
+| [CE-SW-10: Learning and Crystal/RNA Evidence Registry](CE-SW-10_windstore_learning_crystal_registry.md) | Host-only SHA-256 immutable objects, append-only event journal, stage-to-hash lookup, filtered push inbox, imported plans and non-mutating successor proposals | **Digital-only reference + native tests** |
+| [CE-SW-11: Durable WindStore and Evidence Cursors](CE-SW-11_durable_windstore_journal_and_cursors.md) | OS-level exclusive writer lock, committed HEAD, crash-tail recovery, synchronous evidence push, disk audit and durable subscriber cursors | **SW2.1 host-only implementation; cross-platform validation pending** |
 
 See also [proposed Colony Intelligence and control schemas](../../schemas/software/README.md) for snapshot, board capability, Bread/Meat planning and guidance records.
 
-| [CE-SW-10: Learning and Crystal/RNA Evidence Registry](CE-SW-10_windstore_learning_crystal_registry.md) | Host-only SHA-256 immutable objects, append-only event journal, stage-to-hash lookup, filtered push inbox, imported plans and non-mutating successor proposals | **Digital-only reference + native tests** |
 
 ## System integration
 
