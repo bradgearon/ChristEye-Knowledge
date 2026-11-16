@@ -25,6 +25,8 @@ const longInput = 'x'.repeat(128);
 assert.throws(() => api.parseNDJSON(longInput,10000,16), /Oversized/);
 const invalid = [{origin:'SIMULATED_UNCALIBRATED',format:'CEVLMOVERLAY/1',colony:'a',source_sha256:'0'.repeat(64),tick:0,cells:[],molecules:[],connections:[],active_processes:[],fields:{side:8,layers:Array.from({length:6},(_,i)=>({name:'field'+i,values:Array(64).fill(0)}))}}];
 assert.equal(api.validateOverlays(invalid).length,1);
+const overlayDemo = api.parseNDJSON(fs.readFileSync(path.join(__dirname, '../tools/sim3_viewer/overlay-demo.ndjson'), 'utf8'));
+assert.equal(api.validateOverlays(overlayDemo).length,2);
 assert.throws(()=>api.validateOverlays([...invalid,invalid[0]]),/Invalid overlay colony/);
 const unsafe = flip(invalid[0]);unsafe.fields.layers[0].values[0]='not-a-number';
 assert.throws(()=>api.validateOverlays([unsafe]),/Soil field/);

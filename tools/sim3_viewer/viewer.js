@@ -45,6 +45,21 @@ function draw(){const rect=canvas.getBoundingClientRect(),w=rect.width,h=rect.he
       line(project(world(a,f),w,h),project(world(b,f),w,h),edge.channel==="food"?"#aaca84":"#73d4ec",2);}
   if(byId("lineage").checked)for(const c of visible){const parent=f.cells.find(x=>x.colony===c.colony&&x.id===c.parent);
     if(parent)line(project(world(parent,f),w,h),project(world(c,f),w,h),"#8da5bb",1);}
+  const fieldName=byId("soil").value;
+  if(fieldName!=="none" && byId("showOverlay").checked)for(const o of v.overlay){
+    if(v.colony!=="all" && v.colony!==o.colony)continue;
+    const layer=o.fields.layers.find(x=>x.name===fieldName);
+    if(!layer)continue;
+    const highest=Math.max(1,...layer.values);
+    for(let i=0;i<64;i++){
+      const amount=layer.values[i];
+      if(amount<=0)continue;
+      const at=project(world({colony:o.colony,x:(i%8)*4+1,y:Math.floor(i/8)*4+1,z:0},f),w,h);
+      const intensity=Math.max(.1,Math.min(.75,amount/highest*.75));
+      ctx.fillStyle=fieldName==="rna"?`rgba(190,153,248,${intensity})`:`rgba(161,226,163,${intensity})`;
+      ctx.beginPath();ctx.arc(at.x,at.y,4+intensity*5,0,Math.PI*2);ctx.fill();
+    }
+  }
   if(byId("showOverlay").checked)for(const o of v.overlay)for(const c of o.cells){if(v.colony!=="all"&&v.colony!==o.colony)continue;
     const p=project(world({...c,colony:o.colony},f),w,h);ctx.beginPath();ctx.arc(p.x,p.y,12,0,2*Math.PI);
     ctx.setLineDash([3,3]);ctx.strokeStyle="#d7acef";ctx.stroke();ctx.setLineDash([]);}
@@ -71,7 +86,7 @@ canvas.onpointerup=e=>{if(start&&Math.hypot(e.clientX-start.x,e.clientY-start.y)
 canvas.addEventListener("wheel",e=>{e.preventDefault();v.zoom=Math.max(.2,Math.min(8,v.zoom*Math.exp(-e.deltaY*.001)));draw();},{passive:false});
 byId("time").oninput=e=>seek(Number(e.target.value));
 byId("colony").onchange=e=>{v.colony=e.target.value;v.selected=null;renderMetrics();draw();};
-for(const key of ["lineage","wiring","showOverlay"])byId(key).onchange=draw;
+for(const key of ["lineage","wiring","showOverlay","soil"])byId(key).onchange=draw;
 byId("play").onclick=()=>{v.playing=!v.playing;byId("play").textContent=v.playing?"Pause":"Play";v.last=0;};
 byId("reset").onclick=()=>{v.yaw=-.65;v.pitch=.43;v.zoom=1.45;draw();};
 async function readJsonLines(file,max=10000){return replay.parseNDJSON(await file.text(),max);}

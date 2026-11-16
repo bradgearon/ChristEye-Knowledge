@@ -35,6 +35,14 @@ class Sim31ViewerSchema(unittest.TestCase):
     def test_overlay_schema_is_valid(self):
         schema = json.loads((ROOT / "schemas/software/colony_lab_overlay.v1.schema.json").read_text())
         Draft202012Validator.check_schema(schema)
+        validator = Draft202012Validator(schema)
+        overlays = [json.loads(line) for line in (ROOT / "tools/sim3_viewer/overlay-demo.ndjson").read_text().splitlines()]
+        self.assertEqual(len(overlays), 2)
+        for overlay in overlays:
+            validator.validate(overlay)
+        broken = copy.deepcopy(overlays[0])
+        broken["fields"]["layers"][0]["values"] = [0] * 12
+        self.assertFalse(validator.is_valid(broken))
 
 
 if __name__ == '__main__':

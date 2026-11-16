@@ -34,7 +34,7 @@ CEVRUN/1 configuration → SIM3 executable laws → committed snapshot history
 
 `replay_contract.js` is a pure browser/Node validator for file-loaded frames. It checks declared simulated origin, format, bounded numeric fields, stable run/configuration/law identity, unique cells and colonies, lineage references, known channel endpoints, and **contiguous monotonic synthetic ticks**. Malformed or cross-run files are rejected before rendering; it cannot verify the cryptographic snapshot hash without the corresponding canonical binary checkpoint, and an all-zero SHA field in the *UI fixture* is a placeholder, not evidence.
 
-`viewer-demo.ndjson` is a tiny **hand-authored UI fixture**, not a native runner output. Actual data should be produced using the native CLI below. The fixture's zero hashes must never be presented as authenticated provenance or scientific validation.
+`viewer-demo.ndjson` and `overlay-demo.ndjson` are tiny **hand-authored UI fixtures**, not native runner outputs. The latter lets the viewer exercise six symbolic Soil heatmap layers with a selectable source colony. Actual data should be produced using the native CLI below. The fixture's zero hashes must never be presented as authenticated provenance or scientific validation.
 
 ```bash
 cmake -S native -B build/native -DCE_WIND_BUILD_TESTS=ON
