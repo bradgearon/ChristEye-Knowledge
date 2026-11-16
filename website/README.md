@@ -64,3 +64,7 @@ The **first implementation target is CE-A02 long-term storage** because it force
 - New planning files have no dependency on a new build tool or a fabricated experiment.
 
 This is **the editorial and architectural blueprint for the website**, not a replacement for the complete project design documents.
+
+## S02 implementation: React portal (now in development)
+
+The original S01 architecture suggested Astro/Starlight, but the working implementation uses **React, TypeScript and Vite** to support a richer interactive atlas and digital laboratories, while keeping the same source-controlled WDS research content. See [React portal architecture](app/ARCHITECTURE.md) and [app build instructions](app/README.md). The new site is built as a static artifact and can be hosted on GitHub Pages under `/ChristEye-Knowledge/portal/` or on an independent web host.
