@@ -1,10 +1,10 @@
-import {useEffect,useMemo,useState} from 'react';
+import {useEffect,useState} from 'react';
 import {Link,NavLink,Routes,Route,useLocation,useNavigate} from 'react-router-dom';
-import {Activity,ArrowRight,ArrowUpRight,BookOpen,BrainCircuit,CheckCircle2,ChevronRight,CircuitBoard,Code2,Cpu,Database,Dna,ExternalLink,FileText,FlaskConical,Flower2,GitBranch,HeartHandshake,Layers3,Leaf,Menu,Microscope,Moon,Network,Play,Search,Shield,ShieldCheck,Sparkles,Sun,X,Zap} from 'lucide-react';
+import {ArrowRight,ArrowUpRight,BookOpen,BrainCircuit,CheckCircle2,ChevronRight,CircuitBoard,Code2,Cpu,Database,Dna,ExternalLink,FileText,FlaskConical,Flower2,GitBranch,HeartHandshake,Layers3,Leaf,Menu,Microscope,Moon,Network,Play,Search,Shield,ShieldCheck,Sparkles,Sun,X,Zap} from 'lucide-react';
 import Atlas from './Atlas';
 import {DocReader,Library,SourceRedirect} from './Reader';
 import {InteractiveLab,Studio} from './Studio';
-import type {Manifest,DocMeta,ModuleProfile,Molecule} from './data';
+import type {Manifest,ModuleProfile,Molecule} from './data';
 import {readRoute,groupNames,sourceLink,useData} from './data';
 
 const nav=[

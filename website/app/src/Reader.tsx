@@ -7,7 +7,7 @@ import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import rehypeSlug from 'rehype-slug';
-import type {DocBody,DocMeta,Manifest} from './data';
+import type {DocBody,Manifest} from './data';
 import {getData,readRoute,resolveRelative,sourceLink,groupNames} from './data';
 
 const slug=(s:string)=>s.toLowerCase().replace(/<[^>]+>/g,'').replace(/[^\w\s-]/g,'').replace(/\s+/g,'-');

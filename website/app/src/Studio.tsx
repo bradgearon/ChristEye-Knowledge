@@ -1,6 +1,6 @@
-import {useEffect,useMemo,useState} from 'react';
+import {useMemo,useState} from 'react';
 import {Link} from 'react-router-dom';
-import {Activity,ArrowUpRight,BookOpen,BrainCircuit,Check,ChevronRight,Cpu,Database,FileText,FlaskConical,Gamepad2,HeartPulse,LockKeyhole,Music2,Play,RotateCcw,ShieldCheck,SlidersHorizontal,Split,Waveform} from 'lucide-react';
+import {Activity,ArrowUpRight,Check,ChevronRight,Cpu,LockKeyhole,Play,RotateCcw} from 'lucide-react';
 import type {Chip,Manifest} from './data';
 import {readRoute,sourceLink,useData} from './data';
 
@@ -44,7 +44,7 @@ function WindLab(){
   setLog(prev=>[event+' | '+reason,...prev].slice(0,8));
   setCounter(v=>v+1);
  };
- return <div className="lab-two-col"><div className="lab-controls"><h3>Inject a typed event</h3><p>One route, four outcomes. Watch the validation contract rather than a fake neural signal.</p><label className="field">Test input<select value={scenario} onChange={e=>setScenario(e.target.value)}><option value="valid">Valid observation → Lotus</option><option value="expired">Expired event</option><option value="duplicate">Repeated event identifier</option><option value="forbidden">Unauthorized physical-care route</option></select></label><button className="btn btn-primary" type="button" onClick={run}><Play size={15}/> Deliver simulated event</button></div>
+ return <div className="lab-two-col"><div className="lab-controls"><h3>Inject a typed event</h3><p>One route, four outcomes. Watch the validation contract rather than a fake neural signal.</p><label className="field">Test input<select value={scenario} onChange={e=>setScenario(e.target.value as typeof scenario)}><option value="valid">Valid observation → Lotus</option><option value="expired">Expired event</option><option value="duplicate">Repeated event identifier</option><option value="forbidden">Unauthorized physical-care route</option></select></label><button className="btn btn-primary" type="button" onClick={run}><Play size={15}/> Deliver simulated event</button></div>
  <Output title="WIND BUS / EVENT STREAM"><div className="terminal"><div className="term-dim">SOURCE observer.digital</div><div className="term-dim">ROUTE observation → lotus.host</div><div className="term-dim">AUTH synthetic · schema v1.0</div><div className="term-sep"/>{log.length?log.map((x,i)=><div className={i===0?'term-new':''} key={x}>{x}</div>):<div className="term-dim">[idle] No events delivered. Run a scenario.</div>}</div></Output></div>;
 }
 function CrystalLab(){
