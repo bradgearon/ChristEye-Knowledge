@@ -152,3 +152,24 @@ Refer to [BIO-09 growth governance](../../../processes/BIO-09-growth-control.md)
 **Next integration:** [CE-A16 scientific companion](../companion/CE-A16_Animon_Spinal_Root_Scientific_Companion.md) and [CE-A02 retention design](CE-A02_Animon_Long_Term_Retention_Design.md).
 
 **Rights:** © 2026 We Develop Software LLC · [WDS Public Research Reference License](../../../LICENSE.md). Confidential physical patent document excluded.
+
+
+## V3.3 operating work package — spinal Root and axon evidence
+
+**Precondition:** use [WO-03](../../../laboratory/WO-03-axon-and-spinal-root-evidence.md) only after source and preparation qualification under [WO-00](../../../laboratory/WO-00-source-and-genomic-qc.md), [WO-01](../../../laboratory/WO-01-soil-development-and-maturation.md) and independent [WO-02 care](../../../laboratory/WO-02-daily-care-and-chemistry.md).
+
+| Step | What the actual investigator does | Required proof/decision |
+|---|---|---|
+| A16-01 | Register source/target region, neuronal phenotype and actual preparation/lot | real specimen, source assay and 3D sampling limits |
+| A16-02 | Select qualified optical/electrophysiology method, timebase and coordinate transformation | instrument calibration, region coverage, source/target identity |
+| A16-03 | Document soma, dendrite and axon candidates **as processes of neurons** with separate cell/track/projection identifiers | original images, tracing method and spatial uncertainty |
+| A16-04 | Classify anatomical contact separately from coactivity/correlated channels | STRUCTURAL vs ASSOCIATIONAL status and matched spatial/control evidence |
+| A16-05 | If claiming actual influence, require a separately approved laboratory experiment and negative routes | valid source/recipient evidence and common-drive exclusion |
+| A16-06 | If claiming a learned Root, require **CE-A02** fixed-reader task and delayed independent performance | valid task-specific evidence; never infer semantic storage from axonal density |
+| A16-07 | Compare repeat observations with prior qualified region, method and care history | flag geometry/medium/instrument changes as NONCOMPARABLE, or record scoped observed differences |
+| A16-08 | Sign evidence classification and failure state | source-specific reviewed graph edge or UNRESOLVED/REJECTED |
+
+**If an expected axon track is missing today:** check optical field/depth, source/region registration, segmentation, qualified calibration, true cell source and changes to care before concluding a physical process disappeared. A software tool cannot respond by prescribing axon growth, adding growth factors or modifying cells.
+
+**Delivered package:** real source and sample ledger, image/electrical raw hashes, cell/axon identity, controls, independent care, reviewer approval and typed [RootEvidenceEdge](../../../schemas/animon/root_evidence_edge.schema.json). All physical observation/manipulation methods must come from local approved SOPs.
+
