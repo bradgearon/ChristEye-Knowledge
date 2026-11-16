@@ -1,0 +1,59 @@
+{
+  "current": {
+    "preparation_id": "SIM-ONLY-01",
+    "source_lot_id": "SIMULATED-LOT",
+    "culture_stage": "NONBIOLOGICAL-QA",
+    "measurement_name": "reference_instrument_signal",
+    "value": 1.04,
+    "unit": "AU",
+    "sample_location": "SYNTHETIC-CALIBRATION-REFERENCE",
+    "method_ref": "SYNTHETIC-QA-TEST",
+    "instrument_ref": "NONLIVING-SIMULATOR",
+    "calibration_version": "TEST-V1",
+    "medium_lot": "NOT_A_CULTURE",
+    "timestamp": "2026-11-16T14:00:00Z",
+    "validity": "VALID",
+    "calibration_valid": true,
+    "raw_data_ref": "synthetic-dataset-002",
+    "care_due": false,
+    "verified_care_receipt": null,
+    "change_event_ref": null,
+    "method_bridge_approved": false
+  },
+  "previous": {
+    "preparation_id": "SIM-ONLY-01",
+    "source_lot_id": "SIMULATED-LOT",
+    "culture_stage": "NONBIOLOGICAL-QA",
+    "measurement_name": "reference_instrument_signal",
+    "value": 1.01,
+    "unit": "AU",
+    "sample_location": "SYNTHETIC-CALIBRATION-REFERENCE",
+    "method_ref": "SYNTHETIC-QA-TEST",
+    "instrument_ref": "NONLIVING-SIMULATOR",
+    "calibration_version": "TEST-V1",
+    "medium_lot": "NOT_A_CULTURE",
+    "timestamp": "2026-11-15T14:00:00Z",
+    "validity": "VALID",
+    "calibration_valid": true,
+    "raw_data_ref": "synthetic-dataset-001",
+    "care_due": false,
+    "verified_care_receipt": null,
+    "change_event_ref": null,
+    "method_bridge_approved": false
+  },
+  "approved_limits": {
+    "critical_low": 0.8,
+    "critical_high": 1.2,
+    "warning_low": 0.9,
+    "warning_high": 1.1,
+    "approved_sop_ref": "SYNTHETIC-NONBIOLOGICAL-EXAMPLE"
+  },
+  "qualified_baseline": [
+    1,
+    1.01,
+    1.03,
+    1.02,
+    1.04,
+    1
+  ]
+}
