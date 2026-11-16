@@ -42,6 +42,9 @@ jobs:
       - name: Verify root URLs, rights and content
         working-directory: website/app
         run: node scripts/verify-cloudflare-build.mjs
+      - name: Test static Worker entrypoint and disabled interest API
+        working-directory: website/app
+        run: node --test tests/cloudflare-worker.test.mjs
       - name: Dry-run Wrangler packaging without Cloudflare credentials
         working-directory: website/app
         run: npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run

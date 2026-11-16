@@ -15,7 +15,7 @@ Sources:
 
 This deployment uses the already tested React portal at website/app in the ChristEye-Knowledge repository. The build transforms the original source registry into static documentation; it does not publish the confidential patent document. It uses HashRouter, so links may include a URL fragment such as /#/studio. Upgrade to clean URLs later without mixing that change into first deployment.
 
-The Cloudflare-specific configuration is in website/app/wrangler.jsonc. It is static-only and has no backend or database permissions. The current GitHub Pages site remains available as fallback.
+The Cloudflare-specific configuration is in website/app/wrangler.jsonc. It includes a minimal Worker entrypoint that normally does not execute for static assets; there is still no live backend or database permission. The current GitHub Pages site remains available as fallback.
 
 ## One-time dashboard steps
 
@@ -49,6 +49,26 @@ npx --yes wrangler@4 deploy
 ~~~
 
 The final deploy requires authorization in your Cloudflare account. GitHub CI verifies packaging without credentials; it is not a real live deployment.
+
+## Troubleshooting: response missing default_environment.script
+
+If Cloudflare shows:
+
+`WorkerResource.getWorkerResult: response missing default_environment.script`
+
+the dashboard is asking for a Worker script it cannot find in the current Worker resource metadata. **This is not a storage-plan charge or a Vite TypeScript error.** Cloudflare supports assets-only deployments, so the error may indicate an uninitialized Worker record or a dashboard state issue, rather than being proof that the earlier Wrangler configuration was invalid.
+
+The repository now supplies `main: "./worker/index.js"` and `assets.binding: "ASSETS"` in `wrangler.jsonc`. This creates a real Worker entry point while preserving Cloudflare's static-asset-first routing and reserving `/api/*` for a future explicitly enabled API. It does not enable interest collection.
+
+**Recommended recovery, in order:**
+
+1. In Cloudflare, go to **Workers & Pages** and inspect whether a Worker named **anaiero-io** exists. The project name must match the `name` in the configuration.
+2. If it exists and has a **Settings → Builds** section, connect GitHub `bradgearon/ChristEye-Knowledge` on branch `main` (or retry the latest build if already connected). Root directory: `website/app`. Confirm the build/deploy commands below.
+3. If Cloudflare cannot load that Worker due to missing script metadata, create a **new Worker using the Hello World template**, named `anaiero-io` if available, and deploy that initial script. Then open **Settings → Builds → Connect** to attach GitHub. This establishes an existing Worker with a default script before the full React build replaces it.
+4. If the name is already held by an incomplete resource, do not delete a live deployment blindly. Use a temporary Worker name for the bootstrap, or correct/remove only the unused broken placeholder after checking it has no active traffic; the Wrangler `name` must be changed to match any different name.
+5. Alternatively, on a computer with Git and Node 22, run `npx wrangler login` in `website/app`, then `ANAIERO_SITE_BASE=/ npm run build` and `npx wrangler deploy`; this can create the Worker directly before connecting the GitHub integration. Keep Cloudflare credentials out of chat and source.
+
+Cloudflare officially documents the [existing-Worker connection flow](https://developers.cloudflare.com/workers/ci-cd/builds/) and [Worker-script/asset routing](https://developers.cloudflare.com/workers/static-assets/). The exact error string has not been confirmed as a documented Cloudflare bug; if it persists after successful deployment, collect the dashboard page URL and Cloudflare build log without exposing secrets.
 
 ## Interest form
 
