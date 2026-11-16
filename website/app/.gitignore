@@ -3,3 +3,6 @@ dist/
 public/content/
 *.tsbuildinfo
 .env*
+
+test-results/
+playwright-report/

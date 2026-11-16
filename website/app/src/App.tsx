@@ -160,7 +160,7 @@ function Shell({manifest}:{manifest:Manifest}){
  return <div className="site-shell">
   <aside className={'site-sidebar '+(menu?'open':'')}>
    <Link to="/" className="brand"><span className="brand-logo"><Flower2 size={26} strokeWidth={1.3}/></span><span><strong>ChristEye<span> Anaiero</span></strong><small>RESEARCH & ENGINEERING</small></span></Link>
-   <div className="nav-label">DISCOVER</div><nav aria-label="Primary navigation">{nav.map(item=><NavLink end={item.to==='/'} key={item.to} to={item.to} className={({isActive})=>'sidebar-link '+(isActive?'active':'')}><item.icon size={18} strokeWidth={1.65}/><span>{item.label}</span><ChevronRight className="sidebar-chevron" size={15}/></NavLink>)}</nav>
+   <div className="nav-label">DISCOVER</div><nav aria-label="Primary navigation">{nav.map(item=><NavLink end={item.to==='/'} key={item.to} to={item.to} onClick={()=>setMenu(false)} className={({isActive})=>'sidebar-link '+(isActive?'active':'')}><item.icon size={18} strokeWidth={1.65}/><span>{item.label}</span><ChevronRight className="sidebar-chevron" size={15}/></NavLink>)}</nav>
    <div className="sidebar-bottom"><div className="sidebar-research"><div className="status-light"/><div><strong>Source-linked research</strong><span>Digital reference · biological research</span></div></div><Link to="/roadmap" className="sidebar-foot-link">Development phases <ArrowUpRight size={13}/></Link><a href="https://github.com/bradgearon/ChristEye-Knowledge" target="_blank" rel="noreferrer" className="sidebar-foot-link">GitHub source <ExternalLink size={13}/></a><span>© 2026 We Develop Software LLC</span></div>
   </aside>
   {menu&&<button className="mobile-scrim" aria-label="Close navigation" onClick={()=>setMenu(false)}/>}

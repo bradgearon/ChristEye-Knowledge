@@ -28,6 +28,7 @@ test('studio digital-only labs produce real local receipts',async ({page})=>{
 test('full scientific document library opens long term storage source',async ({page})=>{
  await page.goto('./#/library');
  await expect(page.locator('.library-summary')).toContainText('352');
+ await page.getByRole('combobox',{name:'Collection'}).selectOption('current-module-design');
  await page.getByRole('textbox',{name:'Search documentation'}).fill('CE-A02');
  const item=page.locator('.library-item').filter({hasText:'CE-A02'}).first();
  await expect(item).toBeVisible();await item.click();
@@ -42,5 +43,6 @@ test('mobile navigation and no horizontal overflow',async ({page})=>{
  await expect(page.locator('.site-sidebar')).toHaveClass(/open/);
  await page.locator('a.sidebar-link').filter({hasText:'Living systems'}).click();
  await expect(page.getByRole('heading',{level:1})).toContainText('Growth with purpose');
+ await expect(page.locator('.site-sidebar')).not.toHaveClass(/open/);
  await page.screenshot({path:'test-results/living-mobile.png',fullPage:false});
 });

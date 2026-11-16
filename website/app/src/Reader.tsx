@@ -7,7 +7,7 @@ import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import rehypeSlug from 'rehype-slug';
-import type {DocBody,Manifest} from './data';
+import type {DocBody,DocMeta,Manifest} from './data';
 import {getData,readRoute,resolveRelative,sourceLink,groupNames} from './data';
 
 const slug=(s:string)=>s.toLowerCase().replace(/<[^>]+>/g,'').replace(/[^\w\s-]/g,'').replace(/\s+/g,'-');
@@ -91,7 +91,7 @@ export function Library({manifest}:{manifest:Manifest}){
  const found=useMemo(()=>{
   const query=q.trim().toLowerCase();
   const matching=query.length>=3&&search?new Set(search.filter(x=>x.search.includes(query)).map(x=>x.id)):null;
-  return manifest.documents.filter(x=>(group==='all'||x.group===group)&&(history||x.group!=='historical')&&(!query||x.title.toLowerCase().includes(query)||x.source_path.toLowerCase().includes(query)||(matching?.has(x.id)??false)));
+  return manifest.documents.filter(x=>(group==='all'||x.group===group)&&(history||x.group!=='historical')&&(!query||x.title.toLowerCase().includes(query)||x.source_path.toLowerCase().includes(query)||(matching?.has(x.id)??false))).sort((a,b)=>{const order=(d:DocMeta)=>d.group==='current-module-design'?0:d.group==='current-module-companion'?1:d.group==='scientific-process'?2:d.group==='research-source'?3:4;const rank=order(a)-order(b);return rank||a.title.localeCompare(b.title)});
  },[manifest,group,history,q,search]);
  return <div className="page-block">
   <div className="section-intro"><div className="eyebrow"><BookOpen size={15}/> COMPLETE DOCUMENT LIBRARY</div><h1>Every design. Every companion.<br/><em>The full technical record.</em></h1><p>All approved source files are readable without downloads. Search, filter, open the full text, and follow scientific connections to original records.</p></div>
