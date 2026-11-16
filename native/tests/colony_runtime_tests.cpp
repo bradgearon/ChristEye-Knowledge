@@ -84,6 +84,24 @@ static void test_movement_contract(){
   auto illegal=transfer;illegal.kind=static_cast<rt::MovementKind>(255);
   CHECK(router.submit(illegal)==rt::Status::invalid);
 }
+static void test_source_isolation(){
+  rt::RuntimeService runtime;
+  CHECK(runtime.enroll({1,1,rt::Origin::simulated,true,true})==rt::Status::ok);
+  CHECK(runtime.enroll({2,1,rt::Origin::external_unverified_readonly,true,false})==rt::Status::ok);
+  auto synthetic=value(1,1,rt::Metric::energy,rt::Lane::health);
+  auto observed=value(2,1,rt::Metric::energy,rt::Lane::health);
+  observed.origin=rt::Origin::external_unverified_readonly;
+  observed.value=77;
+  CHECK(runtime.post(synthetic)==rt::Status::ok);
+  CHECK(runtime.post(observed)==rt::Status::ok);
+  CHECK(runtime.drain()==2);
+  const auto state=runtime.latest(100,1000);
+  CHECK(state.count==2 && state.values[0].source!=state.values[1].source);
+  CHECK(state.values[0].origin!=state.values[1].origin);
+  auto desire=observed;
+  desire.sequence=2;desire.metric=rt::Metric::digital_desire;
+  CHECK(runtime.post(desire)==rt::Status::unauthorized);
+}
 static void test_priority_and_fairness(){
   rt::WeightedQueue<64> q;
   auto health=value(1,1,rt::Metric::energy,rt::Lane::health);
@@ -174,7 +192,7 @@ static void test_sim3_input(const std::filesystem::path& root){
 }
 int main(int argc,char** argv){
   CHECK(argc==2);
-  test_wire();test_projection();test_priority_and_fairness();test_movement_contract();
+  test_wire();test_projection();test_priority_and_fairness();test_movement_contract();test_source_isolation();
   test_persistence_and_concurrency();test_sim3_input(argv[1]);
   std::cout<<"Anaiero ColonyState projector / priority scheduler / bus / persistence tests passed\n";
 }
