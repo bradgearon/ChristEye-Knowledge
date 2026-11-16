@@ -49,6 +49,8 @@ static void run_tests(const fs::path& base){
     CHECK(runner.state().tick==0 && runner.audit_disk());
     CHECK(runner.step()==sim::Result::ok);
     CHECK(runner.step()==sim::Result::ok);
+    CHECK(read(tmp/"active/history/tick-000001.state").starts_with("CEVRUNSTATE/1"));
+    CHECK(read(tmp/"active/history/tick-000002.state")==read(tmp/"active/culture.state"));
     CHECK(runner.state().tick==2 && runner.state().cells.size()==4);
     const auto& child=runner.state().cells.back();
     CHECK(child.id==4 && child.parent==1 && child.birth==2 && child.alive);
@@ -66,6 +68,7 @@ static void run_tests(const fs::path& base){
     sim::Runner contender;
     CHECK(contender.open(config,tmp/"active")==sim::Result::locked);
     eventual_hash=runner.snapshot_sha256();
+    CHECK(read(tmp/"active/history/tick-000003.state")==read(tmp/"active/culture.state"));
     CHECK(runner.audit_disk());
   }
   {
@@ -74,6 +77,7 @@ static void run_tests(const fs::path& base){
     CHECK(runner.snapshot_sha256()==eventual_hash && runner.state().tick==3);
     for(int i=0;i<2;++i)CHECK(runner.step()==sim::Result::ok);
     CHECK(runner.state().tick==5 && runner.state().cells.size()==4);
+    CHECK(read(tmp/"active/history/tick-000005.state")==read(tmp/"active/culture.state"));
     CHECK(runner.state().colonies[1].data>0);
     CHECK(runner.state().cells[2].learning>8); // teaching + synthetic data route
     eventual_hash=runner.snapshot_sha256();

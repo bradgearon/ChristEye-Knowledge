@@ -347,6 +347,21 @@ inline std::string obj(const Snapshot& state,const Configuration& config) {
 class Runner {
   Configuration config_{};Snapshot state_{};fs::path store_{};
   os::File lock_{};bool open_=false;
+  fs::path history_path(std::uint64_t tick) const {
+    std::ostringstream name;name<<"tick-"<<std::setfill('0')<<std::setw(6)<<tick<<".state";
+    return store_/"history"/name.str();
+  }
+  bool retain_snapshot(const Snapshot& snap) const {
+    std::error_code ec;
+    fs::create_directories(store_/"history",ec);if(ec)return false;
+    auto path=history_path(snap.tick);
+    auto bytes=encode_snapshot(snap);
+    if(fs::exists(path,ec)){
+      std::string recorded;
+      return !ec && bounded_read(path,kMaxSnapshotBytes,recorded) && recorded==bytes;
+    }
+    return !ec && os::atomic_write(path,bytes);
+  }
   static Colony* find_colony(Snapshot& st,const std::string& name){for(auto& c:st.colonies)if(c.id==name)return &c;return nullptr;}
   static Cell* find_cell(Snapshot& st,const std::string& col,std::uint32_t id){for(auto& c:st.cells)if(c.colony==col&&c.id==id)return &c;return nullptr;}
   Result apply_tick(Snapshot& next){
@@ -408,13 +423,20 @@ public:
       for(const auto& s:cfg.seeds)candidate.cells.push_back({s.colony,s.kind,s.id,s.parent,s.x,s.y,s.z});
       if(!os::atomic_write(state_path,encode_snapshot(candidate)))return Result::io_error;
     }
-    config_=std::move(cfg);state_=std::move(candidate);store_=root;open_=true;
+    config_=std::move(cfg);state_=std::move(candidate);store_=root;
+    if(!retain_snapshot(state_))return Result::io_error;
+    open_=true;
     return Result::ok;
   }
   Result step(bool save_images=true){
     if(!open_)return Result::invalid_state;
     Snapshot candidate=state_;
     if(auto r=apply_tick(candidate);r!=Result::ok)return r;
+    // Preserve every accepted tick (including inactive lineage tombstones)
+    // before advancing the durable HEAD-equivalent latest-state pointer.
+    // Interrupted writes can leave an unreferenced history object, never a
+    // falsely advanced latest-state pointer.
+    if(!retain_snapshot(candidate))return Result::uncommitted;
     if(!os::atomic_write(store_/"culture.state",encode_snapshot(candidate)))return Result::uncommitted;
     state_=std::move(candidate); // publish to in-memory readers only AFTER commit
     if(save_images){std::error_code ec;fs::create_directories(store_/"frames",ec);
@@ -428,8 +450,10 @@ public:
   }
   std::string snapshot_sha256()const{return pl::sha256_hex(encode_snapshot(state_));}
   bool audit_disk()const{std::string data;Snapshot replay;
-    return open_&&bounded_read(store_/"culture.state",kMaxSnapshotBytes,data)&&
-        decode_snapshot(data,config_,replay)==Result::ok&&encode_snapshot(replay)==encode_snapshot(state_);
+    if(!open_||!bounded_read(store_/"culture.state",kMaxSnapshotBytes,data)||
+       decode_snapshot(data,config_,replay)!=Result::ok||encode_snapshot(replay)!=encode_snapshot(state_))return false;
+    std::string historical;
+    return bounded_read(history_path(replay.tick),kMaxSnapshotBytes,historical)&&historical==data;
   }
 };
 } // namespace christeye::living::sim3
