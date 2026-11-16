@@ -25,6 +25,9 @@
 | [CE-SW-13: SIM3.1 Unified Living Laboratory](CE-SW-13_unified_living_laboratory.md) | Versioned synthetic laws, SHA-pinned VLM2 projections, WindStore checkpoint indexes, synthetic reference evaluations, validated frame schemas and interactive 3D replay | **Native + viewer prototype; biology not validated** |
 | [CE-SW-12: SIM3 Persistent Multi-Colony Runner and 3D Models](CE-SW-12_persistent_multicolony_runner.md) | Restartable SHA-256-pinned host runner, two-colony synthetic resource/data/Stimubus links, lineage tombstones, read-only mmap checkpoint views, golden SVG/OBJ test artifacts and source-provenance descriptors | **Host-side digital-only prototype and native tests** |
 
+| [CE-SW-20: Anaiero v0.015 Native C++ Architecture Pass](CE-SW-20_anaiero_v0015_cpp_architecture_pass.md) | Audited dependency map, controller topology, event/outbox ordering, scheduling, security and safe migration roadmap | **Architecture proposal with regression guard; no new daemon or mesh** |
+| [ADR-001: Native Runtime Ownership](ADR-001_native_runtime_ownership.md) | Target ownership boundaries, common observation envelope, source epochs and transactional digital outbox | **Proposed decision; implementation pending** |
+
 See also [proposed Colony Intelligence and control schemas](../../schemas/software/README.md) for snapshot, board capability, Bread/Meat planning and guidance records.
 
 
