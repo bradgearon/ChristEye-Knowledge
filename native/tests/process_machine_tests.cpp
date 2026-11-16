@@ -18,9 +18,9 @@ CEVLM/2
 name test-garden
 model 1
 assets
-asset crest-glow sprite docs/assets/vlm/crest-glow.svg
-asset molecule-signal icon docs/assets/vlm/molecule-signal.svg
-asset support-flow heatmap docs/assets/vlm/support-flow.svg
+asset crest-glow sprite docs/assets/vlm/crest-glow.svg a6ce313a3247ba73a8ccb5012bcb3283af7716ce64dccaf00548f8495445ed0d
+asset molecule-signal icon docs/assets/vlm/molecule-signal.svg df08bcfae0ee04a83ffabd176033f1c234f83e560605830a5d1c31ba79418991
+asset support-flow heatmap docs/assets/vlm/support-flow.svg 0f29e943cd260248e02046577f1591b83448f82d1ffc733b5ebcae5d54a3eceb
 endassets
 processes
 process birth spawn 4 850 1 0 crest-glow
