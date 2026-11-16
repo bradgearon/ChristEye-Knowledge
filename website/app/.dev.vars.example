@@ -1,0 +1,4 @@
+# Private Worker runtime secrets, never commit .dev.vars:
+# TURNSTILE_SECRET=...
+# PRIVACY_CONTACT=working-email@your-domain
+# ALLOWED_HOSTNAMES=anaiero.io,www.anaiero.io

@@ -1,0 +1,14 @@
+{
+  // Workers Static Assets: no origin server, zero-cost static asset requests.
+  // Set up D1 and add a d1_databases binding below before enabling signups.
+  "name": "anaiero-site",
+  "main": "./worker/index.ts",
+  "compatibility_date": "2026-11-15",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "observability": {"enabled": true}
+}

@@ -1,0 +1,10 @@
+{
+  // Copy the d1_databases entry into wrangler.jsonc AFTER creating the D1 DB.
+  // The placeholder UUID is not deployable; do not commit actual secrets.
+  "d1_databases": [{
+    "binding": "DB",
+    "database_name": "anaiero-interest",
+    "database_id": "REPLACE_WITH_ACTUAL_D1_DATABASE_UUID",
+    "migrations_dir": "migrations"
+  }]
+}

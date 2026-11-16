@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.wrangler/
+.dev.vars
+.dev.vars.*
+public/content/
+src/generated/catalog.json
+.DS_Store
+*.log
