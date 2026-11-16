@@ -175,6 +175,31 @@ static void invalid_process_config_is_rejected() {
   EXPECT(p::ProcessMachine::deserialize(source, machine).error != p::Error::ok);
   EXPECT(machine.state_hash() == baseline);
 }
+struct PushCapture {
+  std::uint32_t calls = 0;
+  std::uint64_t newest_tick = 0;
+  bool bad = false;
+  static void delivered(void* opaque, const p::Event& event) noexcept {
+    auto& self = *static_cast<PushCapture*>(opaque);
+    ++self.calls;
+    if (event.tick < 3 || event.snapshot_hash == 0) self.bad = true;
+    self.newest_tick = event.tick;
+  }
+};
+static void post_commit_events_are_not_replayed_on_failure() {
+  auto a = make();
+  PushCapture receiver;
+  a.set_process_event_callback(PushCapture::delivered, &receiver);
+  EXPECT(a.advance(2) == p::Error::ok);
+  EXPECT(receiver.calls == 4 && receiver.newest_tick == 4 && !receiver.bad);
+  v::Action duplicate{};
+  EXPECT(v::parse_action("spawn 1 crest_progenitor 20 20 0", duplicate));
+  EXPECT(a.start(70, "birth", duplicate) == p::Error::ok);
+  EXPECT(a.advance(2) == p::Error::ok);
+  const auto prior = receiver.calls;
+  EXPECT(a.advance(2) == p::Error::execution_failed);
+  EXPECT(receiver.calls == prior); // Nothing leaks from rolled-back transaction.
+}
 static void windpacket_integration() {
   auto a = make();
   wind::BoundedScheduler<32> queue;
@@ -210,6 +235,7 @@ static void windpacket_integration() {
 int main() {
   schedule_and_save(); clones_and_negative_cases();
   failed_completion_is_transactional(); import_v1_and_manual_ops();
-  invalid_process_config_is_rejected(); windpacket_integration();
+  invalid_process_config_is_rejected(); post_commit_events_are_not_replayed_on_failure();
+  windpacket_integration();
   std::cout << "VLM2 process catalogue, timeline, replay and WindBus tests passed\n";
 }
