@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0.0",
+  "preparation_id": "PREP-NOT-CREATED-SYNTHETIC",
+  "source_lot_id": "LOT-UNASSIGNED-SYNTHETIC",
+  "created_at": "2026-11-16T00:00:00Z",
+  "evidence_status": "DESIGN",
+  "evidence_ref": null,
+  "record_id": "SOIL-EXAMPLE-001",
+  "soil_region_id": "REGION-UNOBSERVED",
+  "regional_phenotype_candidate": null,
+  "source_preparation_ref": "SOURCE-PREPARATION-UNASSIGNED",
+  "spatial_transform_ref": null,
+  "volume_observation_ref": null,
+  "maturation_assay_refs": [],
+  "cell_population_observation_refs": [],
+  "axon_projection_refs": [],
+  "viability_observation_ref": null,
+  "instrument_depth_coverage_ref": null,
+  "unobserved_volume_note": "No preparation or tissue observation has occurred",
+  "review_state": "SOURCE_UNVERIFIED"
+}
