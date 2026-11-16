@@ -1,0 +1,28 @@
+name: Anaiero Native Architecture Guard
+on:
+  push:
+    paths:
+      - 'native/include/anaiero/**'
+      - 'tests/test_native_architecture.py'
+      - '.github/workflows/native-architecture.yml'
+      - 'docs/software/CE-SW-20_anaiero_v0015_cpp_architecture_pass.md'
+      - 'docs/software/ADR-001_native_runtime_ownership.md'
+  pull_request:
+    paths:
+      - 'native/include/anaiero/**'
+      - 'tests/test_native_architecture.py'
+      - '.github/workflows/native-architecture.yml'
+      - 'docs/software/CE-SW-20_anaiero_v0015_cpp_architecture_pass.md'
+      - 'docs/software/ADR-001_native_runtime_ownership.md'
+permissions:
+  contents: read
+jobs:
+  native-boundaries:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify native layers and documented migration debts
+        run: python -m unittest discover -s tests -p test_native_architecture.py -v
