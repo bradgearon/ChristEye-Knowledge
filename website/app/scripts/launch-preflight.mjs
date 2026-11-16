@@ -47,7 +47,13 @@ if(offline){
     assert.equal(stage.vars.ALLOWED_HOSTNAMES,'anaiero.bradgearon.workers.dev');
     assert.equal(stage.assets.directory,production.assets.directory);
     assert.deepEqual(stage.assets.run_worker_first,['/api/*']);
-    assert.ok(!stage.d1_databases,'Staging database must be set to a real separate resource only');
+    if(stage.d1_databases){
+      assert.equal(stage.d1_databases.length,1,'Exactly one staging database expected');
+      assert.equal(stage.d1_databases[0].binding,'DB');
+      assert.equal(stage.d1_databases[0].database_name,'anaiero-interest-dev');
+      const prodIds=(production.d1_databases||[]).map(x=>x.database_id).filter(Boolean);
+      assert.ok(!prodIds.includes(stage.d1_databases[0].database_id),'Staging must not share production D1');
+    }
     return 'Staging and production Worker names/allowed hostnames isolated';
   });
   check('React production HTML at domain root',()=>{

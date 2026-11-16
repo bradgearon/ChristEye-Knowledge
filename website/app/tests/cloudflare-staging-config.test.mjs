@@ -27,7 +27,12 @@ test('both Workers serve identical static assets with API-first routing',()=>{
 });
 
 test('staging does not contain production D1 IDs or secrets',()=>{
-  assert.ok(!Object.hasOwn(staging,'d1_databases'),'Staging D1 binding requires a separate database');
+  if(Object.hasOwn(staging,'d1_databases')){
+    assert.equal(staging.d1_databases.length,1);
+    assert.equal(staging.d1_databases[0].binding,'DB');
+    assert.equal(staging.d1_databases[0].database_name,'anaiero-interest-dev');
+    assert.ok(!((prod.d1_databases||[]).map(d=>d.database_id).includes(staging.d1_databases[0].database_id)));
+  }
   for(const field of ['TURNSTILE_SECRET','TURNSTILE_SITE_KEY','PRIVACY_CONTACT']){
     assert.ok(!Object.hasOwn(staging.vars,field),'Cloudflare secrets and company contact are set in account');
   }
