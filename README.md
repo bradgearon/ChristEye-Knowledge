@@ -1,12 +1,14 @@
 # ChristEye Anaiero
 
-**We Develop Software LLC · Scientific research and modular computer architecture · November 15, 2026**
+**Animon** is the proposed individual developmental system class; **ChristEye Anaiero** is the architecture and WDS research program. [Read the ANIMON/1 definition](ontology/ANIMON_V1.md) and the [v3.2 scientific pilot](specifications/v3.2/README.md). The digital reference is not a living Animon and the physical candidate has not been validated.
+
+**We Develop Software LLC · Scientific research and Animon developmental systems architecture · November 15, 2026**
 
 [**Website S01 blueprint**](website/README.md) · [**V3.1 scientific implementation**](specifications/v3/README.md) · [**Scientist workflow**](processes/SCIENTIST_WORKFLOW.md) · [**Molecules and axons**](processes/MOLECULAR_INDEX.md) · [**Biological schemas**](schemas/biology/README.md) · [**Phase 1**](docs/phase-1.md) · [Complete documents](docs/full-document-library.md) · [24 subsystem contracts](docs/module-contracts.md) · [Full schemas](docs/schema-reference.md) · [Scientific research](research/full-markdown/README.md) · [Website](docs/index.html)
 
 ChristEye Anaiero is a research and engineering program investigating modular developmental computing, supervised biological instrumentation, specialist StarChips, capability-bearing digital CrystalPacks, Roots and retained knowledge, and the possible future living embodiment of these systems.
 
-> **Research status.** Software prototypes and documentation exist. The project has **not** demonstrated an intelligent organoid computer, biological transfer of arbitrary memories, a validated physical Crystal, or an autonomous cell-growth system.
+> **Research status.** Software prototypes and documentation exist. The project has **not** demonstrated a functioning living Animon, biological transfer of arbitrary memories, a validated physical Crystal, or an autonomous cell-growth system.
 
 ## Read the documentation as an engineer
 

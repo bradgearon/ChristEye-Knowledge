@@ -1,5 +1,7 @@
 # Anaiero — controlled process library
 
+**System-class terminology:** [Animon (ANIMON/1)](../ontology/ANIMON_V1.md) is the proposed individual developmental system, distinct from an Animon specification or nonliving digital reference. [Core/Care v3.2 pilot](../specifications/v3.2/README.md) supplies the first updated module dossiers. Original process IDs remain unchanged.
+
 **Revision:** 2026-11-15 · **Release:** candidate biological engineering architecture / no qualified tissue procedure. The design and companion for every CE-A module link to the relevant process and its evidence register.
 
 | Process | Owner / controlled boundary |

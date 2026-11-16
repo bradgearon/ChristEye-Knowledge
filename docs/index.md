@@ -1,5 +1,7 @@
 # ChristEye Anaiero — documentation
 
+**Current naming:** an **Animon** is the proposed individually traceable developmental system. [ANIMON/1 ontology](../ontology/ANIMON_V1.md) · [v3.2 Core/Care pilot](../specifications/v3.2/README.md).
+
 **15 November 2026 · © 2026 We Develop Software LLC · WDS Public Research Reference License**
 
 The documentation is a **complete technical library**, not an index of promised future writing. Current and historical specifications are separated, and original experimental figures and machine-readable data are preserved.

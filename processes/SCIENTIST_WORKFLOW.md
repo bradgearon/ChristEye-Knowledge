@@ -1,5 +1,7 @@
 # Anaiero scientific director's full cross-module workflow — 2026-11-15
 
+**2026-11-16 nomenclature:** The individual target system is an **Animon**. [ANIMON/1](../ontology/ANIMON_V1.md) distinguishes project architecture, digital reference and physical candidate; this workflow remains a review path, not an organoid construction recipe.
+
 **Role:** scientist-facing process packet and signed handoff; **scope:** experimental design and qualification, not a stand-alone cell manufacturing or peptide administration SOP. The [24 current module designs](../specifications/v3/README.md) and [10 living-science record schemas](../schemas/biology/README.md) reference this workflow.
 
 ## The system to build
