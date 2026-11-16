@@ -1,0 +1,58 @@
+name: Anaiero ColonyState Runtime SW4
+on:
+  push:
+    paths:
+      - 'native/include/anaiero/**'
+      - 'native/examples/colony_runtime_cli.cpp'
+      - 'native/tests/colony_runtime_tests.cpp'
+      - 'native/examples/anaiero_cli.cpp'
+      - 'native/CMakeLists.txt'
+      - 'docs/software/CE-SW-18_colony_state_runtime_projector.md'
+      - 'schemas/software/colony_state_runtime.v1.schema.json'
+      - 'examples/sw4/**'
+      - 'tests/test_sw4_runtime_contract.py'
+      - '.github/workflows/anaiero-runtime.yml'
+  pull_request:
+    paths:
+      - 'native/include/anaiero/**'
+      - 'native/examples/colony_runtime_cli.cpp'
+      - 'native/tests/colony_runtime_tests.cpp'
+      - 'native/examples/anaiero_cli.cpp'
+      - 'native/CMakeLists.txt'
+      - 'docs/software/CE-SW-18_colony_state_runtime_projector.md'
+      - 'schemas/software/colony_state_runtime.v1.schema.json'
+      - 'examples/sw4/**'
+      - 'tests/test_sw4_runtime_contract.py'
+      - '.github/workflows/anaiero-runtime.yml'
+permissions:
+  contents: read
+jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S native -B build/sw4 -DCE_WIND_BUILD_TESTS=ON
+      - name: Build
+        run: cmake --build build/sw4 --config Release --target ce_colony_runtime ce_colony_runtime_tests anaiero
+      - name: Run integration tests
+        run: ctest --test-dir build/sw4 -C Release --output-on-failure -R "anaiero_runtime_"
+      - name: Verify public module availability
+        run: ./build/sw4/anaiero help runtime
+        if: runner.os != 'Windows'
+      - name: Verify public module availability on Windows
+        run: .\\build\\sw4\\Release\\anaiero.exe help runtime
+        if: runner.os == 'Windows'
+  schema:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install 'jsonschema>=4.18,<5'
+      - run: python -m unittest discover -s tests -p test_sw4_runtime_contract.py -v

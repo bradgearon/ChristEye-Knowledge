@@ -109,3 +109,9 @@ The `stream` output is NDJSON with all synthetic actors, proxy counters and a si
 ## SW2 reference — WindRegistry
 
 The host-only `ce_wind_registry` CLI and `christeye/living/wind_registry.hpp` provide immutable SHA-256 object identity, a replay-checked append-only evidence journal, per-entity and per-kind pushed subscriptions, stage-to-Crystal/RNA/support mapping and immutable successor proposals. See [CE-SW-10](../docs/software/CE-SW-10_windstore_learning_crystal_registry.md). This is **not** crash-safe production WindStore (no fsync/locking), nor an authenticated multi-host transport or biological action pipeline.
+
+## SW4 — `anaiero runtime` latest-state projector
+
+The native controller path is `SIM3 -> typed WindPacket/1 -> bounded weighted queue -> ColonyState projector -> post-commit subscriptions`.
+Run `anaiero runtime simulate examples/connected-gardens.cev ./culture-state 5` or start the blocking local event shell with `anaiero runtime serve examples/connected-gardens.cev ./culture-state` and issue `STEP`, `STATE`, `QUIT`.
+The in-RAM bounded latest-state snapshot and individual source cursors are not replacements for authenticated mesh joining, qualified laboratory instruments, or independently managed physical care. See [CE-SW-18](../docs/software/CE-SW-18_colony_state_runtime_projector.md).

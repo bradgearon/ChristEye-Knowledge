@@ -268,3 +268,26 @@ if(CE_WIND_BUILD_TESTS)
     -DCE_TEMP=${CMAKE_CURRENT_BINARY_DIR}/anaiero-smoke
     -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/anaiero_dispatch_smoke.cmake)
 endif()
+
+# CE-SW-18 low-resource native controller ColonyState projector and weighted Animon work.
+find_package(Threads REQUIRED)
+add_executable(ce_colony_runtime examples/colony_runtime_cli.cpp)
+target_link_libraries(ce_colony_runtime PRIVATE ce_wind_core Threads::Threads)
+if(MSVC)
+  target_compile_options(ce_colony_runtime PRIVATE /W4 /WX)
+else()
+  target_compile_options(ce_colony_runtime PRIVATE -Wall -Wextra -Wconversion -Werror)
+endif()
+if(CE_WIND_BUILD_TESTS)
+  add_executable(ce_colony_runtime_tests tests/colony_runtime_tests.cpp)
+  target_link_libraries(ce_colony_runtime_tests PRIVATE ce_wind_core Threads::Threads)
+  if(MSVC)
+    target_compile_options(ce_colony_runtime_tests PRIVATE /W4 /WX)
+  else()
+    target_compile_options(ce_colony_runtime_tests PRIVATE -Wall -Wextra -Wconversion -Werror)
+  endif()
+  add_test(NAME anaiero_runtime_projector COMMAND ce_colony_runtime_tests ${CMAKE_CURRENT_SOURCE_DIR}/..)
+  add_test(NAME anaiero_runtime_simulate COMMAND ce_colony_runtime simulate
+    ${CMAKE_CURRENT_SOURCE_DIR}/../examples/connected-gardens.cev
+    ${CMAKE_CURRENT_BINARY_DIR}/anaiero-runtime-simulated 2)
+endif()
