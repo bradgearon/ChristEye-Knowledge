@@ -1,0 +1,13 @@
+{
+  "schema_version": "ce.wind_registry.event/1",
+  "sequence": 1,
+  "previous_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "event_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+  "kind": "RNA_OBSERVATION",
+  "entity": "binding-17",
+  "object_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+  "origin": "SIMULATED",
+  "source_tick": 12,
+  "clock": "sim-clock",
+  "producer": "local-simulator"
+}
