@@ -15,7 +15,7 @@ Sources:
 
 This deployment uses the already tested React portal at website/app in the ChristEye-Knowledge repository. The build transforms the original source registry into static documentation; it does not publish the confidential patent document. It uses HashRouter, so links may include a URL fragment such as /#/studio. Upgrade to clean URLs later without mixing that change into first deployment.
 
-The Cloudflare-specific configuration is in website/app/wrangler.jsonc. It includes a minimal Worker entrypoint that normally does not execute for static assets; there is still no live backend or database permission. The current GitHub Pages site remains available as fallback.
+The Cloudflare-specific configuration is in website/app/wrangler.jsonc. It includes an API Worker entrypoint for /api/* while ordinary assets remain static. The code now supports opt-in interest registration, **but registration remains disabled without D1, Turnstile and a monitored privacy contact; no deployed configuration has been verified in this conversation**. The current GitHub Pages site remains available as fallback.
 
 ## One-time dashboard steps
 
@@ -24,7 +24,7 @@ The Cloudflare-specific configuration is in website/app/wrangler.jsonc. It inclu
 3. Choose production branch main once the Cloudflare release PR has been merged. Until then, use deploy/cloudflare-anaiero-io only for review.
 4. Set Root directory: website/app
 5. Set Build command exactly:
-   npm ci --no-audit --no-fund && ANAIERO_SITE_BASE=/ npm run build && node scripts/verify-cloudflare-build.mjs
+   npm ci --no-audit --no-fund && ANAIERO_SITE_BASE=/ npm run build && node scripts/verify-cloudflare-build.mjs && node scripts/launch-preflight.mjs --offline
 6. Set Deploy command exactly:
    npx --yes wrangler@4 deploy
 7. Save and Deploy. Check the generated workers.dev address, homepage, document library, science section, interactive lab and mobile navigation before attaching the domain.
@@ -45,6 +45,7 @@ For a local build, run from website/app:
 npm ci --no-audit --no-fund
 ANAIERO_SITE_BASE=/ npm run build
 node scripts/verify-cloudflare-build.mjs
+node scripts/launch-preflight.mjs --offline
 npx --yes wrangler@4 deploy
 ~~~
 
@@ -58,7 +59,7 @@ If Cloudflare shows:
 
 the dashboard is asking for a Worker script it cannot find in the current Worker resource metadata. **This is not a storage-plan charge or a Vite TypeScript error.** Cloudflare supports assets-only deployments, so the error may indicate an uninitialized Worker record or a dashboard state issue, rather than being proof that the earlier Wrangler configuration was invalid.
 
-The repository now supplies `main: "./worker/index.js"` and `assets.binding: "ASSETS"` in `wrangler.jsonc`. This creates a real Worker entry point while preserving Cloudflare's static-asset-first routing and reserving `/api/*` for a future explicitly enabled API. It does not enable interest collection.
+The repository now supplies `main: "./worker/index.js"` and `assets.binding: "ASSETS"` in `wrangler.jsonc`. This creates a real Worker entry point while preserving Cloudflare's static-asset-first routing and reserving `/api/*` for a future explicitly enabled API. A route to this code does not by itself enable registrations; the Worker fails closed until every required binding and runtime secret exists.
 
 **Recommended recovery, in order:**
 
@@ -72,7 +73,7 @@ Cloudflare officially documents the [existing-Worker connection flow](https://de
 
 ## Interest registration
 
-The public React portal now contains a research-interest and privacy page, plus a consent-checked Worker API. **Registration is disabled by default** until a D1 binding, Turnstile keys and an active privacy mailbox are configured. No email is automatically sent. See [INTEREST_ROLLOUT.md](INTEREST_ROLLOUT.md).
+The public React portal now contains a research-interest and privacy page, plus a consent-checked Worker API. **Registration is disabled by default** until a D1 binding, Turnstile keys and an active privacy mailbox are configured. No email is automatically sent. See [INTEREST_ROLLOUT.md](INTEREST_ROLLOUT.md) and [S07_LAUNCH_RUNBOOK.md](S07_LAUNCH_RUNBOOK.md). Once the domain is live, the read-only check is `node scripts/launch-preflight.mjs --live`.
 
 ## Subdomains and later expansion
 
