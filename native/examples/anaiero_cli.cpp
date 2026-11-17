@@ -21,7 +21,7 @@
 namespace anaiero {
 namespace fs=std::filesystem;
 struct Module {std::string_view name, backend, purpose, example;};
-constexpr std::array<Module,13> modules{{
+constexpr std::array<Module,14> modules{{
   {"vm","ce_vlm","Virtual Living Machines","anaiero vm inspect examples/vlm/crest-garden.avlm"},
   {"process","ce_vlm_process","Timed VLM2 processes","anaiero process inspect examples/vlm/process-garden.avlm"},
   {"plan","ce_vlm_plan","Crystal/RNA/learning plans","anaiero plan inspect examples/vlm/bread-first.cevplan examples/vlm/plan-garden.avlm ."},
@@ -34,6 +34,7 @@ constexpr std::array<Module,13> modules{{
   {"runtime","ce_colony_runtime","Latest ColonyState and weighted Animon status dispatch","anaiero runtime simulate examples/connected-gardens.cev ./state 5"},
   {"cells","ce_cell_behavior","Behavior atlas and synthetic cell development","anaiero cells execute examples/cells/crest-blood-neural.cevatlas ./digital-culture.cevcells examples/cells/reference-development.cevcellrun"},
   {"optimize","ce_optimization","Digital route analysis, trial scoring and feedback","anaiero optimize demo"},
+  {"science","ce_science_lab","Coupled cell and scientific-model simulations","anaiero science compare examples/cells/crest-blood-neural.cevatlas"},
   {"sim","ce_living_sim_demo","SIM1 synthetic demonstration","anaiero sim"}
 }};
 const Module* lookup(std::string_view name) noexcept {
