@@ -477,3 +477,33 @@ if(CE_WIND_BUILD_TESTS)
       -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/scientific_live_smoke.cmake)
   endif()
 endif()
+
+# CE-SW-27 reusable simulation kernel, both native Windows and Linux.
+add_executable(ce_simulation_kernel examples/simulation_kernel_cli.cpp)
+target_link_libraries(ce_simulation_kernel PRIVATE ce_wind_core Threads::Threads)
+if(MSVC)
+  target_compile_options(ce_simulation_kernel PRIVATE /W4 /WX)
+else()
+  target_compile_options(ce_simulation_kernel PRIVATE -Wall -Wextra -Wconversion -Werror)
+endif()
+add_dependencies(anaiero ce_simulation_kernel)
+install(TARGETS ce_simulation_kernel RUNTIME DESTINATION bin)
+if(CE_WIND_BUILD_TESTS)
+  add_executable(ce_simulation_kernel_tests tests/simulation_kernel_tests.cpp)
+  target_link_libraries(ce_simulation_kernel_tests PRIVATE ce_wind_core Threads::Threads)
+  if(MSVC)
+    target_compile_options(ce_simulation_kernel_tests PRIVATE /W4 /WX)
+  else()
+    target_compile_options(ce_simulation_kernel_tests PRIVATE -Wall -Wextra -Wconversion -Werror)
+  endif()
+  add_test(NAME anaiero_engine_kernel COMMAND ce_simulation_kernel_tests
+    ${CMAKE_CURRENT_SOURCE_DIR}/../examples/cells/crest-blood-neural.cevatlas
+    ${CMAKE_CURRENT_SOURCE_DIR}/../examples/connected-gardens.cev
+    ${CMAKE_CURRENT_BINARY_DIR}/kernel-tests)
+  add_test(NAME anaiero_engine_kernel_cli COMMAND ${CMAKE_COMMAND}
+    -DCE_KERNEL=$<TARGET_FILE:ce_simulation_kernel>
+    -DCE_ATLAS=${CMAKE_CURRENT_SOURCE_DIR}/../examples/cells/crest-blood-neural.cevatlas
+    -DCE_SIM3=${CMAKE_CURRENT_SOURCE_DIR}/../examples/connected-gardens.cev
+    -DCE_TEMP=${CMAKE_CURRENT_BINARY_DIR}/kernel-cli
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/simulation_kernel_smoke.cmake)
+endif()
