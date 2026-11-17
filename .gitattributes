@@ -35,6 +35,7 @@ examples/cells/*.cevatlas -text
 examples/cells/*.cevsource -text
 examples/cells/*.cevcellrun -text
 examples/cells/*.cevcells -text
+examples/runtime/*.cevcells -text
 
 # CE-SW-24 byte-exact scientific feature fixtures across Windows/Linux.
 examples/scientific/*.cevscitrace -text

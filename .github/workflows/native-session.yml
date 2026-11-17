@@ -1,9 +1,9 @@
 name: Anaiero Integrated Native Sessions
 on:
   push:
-    paths: ['native/**', 'examples/runtime/**', '.github/workflows/native-session.yml']
+    paths: ['native/**', 'examples/runtime/**', '.gitattributes', '.github/workflows/native-session.yml']
   pull_request:
-    paths: ['native/**', 'examples/runtime/**', '.github/workflows/native-session.yml']
+    paths: ['native/**', 'examples/runtime/**', '.gitattributes', '.github/workflows/native-session.yml']
 permissions:
   contents: read
 jobs:
