@@ -25,6 +25,7 @@ inline const char* metric_name(rt::Metric metric) noexcept {
     case rt::Metric::digital_desire:return "digital_desire";
     case rt::Metric::connection:return "connection";
     case rt::Metric::acquisition_health:return "acquisition_health";
+    case rt::Metric::digital_route_active:return "digital_route_active";
   }
   return "invalid";
 }
