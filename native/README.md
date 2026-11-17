@@ -168,3 +168,36 @@ or claim to execute these solvers. Optional NEURON and CSV converters live
 under `tools/scientific/`; Python is not required by the native C++ controller.
 All normalized values are computational proxies, not physiological readings.
 See [CE-SW-24](../docs/software/CE-SW-24_scientific_simulation_foundation.md).
+
+## SW6.2 source epochs and SW7.1 native live scientific coupling
+
+**General observation replay:** `anaiero science epoch-demo <atlas> <windstore-dir>`
+records two simulation producers, restarts one producer under a second source
+epoch, and rebuilds the same ColonyState view from the committed WindStore
+event stream after restart. The v1 packet remains available; new epoch-scoped
+readings use schema `0xCE600041` and cannot silently lose their epoch.
+
+**Live numerical-model stepping:** the C++20
+`anaiero science live <atlas> <windstore-dir> <epoch> <model-sha256> synthetic`
+command exchanges bounded `STEP`/`SAMPLE` frames over stdin/stdout with an
+optional external model. A Python driver is included solely as an optional
+test/model sidecar; Anaiero itself needs no Python or NEURON installation.
+
+```sh
+python tools/scientific/live_solver_bridge.py \
+  --anaiero ./build/native/anaiero \
+  --atlas examples/cells/crest-blood-neural.cevatlas \
+  --store ./live-evidence --epoch 1 --backend synthetic
+
+# Optional when NEURON is separately installed in this Python environment:
+python tools/scientific/live_solver_bridge.py \
+  --anaiero ./build/native/anaiero \
+  --atlas examples/cells/crest-blood-neural.cevatlas \
+  --store ./live-evidence --epoch 2 --backend neuron
+```
+
+On Windows pass the native path to `anaiero.exe`. The current prototype uses
+a read-only *digital* NEURON model sidecar when present; it is not a physiological
+instrument or a validated live-cell interface. See
+[CE-SW-25](../docs/software/CE-SW-25_source_epoch_recovery.md) and
+[CE-SW-26](../docs/software/CE-SW-26_live_multirate_solver_coupling.md).

@@ -13,6 +13,8 @@
 namespace sci=anaiero::science;
 namespace cell=anaiero::cells;
 int run_science_bus(const cell::Atlas& atlas);
+int run_science_live(int argc,char**argv);
+int run_science_epoch_demo(int argc,char**argv);
 static const char* condition(sci::Condition c)noexcept{
   switch(c){
     case sci::Condition::neuron_only:return "neuron_only";
@@ -39,6 +41,8 @@ static bool seed(const cell::Atlas& atlas,cell::ISpatialPort& spatial,cell::Worl
   output=service.world();return true;
 }
 int main(int argc,char**argv){
+  if(argc>1&&std::string_view(argv[1])=="live")return run_science_live(argc,argv);
+  if(argc>1&&std::string_view(argv[1])=="epoch-demo")return run_science_epoch_demo(argc,argv);
   if(argc==2&&std::string_view(argv[1])=="engines"){
     std::cout<<"{\"schema\":\"anaiero.science.engines/1\",\"providers\":[";
     for(std::size_t i=0;i<sci::kModelFamilies.size();++i){
@@ -69,7 +73,9 @@ int main(int argc,char**argv){
     std::cerr<<"usage: anaiero science engines\n"
      <<"       anaiero science trace <file.cevscitrace>\n"
      <<"       anaiero science compare|bus <atlas.cevatlas>\n"
-     <<"       anaiero science replay|environment <atlas.cevatlas> <file.cevscitrace>\n";
+     <<"       anaiero science replay|environment <atlas.cevatlas> <file.cevscitrace>\n"
+     <<"       anaiero science epoch-demo <atlas.cevatlas> <windstore-dir>\n"
+     <<"       anaiero science live <atlas.cevatlas> <windstore-dir> <epoch> <model-sha256> <synthetic|neuron|braincell>\n";
     return 2;
   }
   const auto action=std::string_view(argv[1]);
