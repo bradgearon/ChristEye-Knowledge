@@ -11,13 +11,17 @@ class LiveElectricalFeatureService final:public IElectricalFeatureModel {
   ILiveSolverExchange& io_;
   std::string hash_;
   std::uint32_t epoch_,source_;
+  Provider provider_=Provider::native_reference;
   bool poisoned_=false;
 public:
   LiveElectricalFeatureService(ILiveSolverExchange& io,std::string model_hash,
-    std::uint32_t epoch,std::uint32_t source=64):
-    io_(io),hash_(std::move(model_hash)),epoch_(epoch),source_(source){}
+    std::uint32_t epoch,std::uint32_t source=64,
+    Provider provider=Provider::native_reference):
+    io_(io),hash_(std::move(model_hash)),epoch_(epoch),source_(source),
+    provider_(provider){}
   ModelDescriptor descriptor()const noexcept override {
-    return {Provider::neuron,Evidence::published_model_unverified,1,epoch_,
+    return {provider_,provider_==Provider::native_reference?
+      Evidence::computational_prototype:Evidence::published_model_unverified,1,epoch_,
       source_,"live-neuron-model/1","NORMALIZED_ACTIVITY_PROXY"};
   }
   bool advance(State& state,const Input& input,std::uint32_t) noexcept override {
@@ -38,13 +42,17 @@ class LiveEnvironmentFeatureService final:public IEnvironmentFeatureModel {
   ILiveSolverExchange& io_;
   std::string hash_;
   std::uint32_t epoch_,source_;
+  Provider provider_=Provider::native_reference;
   bool poisoned_=false;
 public:
   LiveEnvironmentFeatureService(ILiveSolverExchange& io,std::string model_hash,
-    std::uint32_t epoch,std::uint32_t source=65):
-    io_(io),hash_(std::move(model_hash)),epoch_(epoch),source_(source){}
+    std::uint32_t epoch,std::uint32_t source=65,
+    Provider provider=Provider::native_reference):
+    io_(io),hash_(std::move(model_hash)),epoch_(epoch),source_(source),
+    provider_(provider){}
   ModelDescriptor descriptor()const noexcept override {
-    return {Provider::physicell,Evidence::published_model_unverified,1,epoch_,
+    return {provider_,provider_==Provider::native_reference?
+      Evidence::computational_prototype:Evidence::published_model_unverified,1,epoch_,
       source_,"live-environment-feature/1","NORMALIZED_ENVIRONMENT_PROXY"};
   }
   bool advance(State& state,std::uint64_t macro_tick) noexcept override {
