@@ -292,7 +292,7 @@ endif()
 
 # CE-SW-18 low-resource native controller ColonyState projector and weighted Animon work.
 find_package(Threads REQUIRED)
-add_executable(ce_colony_runtime examples/colony_runtime_cli.cpp)
+add_executable(ce_colony_runtime examples/colony_runtime_cli.cpp examples/controller_host_cli.cpp)
 target_link_libraries(ce_colony_runtime PRIVATE ce_wind_core Threads::Threads)
 if(MSVC)
   target_compile_options(ce_colony_runtime PRIVATE /W4 /WX)
@@ -506,4 +506,22 @@ if(CE_WIND_BUILD_TESTS)
     -DCE_SIM3=${CMAKE_CURRENT_SOURCE_DIR}/../examples/connected-gardens.cev
     -DCE_TEMP=${CMAKE_CURRENT_BINARY_DIR}/kernel-cli
     -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/simulation_kernel_smoke.cmake)
+endif()
+
+# Native Windows/Linux same-user IPC server and weighted queue linear-scan regression.
+if(WIN32)
+  target_link_libraries(ce_colony_runtime PRIVATE advapi32)
+endif()
+if(CE_WIND_BUILD_TESTS)
+  add_executable(ce_native_host_tests tests/native_host_tests.cpp)
+  target_link_libraries(ce_native_host_tests PRIVATE ce_wind_core Threads::Threads)
+  if(WIN32)
+    target_link_libraries(ce_native_host_tests PRIVATE advapi32)
+  endif()
+  if(MSVC)
+    target_compile_options(ce_native_host_tests PRIVATE /W4 /WX)
+  else()
+    target_compile_options(ce_native_host_tests PRIVATE -Wall -Wextra -Wconversion -Werror)
+  endif()
+  add_test(NAME anaiero_native_host_ipc COMMAND ce_native_host_tests)
 endif()

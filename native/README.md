@@ -210,3 +210,18 @@ a versioned `ISimulationEngine` lifecycle. Engine-specific state remains
 private. SW5 supports CEVCELLSTATE checkpoint and restore; SIM3 retains its
 separate persistence model, and arbitrary in-place rewind is explicitly
 unsupported. See [CE-SW-27](../docs/software/CE-SW-27_reusable_simulation_kernel.md).
+
+## Native local controller (experimental)
+
+Native Windows and Linux `anaiero runtime start <endpoint> <sim3.cev> <state-dir>`
+opens the existing durable SIM3 digital colony and hosts an authenticated local
+control endpoint. Linux uses same-UID Unix-domain sockets; Windows uses named
+pipes and verified user SIDs. `anaiero runtime query <endpoint> PING|STATE|STEP|STOP`
+is a separate native CLI process. STEP advances **only the digital simulator**.
+The endpoint does not accept biological care, feeding, stimulation, or arbitrary
+module loading commands.
+
+This is a *console/headless process*, not yet registered as an SCM service or
+systemd service, and not a secured remote mesh. Disk sync and subprocess
+timeout supervision require further hardening. See
+[CE-SW-28](../docs/software/CE-SW-28_native_controller_host_and_queue.md).
