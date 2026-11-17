@@ -49,7 +49,8 @@ inline void print_latest(const rt::RuntimeService& runtime,std::uint64_t now_ns)
              <<",\"origin\":\""<<(v.origin==rt::Origin::simulated?"SIMULATED":"EXTERNAL_UNVERIFIED_READONLY")
              <<"\",\"sequence\":"<<v.sequence
              <<",\"evidence_tag\":"<<v.evidence_tag
-             <<",\"acquired_ns\":"<<v.acquired_ns<<"}";
+             <<",\"acquired_ns\":"<<v.acquired_ns
+             <<",\"source_epoch\":"<<v.source_epoch<<"}";
   }
   std::cout<<"]}\n";
 }

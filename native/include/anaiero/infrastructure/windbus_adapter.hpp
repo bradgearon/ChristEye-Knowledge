@@ -35,7 +35,8 @@ inline constexpr std::size_t kObservationFrame=christeye::wind::kFixedHeaderByte
 inline bool encode_observation(const Observation& o,std::span<std::byte> output,
                                std::size_t& written) noexcept {
   written=0;
-  if(!valid_observation(o)||output.size()<kObservationFrame)return false;
+  if(!valid_observation(o)||o.source_epoch!=0||
+     output.size()<kObservationFrame)return false;
   std::array<std::byte,kObservationPayload> payload{};
   wire_detail::u32(payload,0,o.colony);wire_detail::u32(payload,4,o.animon);
   wire_detail::u32(payload,8,o.source);wire_detail::u32(payload,12,o.clock_domain);

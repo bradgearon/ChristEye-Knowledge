@@ -38,7 +38,8 @@ class RuntimeService {
     for(std::size_t i=0;i<permissions_count_;++i){
       const auto& p=permissions_[i];
       if(p.source!=o.source)continue;
-      if(p.origin!=o.origin||p.clock_domain!=o.clock_domain)return false;
+      if(p.origin!=o.origin||p.clock_domain!=o.clock_domain||
+         (p.source_epoch!=0&&p.source_epoch!=o.source_epoch))return false;
       if(o.lane==Lane::fault&&!p.can_publish_fault)return false;
       if(health_metric(o.metric)&&!p.can_read_health)return false;
       if(o.metric==Metric::digital_desire&&(!p.can_publish_digital_desires||

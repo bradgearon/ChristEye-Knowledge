@@ -9,7 +9,7 @@ class ColonyProjector {
   ColonyState state_{};
   contracts::IServiceExtension* extension_=nullptr;
   static bool same_key(const MetricValue& a, const Observation& b) noexcept {
-    return a.colony==b.colony&&a.animon==b.animon&&a.metric==b.metric&&a.source==b.source;
+    return a.colony==b.colony&&a.animon==b.animon&&a.metric==b.metric&&a.source==b.source&&a.source_epoch==b.source_epoch;
   }
 public:
   // Configure extension before starting threads. Never invoke it under lock.
@@ -21,7 +21,8 @@ public:
     std::lock_guard<std::mutex> lock(mutex_);
     std::size_t source_index=state_.sources;
     for(std::size_t i=0;i<state_.sources;++i)
-      if(state_.cursors[i].id==o.source){source_index=i;break;}
+      if(state_.cursors[i].id==o.source &&
+         state_.cursors[i].epoch==o.source_epoch){source_index=i;break;}
     if(source_index==kMaxSources)return Status::source_full;
     if(source_index<state_.sources){
       const auto& cursor=state_.cursors[source_index];
@@ -42,7 +43,8 @@ public:
     std::lock_guard<std::mutex> lock(mutex_);
     std::size_t source_index=state_.sources;
     for(std::size_t i=0;i<state_.sources;++i)
-      if(state_.cursors[i].id==o.source){source_index=i;break;}
+      if(state_.cursors[i].id==o.source &&
+         state_.cursors[i].epoch==o.source_epoch){source_index=i;break;}
     if(source_index==kMaxSources)return Status::source_full;
     if(source_index<state_.sources){
       const auto& source=state_.cursors[source_index];
@@ -61,7 +63,7 @@ public:
     // to infer biological causality. Source revision is the ordering authority.
     bool gap=false;
     if(source_index==state_.sources){
-      state_.cursors[state_.sources++]={o.source,o.clock_domain,0,0,false,false};
+      state_.cursors[state_.sources++]={o.source,o.clock_domain,0,0,false,false,o.source_epoch};
     }
     auto& cursor=state_.cursors[source_index];
     if(cursor.has_sequence&&o.sequence>cursor.last_sequence+1){gap=true;cursor.gap=true;++state_.sequence_gaps;}
@@ -70,7 +72,8 @@ public:
     if(index==state_.count)++state_.count;
     auto& m=state_.values[index];
     m={o.colony,o.animon,o.source,o.metric,o.value,o.origin,
-       gap?Quality::degraded:Quality::current,o.sequence,o.acquired_ns,o.evidence_tag};
+       gap?Quality::degraded:Quality::current,o.sequence,o.acquired_ns,o.evidence_tag,
+       o.source_epoch};
     ++state_.committed_updates;++state_.revision;
     revision=state_.revision;
     } // Release the mutex before notifying extensions.
@@ -90,6 +93,11 @@ public:
       auto& m=copy.values[i];
       if(now_ns>=m.acquired_ns&&now_ns-m.acquired_ns>max_age_ns)
         m.quality=Quality::stale;
+      // A newer source incarnation supersedes the old reading, even when
+      // its original wall clock or tick domain has not expired yet.
+      for(std::size_t j=0;j<copy.sources;++j)
+        if(copy.cursors[j].id==m.source&&copy.cursors[j].epoch>m.source_epoch)
+          m.quality=Quality::stale;
     }
     return copy;
   }
