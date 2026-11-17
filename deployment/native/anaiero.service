@@ -1,0 +1,23 @@
+[Unit]
+Description=Anaiero native simulation session
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=notify
+NotifyAccess=main
+WorkingDirectory=%h/.local/share/anaiero
+ExecStart=%h/.local/lib/anaiero/bin/ce_colony_runtime start %t/anaiero/control.sock %h/.config/anaiero/session.cevsession %h/.local/state/anaiero/session
+RuntimeDirectory=anaiero
+RuntimeDirectoryMode=0700
+UMask=0077
+KillSignal=SIGTERM
+KillMode=control-group
+TimeoutStartSec=30
+TimeoutStopSec=30
+Restart=on-failure
+RestartSec=2
+NoNewPrivileges=true
+
+[Install]
+WantedBy=default.target
