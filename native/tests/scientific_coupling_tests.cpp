@@ -3,10 +3,10 @@
 #include <cassert>
 #include <cstdlib>
 #include <iostream>
-#ifdef NDEBUG
+#ifdef assert
 #undef assert
-#define assert(expr) do {if(!(expr))std::abort();}while(false)
 #endif
+#define assert(e) do { if(!(e)) std::abort(); } while(false)
 using namespace anaiero;
 struct Frames final:science::ICellFramePublisher {
   science::Frame last{};

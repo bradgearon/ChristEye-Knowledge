@@ -2,7 +2,7 @@
 #include "anaiero/infrastructure/cell_source_record.hpp"
 #include "anaiero/infrastructure/cell_position_port.hpp"
 #include "anaiero/infrastructure/scientific_trace_reader.hpp"
-#include "anaiero/models/scientific_model_catalog.hpp"
+#include "anaiero/contracts/scientific_model_catalog.hpp"
 #include "anaiero/services/coupled_simulation_service.hpp"
 #include "anaiero/services/recorded_electrical_service.hpp"
 #include "anaiero/services/recorded_environment_service.hpp"

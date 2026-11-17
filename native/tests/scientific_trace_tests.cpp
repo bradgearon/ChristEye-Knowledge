@@ -9,10 +9,10 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
-#ifdef NDEBUG
-#undef NDEBUG
-#define assert(e) do{if(!(e))std::abort();}while(false)
+#ifdef assert
+#undef assert
 #endif
+#define assert(e) do { if(!(e)) std::abort(); } while(false)
 using namespace anaiero;
 int main(int argc,char**argv){
   assert(argc==2);
