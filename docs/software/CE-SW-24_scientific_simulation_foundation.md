@@ -40,7 +40,7 @@ Official project references: [NEURON](https://www.neuronsimulator.org/en/latest/
       -> CoupledSimulationService (runs one deterministic digital scenario)
           -> IElectricalFeatureModel     [native or replayed NEURON/BRAINCELL features]
           -> IEnvironmentFeatureModel  [native constant or replayed population/chemical feature]
-          -> HypothesisRuntimeService [neuron only | astrocyte coupled | ablated | shuffled]
+          -> IHypothesisRule / HypothesisRuntimeService [replaceable experimental coupling]
           -> CellBehaviorService      [existing SW5, independent slower cadence]
           -> ICellFramePublisher      [infrastructure]
       -> ScientificWindBusPublisher
@@ -49,7 +49,7 @@ Official project references: [NEURON](https://www.neuronsimulator.org/en/latest/
           -> ColonyState Projector (read-only view)
 ```
 
-All models are plain records, with behavior, scoring, validation and coupling in services. Infrastructure handles exact-byte trace I/O, SHA-256 verification and event transport. Each new service exposes injectable strategy/port interfaces; no theoretical behavior needs to be hardcoded in WindBus.
+All models are plain records, with behavior, scoring, validation and coupling in services. The default glial coupling rule is injected through `IHypothesisRule`, so alternative experimental rules can be substituted without editing the coordinator or the models. Invalid rules must not commit a partial synthetic tick. Infrastructure handles exact-byte trace I/O, SHA-256 verification and event transport. Each new service exposes injectable strategy/port interfaces; no theoretical behavior needs to be hardcoded in WindBus.
 
 The observation bus bridge publishes three digital fields per slow step—`activity`, `digital_learning` and `connection`—through the **existing exact WindPacket** serialization and SW4 priority queue. The bridge supports partial-frame retry without duplicating already admitted metrics. The starter three-cell SW5 World has two neuron archetypes and one astrocyte archetype, linked by a *digital guidance intent*. It is not a reconstructed or cultured biological preparation.
 

@@ -3,9 +3,9 @@
 #include "anaiero/services/reference_electrical_service.hpp"
 #include <algorithm>
 namespace anaiero::science {
-class HypothesisRuntimeService {
+class HypothesisRuntimeService final:public IHypothesisRule {
 public:
-  static Code step(State& s,Condition condition,Phase phase) noexcept {
+  Code step(State& s,Condition condition,Phase phase) noexcept override {
     const auto c=static_cast<unsigned>(condition);
     if(c<1||c>4)return Code::bad_plan;
     // Slowly integrating synthetic astrocyte state. Not calcium concentration.

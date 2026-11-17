@@ -68,6 +68,10 @@ struct Result {
   std::int32_t end_retention=0,average_probe=0;
   std::uint32_t viable=0,candidate_links=0;
 };
+struct IHypothesisRule {
+  virtual ~IHypothesisRule()=default;
+  virtual Code step(State&,Condition,Phase) noexcept=0;
+};
 struct IElectricalFeatureModel {
   virtual ~IElectricalFeatureModel()=default;
   virtual ModelDescriptor descriptor() const noexcept=0;

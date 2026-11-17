@@ -88,4 +88,20 @@ int main(){
     assert(rejected.step(malformed,science::Phase::train,0)==science::Code::bad_plan);
     assert(rejected.frame_count()==0);
   }
+  {
+    science::ReferenceElectricalService model;
+    science::CoupledSimulationService custom(atlas,pos,model);
+    struct RejectRule final:science::IHypothesisRule {
+      science::Code step(science::State&,science::Condition,
+                         science::Phase)noexcept override {
+        return science::Code::model_failure;
+      }
+    } rejected_rule;
+    custom.set_hypothesis_rule(&rejected_rule);
+    assert(custom.initialize(initial)==science::Code::ok);
+    assert(custom.step(plan,science::Phase::train,0)==science::Code::model_failure);
+    assert(custom.state().tick==0&&custom.frame_count()==0);
+    custom.set_hypothesis_rule(nullptr);
+    assert(custom.step(plan,science::Phase::train,0)==science::Code::ok);
+  }
 }

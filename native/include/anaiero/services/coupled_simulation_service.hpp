@@ -16,6 +16,8 @@ class CoupledSimulationService final {
   cells::ISpatialPort& spatial_;
   IElectricalFeatureModel& electrical_;
   IEnvironmentFeatureModel* environment_=nullptr;
+  HypothesisRuntimeService default_hypothesis_{};
+  IHypothesisRule* hypothesis_=&default_hypothesis_;
   ICellFramePublisher* publisher_=nullptr;
   IServiceSimulationHook* hook_=nullptr;
   State state_{};
@@ -46,11 +48,19 @@ public:
     atlas_(std::move(atlas)),spatial_(spatial),electrical_(electrical){}
   void set_publisher(ICellFramePublisher* p) noexcept {publisher_=p;}
   void set_environment(IEnvironmentFeatureModel* e) noexcept {environment_=e;}
+  void set_hypothesis_rule(IHypothesisRule* rule) noexcept {
+    hypothesis_=rule?rule:&default_hypothesis_;
+  }
   void set_hook(IServiceSimulationHook* h) noexcept {hook_=h;}
   Code initialize(const cells::World& world,State initial={}) noexcept {
     if(initial.epoch==0||initial.source==0||initial.tick!=0||
        initial.strength<0||initial.strength>kProxyMax||
        electrical_.descriptor().schema!=1)return Code::bad_input;
+    const auto descriptor=electrical_.descriptor();
+    if(descriptor.provider!=Provider::native_reference&&
+       descriptor.source_epoch!=initial.epoch)return Code::source_mismatch;
+    if(environment_&&environment_->descriptor().provider!=Provider::native_reference&&
+       environment_->descriptor().source_epoch!=initial.epoch)return Code::source_mismatch;
     cells::CellBehaviorService validation(atlas_,spatial_);
     if(validation.restore(world)!=cells::Status::ok||world.tick!=0)return Code::bad_input;
     world_=world;state_=initial;count_=0;initialized_=true;has_pending_=false;
@@ -74,7 +84,7 @@ public:
     for(std::uint8_t f=0;f<plan.electrical_steps_per_tick;++f)
       if(!electrical_.advance(next,input,f))return Code::model_failure;
     if(environment_&&!environment_->advance(next,next.tick+1))return Code::model_failure;
-    if(HypothesisRuntimeService::step(next,plan.condition,phase)!=Code::ok)
+    if(hypothesis_->step(next,plan.condition,phase)!=Code::ok)
       return Code::model_failure;
     cells::World staged=world_;
     if((next.tick+1)%plan.development_every==0){
