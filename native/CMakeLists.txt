@@ -382,3 +382,40 @@ if(CE_WIND_BUILD_TESTS)
     -DCE_TEMP=${CMAKE_CURRENT_BINARY_DIR}/route-delivery-cli
     -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/route_delivery_smoke.cmake)
 endif()
+
+# CE-SW-24: lightweight native scientific-model coupling and hypothesis runtime.
+# Third-party scientific engines are OPTIONAL outside the Anaiero controller.
+add_executable(ce_science_lab
+  examples/scientific_lab_cli.cpp
+  examples/scientific_bus_cli.cpp)
+target_link_libraries(ce_science_lab PRIVATE ce_wind_core Threads::Threads)
+if(MSVC)
+  target_compile_options(ce_science_lab PRIVATE /W4 /WX)
+else()
+  target_compile_options(ce_science_lab PRIVATE -Wall -Wextra -Wconversion -Werror)
+endif()
+add_dependencies(anaiero ce_science_lab)
+install(TARGETS ce_science_lab RUNTIME DESTINATION bin)
+if(CE_WIND_BUILD_TESTS)
+  add_executable(ce_scientific_coupling_tests tests/scientific_coupling_tests.cpp)
+  add_executable(ce_scientific_trace_tests tests/scientific_trace_tests.cpp)
+  target_link_libraries(ce_scientific_coupling_tests PRIVATE ce_wind_core)
+  target_link_libraries(ce_scientific_trace_tests PRIVATE ce_wind_core)
+  if(MSVC)
+    target_compile_options(ce_scientific_coupling_tests PRIVATE /W4 /WX)
+    target_compile_options(ce_scientific_trace_tests PRIVATE /W4 /WX)
+  else()
+    target_compile_options(ce_scientific_coupling_tests PRIVATE -Wall -Wextra -Wconversion -Werror)
+    target_compile_options(ce_scientific_trace_tests PRIVATE -Wall -Wextra -Wconversion -Werror)
+  endif()
+  add_test(NAME anaiero_science_coupling COMMAND ce_scientific_coupling_tests)
+  add_test(NAME anaiero_science_trace COMMAND ce_scientific_trace_tests
+    ${CMAKE_CURRENT_SOURCE_DIR}/../examples/scientific/native-reference.cevscitrace)
+  add_test(NAME anaiero_science_cli COMMAND ${CMAKE_COMMAND}
+    -DCE_SCI=$<TARGET_FILE:ce_science_lab>
+    -DCE_ANA=$<TARGET_FILE:anaiero>
+    -DCE_ATLAS=${CMAKE_CURRENT_SOURCE_DIR}/../examples/cells/crest-blood-neural.cevatlas
+    -DCE_TRACE=${CMAKE_CURRENT_SOURCE_DIR}/../examples/scientific/native-reference.cevscitrace
+    -DCE_ENV_TRACE=${CMAKE_CURRENT_SOURCE_DIR}/../examples/scientific/native-environment.cevscitrace
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/scientific_cli_smoke.cmake)
+endif()

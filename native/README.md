@@ -146,3 +146,25 @@ route status into the volatile ColonyState view, and acknowledges the source
 route ledger only after that state is readable. The source slot is a local
 configuration value, **not** an authenticated peer identity. No real-cell
 controls or external mesh acknowledgement. See [CE-SW-23](../docs/software/CE-SW-23_durable_route_bus_projection.md).
+
+## CE-SW-24 — Science bridge and hypothesis runtime
+
+The new public command `anaiero science` runs a small **digital-only**
+SW5 neuron/astrocyte experiment with four software conditions, a bounded
+fast/slow coordinator, read-only model trace adapters and a WindBus ->
+ColonyState demonstration:
+
+```sh
+anaiero science engines
+anaiero science compare examples/cells/crest-blood-neural.cevatlas
+anaiero science bus examples/cells/crest-blood-neural.cevatlas
+anaiero science trace examples/scientific/native-reference.cevscitrace
+```
+
+NEURON and BRAINCELL exported neuronal model outputs, and PhysiCell/MOOSE/STEPS
+population/chemical model outputs, are supported **only through optional offline
+normalized trace exchange** at this stage. Anaiero does not install, link,
+or claim to execute these solvers. Optional NEURON and CSV converters live
+under `tools/scientific/`; Python is not required by the native C++ controller.
+All normalized values are computational proxies, not physiological readings.
+See [CE-SW-24](../docs/software/CE-SW-24_scientific_simulation_foundation.md).

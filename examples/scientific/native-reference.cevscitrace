@@ -1,0 +1,123 @@
+CEVSCITRACE/1
+provider NATIVE_REFERENCE
+classification SYNTHETIC_FIXTURE
+channel ELECTRICAL_ACTIVITY
+model_sha256 143dd05c2269994af09421b558c12fd28e89f73c22617ccdaf4abd010cb570bf
+raw_sha256 de98858e30e441360c33c06443d00e766ff71bc61023965db78eb81aad0d62ae
+transform_sha256 b3c691942d157634bbd2ef2ae41b0357a5eecf90f9f826adb91138f4d6196861
+source_epoch 1
+unit DIMENSIONLESS_ACTIVITY_PROXY
+sample 1 0
+sample 2 0
+sample 3 0
+sample 4 80
+sample 5 140
+sample 6 185
+sample 7 218
+sample 8 243
+sample 9 262
+sample 10 276
+sample 11 287
+sample 12 215
+sample 13 161
+sample 14 120
+sample 15 90
+sample 16 147
+sample 17 190
+sample 18 222
+sample 19 246
+sample 20 264
+sample 21 278
+sample 22 288
+sample 23 296
+sample 24 222
+sample 25 166
+sample 26 124
+sample 27 93
+sample 28 149
+sample 29 191
+sample 30 223
+sample 31 247
+sample 32 265
+sample 33 278
+sample 34 288
+sample 35 296
+sample 36 222
+sample 37 166
+sample 38 124
+sample 39 93
+sample 40 149
+sample 41 191
+sample 42 223
+sample 43 247
+sample 44 265
+sample 45 278
+sample 46 288
+sample 47 296
+sample 48 222
+sample 49 166
+sample 50 124
+sample 51 93
+sample 52 69
+sample 53 51
+sample 54 38
+sample 55 28
+sample 56 21
+sample 57 15
+sample 58 11
+sample 59 8
+sample 60 6
+sample 61 4
+sample 62 3
+sample 63 2
+sample 64 1
+sample 65 0
+sample 66 0
+sample 67 0
+sample 68 0
+sample 69 0
+sample 70 0
+sample 71 0
+sample 72 0
+sample 73 0
+sample 74 0
+sample 75 0
+sample 76 0
+sample 77 0
+sample 78 0
+sample 79 0
+sample 80 0
+sample 81 0
+sample 82 0
+sample 83 0
+sample 84 0
+sample 85 0
+sample 86 0
+sample 87 0
+sample 88 0
+sample 89 0
+sample 90 0
+sample 91 0
+sample 92 0
+sample 93 0
+sample 94 0
+sample 95 0
+sample 96 0
+sample 97 0
+sample 98 0
+sample 99 0
+sample 100 0
+sample 101 0
+sample 102 0
+sample 103 0
+sample 104 0
+sample 105 0
+sample 106 0
+sample 107 0
+sample 108 0
+sample 109 0
+sample 110 0
+sample 111 0
+sample 112 0
+end
+seal 39f4183afa98a8c18e4c8f761bf6c4d702d910ecad7f6a2ee13efa5569592f28

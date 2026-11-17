@@ -1,0 +1,48 @@
+name: Anaiero Scientific Simulation Foundation
+on:
+  push:
+    paths:
+      - 'native/include/anaiero/**'
+      - 'native/examples/scientific_*'
+      - 'native/tests/scientific_*'
+      - 'native/CMakeLists.txt'
+      - 'native/examples/anaiero_cli.cpp'
+      - 'examples/scientific/**'
+      - 'tools/scientific/**'
+      - 'tests/test_scientific_trace_contract.py'
+      - 'docs/software/CE-SW-24_scientific_simulation_foundation.md'
+      - '.github/workflows/scientific-simulation.yml'
+  pull_request:
+    paths:
+      - 'native/include/anaiero/**'
+      - 'native/examples/scientific_*'
+      - 'native/tests/scientific_*'
+      - 'native/CMakeLists.txt'
+      - 'native/examples/anaiero_cli.cpp'
+      - 'examples/scientific/**'
+      - 'tools/scientific/**'
+      - 'tests/test_scientific_trace_contract.py'
+      - 'docs/software/CE-SW-24_scientific_simulation_foundation.md'
+      - '.github/workflows/scientific-simulation.yml'
+permissions:
+  contents: read
+jobs:
+  native-science:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure C++20
+        run: cmake -S native -B build/science -DCE_WIND_BUILD_TESTS=ON
+      - name: Build native science, tests and command
+        run: cmake --build build/science --config Release --target ce_science_lab ce_scientific_coupling_tests ce_scientific_trace_tests anaiero
+      - name: Validate coupling, immutable traces and WindBus projection
+        run: ctest --test-dir build/science -C Release --output-on-failure -R "anaiero_science_"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate exact-byte sealed fixture contracts
+        run: python -m unittest discover -s tests -p test_scientific_trace_contract.py -v

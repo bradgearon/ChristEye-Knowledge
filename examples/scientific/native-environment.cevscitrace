@@ -1,0 +1,39 @@
+CEVSCITRACE/1
+provider NATIVE_REFERENCE
+classification SYNTHETIC_FIXTURE
+channel ENVIRONMENT_PROXY
+model_sha256 cb76d2d9410f142e9804b4f02bbc1c09bdab964b5217c8880bef86035eb56c1a
+raw_sha256 f2d9b4802de223658ef56d1a4650f270616e2d94b2250cf5ccf60eb32157cebd
+transform_sha256 dd699e7c259bdea5a76927ea6f0319a973d7a03d3e35ab89d571f535eeda98b1
+source_epoch 1
+unit DIMENSIONLESS_ENVIRONMENT_PROXY
+sample 1 75
+sample 2 75
+sample 3 75
+sample 4 75
+sample 5 75
+sample 6 75
+sample 7 75
+sample 8 75
+sample 9 75
+sample 10 75
+sample 11 75
+sample 12 75
+sample 13 75
+sample 14 75
+sample 15 75
+sample 16 75
+sample 17 75
+sample 18 75
+sample 19 75
+sample 20 75
+sample 21 60
+sample 22 60
+sample 23 60
+sample 24 60
+sample 25 60
+sample 26 60
+sample 27 60
+sample 28 60
+end
+seal 0aac22fdb1de7fa302efe3d8e3eacf7239e1fabe71884204e9fb2ff35e9ca090
