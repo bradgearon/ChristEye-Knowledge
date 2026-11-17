@@ -82,3 +82,8 @@ These documents extend the existing [v3 architecture](../../specifications/v3/ma
 - [CE-A11 connective controller design](../../specifications/v3/design/CE-A11_connective_controllers_Design.md)
 - [CE-A22 independent limits design](../../specifications/v3/design/CE-A22_independent_limits_and_governance_Design.md)
 - [Scientific source-provenance and publication policy](../../PUBLICATION_POLICY.md)
+
+## Current native integration
+
+- [CE-SW-31 — Integrated native sessions](CE-SW-31_integrated_native_sessions.md)
+- [Native implementation checkpoint and next batches](native_implementation_status.md)

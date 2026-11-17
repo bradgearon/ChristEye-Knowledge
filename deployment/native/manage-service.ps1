@@ -42,7 +42,11 @@ switch ($Action) {
             New-Item -ItemType Directory -Path $statePath | Out-Null
         }
         $arguments = @($exePath, 'service', $Endpoint, $configPath, $statePath)
-        $binaryPath = ($arguments | ForEach-Object { '"' + $_ + '"' }) -join ' '
+        # Quotes in paths are rejected above. Double terminal backslashes so
+        # the CRT parser sees a closing quote instead of an escaped quote.
+        $binaryPath = ($arguments | ForEach-Object {
+            '"' + [regex]::Replace($_, '(\\+)$', '$1$1') + '"'
+        }) -join ' '
         New-Service -Name $serviceName -DisplayName 'Anaiero native simulation session' `
             -BinaryPathName $binaryPath -StartupType Manual -Credential $Credential `
             -Description 'Native C++ simulation session with same-user local control and durable evidence.' | Out-Null

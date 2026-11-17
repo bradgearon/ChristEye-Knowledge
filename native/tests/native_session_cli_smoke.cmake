@@ -1,0 +1,17 @@
+file(REMOVE_RECURSE "${CE_TEMP}")
+execute_process(COMMAND "${CE_RUNTIME}" session "${CE_CONFIG}" "${CE_TEMP}" 4
+  RESULT_VARIABLE result OUTPUT_VARIABLE first ERROR_VARIABLE error TIMEOUT 45)
+if(NOT result EQUAL 0)
+  message(FATAL_ERROR "Native session failed: ${error}")
+endif()
+foreach(fragment "\"cycles\":4" "\"tick\":4" "\"tick\":2" "\"state_revision\":40" "\"sequence_gaps\":0")
+  string(FIND "${first}" "${fragment}" found)
+  if(found LESS 0)
+    message(FATAL_ERROR "Missing ${fragment}: ${first}")
+  endif()
+endforeach()
+execute_process(COMMAND "${CE_RUNTIME}" session "${CE_CONFIG}" "${CE_TEMP}"
+  RESULT_VARIABLE result OUTPUT_VARIABLE second ERROR_VARIABLE error TIMEOUT 45)
+if(NOT result EQUAL 0 OR NOT first STREQUAL second)
+  message(FATAL_ERROR "Native session restart differs: ${error}\n${first}\n${second}")
+endif()

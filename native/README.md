@@ -1,8 +1,30 @@
-# Anaiero native WindBus SW1 prototype
+# Anaiero native runtime
+
+## Integrated native sessions (CE-SW-31)
+
+The native controller now composes SW5 and SIM3, persistent coordinator progress,
+asynchronous evidence, checkpoint recovery, active SW5 optimization and cached
+operator state. Windows and Linux have native local IPC and process/service
+lifecycle adapters. See [CE-SW-31](../docs/software/CE-SW-31_integrated_native_sessions.md)
+and the [current implementation index](../docs/software/native_implementation_status.md).
+
+```sh
+anaiero runtime session examples/runtime/mixed-native.cevsession ./mixed-state 4
+anaiero runtime start /tmp/anaiero-mixed.sock examples/runtime/mixed-native.cevsession ./mixed-state
+anaiero runtime query /tmp/anaiero-mixed.sock "ANALYZE 101 3 4 18"
+```
+
+On Windows use a named endpoint such as `anaiero-mixed`. The store is bounded;
+capacity admission preserves recoverable state before the existing journal fills.
+Building does not install an operating-system service. Deployment examples are
+in [deployment/native](../deployment/native/README.md).
+
+The sections below retain the component history and its original boundaries;
+CE-SW-31 identifies the currently integrated behavior.
 
 ## Public executable: anaiero
 
-**Native host parity:** Anaiero's planned lightweight long-running controller is a **native Windows and native Linux** application with one portable C++20 core. Both platforms are first-class, using IOCP/named pipes/SCM or epoll/Unix-domain sockets/systemd in infrastructure adapters. It will not require WSL, containers or a scripting runtime. Today's CLI/tools already build on Windows and Linux; full supervised host adapters are planned, not yet delivered. See [ADR-002](../docs/software/ADR-002_native_windows_linux_parity.md).
+**Native host parity:** Anaiero's planned lightweight long-running controller is a **native Windows and native Linux** application with one portable C++20 core. Both platforms are first-class, using IOCP/named pipes/SCM or epoll/Unix-domain sockets/systemd in infrastructure adapters. It will not require WSL, containers or a scripting runtime. The integrated session includes local IPC, console cancellation, an SCM entrypoint and systemd readiness notifications; remote mesh and sustained storage remain later milestones. See [ADR-002](../docs/software/ADR-002_native_windows_linux_parity.md).
 
 Use **`anaiero`** as the single public native command. The old `ce_*` programs remain as internal backends for compatibility, but new user scripts should call `anaiero`:
 
@@ -36,7 +58,7 @@ cmake --build build/native --config Release
 ctest --test-dir build/native -C Release --output-on-failure
 ```
 
-### What this code does *not* do
+### Original SW1 codec boundaries
 
 - **No network transport**: the codec is not a QUIC, Noise or TLS implementation. A packet flag never authenticates a peer. Future adapters must verify the secure session, ACL, source-slot mapping, schema and consent scope before accepting records.
 - **No durable delivery**: `accepted` means an in-memory queue slot, not persisted, network acknowledged, delivered or biologically acted upon. Future SW2 adds WindStore/WindChange durability.

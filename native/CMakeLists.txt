@@ -292,7 +292,7 @@ endif()
 
 # CE-SW-18 low-resource native controller ColonyState projector and weighted Animon work.
 find_package(Threads REQUIRED)
-add_executable(ce_colony_runtime examples/colony_runtime_cli.cpp examples/controller_host_cli.cpp)
+add_executable(ce_colony_runtime examples/colony_runtime_cli.cpp examples/controller_host_cli.cpp examples/session_host_cli.cpp)
 target_link_libraries(ce_colony_runtime PRIVATE ce_wind_core Threads::Threads)
 if(MSVC)
   target_compile_options(ce_colony_runtime PRIVATE /W4 /WX)
@@ -524,6 +524,33 @@ if(CE_WIND_BUILD_TESTS)
     target_compile_options(ce_native_host_tests PRIVATE -Wall -Wextra -Wconversion -Werror)
   endif()
   add_test(NAME anaiero_native_host_ipc COMMAND ce_native_host_tests)
+  set_tests_properties(anaiero_native_host_ipc PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 90)
+endif()
+
+# CE-SW-31: one recoverable native session and an independently responsive host.
+if(CE_WIND_BUILD_TESTS)
+  foreach(part native_session session_record session_host_control)
+    add_executable(ce_${part}_tests tests/${part}_tests.cpp)
+    target_link_libraries(ce_${part}_tests PRIVATE ce_wind_core Threads::Threads)
+    if(MSVC)
+      target_compile_options(ce_${part}_tests PRIVATE /W4 /WX)
+    else()
+      target_compile_options(ce_${part}_tests PRIVATE -Wall -Wextra -Wconversion -Werror)
+    endif()
+  endforeach()
+  add_test(NAME anaiero_native_session COMMAND ce_native_session_tests
+    ${CMAKE_CURRENT_SOURCE_DIR}/../examples/runtime/mixed-native.cevsession
+    ${CMAKE_CURRENT_BINARY_DIR}/native-session-tests)
+  add_test(NAME anaiero_session_record COMMAND ce_session_record_tests
+    ${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_BINARY_DIR}/session-record-tests)
+  add_test(NAME anaiero_session_host_control COMMAND ce_session_host_control_tests)
+  set_tests_properties(anaiero_native_session anaiero_session_record
+    anaiero_session_host_control PROPERTIES TIMEOUT 120)
+  add_test(NAME anaiero_session_cli COMMAND ${CMAKE_COMMAND}
+    -DCE_RUNTIME=$<TARGET_FILE:ce_colony_runtime>
+    -DCE_CONFIG=${CMAKE_CURRENT_SOURCE_DIR}/../examples/runtime/mixed-native.cevsession
+    -DCE_TEMP=${CMAKE_CURRENT_BINARY_DIR}/session-cli
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/native_session_cli_smoke.cmake)
 endif()
 
 # CE-SW-29: one bounded async persistence worker, checkpoint indexes, units.

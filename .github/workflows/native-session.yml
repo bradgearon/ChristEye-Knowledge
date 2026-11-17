@@ -1,0 +1,25 @@
+name: Anaiero Integrated Native Sessions
+on:
+  push:
+    paths: ['native/**', 'examples/runtime/**', '.github/workflows/native-session.yml']
+  pull_request:
+    paths: ['native/**', 'examples/runtime/**', '.github/workflows/native-session.yml']
+permissions:
+  contents: read
+jobs:
+  native-session:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S native -B build/native -DCE_WIND_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release
+      - name: Build integrated runtime and contracts
+        run: cmake --build build/native --config Release --parallel 2 --target ce_colony_runtime ce_native_session_tests ce_session_record_tests ce_session_host_control_tests ce_native_host_tests ce_simulation_kernel_tests ce_async_evidence_tests
+      - name: Verify session recovery and native host
+        env:
+          ANAIERO_REQUIRE_IPC: '1'
+        run: ctest --test-dir build/native -C Release --output-on-failure -R "anaiero_(native_session|session_|native_host_ipc|engine_kernel$|async_evidence_and_units)"
