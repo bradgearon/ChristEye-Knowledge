@@ -27,6 +27,7 @@
 
 | [CE-SW-20: Anaiero v0.015 Native C++ Architecture Pass](CE-SW-20_anaiero_v0015_cpp_architecture_pass.md) | Audited dependency map, controller topology, event/outbox ordering, scheduling, security and safe migration roadmap | **Architecture proposal with regression guard; no new daemon or mesh** |
 | [ADR-001: Native Runtime Ownership](ADR-001_native_runtime_ownership.md) | Target ownership boundaries, common observation envelope, source epochs and transactional digital outbox | **Proposed decision; implementation pending** |
+| [CE-SW-22: SW5 Forked Optimization and Durable Routes](CE-SW-22_forked_simulation_optimization_and_durable_routes.md) | Actual SW5 forks, multi-goal scoring, CAS-pinned route state and recoverable outbox | **Native synthetic reference; authenticated delivery pending** |
 | [CE-SW-21: Adaptive Optimization and Service Extensions](CE-SW-21_adaptive_optimization_and_service_extensions.md) | Goal-directed digital route proposals, bounded dry runs, safe revision-checked commits and postcommit extension hooks | **Native synthetic-only reference; durable changes pending** |
 | [ADR-002: First-Class Native Windows and Linux](ADR-002_native_windows_linux_parity.md) | Lightweight portable C++20 controller with equal native Windows/Linux host adapters and release gates | **Accepted platform requirement; native supervisor adapters pending** |
 

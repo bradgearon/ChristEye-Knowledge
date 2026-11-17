@@ -5,6 +5,9 @@ on:
       - 'native/include/anaiero/**'
       - 'native/examples/optimization_cli.cpp'
       - 'native/tests/adaptive_optimization_tests.cpp'
+      - 'native/tests/fork_optimizer_tests.cpp'
+      - 'native/examples/optimization_fork_cli.cpp'
+      - 'docs/software/CE-SW-22_forked_simulation_optimization_and_durable_routes.md'
       - 'native/CMakeLists.txt'
       - 'native/examples/anaiero_cli.cpp'
       - '.github/workflows/anaiero-optimization.yml'
@@ -14,6 +17,9 @@ on:
       - 'native/include/anaiero/**'
       - 'native/examples/optimization_cli.cpp'
       - 'native/tests/adaptive_optimization_tests.cpp'
+      - 'native/tests/fork_optimizer_tests.cpp'
+      - 'native/examples/optimization_fork_cli.cpp'
+      - 'docs/software/CE-SW-22_forked_simulation_optimization_and_durable_routes.md'
       - 'native/CMakeLists.txt'
       - 'native/examples/anaiero_cli.cpp'
       - '.github/workflows/anaiero-optimization.yml'
@@ -32,12 +38,19 @@ jobs:
       - name: Configure C++20
         run: cmake -S native -B build/optimization -DCE_WIND_BUILD_TESTS=ON
       - name: Build
-        run: cmake --build build/optimization --config Release --target anaiero ce_adaptive_optimization_tests
+        run: cmake --build build/optimization --config Release --target anaiero ce_adaptive_optimization_tests ce_fork_optimizer_tests
       - name: Run synthetic optimization tests
-        run: ctest --test-dir build/optimization -C Release --output-on-failure -R "anaiero_adaptive_optimization"
+        run: ctest --test-dir build/optimization -C Release --output-on-failure -R "anaiero_(adaptive_optimization|sw5_fork_optimizer)"
       - name: Linux CLI demo
         if: runner.os != 'Windows'
         run: ./build/optimization/anaiero optimize demo
       - name: Windows CLI demo
         if: runner.os == 'Windows'
         run: .\\build\\optimization\\Release\\anaiero.exe optimize demo
+
+      - name: Verify Linux SW5 forked optimization
+        if: runner.os != 'Windows'
+        run: ./build/optimization/anaiero optimize fork demo examples/cells/crest-blood-neural.cevatlas build/optimization/fork-cli
+      - name: Verify Windows SW5 forked optimization
+        if: runner.os == 'Windows'
+        run: .\\build\\optimization\\Release\\anaiero.exe optimize fork demo examples/cells/crest-blood-neural.cevatlas build/optimization/fork-cli

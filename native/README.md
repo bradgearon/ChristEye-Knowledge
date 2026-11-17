@@ -133,3 +133,7 @@ This is a **synthetic-only simulation**. It does not model culture conditions, b
 ## Adaptive Optimization (v0.015)
 
 `anaiero optimize demo` runs a synthetic digital route-selection/feedback example via a service, a trial port and an in-memory digital route store. ColonyState remains only the read model. Extensibility hooks are defined by `IServiceExtension` and opt-in service-specific strategy ports. No real cells or physical actuators are controlled. See [CE-SW-21](../docs/software/CE-SW-21_adaptive_optimization_and_service_extensions.md).
+
+## SW5 forked optimization and durable digital route policy
+
+`anaiero optimize fork demo examples/cells/crest-blood-neural.cevatlas ./digital-forks` evaluates three real SW5 checkpoint forks, selects a route using guarded multi-objective scoring and stores digital policy state plus a pending outbox receipt behind a SHA-256-pinned atomic HEAD. Reopening reads the existing committed state without duplicating its route. `ce_fork_optimizer_tests` exercises object/HEAD fault injection, receipt replay, time-preserving rollback and invalid HEAD. No living-cell actuation or authenticated outbound delivery is implemented. See [CE-SW-22](../docs/software/CE-SW-22_forked_simulation_optimization_and_durable_routes.md).
