@@ -1,0 +1,56 @@
+name: Anaiero Authenticated Native Mesh
+on:
+  push:
+    paths: ['native/**', 'examples/mesh/**', 'docs/software/CE-SW-35*', '.github/workflows/native-mesh.yml']
+  pull_request:
+    paths: ['native/**', 'examples/mesh/**', 'docs/software/CE-SW-35*', '.github/workflows/native-mesh.yml']
+permissions:
+  contents: read
+jobs:
+  native-mesh:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2022]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Linux OpenSSL development files
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes libssl-dev
+      - name: Install native Windows OpenSSL with the runner's vcpkg
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $meshVcpkg = $env:VCPKG_INSTALLATION_ROOT
+          if (-not $meshVcpkg -or -not (Test-Path "$meshVcpkg/vcpkg.exe")) {
+            throw 'The Windows runner must provide its documented vcpkg installation.'
+          }
+          & "$meshVcpkg/vcpkg.exe" install openssl:x64-windows --disable-metrics
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          "$meshVcpkg/installed/x64-windows/bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Configure Linux controller and mesh without Python discovery
+        if: runner.os == 'Linux'
+        run: cmake -S native -B build/mesh -DANAIERO_CONTROLLER_ONLY=ON -DANAIERO_ENABLE_MESH=ON -DCE_WIND_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_DISABLE_FIND_PACKAGE_Python3=TRUE
+      - name: Configure native MSVC controller and mesh without Python discovery
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          cmake -S native -B build/mesh -A x64 -DANAIERO_CONTROLLER_ONLY=ON -DANAIERO_ENABLE_MESH=ON -DCE_WIND_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_DISABLE_FIND_PACKAGE_Python3=TRUE "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Build controller, authenticated transport and mesh services
+        run: cmake --build build/mesh --config Release --parallel 2 --target ce_colony_runtime ce_scientific_solver_provider ce_scientific_config ce_mesh ce_mesh_tls_tests ce_mesh_integration_tests ce_mesh_authorization_tests ce_mesh_replay_tests ce_mesh_ingress_tests ce_mesh_export_tests
+      - name: Verify native TLS, durable ingress, replay and artifacts
+        env:
+          ANAIERO_REQUIRE_MESH_TLS: '1'
+        run: ctest --test-dir build/mesh -C Release --output-on-failure --no-tests=error -R "anaiero_mesh_"
+      - name: Preserve mesh test diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mesh-test-logs-${{ matrix.os }}
+          path: build/mesh/Testing/Temporary/*.log
+          if-no-files-found: ignore

@@ -2,8 +2,9 @@ cmake_minimum_required(VERSION 3.20)
 project(ChristEyeAnaieroNative LANGUAGES CXX)
 option(CE_WIND_BUILD_TESTS "Build native WindBus codec/scheduler tests" ON)
 option(ANAIERO_CONTROLLER_ONLY "Build the native session controller without demo/legacy CLIs" OFF)
+option(ANAIERO_ENABLE_MESH "Build the optional OpenSSL 3 native authenticated mesh" OFF)
 
-# Header-only, explicit C++20 link targets: no dynamic runtime or platform SDK.
+# Core header-only C++20 link targets; optional host adapters are declared below.
 add_library(anaiero_models INTERFACE)
 add_library(anaiero_contracts INTERFACE)
 add_library(anaiero_domain INTERFACE)
@@ -44,6 +45,7 @@ if(ANAIERO_CONTROLLER_ONLY)
     enable_testing()
   endif()
   include(cmake/NativeSessions.cmake)
+  include(cmake/NativeMesh.cmake)
   return()
 endif()
 
@@ -603,3 +605,4 @@ if(CE_WIND_BUILD_TESTS)
 endif()
 
 include(cmake/NativeSessions.cmake)
+include(cmake/NativeMesh.cmake)

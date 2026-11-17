@@ -11,6 +11,10 @@ ROOT = Path(__file__).resolve().parents[1] / "native" / "include" / "anaiero"
 INCLUDE = re.compile(
     r'^\s*#\s*include\s*["<]anaiero/(models|contracts|services|infrastructure|application)/([^">]+)[">]', re.M)
 LEGACY_INCLUDE = re.compile(r'^\s*#\s*include\s*["<](christeye/[^">]+)[">]', re.M)
+TLS_INCLUDE = re.compile(
+    r'^\s*#\s*include\s*["<]((?:openssl|gnutls|mbedtls)/[^">]+|(?:schannel|sspi)\.h)[">]',
+    re.M | re.I,
+)
 
 # SHA-256 is a portable algorithm, not a host service. Every other legacy
 # bridge is allowed by its exact importing header and destination, never by a
@@ -33,6 +37,12 @@ LEGACY_BRIDGES = {
     ("infrastructure/experiment_definition_file.hpp", "christeye/living/durable_records.hpp"),
     ("infrastructure/operation_store.hpp", "christeye/living/durable_registry.hpp"),
     ("infrastructure/windstore_checkpoint_catalog.hpp", "christeye/living/durable_registry.hpp"),
+    ("infrastructure/mesh_configuration.hpp", "christeye/living/durable_records.hpp"),
+    ("infrastructure/mesh_enrollment_store.hpp", "christeye/living/durable_registry.hpp"),
+    ("infrastructure/mesh_ingress_store.hpp", "christeye/living/durable_registry.hpp"),
+    ("infrastructure/native_session_mesh_export.hpp", "christeye/living/durable_registry.hpp"),
+    ("infrastructure/windstore_mesh_artifact.hpp", "christeye/living/durable_registry.hpp"),
+    ("infrastructure/windstore_mesh_replay.hpp", "christeye/living/durable_registry.hpp"),
     ("application/sim3_controller_cycle.hpp", "christeye/living/colony_runner.hpp"),
     ("application/sim3_simulation_adapter.hpp", "christeye/living/colony_runner.hpp"),
     ("application/sim3_experiment_adapter.hpp", "christeye/living/colony_runner.hpp"),
@@ -138,6 +148,51 @@ class NativeArchitectureTests(unittest.TestCase):
             for bad in forbidden:
                 with self.subTest(path=path.name, forbidden=bad):
                     self.assertNotIn(f"#include {bad}", source)
+
+    def test_tls_implementation_headers_stay_in_infrastructure(self):
+        for layer in ("models", "contracts", "services", "application"):
+            for path in headers(layer):
+                with self.subTest(path=path.relative_to(ROOT).as_posix()):
+                    self.assertFalse(
+                        TLS_INCLUDE.findall(path.read_text(encoding="utf-8")),
+                        "TLS library details must stay behind infrastructure adapters",
+                    )
+
+    def test_mesh_protocol_has_no_native_mutation_dispatch(self):
+        wire = ROOT / "infrastructure/mesh_wire.hpp"
+        enum = re.search(r"enum\s+class\s+Command\s*\{([^}]+)\}",
+                         wire.read_text(encoding="utf-8"))
+        self.assertIsNotNone(enum, "Mesh commands must have an explicit bounded protocol")
+        commands = {item.split("=", 1)[0].strip() for item in enum.group(1).split(",")}
+        self.assertEqual(
+            {"publish", "subscribe", "next", "ack", "artifact", "chunk", "ping"},
+            commands,
+            "Adding remote operations requires an explicit authorization-boundary review",
+        )
+        # The wire/gateway include closure must stay independent of the local
+        # session mutation, experimental execution and solver-process owners.
+        # Local administration and offline export remain separate entry points.
+        forbidden = {
+            "services/native_session_service.hpp",
+            "services/operation_service.hpp",
+            "services/experiment_service.hpp",
+            "application/native_session_application.hpp",
+            "application/supervised_scientific_engine.hpp",
+            "infrastructure/native_child_process.hpp",
+            "infrastructure/stdio_live_solver.hpp",
+        }
+        pending = ["infrastructure/mesh_wire.hpp", "application/native_mesh_application.hpp"]
+        visited = set()
+        while pending:
+            relative = pending.pop()
+            if relative in visited:
+                continue
+            visited.add(relative)
+            self.assertNotIn(relative, forbidden,
+                             "Remote mesh gateway reached a local mutation or process owner")
+            path = ROOT / relative
+            self.assertTrue(path.is_file(), f"Missing dependency: {relative}")
+            pending.extend(internal_includes(path))
 
 
 if __name__ == "__main__":

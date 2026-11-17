@@ -53,7 +53,7 @@ inline bool valid_kind(std::string_view k) noexcept {
          k=="SUPPORT_OBSERVATION"||k=="CRYSTAL_EVIDENCE"||k=="SUCCESSOR_PROPOSED"||
          k=="CULTURE_CHECKPOINT"||k=="VLM_OVERLAY_IMPORTED"||k=="MODEL_EVALUATION"||
          k=="DIGITAL_ROUTE_RECEIPT"||k=="OBSERVATION_RECORDED"||
-         k=="SCIENTIFIC_MODEL_SESSION";
+         k=="SCIENTIFIC_MODEL_SESSION"||k=="MESH_INGRESS_RECEIPT";
 }
 inline bool valid_origin(std::string_view o) noexcept {
   return o=="SIMULATED"||o=="INFERRED"||o=="IMPORTED_UNVERIFIED";

@@ -136,6 +136,17 @@ public:
     for(const auto& e:events_)if(e.sequence>after&&!fn(e))return false;
     return true;
   }
+  Code read_event_page(const Cursor& after,std::size_t limit,std::vector<Event>& out,bool& caught_up)const {
+    if(segmented_)return segmented_->read_event_page(after,limit,out,caught_up);
+    out.clear();caught_up=false;
+    if(!open_)return Code::not_open;
+    if(after.code!=Code::ok||!limit||limit>64||after.sequence>events_.size()||!valid_digest(after.hash)||
+      after.hash!=(after.sequence?events_[static_cast<std::size_t>(after.sequence-1)].hash:kZeroDigest))return Code::invalid_cursor;
+    const auto available=events_.size()-static_cast<std::size_t>(after.sequence);
+    const auto count=std::min(limit,available);
+    for(std::size_t i=0;i<count;++i)out.push_back(events_[static_cast<std::size_t>(after.sequence)+i]);
+    caught_up=count==available;return Code::ok;
+  }
   bool latest_event(std::string_view kind,std::string_view entity,std::string_view clock,
                     Event& out,bool& found,std::string_view producer={})const {
     if(segmented_)return segmented_->latest_event(kind,entity,clock,out,found,producer);
@@ -300,7 +311,8 @@ public:
     if(hash!=expected)return Code::invalid_cursor;
     auto old=read_cursor(consumer);
     if(old.code!=Code::ok||sequence<old.sequence)return Code::invalid_cursor;
-    if(sequence==old.sequence)return Code::ok;
+    // Even a zero cursor must be materialized so a registered reader retains
+    // its history before its first acknowledgement.
     const auto file=root_/"cursors"/(std::string(consumer)+".cursor");
     return os::atomic_write(file,sealed_cursor(sequence,hash))?Code::ok:Code::io_error;
   }

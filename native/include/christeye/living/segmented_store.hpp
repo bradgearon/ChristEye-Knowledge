@@ -412,7 +412,8 @@ public:
   }
   bool release(StorageReservation& value)noexcept {
     for(auto& r:reservations_)if(r.id&&r.id==value.id&&r.events==value.events&&r.bytes==value.bytes){
-      reserved_events_-=r.events;reserved_bytes_-=r.bytes;r={};value={};return true;}return false;
+      reserved_events_-=r.events;reserved_bytes_-=r.bytes;r={};value={};return true;}
+    return false;
   }
   bool get(std::string_view hash,std::string& out)const {
     if(!open_||!valid_digest(hash))return false;
@@ -451,6 +452,36 @@ public:
       for(const auto& e:part)if(e.sequence>after&&!callback(e))return false;
     }
     return true;
+  }
+  // Bounded remote/recovery page. Validate bounded segment metadata/records
+  // here; callers fetch authorized payloads separately. Locating
+  // the starting segment takes logarithmic metadata reads, not a history fold.
+  Code read_event_page(const Cursor& after,std::size_t limit,std::vector<Event>& out,bool& caught_up)const {
+    out.clear();caught_up=false;
+    if(!open_)return Code::not_open;
+    if(after.code!=Code::ok||!limit||limit>64||after.sequence>root_state_.sequence||!valid_digest(after.hash)||
+      (!after.sequence&&after.hash!=kZeroDigest))return Code::invalid_cursor;
+    if(after.sequence==root_state_.sequence){
+      if(after.hash!=root_state_.last)return Code::invalid_cursor;
+      caught_up=true;return Code::ok;
+    }
+    const auto target=after.sequence?after.sequence:1;
+    std::uint64_t low=1,high=root_state_.segment;
+    while(low<high){const auto mid=low+(high-low)/2;Segment m;if(!metadata(mid,m))return Code::corrupt_journal;
+      if(m.last<target)low=mid+1;else high=mid;}
+    bool verified=after.sequence==0;std::string previous=after.hash;std::uint64_t sequence=after.sequence;
+    for(auto id=low;id<=root_state_.segment;++id){
+      std::vector<Event> part;if(!read_segment(id,part,false))return Code::corrupt_journal;
+      for(const auto& event:part){
+        if(event.sequence==after.sequence){if(event.hash!=after.hash)return Code::invalid_cursor;verified=true;}
+        if(event.sequence<=after.sequence)continue;
+        if(!verified||event.sequence!=sequence+1||event.previous_hash!=previous)return Code::corrupt_journal;
+        out.push_back(event);previous=event.hash;sequence=event.sequence;
+        if(out.size()==limit){caught_up=sequence==root_state_.sequence;return Code::ok;}
+      }
+    }
+    caught_up=sequence==root_state_.sequence;
+    return verified&&caught_up?Code::ok:Code::corrupt_journal;
   }
   bool find_event(std::string_view kind,std::string_view entity,std::string_view clock,
                   std::string_view producer,std::uint64_t tick,Event& out,bool& found)const {

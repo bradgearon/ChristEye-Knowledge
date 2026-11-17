@@ -21,7 +21,16 @@
 namespace anaiero {
 namespace fs=std::filesystem;
 struct Module {std::string_view name, backend, purpose, example;};
-constexpr std::array<Module,15> modules{{
+constexpr std::array<Module,
+#ifdef ANAIERO_HAS_MESH
+16
+#else
+15
+#endif
+> modules{{
+#ifdef ANAIERO_HAS_MESH
+  {"mesh","ce_mesh","Authenticated evidence replication and scoped artifacts","anaiero mesh help"},
+#endif
   {"vm","ce_vlm","Virtual Living Machines","anaiero vm inspect examples/vlm/crest-garden.avlm"},
   {"process","ce_vlm_process","Timed VLM2 processes","anaiero process inspect examples/vlm/process-garden.avlm"},
   {"plan","ce_vlm_plan","Crystal/RNA/learning plans","anaiero plan inspect examples/vlm/bread-first.cevplan examples/vlm/plan-garden.avlm ."},
