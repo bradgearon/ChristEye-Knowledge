@@ -49,8 +49,14 @@ public:
       Forecast forecast{};
       if(!evaluator_.evaluate(plan,candidate,forecast)||!forecast.valid)continue;
       if(!forecast.baseline.id||forecast.baseline.id!=forecast.trial.id||
+         forecast.baseline.source_epoch==0||
          forecast.baseline.source_epoch!=forecast.trial.source_epoch||
-         forecast.baseline.tick>=forecast.trial.tick)return false;
+         forecast.baseline.tick!=forecast.trial.tick||
+         forecast.baseline.revision!=forecast.source_revision||
+         forecast.trial.revision!=forecast.source_revision||
+         forecast.source_state_sha256.size()!=64)return false;
+      for(char c:forecast.source_state_sha256)
+        if(!((c>='0'&&c<='9')||(c>='a'&&c<='f')))return false;
       std::int64_t score=0;bool allowed=true;
       for(std::size_t k=0;k<plan.goal_count;++k){
         const auto& o=plan.objectives[k];
