@@ -19,4 +19,16 @@ struct ConservationBudget {
   Quantity before{},inflow{},outflow{},after{};
   std::int64_t absolute_tolerance=0;
 };
+struct QuantityIdentity {
+  std::uint32_t source=0;
+  std::uint64_t epoch=0;
+  std::array<char,65> model_sha256{};
+};
+// Caller-declared, immutable coupling definition. Each term is pinned in
+// before/inflow/outflow/after order; the transform digest identifies the
+// reviewed mapping. This record is provenance, not proof of model validity.
+struct ConservationContext {
+  std::array<QuantityIdentity,4> terms{};
+  std::array<char,65> transform_sha256{};
+};
 } // namespace anaiero::science

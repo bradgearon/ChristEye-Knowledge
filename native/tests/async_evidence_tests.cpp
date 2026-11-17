@@ -313,6 +313,23 @@ static void units(){
   CHECK(!unit.conservation({before,inflow,outflow,bounded,1}));
   bounded.epoch=2;
   CHECK(!unit.conservation({before,inflow,outflow,bounded,100}));
+  bounded.epoch=1;bounded.value=70;
+  for(auto* q:{&before,&inflow,&outflow,&bounded}){
+    q->model_sha256.fill('a');q->model_sha256.back()='\0';
+  }
+  CHECK(unit.conservation({before,inflow,outflow,bounded,0}));
+  bounded.model_sha256[0]='b';
+  CHECK(!unit.conservation({before,inflow,outflow,bounded,0}));
+  sci::ConservationContext context{};
+  const std::array<const sci::Quantity*,4> terms{{&before,&inflow,&outflow,&bounded}};
+  for(std::size_t i=0;i<terms.size();++i)
+    context.terms[i]={terms[i]->source,terms[i]->epoch,terms[i]->model_sha256};
+  context.transform_sha256.fill('c');context.transform_sha256.back()='\0';
+  CHECK(unit.conservation({before,inflow,outflow,bounded,0},&context));
+  context.terms[3].epoch=2;
+  CHECK(!unit.conservation({before,inflow,outflow,bounded,0},&context));
+  context.terms[3].epoch=1;context.transform_sha256[0]='\0';
+  CHECK(!unit.conservation({before,inflow,outflow,bounded,0},&context));
 }
 int main(int argc,char**argv){
   CHECK(argc==2);
