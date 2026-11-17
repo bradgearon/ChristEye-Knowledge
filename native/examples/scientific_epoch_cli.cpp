@@ -27,7 +27,8 @@ int run_science_epoch_demo(int argc,char**argv) {
        !projector.enroll({72,3,rt::Origin::simulated,true,false,false,0}))
       return 1;
     rt::WindStoreEpochObservationJournal journal(store,"science-recovery");
-    rt::EpochObservationDeliveryService service(journal,projector);
+    rt::EpochObservationCodec codec;
+    rt::EpochObservationDeliveryService service(codec,journal,projector);
     if(!service.recover())return 1;
     if(store.event_count()==0){
       auto send=[&](std::uint32_t src,std::uint64_t epoch,
@@ -56,7 +57,8 @@ int run_science_epoch_demo(int argc,char**argv) {
   if(!projector.enroll({71,3,rt::Origin::simulated,true,false,false,0})||
      !projector.enroll({72,3,rt::Origin::simulated,true,false,false,0}))return 1;
   rt::WindStoreEpochObservationJournal journal(reopened,"science-recovery");
-  rt::EpochObservationDeliveryService service(journal,projector);
+  rt::EpochObservationCodec codec;
+    rt::EpochObservationDeliveryService service(codec,journal,projector);
   if(!service.recover())return 1;
   const auto latest=projector.latest();
   std::size_t stale=0,current=0;

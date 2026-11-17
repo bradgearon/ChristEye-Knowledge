@@ -77,7 +77,7 @@ int main(int argc,char**argv) {
     CHECK(view.enroll({71,3,rt::Origin::simulated,true,false,false,0}));
     CHECK(view.enroll({72,3,rt::Origin::simulated,true,false,false,0}));
     rt::WindStoreEpochObservationJournal journal(store,"multi-source");
-    rt::EpochObservationDeliveryService service(journal,view);
+    rt::EpochObservationDeliveryService service(codec,journal,view);
     CHECK(service.recover());
     CHECK(!service.submit(make(71,1,2,rt::Metric::energy,99))); // gap
     CHECK(store.event_count()==0);
@@ -111,7 +111,7 @@ int main(int argc,char**argv) {
     CHECK(view.enroll({71,3,rt::Origin::simulated,true,false,false,0}));
     CHECK(view.enroll({72,3,rt::Origin::simulated,true,false,false,0}));
     rt::WindStoreEpochObservationJournal journal(store,"multi-source");
-    rt::EpochObservationDeliveryService service(journal,view);
+    rt::EpochObservationDeliveryService service(codec,journal,view);
     CHECK(service.recover()&&service.source_epochs()==3);
     check_latest(view.latest());
     CHECK(store.read_cursor("display").sequence==4);

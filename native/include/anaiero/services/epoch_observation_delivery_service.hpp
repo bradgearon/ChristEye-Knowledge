@@ -2,7 +2,7 @@
 // SW6.2 service: bounded, ordered, journal-first epoch observation delivery.
 // Distinct source epochs can restart sequence numbers without aliasing.
 #include "anaiero/contracts/epoch_observation.hpp"
-#include "anaiero/infrastructure/epoch_observation_codec.hpp"
+#include <array>
 #include <array>
 #include <cstddef>
 namespace anaiero::runtime {
@@ -14,7 +14,7 @@ class EpochObservationDeliveryService final:private IObservationEpochReplay {
   };
   IObservationEpochJournal& journal_;
   IObservationEpochProjection& projection_;
-  EpochObservationCodec codec_{};
+  IObservationEpochCodec& codec_;
   std::array<Cursor,kMaxSources> cursors_{};
   std::size_t count_=0;
   bool ready_=false,has_pending_=false;
@@ -47,9 +47,9 @@ class EpochObservationDeliveryService final:private IObservationEpochReplay {
     record(o,existing);return true;
   }
 public:
-  EpochObservationDeliveryService(IObservationEpochJournal& journal,
-    IObservationEpochProjection& projection) noexcept:
-    journal_(journal),projection_(projection){}
+  EpochObservationDeliveryService(IObservationEpochCodec& codec,
+    IObservationEpochJournal& journal,IObservationEpochProjection& projection) noexcept:
+    journal_(journal),projection_(projection),codec_(codec){}
   bool recover() noexcept {
     if(ready_||!journal_.replay(*this))return false;
     ready_=true;return true;

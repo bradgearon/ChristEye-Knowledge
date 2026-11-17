@@ -5,7 +5,7 @@
 #include "anaiero/infrastructure/stdio_live_solver.hpp"
 #include "anaiero/infrastructure/windstore_epoch_observation_journal.hpp"
 #include "anaiero/infrastructure/epoch_runtime_projection.hpp"
-#include "anaiero/infrastructure/epoch_scientific_publisher.hpp"
+#include "anaiero/services/epoch_scientific_frame_service.hpp"
 #include "anaiero/services/live_solver_feature_services.hpp"
 #include "anaiero/services/coupled_simulation_service.hpp"
 #include <charconv>
@@ -55,7 +55,8 @@ int run_science_live(int argc,char**argv) {
   constexpr std::uint32_t source=64;
   if(!port.enroll({source,3,rt::Origin::simulated,true,false,false,0}))return 1;
   rt::WindStoreEpochObservationJournal journal(store,"science-live");
-  rt::EpochObservationDeliveryService delivery(journal,port);
+  rt::EpochObservationCodec epoch_codec;
+  rt::EpochObservationDeliveryService delivery(epoch_codec,journal,port);
   if(!delivery.recover())return 1;
   const auto state=port.latest();
   for(std::size_t i=0;i<state.sources;++i)

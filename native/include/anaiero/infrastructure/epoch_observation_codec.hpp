@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <span>
 namespace anaiero::runtime {
-class EpochObservationCodec final {
+class EpochObservationCodec final:public IObservationEpochCodec {
   static christeye::wind::DeliveryClass delivery(Lane lane) noexcept {
     using D=christeye::wind::DeliveryClass;
     switch(lane){
@@ -22,7 +22,7 @@ class EpochObservationCodec final {
   }
 public:
   bool encode(const Observation& o,
-    std::array<std::byte,kEpochObservationFrame>& out) const noexcept {
+    std::array<std::byte,kEpochObservationFrame>& out) const noexcept override {
     out={};
     if(!valid_observation(o)||o.source_epoch==0)return false;
     std::array<std::byte,kEpochObservationPayload> payload{};
@@ -53,7 +53,7 @@ public:
     return christeye::wind::encode(h,{},payload,out,length)==
       christeye::wind::Error::ok&&length==out.size();
   }
-  bool decode(std::span<const std::byte> wire,Observation& result) const noexcept {
+  bool decode(std::span<const std::byte> wire,Observation& result) const noexcept override {
     christeye::wind::View v{};
     if(christeye::wind::decode(wire,v)!=christeye::wind::Error::ok||
        v.header.kind!=christeye::wind::Kind::observation||
