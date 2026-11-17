@@ -237,3 +237,19 @@ model digests. Exact UnitConversionService rejects incompatible/lossy
 transforms, while JournalRetentionReviewService computes a non-destructive
 candidate retention boundary. The old WindStore journal is **not** yet compacted.
 See [CE-SW-29](../docs/software/CE-SW-29_async_evidence_and_units.md).
+
+## CE-SW-30 — Engine-neutral adaptive optimization and authorization boundaries
+
+`EngineOptimizationService` now scores replaceable digital scenario evaluators
+through `IScenarioEvaluator`, with matching simulation horizons, unchanged
+source snapshot digest and revision, and deterministic multi-objective scoring.
+The SW5 adapter runs actual isolated CellBehaviorService forks, then delegates
+the selected route to the **existing durable route ledger** through an
+`IEngineChangePort`. Another future simulator can implement the evaluator
+without teaching the optimizer its internal Cell type.
+
+`SessionAuthorizationService` is a small reusable policy layer for an
+injected, independently **cryptographically verified** remote session.
+Neither this policy nor a self-reported source slot implements TLS, peer
+certificate verification or secure mesh enrollment. See
+[CE-SW-30](../docs/software/CE-SW-30_generic_engine_optimizer_and_trust_gates.md).

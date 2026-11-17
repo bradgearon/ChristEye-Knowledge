@@ -538,3 +538,18 @@ if(CE_WIND_BUILD_TESTS)
   add_test(NAME anaiero_async_evidence_and_units COMMAND ce_async_evidence_tests
     ${CMAKE_CURRENT_BINARY_DIR}/async-evidence-session)
 endif()
+
+# CE-SW-30: engine-neutral optimizer with real SW5 matched-horizon forks.
+if(CE_WIND_BUILD_TESTS)
+  add_executable(ce_engine_optimization_tests tests/engine_optimization_tests.cpp)
+  target_link_libraries(ce_engine_optimization_tests PRIVATE ce_wind_core Threads::Threads)
+  if(MSVC)
+    target_compile_options(ce_engine_optimization_tests PRIVATE /W4 /WX)
+  else()
+    target_compile_options(ce_engine_optimization_tests PRIVATE
+      -Wall -Wextra -Wconversion -Werror)
+  endif()
+  add_test(NAME anaiero_engine_optimization COMMAND ce_engine_optimization_tests
+    ${CMAKE_CURRENT_SOURCE_DIR}/../examples/cells/crest-blood-neural.cevatlas
+    ${CMAKE_CURRENT_BINARY_DIR}/engine-optimization-session)
+endif()

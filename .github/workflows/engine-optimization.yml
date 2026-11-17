@@ -1,0 +1,30 @@
+name: Anaiero Engine-Neutral Optimization and Trust Policy
+on:
+  push:
+    paths:
+      - 'native/include/anaiero/**'
+      - 'native/tests/engine_optimization_tests.cpp'
+      - 'native/CMakeLists.txt'
+      - 'docs/software/CE-SW-30_generic_engine_optimizer_and_trust_gates.md'
+      - '.github/workflows/engine-optimization.yml'
+  pull_request:
+    paths:
+      - 'native/include/anaiero/**'
+      - 'native/tests/engine_optimization_tests.cpp'
+      - 'native/CMakeLists.txt'
+      - 'docs/software/CE-SW-30_generic_engine_optimizer_and_trust_gates.md'
+      - '.github/workflows/engine-optimization.yml'
+permissions:
+  contents: read
+jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: cmake -S native -B build/engine-opt -DCE_WIND_BUILD_TESTS=ON
+      - run: cmake --build build/engine-opt --config Release --target ce_engine_optimization_tests
+      - run: ctest --test-dir build/engine-opt -C Release --output-on-failure -R "anaiero_engine_optimization"
