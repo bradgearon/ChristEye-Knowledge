@@ -1,0 +1,30 @@
+name: Anaiero Async Evidence and Scientific Units
+on:
+  push:
+    paths:
+      - 'native/include/anaiero/**'
+      - 'native/tests/async_evidence_tests.cpp'
+      - 'native/CMakeLists.txt'
+      - 'docs/software/CE-SW-29_async_evidence_and_units.md'
+      - '.github/workflows/async-evidence.yml'
+  pull_request:
+    paths:
+      - 'native/include/anaiero/**'
+      - 'native/tests/async_evidence_tests.cpp'
+      - 'native/CMakeLists.txt'
+      - 'docs/software/CE-SW-29_async_evidence_and_units.md'
+      - '.github/workflows/async-evidence.yml'
+permissions:
+  contents: read
+jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: cmake -S native -B build/async -DCE_WIND_BUILD_TESTS=ON
+      - run: cmake --build build/async --config Release --target ce_async_evidence_tests
+      - run: ctest --test-dir build/async -C Release --output-on-failure -R "anaiero_async_evidence_and_units"
