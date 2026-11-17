@@ -60,7 +60,8 @@ int run_fork(int argc,char**argv){
      return error("no digital route event");
    christeye::living::durable::Registry store;
    if(store.open(argv[5])!=christeye::living::durable::Code::ok)return error("WindStore open");
-   anaiero::runtime::RuntimeService runtime;
+   anaiero::runtime::WeightedQueue<> runtime_queue;
+   anaiero::runtime::RuntimeService runtime(runtime_queue);
    opt::RouteReceiptWindPacketCodec codec;
    opt::WindStoreRouteReceiptJournal journal(store,argv[6]);
    opt::RouteRuntimeProjectionPort projector(runtime,source,state.selected.colony);
