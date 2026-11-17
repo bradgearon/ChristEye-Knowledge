@@ -28,7 +28,9 @@ public:
     result={};
     result.id=id_;result.source_epoch=epoch_;result.tick=state.tick;
     result.revision=state.tick;
-    result.participants=static_cast<std::uint32_t>(state.cells.size());
+    // Dead lineage records remain in the durable model, but do not count as viable.
+    result.participants=static_cast<std::uint32_t>(std::count_if(state.cells.begin(),state.cells.end(),
+      [](const auto& cell){return cell.alive;}));
     result.connections=static_cast<std::uint32_t>(runner_.configuration().links.size());
     for(const auto& cell:state.cells) {
       result.energy+=cell.energy;result.learning_proxy+=cell.learning;

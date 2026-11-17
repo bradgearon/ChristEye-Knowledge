@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <algorithm>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <string>
 #define CHECK(x) do{if(!(x)){std::cerr<<"FAILED " #x <<" line "<<__LINE__<<"\n";std::abort();}}while(false)
@@ -237,6 +238,32 @@ static void coordinator_regressions() {
     CHECK(recovered.resume(invalid)==eng::Status::invalid);
   }
 }
+static void viability_regression(const fs::path& config,const fs::path& root){
+  sim3::Configuration parsed;CHECK(sim3::Configuration::load(config,parsed)==sim3::Result::ok);
+  fs::create_directories(root);
+  auto copy_asset=[&](const std::string& relative){
+    const auto target=root/relative;fs::create_directories(target.parent_path());
+    fs::copy_file(config.parent_path()/relative,target,fs::copy_options::overwrite_existing);
+  };
+  copy_asset(parsed.material_path);
+  for(const auto& colony:parsed.colonies)copy_asset(colony.source_path);
+  std::ifstream input(config);std::ofstream output(root/"starvation.cev");std::string line;
+  while(std::getline(input,line))if(line.find(" support ")==std::string::npos)output<<line<<'\n';
+  output.close();const auto state=root/"state";std::uint32_t alive=0;
+  {
+    sim3::Runner runner;CHECK(runner.open(root/"starvation.cev",state)==sim3::Result::ok);
+    app::Sim3SimulationAdapter adapter(runner,201,71,1);eng::Snapshot snapshot;
+    for(unsigned i=0;i<60;++i)CHECK(runner.step(false)==sim3::Result::ok);
+    for(const auto& cell:runner.state().cells)if(cell.alive)++alive;
+    CHECK(alive<runner.state().cells.size());
+    CHECK(adapter.latest(snapshot)==eng::Status::ok&&snapshot.participants==alive);
+  }
+  {
+    sim3::Runner runner;CHECK(runner.open(root/"starvation.cev",state)==sim3::Result::ok);
+    app::Sim3SimulationAdapter adapter(runner,201,71,1);eng::Snapshot snapshot;
+    CHECK(adapter.latest(snapshot)==eng::Status::ok&&snapshot.participants==alive);
+  }
+}
 int main(int argc,char**argv){
   CHECK(argc==4);
   coordinator_regressions();
@@ -312,5 +339,6 @@ int main(int argc,char**argv){
     CHECK(controller.flush_pending()==eng::Status::ok&&collector.count==1);
     CHECK(controller.run_cycles(1)==eng::Status::ok&&collector.count==2);
   }
+  viability_regression(fs::absolute(argv[2]),dir/"viability-regression");
   std::cout<<"sim engine adapters, shared coordinator, checkpoints and restart PASS\n";
 }
