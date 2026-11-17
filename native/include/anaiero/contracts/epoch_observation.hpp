@@ -20,6 +20,7 @@ struct IObservationEpochJournal {
 struct IObservationEpochProjection {
   virtual ~IObservationEpochProjection()=default;
   virtual bool enroll(SourcePermission) noexcept=0;
+  virtual bool can_accept(const Observation&) const noexcept=0;
   virtual bool apply(const Observation&) noexcept=0;
   virtual ColonyState latest() const noexcept=0;
 };
