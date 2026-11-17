@@ -9,12 +9,12 @@
 #include <limits>
 namespace anaiero::runtime {
 class EpochRuntimeProjectionPort final:public IObservationEpochProjection {
-  RuntimeService& runtime_;
+  IObservationRuntime& runtime_;
   EpochObservationCodec codec_{};
   std::array<SourcePermission,kMaxSources> sources_{};
   std::size_t enrolled_=0;
 public:
-  explicit EpochRuntimeProjectionPort(RuntimeService& runtime) noexcept:
+  explicit EpochRuntimeProjectionPort(IObservationRuntime& runtime) noexcept:
     runtime_(runtime){}
   bool enroll(SourcePermission permission) noexcept override {
     if(enrolled_==sources_.size()||permission.source_epoch!=0)return false;

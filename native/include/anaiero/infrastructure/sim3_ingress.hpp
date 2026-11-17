@@ -7,7 +7,7 @@
 #include <cstdint>
 namespace anaiero::runtime {
 class Sim3Ingress {
-  RuntimeService& runtime_;
+  IObservationRuntime& runtime_;
   std::array<std::uint64_t,8> sequences_{};
   Status send(std::uint32_t colony,std::uint32_t animon,Metric metric,
               std::int32_t value,std::uint64_t ns,std::uint64_t tag,
@@ -29,7 +29,7 @@ class Sim3Ingress {
     return ingress_frame(runtime_,std::span<const std::byte>(frame.data(),count));
   }
 public:
-  explicit Sim3Ingress(RuntimeService& service) noexcept : runtime_(service) {}
+  explicit Sim3Ingress(IObservationRuntime& service) noexcept : runtime_(service) {}
   Status enroll(const christeye::living::sim3::Configuration& cfg) noexcept {
     if(cfg.colonies.size()>sequences_.size())return Status::invalid;
     for(std::size_t i=0;i<cfg.colonies.size();++i){

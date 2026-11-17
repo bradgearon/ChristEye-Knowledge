@@ -11,7 +11,7 @@
 
 namespace anaiero::optimization {
 class RouteRuntimeProjectionPort final:public IRouteReceiptProjection {
-  runtime::RuntimeService& runtime_;
+  runtime::IObservationRuntime& runtime_;
   std::uint32_t source_,colony_,clock_domain_;
   bool initialized_=false;
   static std::uint64_t evidence_tag(const std::string& sha) noexcept {
@@ -35,7 +35,7 @@ class RouteRuntimeProjectionPort final:public IRouteReceiptProjection {
     return false;
   }
 public:
-  RouteRuntimeProjectionPort(runtime::RuntimeService& runtime,
+  RouteRuntimeProjectionPort(runtime::IObservationRuntime& runtime,
     std::uint32_t source,std::uint32_t colony,std::uint32_t clock_domain=1) noexcept:
     runtime_(runtime),source_(source),colony_(colony),clock_domain_(clock_domain){}
   bool initialize() noexcept override {

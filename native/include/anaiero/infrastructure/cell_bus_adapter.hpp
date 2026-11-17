@@ -8,10 +8,10 @@
 #include <cstdint>
 namespace anaiero::cells {
 class CellBusAdapter final : public IEventPort {
-  anaiero::runtime::RuntimeService& bus_;
+  anaiero::runtime::IObservationRuntime& bus_;
   std::uint64_t sequence_=0, failures_=0;
 public:
-  explicit CellBusAdapter(anaiero::runtime::RuntimeService& bus) noexcept:bus_(bus){}
+  explicit CellBusAdapter(anaiero::runtime::IObservationRuntime& bus) noexcept:bus_(bus){}
   anaiero::runtime::Status enroll() noexcept {
     return bus_.enroll({30,1,anaiero::runtime::Origin::simulated,true,true,false});
   }
