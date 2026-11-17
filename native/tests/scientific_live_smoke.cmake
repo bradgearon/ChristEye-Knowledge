@@ -16,8 +16,8 @@ function(run_live label epoch expected_total)
     message(FATAL_ERROR "${label}: ${rc} ${output} ${diagnostic}")
   endif()
 endfunction()
-run_live("first" 1 112)
-run_live("new-epoch" 2 224)
+run_live("first" 1 113)
+run_live("new-epoch" 2 226)
 # Wrong source sequence must fail closed, not report a completed run.
 execute_process(COMMAND "${CE_PYTHON}" "${CE_DRIVER}"
   --anaiero "${CE_ANA}" --atlas "${CE_ATLAS}"
