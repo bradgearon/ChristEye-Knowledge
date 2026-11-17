@@ -12,6 +12,7 @@
 #include <cstdint>
 #include <iostream>
 #include <limits>
+#include <string>
 #include <string_view>
 namespace cell=anaiero::cells;
 namespace sci=anaiero::science;
@@ -64,6 +65,28 @@ int run_science_live(int argc,char**argv) {
       std::cerr<<"source epoch already used: start a new external session/epoch\n";
       return 1;
     }
+  // Persist the full numerical-model identity separately from fast features.
+  // A session epoch is reserved even if the external model fails before its
+  // first macro-step. This is evidence provenance, not peer authentication.
+  for(const auto& event:store.events())
+    if(event.kind=="SCIENTIFIC_MODEL_SESSION"&&event.entity=="science-live"&&
+       event.source_tick==epoch){
+      std::cerr<<"source epoch already has a model session record\n";
+      return 1;
+    }
+  const std::string manifest=
+    "CEVLIVEMODEL/1\nmodel_sha256 "+std::string(argv[5])+
+    "\natlas_sha256 "+atlas.model_digest+
+    "\nepoch "+std::to_string(epoch)+
+    "\ndeclared_provider "+std::string(mode)+
+    "\nelectrical_transform DIMENSIONLESS_PROXY_V1\n"+
+    "environment_provider SYNTHETIC\nfast_step_ns 25000\n"+
+    "environment_step_ns 100000\nend\n";
+  const auto object=store.put(manifest);
+  if(object.code!=durable::Code::ok)return 1;
+  const auto registered=store.publish("SCIENTIFIC_MODEL_SESSION","science-live",
+      object.hash,"SIMULATED",epoch,"simulation","live-model");
+  if(registered.code!=durable::Code::ok)return 1;
   cell::BoundedPositionPort spatial;
   cell::World world{};
   if(!seed_live(atlas,spatial,world))return 1;
