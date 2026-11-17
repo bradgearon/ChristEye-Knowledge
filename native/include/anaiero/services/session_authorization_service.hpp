@@ -3,8 +3,8 @@
 // NOT authentication. Real mesh transport must inject a verified session.
 #include "anaiero/contracts/runtime_events.hpp"
 #include <cstdint>
-namespace anaiero::security {
 #include "anaiero/contracts/verified_session.hpp"
+namespace anaiero::security {
 class SessionAuthorizationService final {
 public:
   bool may_publish(const IVerifiedSession& session,
