@@ -68,6 +68,14 @@ public:
   void set_wakeup(void (*fn)(void*) noexcept,void* ctx) noexcept {
     wakeup_=fn;wake_context_=ctx;
   }
+  // Single-owner preflight used by journal-first services. It cannot authorize
+  // a peer; enrollment and identity checks happen before this call.
+  Status can_accept(Observation o) const noexcept {
+    o=AnimonPriorityService::classify(o);
+    if(!valid_observation(o))return Status::invalid;
+    if(!allowed(o))return Status::unauthorized;
+    return projector_.can_apply(o);
+  }
   Status post(Observation o) noexcept {
     o=AnimonPriorityService::classify(o);
     if(!valid_observation(o))return Status::invalid;
