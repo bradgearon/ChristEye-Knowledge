@@ -328,7 +328,7 @@ add_dependencies(anaiero ce_cell_behavior)
 install(TARGETS ce_cell_behavior RUNTIME DESTINATION bin)
 
 # Anaiero v0.015 adaptive optimization: pure service scoring + demo route adapter.
-add_executable(ce_optimization examples/optimization_cli.cpp)
+add_executable(ce_optimization examples/optimization_cli.cpp examples/optimization_fork_cli.cpp)
 target_link_libraries(ce_optimization PRIVATE ce_wind_core Threads::Threads)
 if(MSVC)
   target_compile_options(ce_optimization PRIVATE /W4 /WX)
@@ -347,4 +347,19 @@ if(CE_WIND_BUILD_TESTS)
   endif()
   add_test(NAME anaiero_adaptive_optimization_unit COMMAND ce_adaptive_optimization_tests)
   add_test(NAME anaiero_adaptive_optimization_cli COMMAND ce_optimization demo)
+endif()
+
+# Real SW5 deterministic forks, multi-goal optimization, CAS-pinned route receipt.
+if(CE_WIND_BUILD_TESTS)
+  add_executable(ce_fork_optimizer_tests tests/fork_optimizer_tests.cpp)
+  target_link_libraries(ce_fork_optimizer_tests PRIVATE ce_wind_core Threads::Threads)
+  if(MSVC)
+    target_compile_options(ce_fork_optimizer_tests PRIVATE /W4 /WX)
+  else()
+    target_compile_options(ce_fork_optimizer_tests PRIVATE -Wall -Wextra -Wconversion -Werror)
+  endif()
+  add_test(NAME anaiero_sw5_fork_optimizer
+    COMMAND ce_fork_optimizer_tests
+    ${CMAKE_CURRENT_SOURCE_DIR}/../examples/cells/crest-blood-neural.cevatlas
+    ${CMAKE_CURRENT_BINARY_DIR}/sw5-fork-session)
 endif()
