@@ -27,7 +27,9 @@ public:
        decoded.source_epoch!=o.source_epoch||decoded.sequence!=o.sequence||
        decoded.metric!=o.metric||decoded.colony!=o.colony||decoded.animon!=o.animon||
        decoded.value!=o.value||decoded.evidence_tag!=o.evidence_tag||
-       decoded.acquired_ns!=o.acquired_ns||decoded.origin!=o.origin)return false;
+       decoded.acquired_ns!=o.acquired_ns||decoded.origin!=o.origin||
+       decoded.lane!=o.lane||decoded.clock_domain!=o.clock_domain||
+       decoded.urgency!=o.urgency||decoded.importance!=o.importance)return false;
     const std::string_view bytes(reinterpret_cast<const char*>(wire.data()),wire.size());
     const auto digest=christeye::living::plans::sha256_hex(bytes);
     const auto clock="epoch-"+std::to_string(o.source_epoch);
