@@ -25,7 +25,32 @@ public:
     return runtime_.latest(std::numeric_limits<std::uint64_t>::max(),
                            std::numeric_limits<std::uint64_t>::max());
   }
+  bool can_accept(const Observation& observation) const noexcept override {
+    if(observation.source_epoch==0||!valid_observation(observation))return false;
+    bool source_ok=false;
+    for(std::size_t i=0;i<enrolled_;++i){
+      const auto& p=sources_[i];
+      if(p.source==observation.source&&p.clock_domain==observation.clock_domain&&
+         p.origin==observation.origin){source_ok=true;break;}
+    }
+    if(!source_ok)return false;
+    const auto status=runtime_.can_accept(observation);
+    if(status==Status::ok)return true;
+    if(status!=Status::duplicate)return false;
+    const auto view=runtime_.latest(observation.acquired_ns,
+      std::numeric_limits<std::uint64_t>::max());
+    for(std::size_t i=0;i<view.count;++i){
+      const auto& v=view.values[i];
+      if(v.source==observation.source&&v.source_epoch==observation.source_epoch&&
+         v.sequence==observation.sequence&&v.colony==observation.colony&&
+         v.animon==observation.animon&&v.metric==observation.metric&&
+         v.value==observation.value&&v.evidence_tag==observation.evidence_tag)
+        return true;
+    }
+    return false;
+  }
   bool apply(const Observation& observation) noexcept override {
+    if(!can_accept(observation))return false;
     if(observation.source_epoch==0||!valid_observation(observation))return false;
     bool source_ok=false;
     for(std::size_t i=0;i<enrolled_;++i) {
