@@ -24,7 +24,7 @@
           "colony": {"type": "integer", "minimum": 1},
           "animon": {"type": "integer", "minimum": 0},
           "source": {"type": "integer", "minimum": 1},
-          "metric": {"enum": ["viability", "energy", "support", "stress", "activity", "digital_learning", "digital_desire", "connection", "acquisition_health"]},
+          "metric": {"enum": ["viability", "energy", "support", "stress", "activity", "digital_learning", "digital_desire", "connection", "acquisition_health", "digital_route_active"]},
           "value": {"type": "integer"},
           "quality": {"enum": ["CURRENT", "STALE", "DEGRADED", "UNKNOWN"]},
           "origin": {"enum": ["SIMULATED", "EXTERNAL_UNVERIFIED_READONLY"]},

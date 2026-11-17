@@ -30,7 +30,7 @@ inline constexpr bool health_metric(Metric m) noexcept {
          m==Metric::stress || m==Metric::activity || m==Metric::acquisition_health;
 }
 inline constexpr bool valid_metric(Metric m) noexcept {
-  return static_cast<unsigned>(m)>=1 && static_cast<unsigned>(m)<=9;
+  return static_cast<unsigned>(m)>=1 && static_cast<unsigned>(m)<=10;
 }
 inline constexpr bool valid_lane(Lane l) noexcept {return static_cast<unsigned>(l)<=4;}
 inline constexpr bool valid_origin(Origin o) noexcept {return o==Origin::simulated||o==Origin::external_unverified_readonly;}

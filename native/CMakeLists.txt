@@ -363,3 +363,22 @@ if(CE_WIND_BUILD_TESTS)
     ${CMAKE_CURRENT_SOURCE_DIR}/../examples/cells/crest-blood-neural.cevatlas
     ${CMAKE_CURRENT_BINARY_DIR}/sw5-fork-session)
 endif()
+
+# CE-SW-23: real outbox receipts through WindPacket, durable WindStore and SW4 projector.
+if(CE_WIND_BUILD_TESTS)
+  add_executable(ce_route_delivery_tests tests/route_delivery_tests.cpp)
+  target_link_libraries(ce_route_delivery_tests PRIVATE ce_wind_core Threads::Threads)
+  if(MSVC)
+    target_compile_options(ce_route_delivery_tests PRIVATE /W4 /WX)
+  else()
+    target_compile_options(ce_route_delivery_tests PRIVATE -Wall -Wextra -Wconversion -Werror)
+  endif()
+  add_test(NAME anaiero_route_delivery COMMAND ce_route_delivery_tests
+    ${CMAKE_CURRENT_SOURCE_DIR}/../examples/cells/crest-blood-neural.cevatlas
+    ${CMAKE_CURRENT_BINARY_DIR}/route-delivery-integration)
+  add_test(NAME anaiero_route_delivery_cli COMMAND ${CMAKE_COMMAND}
+    -DCE_CLI=$<TARGET_FILE:ce_optimization>
+    -DCE_ATLAS=${CMAKE_CURRENT_SOURCE_DIR}/../examples/cells/crest-blood-neural.cevatlas
+    -DCE_TEMP=${CMAKE_CURRENT_BINARY_DIR}/route-delivery-cli
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/route_delivery_smoke.cmake)
+endif()

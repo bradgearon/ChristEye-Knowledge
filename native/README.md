@@ -137,3 +137,12 @@ This is a **synthetic-only simulation**. It does not model culture conditions, b
 ## SW5 forked optimization and durable digital route policy
 
 `anaiero optimize fork demo examples/cells/crest-blood-neural.cevatlas ./digital-forks` evaluates three real SW5 checkpoint forks, selects a route using guarded multi-objective scoring and stores digital policy state plus a pending outbox receipt behind a SHA-256-pinned atomic HEAD. Reopening reads the existing committed state without duplicating its route. `ce_fork_optimizer_tests` exercises object/HEAD fault injection, receipt replay, time-preserving rollback and invalid HEAD. No living-cell actuation or authenticated outbound delivery is implemented. See [CE-SW-22](../docs/software/CE-SW-22_forked_simulation_optimization_and_durable_routes.md).
+
+## SW6.1 — Durable route outbox to WindBus and projector
+
+`anaiero optimize fork sync <atlas> <route-session-dir> <windstore-dir> <session-id> <source-slot>`
+replays verified route receipt packets from WindStore, projects pending digital
+route status into the volatile ColonyState view, and acknowledges the source
+route ledger only after that state is readable. The source slot is a local
+configuration value, **not** an authenticated peer identity. No real-cell
+controls or external mesh acknowledgement. See [CE-SW-23](../docs/software/CE-SW-23_durable_route_bus_projection.md).

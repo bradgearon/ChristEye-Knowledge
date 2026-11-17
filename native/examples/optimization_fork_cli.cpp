@@ -4,6 +4,12 @@
 #include "anaiero/infrastructure/durable_route_ledger.hpp"
 #include "anaiero/infrastructure/cell_source_record.hpp"
 #include "anaiero/infrastructure/cell_position_port.hpp"
+#include "anaiero/services/route_receipt_delivery_service.hpp"
+#include "anaiero/infrastructure/route_receipt_codec.hpp"
+#include "anaiero/infrastructure/windstore_route_journal.hpp"
+#include "anaiero/infrastructure/route_runtime_projection.hpp"
+#include <charconv>
+#include <cstdint>
 #include <array>
 #include <cstdint>
 #include <filesystem>
@@ -33,8 +39,45 @@ struct StdoutTestSink final:opt::IRouteReceiptSink {
  }
 };
 int run_fork(int argc,char**argv){
+ if(argc==8&&std::string_view(argv[2])=="sync"){
+   cell::Atlas atlas{};
+   if(cell::files::load_checked_atlas(argv[3],atlas)!=cell::Status::ok)
+     return error("atlas/evidence invalid");
+   std::uint32_t source=0;
+   const std::string_view raw{argv[7]};
+   auto [end,ec]=std::from_chars(raw.data(),raw.data()+raw.size(),source);
+   if(ec!=std::errc{}||end!=raw.data()+raw.size()||source==0)
+     return error("invalid local source slot");
+   opt::DurableRouteLedger ledger;
+   if(ledger.open(argv[4],atlas)!=opt::StoreResult::ok)return error("route ledger lock");
+   cell::BoundedPositionPort spatial;
+   opt::DurableDigitalRouteService controller(ledger,atlas,spatial);
+   // The controller should not mutate the culture while delivering receipts.
+   opt::DigitalRouteLedger state{};
+   if(controller.read(state)!=opt::StoreResult::ok||state.selected.colony==0)
+     return error("no digital route event");
+   christeye::living::durable::Registry store;
+   if(store.open(argv[5])!=christeye::living::durable::Code::ok)return error("WindStore open");
+   anaiero::runtime::RuntimeService runtime;
+   opt::RouteReceiptWindPacketCodec codec;
+   opt::WindStoreRouteReceiptJournal journal(store,argv[6]);
+   opt::RouteRuntimeProjectionPort projector(runtime,source,state.selected.colony);
+   opt::RouteReceiptDeliveryService delivery(codec,journal,projector,source);
+   if(!delivery.recover()||!controller.deliver(delivery))
+     return error("durable route delivery/projection failed");
+   if(controller.read(state)!=opt::StoreResult::ok)return error("ledger reread");
+   const auto latest=runtime.latest(state.event_sequence*1000000ULL,10000000ULL);
+   std::cout<<"{\"schema\":\"anaiero.route.delivery/1\",\"session\":\""
+            <<argv[6]<<"\",\"sequence\":"<<state.event_sequence
+            <<",\"acked\":"<<(state.event_acked?"true":"false")
+            <<",\"projector_revision\":"<<latest.revision
+            <<",\"journal_events\":"<<store.event_count()
+            <<",\"active\":"<<(state.active?"true":"false")<<"}\n";
+   return state.event_acked?0:1;
+ }
  if(argc!=5 || std::string_view(argv[2])!="demo"){
-   std::cerr<<"usage: anaiero optimize fork demo <atlas.cevatlas> <session-dir>\n";
+   std::cerr<<"usage: anaiero optimize fork demo <atlas.cevatlas> <session-dir>\n"
+             <<"       anaiero optimize fork sync <atlas.cevatlas> <session-dir> <windstore-dir> <session-id> <source-slot>\n";
    return 2;
  }
  cell::Atlas atlas{};
