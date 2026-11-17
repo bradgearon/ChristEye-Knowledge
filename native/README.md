@@ -201,3 +201,12 @@ a read-only *digital* NEURON model sidecar when present; it is not a physiologic
 instrument or a validated live-cell interface. See
 [CE-SW-25](../docs/software/CE-SW-25_source_epoch_recovery.md) and
 [CE-SW-26](../docs/software/CE-SW-26_live_multirate_solver_coupling.md).
+
+## CE-SW-27 — Reusable simulation kernel
+
+The public native `anaiero kernel demo <atlas.cevatlas> <sim3-config.cev> <run-dir>`
+composes the existing SW5 CellBehaviorService and SIM3 durable Runner using
+a versioned `ISimulationEngine` lifecycle. Engine-specific state remains
+private. SW5 supports CEVCELLSTATE checkpoint and restore; SIM3 retains its
+separate persistence model, and arbitrary in-place rewind is explicitly
+unsupported. See [CE-SW-27](../docs/software/CE-SW-27_reusable_simulation_kernel.md).
