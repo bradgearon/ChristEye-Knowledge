@@ -1,0 +1,47 @@
+name: Anaiero Route Outbox and Projector SW6.1
+on:
+  push:
+    paths:
+      - 'native/include/anaiero/**'
+      - 'native/include/christeye/living/durable_registry.hpp'
+      - 'native/examples/optimization_fork_cli.cpp'
+      - 'native/examples/colony_runtime_cli.cpp'
+      - 'native/tests/route_delivery_*'
+      - 'native/CMakeLists.txt'
+      - 'schemas/software/colony_state_runtime.v1.schema.json'
+      - 'docs/software/CE-SW-23_durable_route_bus_projection.md'
+      - '.github/workflows/route-outbox.yml'
+  pull_request:
+    paths:
+      - 'native/include/anaiero/**'
+      - 'native/include/christeye/living/durable_registry.hpp'
+      - 'native/examples/optimization_fork_cli.cpp'
+      - 'native/examples/colony_runtime_cli.cpp'
+      - 'native/tests/route_delivery_*'
+      - 'native/CMakeLists.txt'
+      - 'schemas/software/colony_state_runtime.v1.schema.json'
+      - 'docs/software/CE-SW-23_durable_route_bus_projection.md'
+      - '.github/workflows/route-outbox.yml'
+permissions:
+  contents: read
+jobs:
+  native-outbox:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure native C++20
+        run: cmake -S native -B build/sw61 -DCE_WIND_BUILD_TESTS=ON
+      - name: Compile route delivery and CLI
+        run: cmake --build build/sw61 --config Release --target ce_route_delivery_tests ce_optimization anaiero
+      - name: Crash/replay and public CLI smoke
+        run: ctest --test-dir build/sw61 -C Release --output-on-failure -R "anaiero_route_delivery"
+      - name: Unix CLI health
+        if: runner.os != 'Windows'
+        run: ./build/sw61/anaiero help optimize
+      - name: Windows CLI health
+        if: runner.os == 'Windows'
+        run: .\build\sw61\Release\anaiero.exe help optimize
