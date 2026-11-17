@@ -53,6 +53,8 @@ static ns::Record sample(const fs::path& repo){
     snapshot(101,3,before.tick,before.generation,source_sha),{500,10,30,true},eng::Status::ok};
   p.engines[1]={202,62,7,eng::Kind::sim3,2,std::string(64,'b'),
     snapshot(202,7,9,9,std::string(64,'c')),{},eng::Status::ok};
+  r.contracts[0]={"anaiero-sw5/1",1,1,1,101,0,{},true,true,true,true};
+  r.contracts[1]={"anaiero-sim3/2",2,2,1,202,0,{},true,true,false,false};
   r.evidence[0].next_sequence=96;r.evidence[0].published=p.engines[0].last;
   r.evidence[1].next_sequence=51;r.evidence[1].published=p.engines[1].last;
   opt::Candidate route{1,101,3,4,opt::RouteKind::digital_signal,2,1,900};
@@ -89,7 +91,7 @@ static void canonical_and_invalid(const ns::Record& expected){
   };
   reject({});reject(wire.substr(0,wire.size()/2));reject(wire.substr(0,wire.size()-1));
   reject(wire.substr(0,wire.size()-5));reject(wire+"extra\n");reject(wire+"\n");
-  reject(replaced(wire,"CEVSESSIONSTATE/1","CEVSESSIONSTATE/2"));
+  reject(replaced(wire,"CEVSESSIONSTATE/2","CEVSESSIONSTATE/99"));
   reject(replaced(wire,"\n7 2 20 ","\n+7 2 20 "));
   reject(replaced(wire,"\n7 2 20 ","\n18446744073709551616 2 20 "));
   for(const auto* progress:{"1 18 0 0 1 0 0\n","1 18 9 0 1 0 0\n",

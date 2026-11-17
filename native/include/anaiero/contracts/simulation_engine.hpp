@@ -11,12 +11,27 @@ inline constexpr std::size_t kMaxEngines=8;
 enum class Kind : std::uint8_t {sw5=1,sim3=2,scientific=3};
 enum class Status : std::uint8_t {ok,invalid,not_initialized,tick_conflict,
   advance_failed,io_failure,unsupported,capacity,publish_failed};
+enum class SummarySemantic : std::uint8_t {
+  unsupported=0,live_cells,active_cell_links,configured_colony_links,
+  model_energy_proxy,learning_proxy,normalized_activity,
+  membrane_voltage_microvolt,model_entities
+};
+// Versioned interpretation of the small compatibility Snapshot. A zero tick_ns
+// declares logical time; a positive value declares simulated nanoseconds/tick.
+struct Capabilities {
+  bool isolated_fork=false,evaluate_candidates=false,apply_changes=false;
+  std::uint32_t input_schema=0,metric_schema=0,checkpoint_schema=0,clock_domain=0;
+  std::uint64_t tick_ns=0;
+  std::array<SummarySemantic,4> summaries{}; // participants, connections, energy, learning
+  std::string_view behavior_id{};
+};
 struct Descriptor {
   std::uint32_t id=0,source=0;
   std::uint64_t source_epoch=1;
   Kind kind=Kind::sw5;
   std::string_view model_digest{},classification="SYNTHETIC_UNCALIBRATED";
   bool supports_checkpoint=true,supports_restore=false;
+  Capabilities capabilities{};
 };
 struct Inputs {
   std::int32_t support_proxy=0,stress_proxy=0,digital_signal=0;

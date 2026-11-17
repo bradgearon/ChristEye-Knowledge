@@ -1,0 +1,17 @@
+CEVEXPERIMENT/1
+name sim3-teaching
+engine 201 2 49b4ce5d133739e5f07ea04a43d0dca4bef00f85bfa320696c6100653fd959ee "anaiero-sim3/2"
+identity 2 201 0 0 4efc59837e6f4f921723ca7e0ebffc3d3efae5b5cec7ae721a74e523a613f6d4
+optimization 18 1 2
+objective 4 100 4 1
+objective 1 4 2 1
+outcome 0 0 0 0
+stages 1
+stage observe 18 0 0 0 0
+candidates 3
+candidate 201 201 0 0 0 3 blood 3 10 0
+candidate 202 202 0 0 0 3 blood 3 40 0
+candidate 203 203 0 0 0 2 crest blood 0 2
+artifacts 0
+learning "" "" "" ""
+seal 4a798a045987e70cc0577ef8432d85999dbbab027e2260e9709b38ae4f738533

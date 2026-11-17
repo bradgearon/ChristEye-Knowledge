@@ -1,0 +1,6 @@
+CEPASSIVE/1
+rest_microvolt -65000
+tau_ns 1000000
+resistance_ohm 79577472
+max_current_picoamp 20
+end

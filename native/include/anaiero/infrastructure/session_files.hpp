@@ -3,6 +3,7 @@
 #include "anaiero/contracts/native_session.hpp"
 #include "anaiero/infrastructure/windstore_checkpoint_catalog.hpp"
 #include "anaiero/infrastructure/cell_checkpoint.hpp"
+#include "anaiero/infrastructure/scientific_solver_configuration.hpp"
 #include "christeye/living/durable_registry.hpp"
 #include <algorithm>
 #include <filesystem>
@@ -29,7 +30,8 @@ inline bool read_configuration(const fs::path& path,Configuration& config,std::s
   raw=std::move(normalized);
   std::istringstream in(raw);std::string line;
   Configuration next{};
-  if(!std::getline(in,line)||line!="CEVSESSION/1"){error="expected CEVSESSION/1";return false;}
+  if(!std::getline(in,line)||(line!="CEVSESSION/1"&&line!="CEVSESSION/2")){error="expected CEVSESSION/1 or CEVSESSION/2";return false;}
+  const bool version2=line=="CEVSESSION/2";
   if(!std::getline(in,line)||!line.starts_with("name ")||
      !db::valid_id(line.substr(5))||line.size()>69){error="invalid session name";return false;}
   next.name=line.substr(5);
@@ -39,6 +41,12 @@ inline bool read_configuration(const fs::path& path,Configuration& config,std::s
     error="period_ms must be 10..60000";return false;
   }
   next.period_ms=static_cast<std::uint32_t>(period);
+  if(version2){
+    if(!std::getline(in,line)||!line.starts_with("storage segmented ")){error="expected storage segmented <segment-events>";return false;}
+    std::uint64_t count=0;
+    if(!db::parse_u64(std::string_view(line).substr(18),count)||count<8||count>4096){error="segment events must be 8..4096";return false;}
+    next.sustained_storage=true;next.segment_events=static_cast<std::uint32_t>(count);
+  }
   std::string identity=raw;
   bool ended=false;
   while(std::getline(in,line)) {
@@ -60,11 +68,12 @@ inline bool read_configuration(const fs::path& path,Configuration& config,std::s
     e.id=static_cast<std::uint32_t>(id);e.source=static_cast<std::uint32_t>(source);
     if(kind=="sw5")e.kind=engine::Kind::sw5;
     else if(kind=="sim3")e.kind=engine::Kind::sim3;
-    else {error="engine kind must be sw5 or sim3";return false;}
+    else if(version2&&kind=="scientific")e.kind=engine::Kind::scientific;
+    else {error="unsupported engine kind";return false;}
     e.cadence=static_cast<std::uint8_t>(cadence);e.inputs.lesson=lesson!=0;
-    if(e.kind==engine::Kind::sim3&&(e.initial_path!="-"||e.inputs.support_proxy||
+    if(e.kind!=engine::Kind::sw5&&(e.initial_path!="-"||e.inputs.support_proxy||
        e.inputs.stress_proxy||e.inputs.digital_signal||e.inputs.lesson)){
-      error="SIM3 uses its declared model inputs";return false;
+      error="engine uses its declared model inputs";return false;
     }
     for(std::size_t i=0;i<next.count;++i)
       if(next.engines[i].id==e.id||next.engines[i].source==e.source){
@@ -82,6 +91,12 @@ inline bool read_configuration(const fs::path& path,Configuration& config,std::s
     };
     if(!pin(e.model_path)||(e.kind==engine::Kind::sw5&&!pin(e.initial_path))){
       error="cannot pin engine model or initial checkpoint";return false;
+    }
+    if(e.kind==engine::Kind::scientific){
+      science::ScientificConfiguration solver;
+      if(!science::files::read_solver_configuration(e.model_path,solver,error))return false;
+      e.solver_configuration_sha256=solver.configuration_sha256;
+      identity+='\n';identity+=solver.configuration_sha256;
     }
     next.engines[next.count++]=std::move(e);
   }
@@ -124,7 +139,9 @@ inline bool valid_candidate(const optimization::Candidate& c,bool allow_empty=tr
 }
 inline bool valid_record(const Record& r)noexcept {
   const auto& p=r.coordinator;
-  if(!db::valid_digest(r.configuration_sha256)||p.schema!=1||!p.initialized||
+  if((r.schema!=1&&r.schema!=2)||(r.schema==1&&(r.operation_id||r.experiment_operation_id||r.experiment_pending||r.operation_cancelled||r.experiment_policy_paused))||
+     (r.experiment_pending&&!r.experiment_operation_id)||
+     !db::valid_digest(r.configuration_sha256)||p.schema!=1||!p.initialized||
      !p.engine_count||p.engine_count>engine::kMaxEngines||p.next_slot>p.engine_count||
      r.target_cycles<p.completed_cycles||!valid_inputs(p.default_inputs)||
      (!p.cycle_active&&(p.next_slot||p.publication_pending))||
@@ -133,7 +150,13 @@ inline bool valid_record(const Record& r)noexcept {
   for(std::size_t i=0;i<p.engine_count;++i){
     const auto& e=p.engines[i];const auto& v=r.evidence[i];const auto& route=v.route;
     const auto kind=static_cast<unsigned>(e.kind);
-    if(!e.id||!e.source||!e.source_epoch||kind<1||kind>2||!e.cadence||e.cadence>64||
+    if(r.schema>=2){
+      const auto& c=r.contracts[i];
+      if(c.behavior.empty()||c.behavior.size()>96||!c.input_schema||!c.metric_schema||!c.clock_domain||!c.checkpoint_schema)return false;
+      for(const auto semantic:c.summaries)if(static_cast<unsigned>(semantic)>
+        static_cast<unsigned>(engine::SummarySemantic::model_entities))return false;
+    }
+    if(!e.id||!e.source||!e.source_epoch||kind<1||kind>3||!e.cadence||e.cadence>64||
        !db::valid_digest(e.model_digest)||!valid_snapshot(e.last)||
        e.last.id!=e.id||e.last.source_epoch!=e.source_epoch||!valid_inputs(e.cycle_inputs)||
        static_cast<unsigned>(e.last_status)>static_cast<unsigned>(engine::Status::publish_failed)||
@@ -204,7 +227,7 @@ inline bool valid_record(const Record& r)noexcept {
   if(!q.engine_id&&(q.horizon||q.option.route.id||selection.approved||forecast.valid))return false;
   if(selection.approved){
     if(!q.engine_id||!forecast.valid||selection.score<=0||!c.id||!c.policy_token||
-       c.id!=q.option.route.id||c.policy_token!=q.option.route.id||q.option.route.colony!=q.engine_id||
+       c.id!=q.option.route.id||q.option.route.colony!=q.engine_id||
        !q.option.guidance||q.option.guidance!=q.option.route.guidance_weight||
        c.cost!=q.option.route.digital_cost||c.risk!=q.option.route.model_risk||
        c.uncertainty!=q.option.uncertainty)return false;
@@ -256,8 +279,9 @@ inline std::string encode_record(const Record& r) {
   if(!valid_record(r))return {};
   std::ostringstream out;
   const auto& p=r.coordinator;
-  out<<"CEVSESSIONSTATE/1\n"<<r.revision<<' '<<r.changes<<' '<<r.target_cycles<<' '<<std::quoted(r.configuration_sha256)<<'\n'
-     <<p.schema<<' '<<p.completed_cycles<<' '<<static_cast<unsigned>(p.engine_count)<<' '<<static_cast<unsigned>(p.next_slot)<<' '
+  out<<"CEVSESSIONSTATE/"<<r.schema<<'\n'<<r.revision<<' '<<r.changes<<' '<<r.target_cycles<<' '<<std::quoted(r.configuration_sha256);
+  if(r.schema>=2)out<<' '<<r.operation_id<<' '<<r.experiment_operation_id<<' '<<r.experiment_pending<<' '<<r.operation_cancelled<<' '<<r.experiment_policy_paused;
+  out<<'\n'<<p.schema<<' '<<p.completed_cycles<<' '<<static_cast<unsigned>(p.engine_count)<<' '<<static_cast<unsigned>(p.next_slot)<<' '
      <<p.initialized<<' '<<p.cycle_active<<' '<<p.publication_pending<<'\n';
   put_inputs(out,p.default_inputs);put_snapshot(out,p.pending_snapshot);
   for(std::size_t i=0;i<p.engine_count;++i){
@@ -265,6 +289,13 @@ inline std::string encode_record(const Record& r) {
     out<<e.id<<' '<<e.source<<' '<<e.source_epoch<<' '<<static_cast<unsigned>(e.kind)<<' '
        <<static_cast<unsigned>(e.cadence)<<' '<<std::quoted(e.model_digest)<<' '
        <<static_cast<unsigned>(e.last_status)<<'\n';
+    if(r.schema>=2){
+      const auto& c=r.contracts[i];
+      out<<std::quoted(c.behavior)<<' '<<c.input_schema<<' '<<c.metric_schema<<' '<<c.checkpoint_schema<<' '
+        <<c.clock_domain<<' '<<c.tick_ns<<' '<<c.isolated_fork<<' '<<c.evaluate_candidates<<' '<<c.apply_changes<<' '<<c.restore;
+      for(const auto semantic:c.summaries)out<<' '<<static_cast<unsigned>(semantic);
+      out<<'\n';
+    }
     put_snapshot(out,e.last);put_inputs(out,e.cycle_inputs);
     out<<v.next_sequence<<'\n';put_snapshot(out,v.published);
     out<<route.active<<' '<<route.prior_existed<<' '<<route.prior_guidance<<' '<<route.change_id<<'\n';
@@ -287,8 +318,11 @@ inline bool decode_record(std::string_view wire,Record& output){
   if(wire.size()>1024*1024)return false;
   Record r{};std::istringstream in{std::string(wire)};std::string tag;
   auto& p=r.coordinator;unsigned engine_count=0,next_slot=0;
-  if(!(in>>tag)||tag!="CEVSESSIONSTATE/1"||
-     !(in>>r.revision>>r.changes>>r.target_cycles>>std::quoted(r.configuration_sha256))||!db::valid_digest(r.configuration_sha256)||
+  if(!(in>>tag)||(tag!="CEVSESSIONSTATE/1"&&tag!="CEVSESSIONSTATE/2"))return false;
+  r.schema=tag=="CEVSESSIONSTATE/1"?1u:2u;
+  if(!(in>>r.revision>>r.changes>>r.target_cycles>>std::quoted(r.configuration_sha256))||!db::valid_digest(r.configuration_sha256))return false;
+  if(r.schema>=2&&!(in>>r.operation_id>>r.experiment_operation_id>>r.experiment_pending>>r.operation_cancelled>>r.experiment_policy_paused))return false;
+  if(
      !(in>>p.schema>>p.completed_cycles>>engine_count>>next_slot>>p.initialized>>p.cycle_active>>p.publication_pending)||
      p.schema!=1||!engine_count||engine_count>engine::kMaxEngines||next_slot>engine_count||
      !get_inputs(in,p.default_inputs)||!get_snapshot(in,p.pending_snapshot))return false;
@@ -298,8 +332,14 @@ inline bool decode_record(std::string_view wire,Record& output){
     unsigned kind=0,cadence=0,status=0;
     if(!(in>>e.id>>e.source>>e.source_epoch>>kind>>cadence>>std::quoted(e.model_digest)>>status)||
        !e.id||!e.source||!e.source_epoch||kind<1||kind>3||cadence<1||cadence>64||
-       !db::valid_digest(e.model_digest)||status>static_cast<unsigned>(engine::Status::publish_failed)||
-       !get_snapshot(in,e.last)||!get_inputs(in,e.cycle_inputs)||!(in>>v.next_sequence)||!v.next_sequence||
+       !db::valid_digest(e.model_digest)||status>static_cast<unsigned>(engine::Status::publish_failed))return false;
+    if(r.schema>=2){
+      auto& c=r.contracts[i];
+      if(!(in>>std::quoted(c.behavior)>>c.input_schema>>c.metric_schema>>c.checkpoint_schema>>c.clock_domain>>c.tick_ns>>
+           c.isolated_fork>>c.evaluate_candidates>>c.apply_changes>>c.restore))return false;
+      for(auto& semantic:c.summaries){unsigned n=0;if(!(in>>n)||n>8)return false;semantic=static_cast<engine::SummarySemantic>(n);}
+    }
+    if(!get_snapshot(in,e.last)||!get_inputs(in,e.cycle_inputs)||!(in>>v.next_sequence)||!v.next_sequence||
        !get_snapshot(in,v.published)||!(in>>route.active>>route.prior_existed>>route.prior_guidance>>route.change_id)||
        route.prior_guidance>1000||!get_candidate(in,route.selected))return false;
     e.kind=static_cast<engine::Kind>(kind);e.cadence=static_cast<std::uint8_t>(cadence);
@@ -323,6 +363,24 @@ inline bool decode_record(std::string_view wire,Record& output){
 }
 class WindStoreRecordStore final:public IRecordStore {
   db::Registry& db_;std::string name_;std::uint64_t revision_=0;
+  std::uint64_t maintenance_sequence_=0;
+  bool maintenance_loaded_=false;
+  bool load_maintenance_cursor()noexcept {
+    if(maintenance_loaded_)return true;
+    db::ReplayCheckpoint checkpoint;std::string bytes;bool found=false;
+    if(!db_.load_replay_checkpoint(checkpoint,bytes,found))return false;
+    maintenance_sequence_=found?checkpoint.sequence:0;maintenance_loaded_=true;return true;
+  }
+  bool checkpoint_manifest(std::string_view wire,std::string_view object)noexcept {
+    if(!db_.is_segmented())return true;
+    // A distinct marker references the immutable manifest; storing its own hash
+    // as a child would be a self-reference. The full manifest remains reviewable.
+    const auto marker="CEVSESSIONMETADATA/1\nstore "+name_+"\nmanifest "+std::string(object)+"\n"+std::string(wire);
+    const std::array<std::string,1> roots{std::string(object)};
+    if(!db_.save_replay_checkpoint(marker,roots))return false;
+    maintenance_sequence_=db_.event_count();maintenance_loaded_=true;
+    return db_.archive_ready()==db::Code::ok;
+  }
   static bool same_identity(const Record& a,const Record& b)noexcept {
     if(a.configuration_sha256!=b.configuration_sha256||
        a.coordinator.engine_count!=b.coordinator.engine_count)return false;
@@ -330,6 +388,7 @@ class WindStoreRecordStore final:public IRecordStore {
       const auto& x=a.coordinator.engines[i];const auto& y=b.coordinator.engines[i];
       if(x.id!=y.id||x.source!=y.source||x.source_epoch!=y.source_epoch||x.kind!=y.kind||
          x.cadence!=y.cadence||x.model_digest!=y.model_digest)return false;
+      if(a.schema>=2&&b.schema>=2&&a.contracts[i]!=b.contracts[i])return false;
     }
     return true;
   }
@@ -343,6 +402,7 @@ class WindStoreRecordStore final:public IRecordStore {
   bool scan(Record& output,bool& exists,std::uint64_t& revision)noexcept {
     exists=false;revision=0;
     if(!db_.is_open()||!db::valid_id(name_))return false;
+    if(db_.is_segmented())return latest_manifest(output,exists,revision);
     Record staged{};
     for(const auto& e:db_.events()){
       if(e.kind!="CULTURE_CHECKPOINT"||e.entity!=name_||e.producer!="anaiero-session")continue;
@@ -361,38 +421,51 @@ class WindStoreRecordStore final:public IRecordStore {
     // The verified Registry owns the event chain. A save needs only its newest
     // matching manifest; replaying every prior manifest on every checkpoint
     // would make a growing session quadratic in decoding and disk reads.
-    for(auto it=db_.events().rbegin();it!=db_.events().rend();++it){
-      if(it->kind!="CULTURE_CHECKPOINT"||it->entity!=name_||it->producer!="anaiero-session")continue;
-      std::string wire;
-      if(it->clock!="session"||it->origin!="SIMULATED"||!it->source_tick||
-         !db_.get(it->object_hash,wire)||!decode_record(wire,output)||output.revision!=it->source_tick)return false;
-      revision=output.revision;exists=true;return true;
-    }
-    return true;
+    db::Event event{};
+    if(!db_.latest_event("CULTURE_CHECKPOINT",name_,"session",event,exists,"anaiero-session"))return false;
+    if(!exists)return true;
+    std::string wire;
+    if(event.origin!="SIMULATED"||!event.source_tick||!db_.get(event.object_hash,wire)||
+       !decode_record(wire,output)||output.revision!=event.source_tick)return false;
+    revision=output.revision;return true;
   }
 public:
   WindStoreRecordStore(db::Registry& database,std::string name):db_(database),name_(std::move(name)){}
   bool load(Record& record,bool& exists)noexcept override{
     Record staged{};bool found=false;std::uint64_t revision=0;
     exists=false;
-    if(!scan(staged,found,revision))return false;
+    if(!load_maintenance_cursor()||!scan(staged,found,revision))return false;
     if(found)record=std::move(staged);
     exists=found;revision_=revision;
     return true;
   }
   bool save(Record& record)noexcept override{
-    if(record.revision!=revision_||revision_==UINT64_MAX||!valid_record(record))return false;
+    if(record.revision!=revision_||revision_==UINT64_MAX||!valid_record(record)||!load_maintenance_cursor())return false;
     // The Registry has one disk writer, but multiple store adapters may share
     // that owner. Recheck its actual manifest revision to reject stale adapters.
     Record latest{};bool exists=false;std::uint64_t actual_revision=0;
     if(!latest_manifest(latest,exists,actual_revision)||actual_revision!=revision_||
        (exists&&!progresses(latest,record)))return false;
-    auto next=record;++next.revision;
+    auto next=record;++next.revision;next.schema=2;
     const auto wire=encode_record(next);if(wire.empty())return false;
     auto value=db_.put(wire);
     if(value.code!=db::Code::ok||db_.publish("CULTURE_CHECKPOINT",name_,value.hash,
        "SIMULATED",next.revision,"session","anaiero-session").code!=db::Code::ok)return false;
-    record.revision=next.revision;revision_=next.revision;return true;
+    // Manifest durability precedes maintenance. Preserve the committed revision
+    // even if a later checkpoint/archive boundary reports failure.
+    record.revision=next.revision;record.schema=next.schema;revision_=next.revision;
+    if(db_.is_segmented()&&db_.event_count()-maintenance_sequence_>=db_.capacity().event_limit)
+      return checkpoint_manifest(wire,value.hash);
+    return true;
+  }
+  // Metadata owner only. Suitable for offline maintenance after worker join.
+  bool checkpoint_now()noexcept {
+    if(!db_.is_open()||!load_maintenance_cursor())return false;
+    if(!db_.is_segmented())return true;
+    db::Event latest;bool found=false;
+    if(!db_.latest_event("CULTURE_CHECKPOINT",name_,"session",latest,found,"anaiero-session")||!found)return false;
+    std::string wire;
+    return latest.origin=="SIMULATED"&&db_.get(latest.object_hash,wire)&&checkpoint_manifest(wire,latest.object_hash);
   }
 };
 class CatalogCheckpointStore final:public IEngineCheckpointStore {

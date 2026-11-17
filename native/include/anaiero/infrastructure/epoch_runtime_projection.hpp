@@ -25,6 +25,21 @@ public:
     return runtime_.latest(std::numeric_limits<std::uint64_t>::max(),
                            std::numeric_limits<std::uint64_t>::max());
   }
+  bool restore(const ColonyState& state) noexcept override {
+    if(state.sources>kMaxSources||state.count>kMaxMetrics)return false;
+    for(std::size_t i=0;i<state.sources;++i){const auto& c=state.cursors[i];bool enrolled=false;
+      for(std::size_t j=0;j<enrolled_;++j)if(sources_[j].source==c.id&&sources_[j].clock_domain==c.clock_domain)enrolled=true;
+      if(!enrolled)return false;
+    }
+    for(std::size_t i=0;i<state.count;++i){const auto& m=state.values[i];bool allowed=false;
+      for(std::size_t j=0;j<enrolled_;++j)if(sources_[j].source==m.source&&sources_[j].origin==m.origin&&
+        (!health_metric(m.metric)||sources_[j].can_read_health)&&
+        (m.metric!=Metric::digital_desire||sources_[j].can_publish_digital_desires)&&
+        (m.metric!=Metric::digital_learning||m.origin==Origin::simulated))allowed=true;
+      if(!allowed)return false;
+    }
+    return runtime_.restore(state)==Status::ok;
+  }
   bool can_accept(const Observation& observation) const noexcept override {
     if(observation.source_epoch==0||!valid_observation(observation))return false;
     bool source_ok=false;

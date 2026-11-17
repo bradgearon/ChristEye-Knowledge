@@ -85,5 +85,8 @@ These documents extend the existing [v3 architecture](../../specifications/v3/ma
 
 ## Current native integration
 
+- [CE-SW-32 — Reusable native experiments and durable operations](CE-SW-32_reusable_native_experiments.md)
+- [CE-SW-33 — Sustained native storage and recovery](CE-SW-33_sustained_storage.md)
+- [CE-SW-34 — Supervised scientific engine sessions](CE-SW-34_supervised_scientific_sessions.md)
 - [CE-SW-31 — Integrated native sessions](CE-SW-31_integrated_native_sessions.md)
 - [Native implementation checkpoint and next batches](native_implementation_status.md)

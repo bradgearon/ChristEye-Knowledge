@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 project(ChristEyeAnaieroNative LANGUAGES CXX)
 option(CE_WIND_BUILD_TESTS "Build native WindBus codec/scheduler tests" ON)
+option(ANAIERO_CONTROLLER_ONLY "Build the native session controller without demo/legacy CLIs" OFF)
 
 # Header-only, explicit C++20 link targets: no dynamic runtime or platform SDK.
 add_library(anaiero_models INTERFACE)
@@ -25,6 +26,26 @@ add_library(ce_wind_core INTERFACE)
 target_include_directories(ce_wind_core INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_compile_features(ce_wind_core INTERFACE cxx_std_20)
 target_link_libraries(ce_wind_core INTERFACE anaiero_application)
+
+if(ANAIERO_CONTROLLER_ONLY)
+  find_package(Threads REQUIRED)
+  add_executable(ce_colony_runtime examples/colony_runtime_cli.cpp examples/controller_host_cli.cpp examples/session_host_cli.cpp)
+  target_link_libraries(ce_colony_runtime PRIVATE anaiero_application Threads::Threads)
+  if(WIN32)
+    target_link_libraries(ce_colony_runtime PRIVATE advapi32)
+  endif()
+  if(MSVC)
+    target_compile_options(ce_colony_runtime PRIVATE /W4 /WX)
+  else()
+    target_compile_options(ce_colony_runtime PRIVATE -Wall -Wextra -Wconversion -Werror)
+  endif()
+  install(TARGETS ce_colony_runtime RUNTIME DESTINATION bin)
+  if(CE_WIND_BUILD_TESTS)
+    enable_testing()
+  endif()
+  include(cmake/NativeSessions.cmake)
+  return()
+endif()
 
 # SIM1 demo is part of the installed runtime, even with tests disabled.
 add_executable(ce_living_sim_demo examples/living_sim_demo.cpp)
@@ -580,3 +601,5 @@ if(CE_WIND_BUILD_TESTS)
     ${CMAKE_CURRENT_SOURCE_DIR}/../examples/cells/crest-blood-neural.cevatlas
     ${CMAKE_CURRENT_BINARY_DIR}/engine-optimization-session)
 endif()
+
+include(cmake/NativeSessions.cmake)

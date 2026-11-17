@@ -1,133 +1,13 @@
 #pragma once
-// CE-SW-11 SW2.1: host-only, single-writer committed-head evidence journal.
-// Not an authenticated network transport, scientific proof or biological driver.
-#include "christeye/living/durable_io.hpp"
-#include "christeye/living/plan_hash.hpp"
-#include <charconv>
-#include <cstddef>
-#include <cstdint>
-#include <filesystem>
-#include <fstream>
-#include <iterator>
-#include <sstream>
-#include <string>
-#include <string_view>
-#include <utility>
-#include <vector>
-
+// Legacy bounded store and opt-in segmented store share the public Registry API.
+#include "christeye/living/durable_records.hpp"
+#include "christeye/living/segmented_store.hpp"
+#include <functional>
+#include <memory>
+#include <span>
 namespace christeye::living::durable {
-namespace fs=std::filesystem;
-namespace pl=christeye::living::plans;
-inline constexpr std::size_t kMaxObjectBytes=4*1024*1024;
-inline constexpr std::size_t kMaxJournalBytes=4*1024*1024;
-inline constexpr std::size_t kMaxEvents=4096;
-inline constexpr std::string_view kZeroDigest="0000000000000000000000000000000000000000000000000000000000000000";
-enum class Code : std::uint8_t {
-  ok, locked, io_error, corrupt_journal, bad_head, invalid_argument,
-  missing_object, bad_digest, capacity, not_open, injected_fault, invalid_cursor
-};
-struct Result {Code code=Code::ok;std::string hash;};
-struct Event {
-  std::uint64_t sequence=0;
-  std::string previous_hash,kind,entity,object_hash,origin;
-  std::uint64_t source_tick=0;
-  std::string clock,producer,hash;
-};
-struct Cursor {Code code=Code::ok;std::uint64_t sequence=0;std::string hash=std::string(kZeroDigest);};
-enum class FaultSite : std::uint8_t {none, after_journal_sync, after_head_temp_sync, after_head_commit};
-inline bool valid_digest(std::string_view hash) noexcept {
-  if(hash.size()!=64)return false;
-  for(char c:hash)if(!((c>='0'&&c<='9')||(c>='a'&&c<='f')))return false;
-  return true;
-}
-inline bool valid_id(std::string_view id) noexcept {
-  if(id.empty()||id.size()>80)return false;
-  for(char c:id)if(!((c>='a'&&c<='z')||(c>='A'&&c<='Z')||
-                      (c>='0'&&c<='9')||c=='_'||c=='-'||c=='.'))return false;
-  return true;
-}
-inline bool valid_kind(std::string_view k) noexcept {
-  return k=="PLAN_REGISTERED"||k=="RNA_OBSERVATION"||k=="LEARNING_RESULT"||
-         k=="SUPPORT_OBSERVATION"||k=="CRYSTAL_EVIDENCE"||k=="SUCCESSOR_PROPOSED"||
-         k=="CULTURE_CHECKPOINT"||k=="VLM_OVERLAY_IMPORTED"||k=="MODEL_EVALUATION"||
-         k=="DIGITAL_ROUTE_RECEIPT"||k=="OBSERVATION_RECORDED"||
-         k=="SCIENTIFIC_MODEL_SESSION";
-}
-inline bool valid_origin(std::string_view o) noexcept {
-  return o=="SIMULATED"||o=="INFERRED"||o=="IMPORTED_UNVERIFIED";
-}
-inline bool parse_u64(std::string_view s,std::uint64_t& out) noexcept {
-  auto r=std::from_chars(s.data(),s.data()+s.size(),out);
-  return r.ec==std::errc{}&&r.ptr==s.data()+s.size();
-}
-inline bool read_bounded(const fs::path& path,std::size_t limit,std::string& out) {
-  std::error_code ec;
-  if(fs::is_symlink(path,ec)||ec)return false;
-  const auto n=fs::file_size(path,ec);
-  if(ec||n>limit)return false;
-  std::ifstream file(path,std::ios::binary);
-  if(!file)return false;
-  out.assign(std::istreambuf_iterator<char>(file),std::istreambuf_iterator<char>());
-  return !file.bad()&&out.size()==n;
-}
-inline std::string event_core(const Event& e) {
-  std::ostringstream out;
-  out<<"event "<<e.sequence<<' '<<e.previous_hash<<' '<<e.kind<<' '<<e.entity<<' '
-     <<e.object_hash<<' '<<e.origin<<' '<<e.source_tick<<' '<<e.clock<<' '<<e.producer;
-  return out.str();
-}
-inline std::string event_hash(const Event& e) {
-  return pl::sha256_hex("CE/WINDREG/EVENT/1\n"+event_core(e)+'\n');
-}
-inline std::string serialize_event(const Event& e){return event_core(e)+' '+e.hash+'\n';}
-inline bool parse_event(std::string_view text,Event& event) {
-  std::istringstream in{std::string(text)};
-  std::string tag,seq,tick,extra;
-  Event candidate;
-  if(!(in>>tag>>seq>>candidate.previous_hash>>candidate.kind>>candidate.entity>>
-       candidate.object_hash>>candidate.origin>>tick>>candidate.clock>>candidate.producer>>candidate.hash)||
-     (in>>extra)||tag!="event"||!parse_u64(seq,candidate.sequence)||
-     !parse_u64(tick,candidate.source_tick)||!valid_digest(candidate.previous_hash)||
-     !valid_digest(candidate.object_hash)||!valid_digest(candidate.hash)||
-     !valid_kind(candidate.kind)||!valid_id(candidate.entity)||!valid_origin(candidate.origin)||
-     !valid_id(candidate.clock)||!valid_id(candidate.producer)||event_hash(candidate)!=candidate.hash)return false;
-  event=std::move(candidate);return true;
-}
-struct Head {std::uint64_t offset=0,sequence=0;std::string hash=std::string(kZeroDigest);};
-inline std::string head_body(const Head& head) {
-  return "CEWHEAD/1\noffset "+std::to_string(head.offset)+"\nsequence "+
-         std::to_string(head.sequence)+"\nlast "+head.hash+'\n';
-}
-inline std::string sealed_head(const Head& head) {
-  const auto body=head_body(head);
-  return body+"seal "+pl::sha256_hex(body)+'\n';
-}
-inline bool parse_head(std::string_view data,Head& head) {
-  std::istringstream in{std::string(data)};
-  std::string magic,k1,k2,k3,k4,off,seq,digest,seal,extra;
-  if(!(in>>magic>>k1>>off>>k2>>seq>>k3>>digest>>k4>>seal)||
-     (in>>extra)||magic!="CEWHEAD/1"||k1!="offset"||k2!="sequence"||
-     k3!="last"||k4!="seal"||!parse_u64(off,head.offset)||
-     !parse_u64(seq,head.sequence)||!valid_digest(digest)||!valid_digest(seal))return false;
-  head.hash=digest;
-  return sealed_head(head)==data;
-}
-inline std::string cursor_body(std::uint64_t seq,std::string_view hash) {
-  return "CEWCURSOR/1\nsequence "+std::to_string(seq)+"\nlast "+std::string(hash)+'\n';
-}
-inline std::string sealed_cursor(std::uint64_t seq,std::string_view hash) {
-  auto body=cursor_body(seq,hash);return body+"seal "+pl::sha256_hex(body)+'\n';
-}
-inline bool parse_cursor(std::string_view text,Cursor& cursor) {
-  std::istringstream in{std::string(text)};
-  std::string magic,k1,k2,k3,seq,hash,seal,extra;
-  if(!(in>>magic>>k1>>seq>>k2>>hash>>k3>>seal)||
-     (in>>extra)||magic!="CEWCURSOR/1"||k1!="sequence"||k2!="last"||
-     k3!="seal"||!parse_u64(seq,cursor.sequence)||!valid_digest(hash)||
-     !valid_digest(seal)||sealed_cursor(cursor.sequence,hash)!=text)return false;
-  cursor.hash=hash;return true;
-}
 class Registry final {
+  std::unique_ptr<SegmentedStore> segmented_;
   fs::path root_{};
   os::File writer_lock_{};
   std::vector<Event> events_{};
@@ -175,11 +55,14 @@ public:
   Registry(const Registry&)=delete;
   Registry& operator=(const Registry&)=delete;
   void close() noexcept {
+    segmented_.reset();
     open_=false;events_.clear();subscriptions_.clear();committed_bytes_=0;
     writer_lock_.close();root_.clear();
   }
   ~Registry(){close();}
   Code open(const fs::path& root) {
+    std::error_code check;
+    if(fs::exists(root/"MANIFEST",check))return open(root,StorageOptions::sustained());
     close();root_=root;
     std::error_code ec;
     fs::create_directories(root_/"objects",ec);
@@ -223,10 +106,69 @@ public:
     events_=std::move(verified);committed_bytes_=head.offset;open_=true;
     return Code::ok;
   }
-  bool is_open() const noexcept {return open_;}
-  std::size_t event_count() const noexcept {return events_.size();}
-  const std::vector<Event>& events() const noexcept {return events_;}
+  Code open(const fs::path& root,StorageOptions options) {
+    if(!options.segmented)return open(root);
+    close();segmented_=std::make_unique<SegmentedStore>();
+    const auto status=segmented_->open(root,options);
+    if(status!=Code::ok)segmented_.reset();
+    return status;
+  }
+  bool is_segmented() const noexcept{return segmented_!=nullptr;}
+  bool is_open() const noexcept {return segmented_?segmented_->is_open():open_;}
+  std::size_t event_count() const noexcept {return segmented_?segmented_->event_count():events_.size();}
+  // Segmented mode exposes only the bounded active tail. Use visit_events for history.
+  const std::vector<Event>& events() const noexcept {return segmented_?segmented_->events():events_;}
+  StorageCapacity capacity()const noexcept {
+    if(segmented_)return segmented_->capacity();
+    std::error_code ec;const auto space=fs::space(root_,ec);
+    return {false,events_.size(),kMaxEvents,kMaxJournalBytes,events_.size(),committed_bytes_,ec?0:space.available,0,0,0};
+  }
+  bool can_append(std::size_t count,std::size_t bytes)const noexcept {
+    return segmented_?segmented_->can_append(count,bytes):open_&&count<=kMaxEvents-events_.size()&&bytes<=kMaxJournalBytes-committed_bytes_;
+  }
+  bool reserve(std::size_t count,std::size_t bytes,StorageReservation& r)noexcept {
+    return segmented_&&segmented_->reserve(count,bytes,r);
+  }
+  bool release(StorageReservation& r)noexcept{return segmented_&&segmented_->release(r);}
+  bool visit_events(std::uint64_t after,const std::function<bool(const Event&)>& fn)const {
+    if(segmented_)return segmented_->visit_events(after,fn);
+    if(!open_||after>events_.size()||!fn)return false;
+    for(const auto& e:events_)if(e.sequence>after&&!fn(e))return false;
+    return true;
+  }
+  bool latest_event(std::string_view kind,std::string_view entity,std::string_view clock,
+                    Event& out,bool& found,std::string_view producer={})const {
+    if(segmented_)return segmented_->latest_event(kind,entity,clock,out,found,producer);
+    found=false;if(!open_)return false;
+    for(auto i=events_.rbegin();i!=events_.rend();++i)
+      if(i->kind==kind&&i->entity==entity&&i->clock==clock&&(producer.empty()||i->producer==producer)){out=*i;found=true;break;}
+    return true;
+  }
+  bool find_event(std::string_view kind,std::string_view entity,std::string_view clock,
+                  std::string_view producer,std::uint64_t tick,Event& out,bool& found)const {
+    if(segmented_)return segmented_->find_event(kind,entity,clock,producer,tick,out,found);
+    found=false;if(!open_)return false;
+    for(const auto& e:events_)if(e.kind==kind&&e.entity==entity&&e.clock==clock&&e.producer==producer&&e.source_tick==tick){out=e;found=true;}
+    return true;
+  }
+  Result put_referenced(std::string_view bytes,std::span<const std::string> refs){
+    if(segmented_)return segmented_->put_referenced(bytes,refs);
+    for(const auto& ref:refs)if(!object_good(ref))return {Code::missing_object,{}};
+    return put(bytes);
+  }
+  bool save_replay_checkpoint(std::string_view bytes,std::span<const std::string> refs={}){
+    return segmented_&&segmented_->save_replay_checkpoint(bytes,refs);
+  }
+  bool load_replay_checkpoint(ReplayCheckpoint& record,std::string& bytes,bool& found)const {
+    if(segmented_)return segmented_->load_replay_checkpoint(record,bytes,found);
+    found=false;return open_;
+  }
+  Code archive_ready(){return segmented_?segmented_->archive_ready():Code::invalid_argument;}
+  Code collect_objects(ArchiveStats& stats){return segmented_?segmented_->collect_objects(stats):Code::invalid_argument;}
+  Code pin(std::string_view name,std::span<const std::string> refs){return segmented_?segmented_->pin(name,refs):Code::invalid_argument;}
+  Code unpin(std::string_view name){return segmented_?segmented_->unpin(name):Code::invalid_argument;}
   Result put(std::string_view data) {
+    if(segmented_)return segmented_->put(data);
     if(!open_)return {Code::not_open,{}};
     if(data.size()>kMaxObjectBytes)return {Code::capacity,{}};
     const auto hash=pl::sha256_hex(data);
@@ -237,6 +179,7 @@ public:
     return object_good(hash)?Result{Code::ok,hash}:Result{Code::bad_digest,{}};
   }
   bool get(std::string_view hash,std::string& out) const {
+    if(segmented_)return segmented_->get(hash,out);
     return open_&&object_good(hash)&&read_bounded(object_path(hash),kMaxObjectBytes,out);
   }
   // Generic CEVPLAN contract: validated plan, pinned artifacts and immutable
@@ -244,7 +187,8 @@ public:
   // Unreferenced objects after interruption are safe CAS orphans, not evidence.
   template<class Plan>
   Result register_plan(const Plan& plan,const fs::path& artifact_root) {
-    if(!open_)return {Code::not_open,{}};
+    if(!is_open())return {Code::not_open,{}};
+    std::vector<std::string> references;
     if(static_cast<unsigned>(plan.validate())!=0||
        static_cast<unsigned>(plan.verify_assets(artifact_root))!=0)
       return {Code::invalid_argument,{}};
@@ -262,8 +206,9 @@ public:
          pl::sha256_hex(content)!=artifact.sha256)return {Code::bad_digest,{}};
       auto stored=put(content);
       if(stored.code!=Code::ok)return stored;
+      references.push_back(stored.hash);
     }
-    const auto object=put(plan.serialize(true));
+    const auto object=put_referenced(plan.serialize(true),references);
     if(object.code!=Code::ok)return object;
     const auto announcement=publish("PLAN_REGISTERED",plan.name(),object.hash,
                                      "SIMULATED",0,"plan-revision");
@@ -272,6 +217,15 @@ public:
   Result publish(std::string kind,std::string entity,std::string object_hash,
                  std::string origin,std::uint64_t tick,std::string clock,
                  std::string producer="local-simulator") {
+    if(segmented_){
+      const auto before=segmented_->event_count();
+      const auto result=segmented_->publish(std::move(kind),std::move(entity),std::move(object_hash),std::move(origin),tick,std::move(clock),std::move(producer));
+      if(result.code==Code::ok&&segmented_->event_count()>before){
+        const auto& e=segmented_->events().back();
+        for(const auto& sub:subscriptions_)if((sub.entity.empty()||sub.entity==e.entity)&&(sub.kind.empty()||sub.kind==e.kind))sub.cb(sub.context,e);
+      }
+      return result;
+    }
     if(!open_)return {Code::not_open,{}};
     if(!valid_kind(kind)||!valid_id(entity)||!valid_digest(object_hash)||
        !valid_origin(origin)||!valid_id(clock)||!valid_id(producer))return {Code::invalid_argument,{}};
@@ -311,17 +265,19 @@ public:
   }
   Code subscribe(Callback cb,void* ctx,std::uint64_t after=0,
                  std::string entity={},std::string kind={}) {
-    if(!open_)return Code::not_open;
-    if(!cb||after>events_.size()||subscriptions_.size()>=32||
+    if(!is_open())return Code::not_open;
+    if(!cb||after>event_count()||subscriptions_.size()>=32||
        (!entity.empty()&&!valid_id(entity))||(!kind.empty()&&!valid_kind(kind)))
       return Code::invalid_argument;
-    for(const auto& e:events_)
-      if(e.sequence>after&&(entity.empty()||entity==e.entity)&&
-         (kind.empty()||kind==e.kind))cb(ctx,e);
+    if(!visit_events(after,[&](const Event& e){
+      if((entity.empty()||entity==e.entity)&&(kind.empty()||kind==e.kind))cb(ctx,e);
+      return true;
+    }))return Code::corrupt_journal;
     subscriptions_.push_back({cb,ctx,std::move(entity),std::move(kind)});
     return Code::ok;
   }
   Cursor read_cursor(std::string_view consumer) const {
+    if(segmented_)return segmented_->read_cursor(consumer);
     if(!open_)return {Code::not_open};
     if(!valid_id(consumer))return {Code::invalid_cursor};
     const auto path=root_/"cursors"/(std::string(consumer)+".cursor");
@@ -337,6 +293,7 @@ public:
     return c;
   }
   Code acknowledge(std::string_view consumer,std::uint64_t sequence,std::string_view hash) {
+    if(segmented_)return segmented_->acknowledge(consumer,sequence,hash);
     if(!open_)return Code::not_open;
     if(!valid_id(consumer)||sequence>events_.size()||!valid_digest(hash))return Code::invalid_cursor;
     const auto expected=sequence?events_[static_cast<std::size_t>(sequence-1)].hash:kZeroDigest;
@@ -355,6 +312,7 @@ public:
   // Deep audit explicitly rereads committed HEAD, journal and referenced files.
   // Unlike in-memory verify(), this detects changes to events.log after open().
   bool audit_disk() const {
+    if(segmented_)return segmented_->audit_disk();
     if(!open_)return false;
     std::string journal;
     Head head;
@@ -366,7 +324,7 @@ public:
     return head.hash==(checked.empty()?std::string(kZeroDigest):checked.back().hash);
   }
 #ifdef CE_DURABLE_FAULT_TESTS
-  void inject_next_publish(FaultSite site) noexcept {next_fault_=site;}
+  void inject_next_publish(FaultSite site) noexcept {if(segmented_)segmented_->inject_next_publish(site);else next_fault_=site;}
 #endif
 };
 } // namespace christeye::living::durable

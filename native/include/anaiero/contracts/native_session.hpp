@@ -4,6 +4,8 @@
 #include "anaiero/contracts/engine_optimization.hpp"
 #include "anaiero/contracts/fork_optimization.hpp"
 #include "anaiero/contracts/cell_behavior.hpp"
+#include "anaiero/contracts/operation.hpp"
+#include "anaiero/contracts/session_view.hpp"
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -17,10 +19,13 @@ struct EngineConfig {
   std::uint8_t cadence=1;
   std::string model_path,initial_path;
   engine::Inputs inputs{};
+  std::string solver_configuration_sha256{};
 };
 struct Configuration {
   std::string name,digest;
   std::uint32_t period_ms=100;
+  bool sustained_storage=false;
+  std::uint32_t segment_events=256;
   std::size_t count=0;
   std::array<EngineConfig,engine::kMaxEngines> engines{};
 };
@@ -51,11 +56,26 @@ struct Proposal {
   optimization::ForkOption option{};
   engine::Selection selection{};
 };
+struct EngineContract {
+  std::string behavior;
+  std::uint32_t input_schema=0,metric_schema=0,checkpoint_schema=0,clock_domain=0;
+  std::uint64_t tick_ns=0;
+  std::array<engine::SummarySemantic,4> summaries{};
+  bool isolated_fork=false,evaluate_candidates=false,apply_changes=false,restore=false;
+  bool operator==(const EngineContract&)const=default;
+};
 struct Record {
+  std::uint32_t schema=2;
   std::uint64_t revision=0,changes=0,target_cycles=0;
+  std::uint64_t operation_id=0;
+  std::uint64_t experiment_operation_id=0;
+  bool experiment_pending=false;
+  bool operation_cancelled=false;
+  bool experiment_policy_paused=false;
   std::string configuration_sha256;
   engine::CoordinatorProgress coordinator{};
   std::array<EngineEvidence,engine::kMaxEngines> evidence{};
+  std::array<EngineContract,engine::kMaxEngines> contracts{};
   Publication publication{};
   PendingChange change{};
   Proposal proposal{};
@@ -86,11 +106,14 @@ struct ICancellation {
 struct IWorkBudget {
   virtual ~IWorkBudget()=default;
   virtual bool admits(std::size_t engines)const noexcept=0;
+  virtual StorageView storage()const noexcept{return {};}
 };
-enum class Operation : std::uint8_t {step,analyze,apply,revert,retry};
+enum class Operation : std::uint8_t {step,analyze,apply,revert,retry,experiment,resume_experiment};
 struct Command {
   Operation operation=Operation::step;
   std::uint32_t engine=0,from=0,to=0,count=1;
+  std::uint64_t operation_id=0;
+  std::string reference{};
 };
 struct IDriver {
   virtual ~IDriver()=default;
@@ -101,5 +124,17 @@ struct IDriver {
   virtual bool failed()const noexcept=0;
   virtual std::string state_json()const=0;
   virtual std::uint64_t revision()const noexcept=0;
+  virtual std::uint64_t operation_id()const noexcept{return 0;}
+  virtual View view()const{return {};}
+  virtual ExperimentView experiment_view()const{return {};}
+  virtual operations::View operation_view()const{return {};}
+  virtual void cancel_operations()noexcept{}
+  // Thread-safe signal only. Implementations must not mutate owner state here.
+  virtual void request_cancel()noexcept{}
+  virtual std::string trace_json()const{return "{\"events\":[]}\n";}
+};
+struct IEngineCancellation {
+  virtual ~IEngineCancellation()=default;
+  virtual void request_cancel()noexcept=0;
 };
 } // namespace anaiero::session

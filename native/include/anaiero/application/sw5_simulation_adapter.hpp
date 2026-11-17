@@ -23,13 +23,18 @@ class Sw5SimulationAdapter final:public engine::ISimulationEngine {
     snap.state_sha256[64]='\0';
   }
 public:
+  void set_extension(contracts::IServiceExtension* extension)noexcept{service_.set_extension(extension);}
   Sw5SimulationAdapter(std::uint32_t id,std::uint32_t source,std::uint64_t epoch,
      cells::Atlas atlas,cells::World initial,cells::ISpatialPort& spatial) noexcept
       :atlas_(std::move(atlas)),baseline_(initial),service_(atlas_,spatial),
         id_(id),source_(source),epoch_(epoch){}
   engine::Descriptor describe()const noexcept override {
     return {id_,source_,epoch_,engine::Kind::sw5,atlas_.model_digest,
-      "SYNTHETIC_UNCALIBRATED",true,true};
+      "SYNTHETIC_UNCALIBRATED",true,true,
+      {true,true,true,1,1,1,id_,0,
+       {engine::SummarySemantic::live_cells,engine::SummarySemantic::active_cell_links,
+        engine::SummarySemantic::model_energy_proxy,engine::SummarySemantic::learning_proxy},
+       "anaiero-sw5/1"}};
   }
   engine::Status initialize()noexcept override {
     if(!id_||!source_||!epoch_||!atlas_.synthetic_only||

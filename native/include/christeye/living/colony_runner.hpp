@@ -3,6 +3,8 @@
 // Synthetic food, signaling, lineage, and foreign-stress proxies have no
 // calibrated biological meaning. No wet-lab or electrical actuation.
 #include "christeye/living/durable_io.hpp"
+#include "anaiero/models/sim3_state.hpp"
+#include "anaiero/services/sim3_transition_service.hpp"
 #include "christeye/living/plan_hash.hpp"
 #include <algorithm>
 #include <array>
@@ -33,10 +35,7 @@ inline constexpr std::size_t kMaxLinks = 48;
 inline constexpr std::size_t kMaxProcesses = 64;
 inline constexpr std::size_t kMaxSnapshotBytes = 1024 * 1024;
 
-enum class Result : std::uint8_t {
-  ok, bad_config, bad_hash, invalid_state, locked, io_error,
-  corruption, capacity, uncommitted, already_open
-};
+using Result=anaiero::models::sim3::Result;
 inline bool ident(std::string_view x) {
   if (x.empty() || x.size() > 56) return false;
   for (char c : x) if (!((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
@@ -99,7 +98,7 @@ inline bool bound_path(const fs::path& root, std::string_view rel, fs::path& out
   return true;
 }
 
-enum class Channel : std::uint8_t {food=1,data=2,stimubus=3};
+using Channel=anaiero::models::sim3::Channel;
 inline const char* channel_text(Channel v) noexcept {
   switch(v){case Channel::food:return "food";case Channel::data:return "data";case Channel::stimubus:return "stimubus";}
   return "invalid";
@@ -109,7 +108,7 @@ inline bool channel_from(std::string_view text,Channel& c){
     if(text==channel_text(x)){c=x;return true;}
   return false;
 }
-enum class ProcessKind : std::uint8_t {support=1,teach=2,divide=3,foreign_stress=4};
+using ProcessKind=anaiero::models::sim3::ProcessKind;
 inline const char* process_text(ProcessKind p) noexcept {
   switch(p){case ProcessKind::support:return "support";case ProcessKind::teach:return "teach";
             case ProcessKind::divide:return "divide";case ProcessKind::foreign_stress:return "foreign_stress";}
@@ -121,38 +120,12 @@ inline bool process_from(std::string_view s, ProcessKind& k){
   return false;
 }
 // SIM3.1 versioned symbolic laws, not biological rates or intervention instructions.
-struct ModelLaws {
-  std::uint32_t version=1;
-  std::int32_t food_per_cell=1, fed_gain=1, unfed_cost=7, upkeep_cost=1;
-  std::int32_t stress_cutoff=20, stress_cost=4, maturity_gain=1;
-  std::int32_t blood_step=1, learning_gain=1;
-  bool set(std::string_view name,std::uint32_t value) noexcept {
-    if(value>100)return false;
-    const auto n=static_cast<std::int32_t>(value);
-    if(name=="food_per_cell")food_per_cell=n;
-    else if(name=="fed_gain")fed_gain=n;
-    else if(name=="unfed_cost")unfed_cost=n;
-    else if(name=="upkeep_cost")upkeep_cost=n;
-    else if(name=="stress_cutoff")stress_cutoff=n;
-    else if(name=="stress_cost")stress_cost=n;
-    else if(name=="maturity_gain")maturity_gain=n;
-    else if(name=="blood_step")blood_step=n;
-    else if(name=="learning_gain")learning_gain=n;
-    else return false;
-    return true;
-  }
-};
-struct ColonyConfig {std::string id, source_path, source_sha;};
-struct Seed {std::string colony, kind;std::uint32_t id=0,parent=0;
-  std::int32_t x=0,y=0,z=0;};
-struct Link {std::string from,to;Channel channel=Channel::food;std::uint32_t units=0;};
-struct Process {std::string colony;ProcessKind kind=ProcessKind::support;
-  std::uint32_t subject=0,value=0,at=0;};
-struct Configuration {
-  std::string name, material_role, material_path, material_sha, hash;
-  ModelLaws laws{};
-  std::vector<ColonyConfig> colonies;std::vector<Seed> seeds;
-  std::vector<Link> links;std::vector<Process> processes;
+using ModelLaws=anaiero::models::sim3::ModelLaws;
+using ColonyConfig=anaiero::models::sim3::ColonyConfig;
+using Seed=anaiero::models::sim3::Seed;
+using Link=anaiero::models::sim3::Link;
+using Process=anaiero::models::sim3::Process;
+struct Configuration:anaiero::models::sim3::ConfigurationData {
   static Result load(const fs::path& file, Configuration& result) {
     std::string input;
     if(!bounded_read(file,kMaxConfigBytes,input))return Result::io_error;
@@ -173,7 +146,7 @@ struct Configuration {
         candidate.laws.version=1;law_version_seen=true;
       } else if(t[0]=="law"&&t.size()==3&&law_version_seen) {
         std::uint32_t n=0;
-        if(!law_keys.insert(t[1]).second||!parse_u32(t[2],n)||!candidate.laws.set(t[1],n))return Result::bad_config;
+        if(!law_keys.insert(t[1]).second||!parse_u32(t[2],n)||!anaiero::simulation::Sim3TransitionService::set_law(candidate.laws,t[1],n))return Result::bad_config;
       }
       else if(t[0]=="source"&&t.size()==4&&ident(t[1])&&safe_relative(t[2])&&digest(t[3])){
         if(!candidate.material_role.empty()||
@@ -232,12 +205,9 @@ struct Configuration {
     return Result::ok;
   }
 };
-struct Colony {std::string id;std::int32_t food=80,data=0,signal=0,stress=0;};
-struct Cell {std::string colony,kind;std::uint32_t id=0,parent=0;
-  std::int32_t x=0,y=0,z=0,energy=40,maturity=0,learning=0;
-  std::uint64_t birth=0,death=0;bool alive=true;};
-struct Snapshot {std::string config_hash;std::uint64_t tick=0;
-  std::vector<Colony> colonies;std::vector<Cell> cells;};
+using Colony=anaiero::models::sim3::Colony;
+using Cell=anaiero::models::sim3::Cell;
+using Snapshot=anaiero::models::sim3::Snapshot;
 inline std::string encode_snapshot(const Snapshot& state){
   std::ostringstream ss;ss<<"CEVRUNSTATE/1\nconfig "<<state.config_hash<<"\ntick "<<state.tick<<'\n';
   for(const auto& c:state.colonies)ss<<"colony "<<c.id<<' '<<c.food<<' '<<c.data<<' '<<c.signal<<' '<<c.stress<<'\n';
@@ -376,6 +346,7 @@ inline std::string obj(const Snapshot& state,const Configuration& config) {
   return model;
 }
 class Runner {
+  anaiero::simulation::Sim3TransitionService transitions_{};
   Configuration config_{};Snapshot state_{};fs::path store_{};
   os::File lock_{};bool open_=false;
   fs::path history_path(std::uint64_t tick) const {
@@ -393,50 +364,10 @@ class Runner {
     }
     return !ec && os::atomic_write(path,bytes);
   }
-  static Colony* find_colony(Snapshot& st,const std::string& name){for(auto& c:st.colonies)if(c.id==name)return &c;return nullptr;}
-  static Cell* find_cell(Snapshot& st,const std::string& col,std::uint32_t id){for(auto& c:st.cells)if(c.colony==col&&c.id==id)return &c;return nullptr;}
-  Result apply_tick(Snapshot& next){
-    if(next.tick >= 10000)return Result::capacity;
-    ++next.tick;
-    // Policy-only synthetic processes; foreign_stress is not a pathogen model.
-    for(const auto& p:config_.processes){
-      auto* col=find_colony(next,p.colony);if(!col)return Result::corruption;
-      if(p.kind==ProcessKind::support && p.at>0 && next.tick%p.at==0)col->food=clamp(std::int64_t(col->food)+p.value);
-      else if(p.kind==ProcessKind::foreign_stress && next.tick==p.at)col->stress=clamp(std::int64_t(col->stress)+p.value);
-      else if(p.kind==ProcessKind::teach && next.tick==p.at){auto* cell=find_cell(next,p.colony,p.subject);
-        if(cell&&cell->alive)cell->learning=clamp(std::int64_t(cell->learning)+p.value);
-      }else if(p.kind==ProcessKind::divide && next.tick==p.at){
-        if(next.cells.size()>=kMaxCells)return Result::capacity;
-        auto* parent=find_cell(next,p.colony,p.subject);
-        if(parent&&parent->alive && !find_cell(next,p.colony,p.value)){
-          auto child=*parent;child.id=p.value;child.parent=parent->id;
-          child.x+=1;child.y+=1;child.z+=1;child.energy=20;child.maturity=0;child.learning=0;
-          child.birth=next.tick;child.death=0;child.alive=true;next.cells.push_back(child);
-        }
-      }
-    }
-    for(const auto& edge:config_.links){
-      auto* from=find_colony(next,edge.from);auto* to=find_colony(next,edge.to);
-      if(!from||!to)return Result::corruption;
-      if(edge.channel==Channel::food){const auto amount=std::min<int>(from->food,std::min<int>(static_cast<int>(edge.units),100-to->food));from->food-=amount;to->food+=amount;}
-      else if(edge.channel==Channel::data)to->data=clamp(std::int64_t(to->data)+edge.units);
-      else to->signal=clamp(std::int64_t(to->signal)+edge.units);
-    }
-    for(auto& col:next.colonies)if(col.stress>0)--col.stress;
-    for(auto& c:next.cells){if(!c.alive)continue;
-      auto* col=find_colony(next,c.colony);if(!col)return Result::corruption;
-      const bool fed=col->food>0;
-      if(fed)col->food=clamp(std::int64_t(col->food)-config_.laws.food_per_cell);
-      c.energy=clamp(std::int64_t(c.energy)+(fed?config_.laws.fed_gain:-config_.laws.unfed_cost)-
-        (col->stress>config_.laws.stress_cutoff?config_.laws.stress_cost:config_.laws.upkeep_cost));
-      if(c.energy==0){c.alive=false;c.death=next.tick;continue;}
-      if(fed)c.maturity=clamp(std::int64_t(c.maturity)+config_.laws.maturity_gain);
-      if(c.kind=="blood_carrier")c.x=static_cast<std::int32_t>((std::int64_t(c.x)+config_.laws.blood_step)%256);
-      if(c.kind=="neuron"&&col->data>0)c.learning=clamp(std::int64_t(c.learning)+config_.laws.learning_gain);
-    }
-    return Result::ok;
-  }
+  Result apply_tick(Snapshot& next){return transitions_.advance(config_,next);}
+
 public:
+  void set_extension(anaiero::contracts::IServiceExtension* extension)noexcept{transitions_.set_extension(extension);}
   Runner()=default;Runner(const Runner&)=delete;Runner&operator=(const Runner&)=delete;
   const Snapshot& state() const noexcept{return state_;}
   const Configuration& configuration() const noexcept{return config_;}

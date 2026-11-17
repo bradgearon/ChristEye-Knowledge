@@ -26,7 +26,18 @@ class AsyncEpochJournalWorker final:public IAsyncObservationStore {
   std::size_t active_=0,outstanding_=0;
   std::uint64_t next_ticket_=1,accepted_=0,durable_=0,failed_=0,rejected_=0;
   bool stopping_=false,stopped_=false,write_failed_=false;
+  ObservationJournalCapacity capacity_{};
   std::thread worker_;
+  bool capacity_locked(std::uint64_t events,std::uint64_t bytes)const noexcept {
+    if(stopping_||write_failed_||!capacity_.writable)return false;
+    if(!capacity_.known)return true;
+    if(!capacity_.append_reservation_bytes)return false;
+    const auto reserved=static_cast<std::uint64_t>(input_count_+active_);
+    if(events>capacity_.available_events||reserved>capacity_.available_events-events||
+       reserved>UINT64_MAX/capacity_.append_reservation_bytes)return false;
+    const auto held_bytes=reserved*capacity_.append_reservation_bytes;
+    return bytes<=capacity_.available_bytes&&held_bytes<=capacity_.available_bytes-bytes;
+  }
   void notify_completion() noexcept {
     cv_.notify_all();
     if(completion_signal_)completion_signal_->notify();
@@ -53,8 +64,12 @@ class AsyncEpochJournalWorker final:public IAsyncObservationStore {
         else outcome=AsyncCommitOutcome::durable;
       }
       const bool committed=outcome==AsyncCommitOutcome::durable;
+      // Registry access remains on its worker owner. Publish only a plain-data
+      // capacity snapshot under the queue mutex, never hold it across file IO.
+      const auto capacity=journal_.storage_capacity();
       {
         std::lock_guard<std::mutex> lock(mutex_);
+        capacity_=capacity;
         // Admission reserves a receipt slot for EVERY accepted operation.
         // Shutdown never requires a consumer to make room or discards a
         // completion, including an unsuccessful completion.
@@ -76,7 +91,7 @@ public:
   AsyncEpochJournalWorker(IObservationEpochJournal& journal,
                           IObservationEpochCodec& codec,
                           IAsyncCompletionSignal* signal=nullptr):
-    journal_(journal),codec_(codec),completion_signal_(signal),
+    journal_(journal),codec_(codec),completion_signal_(signal),capacity_(journal.storage_capacity()),
     worker_([this]{loop();}){}
   AsyncEpochJournalWorker(const AsyncEpochJournalWorker&)=delete;
   AsyncEpochJournalWorker&operator=(const AsyncEpochJournalWorker&)=delete;
@@ -84,7 +99,8 @@ public:
   bool enqueue(const Observation& event,std::uint64_t& ticket) noexcept override {
     ticket=0;
     std::lock_guard<std::mutex> lock(mutex_);
-    if(stopping_||write_failed_||outstanding_==Capacity||next_ticket_==0){
+    if(stopping_||write_failed_||outstanding_==Capacity||next_ticket_==0||
+       !capacity_locked(1,capacity_.append_reservation_bytes)){
       ++rejected_;return false;
     }
     ticket=next_ticket_++;
@@ -132,6 +148,17 @@ public:
     std::lock_guard<std::mutex> lock(mutex_);
     return {input_count_,active_,result_count_,outstanding_,Capacity,
       accepted_,durable_,failed_,rejected_,stopping_,stopped_,write_failed_};
+  }
+  ObservationJournalCapacity storage_capacity()const noexcept {
+    std::lock_guard<std::mutex> lock(mutex_);auto result=capacity_;
+    const auto held=static_cast<std::uint64_t>(input_count_+active_);
+    result.available_events=result.available_events>=held?result.available_events-held:0;
+    const auto bytes=result.append_reservation_bytes&&held<=UINT64_MAX/result.append_reservation_bytes?held*result.append_reservation_bytes:UINT64_MAX;
+    result.available_bytes=result.available_bytes>=bytes?result.available_bytes-bytes:0;
+    result.writable=result.writable&&!stopping_&&!write_failed_;return result;
+  }
+  bool has_capacity(std::size_t events,std::size_t bytes)const noexcept {
+    std::lock_guard<std::mutex> lock(mutex_);return capacity_locked(events,bytes);
   }
   // Compatibility accessor: completion reservations now make drops impossible.
   std::uint64_t dropped_completions()const noexcept {

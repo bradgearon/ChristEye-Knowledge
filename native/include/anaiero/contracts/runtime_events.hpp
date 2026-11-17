@@ -29,10 +29,10 @@ enum class Status : std::uint8_t {
 };
 inline constexpr bool health_metric(Metric m) noexcept {
   return m==Metric::viability || m==Metric::energy || m==Metric::support ||
-         m==Metric::stress || m==Metric::activity || m==Metric::acquisition_health;
+         m==Metric::stress || m==Metric::activity || m==Metric::acquisition_health || m==Metric::membrane_voltage;
 }
 inline constexpr bool valid_metric(Metric m) noexcept {
-  return static_cast<unsigned>(m)>=1 && static_cast<unsigned>(m)<=10;
+  return static_cast<unsigned>(m)>=1 && static_cast<unsigned>(m)<=11;
 }
 inline constexpr bool valid_lane(Lane l) noexcept {return static_cast<unsigned>(l)<=4;}
 inline constexpr bool valid_origin(Origin o) noexcept {return o==Origin::simulated||o==Origin::external_unverified_readonly;}
@@ -59,6 +59,7 @@ struct IObservationRuntime {
   virtual std::size_t drain(std::size_t budget) noexcept=0;
   virtual ColonyState latest(std::uint64_t,std::uint64_t) const noexcept=0;
   virtual std::size_t pending() const noexcept=0;
+  virtual Status restore(const ColonyState&) noexcept{return Status::invalid;}
 };
 // Port is an infrastructural interface. Receipts are nonblocking notifications;
 // all physical care, treatment, and stimulation remain out of scope.

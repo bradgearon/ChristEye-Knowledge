@@ -3,6 +3,7 @@
 // Epoch bytes are explicit, never silently dropped when using the v1 codec.
 #include "anaiero/contracts/epoch_observation.hpp"
 #include "anaiero/infrastructure/windbus_adapter.hpp"
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -82,6 +83,10 @@ public:
        v.header.sequence!=candidate.sequence||
        v.header.delivery_class!=delivery(candidate.lane)||
        v.header.destination_slot!=0)return false;
+    // Enums have narrow underlying types. A wider wire number must never alias
+    // a supported enum after narrowing, nor may ignored header fields vary.
+    std::array<std::byte,kEpochObservationFrame> canonical{};
+    if(!encode(candidate,canonical)||!std::equal(wire.begin(),wire.end(),canonical.begin(),canonical.end()))return false;
     result=candidate;return true;
   }
 };

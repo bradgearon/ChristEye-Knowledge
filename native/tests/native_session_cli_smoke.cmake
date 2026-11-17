@@ -12,6 +12,8 @@ foreach(fragment "\"cycles\":4" "\"tick\":4" "\"tick\":2" "\"state_revision\":40
 endforeach()
 execute_process(COMMAND "${CE_RUNTIME}" session "${CE_CONFIG}" "${CE_TEMP}"
   RESULT_VARIABLE result OUTPUT_VARIABLE second ERROR_VARIABLE error TIMEOUT 45)
-if(NOT result EQUAL 0 OR NOT first STREQUAL second)
+string(REGEX REPLACE "\"available_bytes\":[0-9]+" "\"available_bytes\":0" first_stable "${first}")
+string(REGEX REPLACE "\"available_bytes\":[0-9]+" "\"available_bytes\":0" second_stable "${second}")
+if(NOT result EQUAL 0 OR NOT first_stable STREQUAL second_stable)
   message(FATAL_ERROR "Native session restart differs: ${error}\n${first}\n${second}")
 endif()

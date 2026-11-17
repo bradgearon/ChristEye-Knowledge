@@ -39,3 +39,6 @@ examples/runtime/*.cevcells -text
 
 # CE-SW-24 byte-exact scientific feature fixtures across Windows/Linux.
 examples/scientific/*.cevscitrace -text
+examples/scientific/*.cevmodel -text
+examples/experiments/*.cevexperiment -text
+tools/scientific/supervised_neuron_provider.py -text

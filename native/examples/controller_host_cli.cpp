@@ -13,7 +13,7 @@ namespace rt=anaiero::runtime;
 namespace sim3=christeye::living::sim3;
 int run_session_host(int argc,char**argv);
 int run_host_command(int argc,char**argv) {
-  if(argc>=2&&(std::string_view(argv[1])=="session"||std::string_view(argv[1])=="service"))
+  if(argc>=2&&(std::string_view(argv[1])=="session"||std::string_view(argv[1])=="service"||std::string_view(argv[1])=="maintain"))
     return run_session_host(argc,argv);
   if(argc==5&&std::string_view(argv[1])=="start"&&std::filesystem::path(argv[3]).extension()==".cevsession")
     return run_session_host(argc,argv);

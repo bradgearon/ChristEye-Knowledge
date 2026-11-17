@@ -6,7 +6,7 @@
 namespace anaiero::runtime {
 enum class Metric : std::uint8_t {
   viability=1, energy, support, stress, activity, digital_learning,
-  digital_desire, connection, acquisition_health, digital_route_active
+  digital_desire, connection, acquisition_health, digital_route_active, membrane_voltage
 };
 enum class Origin : std::uint8_t { simulated=1, external_unverified_readonly=2 };
 enum class Quality : std::uint8_t { unknown=0, current=1, degraded=2, stale=3 };

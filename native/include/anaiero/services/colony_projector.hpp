@@ -14,6 +14,29 @@ class ColonyProjector {
 public:
   // Configure extension before starting threads. Never invoke it under lock.
   void set_extension(contracts::IServiceExtension* ext) noexcept {extension_=ext;}
+  // Restore is a startup-only operation. Validate every cursor and metric before
+  // replacing the initially empty projection; no observer callbacks are emitted.
+  Status restore(const ColonyState& next)noexcept {
+    if(next.count>kMaxMetrics||next.sources>kMaxSources||next.revision!=next.committed_updates||
+       next.sequence_gaps>next.committed_updates)return Status::invalid;
+    for(std::size_t i=0;i<next.sources;++i){const auto& c=next.cursors[i];
+      if(!c.id||!c.clock_domain||!c.epoch||!c.has_sequence||!c.last_sequence)return Status::invalid;
+      for(std::size_t j=0;j<i;++j)if(next.cursors[j].id==c.id&&next.cursors[j].epoch==c.epoch)return Status::invalid;
+    }
+    for(std::size_t i=0;i<next.count;++i){const auto& m=next.values[i];
+      if(!m.colony||!m.source||!m.source_epoch||!m.sequence||!valid_metric(m.metric)||!valid_origin(m.origin)||
+         static_cast<unsigned>(m.quality)>static_cast<unsigned>(Quality::stale))return Status::invalid;
+      bool bound=false;for(std::size_t j=0;j<next.sources;++j){const auto& c=next.cursors[j];
+        if(c.id==m.source&&c.epoch==m.source_epoch&&m.sequence<=c.last_sequence&&m.acquired_ns<=c.last_acquired_ns)bound=true;}
+      if(!bound)return Status::invalid;
+      for(std::size_t j=0;j<i;++j){const auto& p=next.values[j];
+        if(p.colony==m.colony&&p.animon==m.animon&&p.metric==m.metric&&p.source==m.source&&p.source_epoch==m.source_epoch)return Status::invalid;}
+    }
+    if((next.count==0)!=(next.sources==0)||(next.revision==0)!=(next.count==0))return Status::invalid;
+    std::lock_guard<std::mutex> lock(mutex_);
+    if(state_.revision||state_.count||state_.sources)return Status::invalid;
+    state_=next;return Status::ok;
+  }
   // Single-owner admission check: do not append an impossible observation to
   // the durable evidence log. Apply must follow on the same writer owner.
   Status can_apply(const Observation& o) const noexcept {

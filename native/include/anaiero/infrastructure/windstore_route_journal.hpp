@@ -27,10 +27,9 @@ public:
     const auto hash=christeye::living::plans::sha256_hex(bytes);
     // A session/sequence is immutable even if somebody sends a different
     // valid frame using the same sequence: reject rather than record a fork.
-    for(const auto& existing:registry_.events())
-      if(existing.kind==kKind&&existing.entity==session_&&
-        existing.source_tick==receipt.sequence)
-        return existing.object_hash==hash;
+    Event existing;bool found=false;
+    if(!registry_.find_event(kKind,session_,"simulation",kProducer,receipt.sequence,existing,found))return false;
+    if(found)return existing.object_hash==hash;
     const auto result=registry_.put(bytes);
     if(result.code!=Code::ok||result.hash!=hash)return false;
     const auto published=registry_.publish(std::string(kKind),session_,hash,
@@ -41,8 +40,8 @@ public:
     if(!registry_.is_open()||
        !christeye::living::durable::valid_id(session_))return false;
     std::uint64_t sequence=0;
-    for(const auto& event:registry_.events()){
-      if(event.kind!=kKind||event.entity!=session_)continue;
+    return registry_.visit_events(0,[&](const christeye::living::durable::Event& event){
+      if(event.kind!=kKind||event.entity!=session_)return true;
       if(event.producer!=kProducer||event.origin!="SIMULATED"||
          event.clock!="simulation"||event.source_tick!=sequence+1)return false;
       std::string data;
@@ -51,9 +50,8 @@ public:
       const auto bytes=std::span<const std::byte>(
         reinterpret_cast<const std::byte*>(data.data()),data.size());
       if(!visitor.on_frame(bytes))return false;
-      ++sequence;
-    }
-    return true;
+      ++sequence;return true;
+    });
   }
 };
 } // namespace anaiero::optimization

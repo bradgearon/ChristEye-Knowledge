@@ -1,30 +1,39 @@
 # Anaiero native runtime
 
-## Integrated native sessions (CE-SW-31)
+## Integrated native sessions (CE-SW-31–34)
 
-The native controller now composes SW5 and SIM3, persistent coordinator progress,
-asynchronous evidence, checkpoint recovery, active SW5 optimization and cached
-operator state. Windows and Linux have native local IPC and process/service
-lifecycle adapters. See [CE-SW-31](../docs/software/CE-SW-31_integrated_native_sessions.md)
+The native controller composes SW5, SIM3 and supervised scientific engines,
+durable operations, reusable isolated experiments, staged outcome feedback,
+segmented storage, checkpoint recovery and cached operator state. Windows and
+Linux have native local IPC and process/service lifecycle adapters. See
+[experiments](../docs/software/CE-SW-32_reusable_native_experiments.md),
+[storage](../docs/software/CE-SW-33_sustained_storage.md),
+[scientific sessions](../docs/software/CE-SW-34_supervised_scientific_sessions.md)
 and the [current implementation index](../docs/software/native_implementation_status.md).
 
 ```sh
-anaiero runtime session examples/runtime/mixed-native.cevsession ./mixed-state 4
-anaiero runtime start /tmp/anaiero-mixed.sock examples/runtime/mixed-native.cevsession ./mixed-state
-anaiero runtime query /tmp/anaiero-mixed.sock "ANALYZE 101 3 4 18"
+anaiero runtime session examples/runtime/mixed-sustained.cevsession ./mixed-state 4
+anaiero runtime start /tmp/anaiero-mixed.sock examples/runtime/mixed-sustained.cevsession ./mixed-state
+anaiero runtime query /tmp/anaiero-mixed.sock 'SUBMIT 100 EXPERIMENT "examples/experiments/sw5-guidance.cevexperiment"'
+anaiero runtime query /tmp/anaiero-mixed.sock "RESULT 100"
+anaiero runtime query /tmp/anaiero-mixed.sock "EXPERIMENT_STATE"
 ```
 
-On Windows use a named endpoint such as `anaiero-mixed`. The store is bounded;
-capacity admission preserves recoverable state before the existing journal fills.
+On Windows use a named endpoint such as `anaiero-mixed`. Version 2 storage
+rotates bounded segments and retains historical evidence in verified archives.
+Disk headroom and explicit source/index limits still apply. Version 1 keeps its
+legacy bounded storage behavior.
 Building does not install an operating-system service. Deployment examples are
 in [deployment/native](../deployment/native/README.md).
 
 The sections below retain the component history and its original boundaries;
-CE-SW-31 identifies the currently integrated behavior.
+CE-SW-31–34 identify the currently integrated behavior. A compact controller
+build uses `-DANAIERO_CONTROLLER_ONLY=ON`; it exposes `ce_colony_runtime`
+directly and does not build the multiplexer or the legacy/demo CLI collection.
 
 ## Public executable: anaiero
 
-**Native host parity:** Anaiero's planned lightweight long-running controller is a **native Windows and native Linux** application with one portable C++20 core. Both platforms are first-class, using IOCP/named pipes/SCM or epoll/Unix-domain sockets/systemd in infrastructure adapters. It will not require WSL, containers or a scripting runtime. The integrated session includes local IPC, console cancellation, an SCM entrypoint and systemd readiness notifications; remote mesh and sustained storage remain later milestones. See [ADR-002](../docs/software/ADR-002_native_windows_linux_parity.md).
+**Native host parity:** Anaiero's controller is a **native Windows and native Linux** application with one portable C++20 core. Both platforms are first-class, with named-pipe/SCM or Unix-domain-socket/systemd infrastructure adapters. The controller requires no WSL, containers or scripting runtime. The integrated session includes local IPC, cancellation, an SCM entrypoint, systemd readiness, sustained storage and owned solver processes. Remote mesh remains a later milestone. See [ADR-002](../docs/software/ADR-002_native_windows_linux_parity.md).
 
 Use **`anaiero`** as the single public native command. The old `ce_*` programs remain as internal backends for compatibility, but new user scripts should call `anaiero`:
 

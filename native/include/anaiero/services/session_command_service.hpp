@@ -4,6 +4,7 @@
 #include "anaiero/contracts/service_extension.hpp"
 #include <charconv>
 #include <cstring>
+#include <iomanip>
 #include <sstream>
 namespace anaiero::session {
 class SessionCommandService final:public host::ICommandService {
@@ -31,6 +32,8 @@ public:
 private:
   host::Reply dispatch(std::string_view request)noexcept{
     if(request=="PING")return reply("PONG\n");
+    if(request=="TRACE")return reply(control_.trace());
+    if(request=="EXPERIMENT_STATE")return reply(control_.experiment_result());
     if(request=="STATE"||request=="STATUS"||request=="ENGINES"||request=="SNAPSHOT")return reply(control_.snapshot());
     if(request=="RUN")return reply(control_.set_running(true)?"OK RUN\n":"ERR stopping\n");
     if(request=="PAUSE")return reply(control_.set_running(false)?"OK PAUSE\n":"ERR stopping\n");
@@ -38,6 +41,17 @@ private:
     if(request=="STOP"){control_.request_stop();return reply("BYE\n",true);}
     std::istringstream input{std::string(request)};std::string word,extra;
     input>>word;
+    std::uint64_t operation_id=0;
+    if(word=="RESULT"||word=="SUBMIT"){
+      std::string id;if(!(input>>id))return reply("ERR operation id required\n");
+      const auto [end,ec]=std::from_chars(id.data(),id.data()+id.size(),operation_id);
+      if(ec!=std::errc{}||end!=id.data()+id.size()||!operation_id)return reply("ERR invalid operation id\n");
+      if(word=="RESULT"){
+        if(input>>extra)return reply("ERR RESULT <id>\n");
+        return reply(control_.operation_result(operation_id));
+      }
+      if(!(input>>word))return reply("ERR SUBMIT <id> <command>\n");
+    }
     if(word=="WATCH"){
       std::string text;std::uint64_t revision=0;
       if(!(input>>text)||input>>extra)return reply("ERR WATCH <revision>\n");
@@ -46,6 +60,7 @@ private:
       return reply(control_.snapshot(revision,500));
     }
     Command command{};
+    command.operation_id=operation_id;
     if(word=="STEP"){
       if(input>>extra){if(!number(extra,command.count)||!command.count||command.count>1024)return reply("ERR STEP 1..1024\n");}
     }else if(word=="ANALYZE"){
@@ -54,10 +69,16 @@ private:
          !number(to,command.to)||!number(horizon,command.count)||!command.count||command.count>128)
         return reply("ERR ANALYZE <engine> <from> <to> <horizon 1..128>\n");
     }else if(word=="APPLY")command.operation=Operation::apply;
+    else if(word=="RESUME_EXPERIMENT")command.operation=Operation::resume_experiment;
     else if(word=="REVERT"){
       command.operation=Operation::revert;
       if(!(input>>extra)||!number(extra,command.engine))return reply("ERR REVERT <engine>\n");
     }else if(word=="RETRY")command.operation=Operation::retry;
+    else if(word=="EXPERIMENT"){
+      command.operation=Operation::experiment;
+      if(!(input>>std::quoted(command.reference))||command.reference.empty()||command.reference.size()>4096)
+        return reply("ERR EXPERIMENT <plan-path>\n");
+    }
     else return reply("ERR unknown session command\n");
     if(input>>extra)return reply("ERR unexpected command arguments\n");
     std::uint64_t ticket=0;

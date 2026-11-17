@@ -16,7 +16,11 @@ public:
     runner_(runner),id_(id),source_(source),epoch_(epoch){}
   engine::Descriptor describe()const noexcept override {
     return {id_,source_,epoch_,engine::Kind::sim3,
-      runner_.configuration().hash,"SYNTHETIC_UNCALIBRATED",true,false};
+      runner_.configuration().hash,"SYNTHETIC_UNCALIBRATED",true,false,
+      {true,true,false,2,2,1,id_,0,
+       {engine::SummarySemantic::live_cells,engine::SummarySemantic::configured_colony_links,
+        engine::SummarySemantic::model_energy_proxy,engine::SummarySemantic::learning_proxy},
+       "anaiero-sim3/2"}};
   }
   engine::Status initialize()noexcept override {
     return runner_.is_open()&&id_&&source_&&epoch_?
