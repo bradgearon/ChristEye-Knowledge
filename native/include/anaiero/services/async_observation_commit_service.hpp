@@ -9,7 +9,7 @@ class AsyncObservationCommitService final {
   IObservationEpochProjection& projector_;
   AsyncCommitReceipt pending_{};
   std::uint64_t ticket_=0;
-  bool awaiting_=false,ready_to_project_=false;
+  bool awaiting_=false,ready_to_project_=false,failed_=false;
 public:
   AsyncObservationCommitService(IAsyncObservationStore& worker,
      IObservationEpochProjection& projector) noexcept:
@@ -17,13 +17,16 @@ public:
   bool submit(const Observation& value) noexcept {
     if(awaiting_||ready_to_project_||!projector_.can_accept(value))return false;
     if(!worker_.enqueue(value,ticket_))return false;
-    awaiting_=true;return true;
+    failed_=false;awaiting_=true;return true;
   }
   bool poll() noexcept {
     if(awaiting_) {
       AsyncCommitReceipt result{};
       if(!worker_.try_receive(result))return false;
-      if(result.ticket!=ticket_||!result.durable)return false;
+      if(result.ticket!=ticket_||!result.durable){
+        awaiting_=false;ticket_=0;failed_=true;
+        return false;
+      }
       pending_=result;ready_to_project_=true;awaiting_=false;
     }
     if(ready_to_project_) {
@@ -35,5 +38,6 @@ public:
     return false;
   }
   bool pending()const noexcept{return awaiting_||ready_to_project_;}
+  bool failed()const noexcept{return failed_;}
 };
 } // namespace anaiero::runtime
