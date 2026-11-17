@@ -15,6 +15,7 @@ class CoupledSimulationService final {
   cells::Atlas atlas_;
   cells::ISpatialPort& spatial_;
   IElectricalFeatureModel& electrical_;
+  cells::CellBehaviorService development_; // allocated once at composition, reused every slow step
   IEnvironmentFeatureModel* environment_=nullptr;
   HypothesisRuntimeService default_hypothesis_{};
   IHypothesisRule* hypothesis_=&default_hypothesis_;
@@ -45,7 +46,8 @@ class CoupledSimulationService final {
 public:
   CoupledSimulationService(cells::Atlas atlas,cells::ISpatialPort& spatial,
                            IElectricalFeatureModel& electrical) noexcept:
-    atlas_(std::move(atlas)),spatial_(spatial),electrical_(electrical){}
+    atlas_(std::move(atlas)),spatial_(spatial),electrical_(electrical),
+    development_(atlas_,spatial_){}
   void set_publisher(ICellFramePublisher* p) noexcept {publisher_=p;}
   void set_environment(IEnvironmentFeatureModel* e) noexcept {environment_=e;}
   void set_hypothesis_rule(IHypothesisRule* rule) noexcept {
@@ -61,8 +63,7 @@ public:
        descriptor.source_epoch!=initial.epoch)return Code::source_mismatch;
     if(environment_&&environment_->descriptor().provider!=Provider::native_reference&&
        environment_->descriptor().source_epoch!=initial.epoch)return Code::source_mismatch;
-    cells::CellBehaviorService validation(atlas_,spatial_);
-    if(validation.restore(world)!=cells::Status::ok||world.tick!=0)return Code::bad_input;
+    if(development_.restore(world)!=cells::Status::ok||world.tick!=0)return Code::bad_input;
     world_=world;state_=initial;count_=0;initialized_=true;has_pending_=false;
     return Code::ok;
   }
@@ -88,14 +89,13 @@ public:
       return Code::model_failure;
     cells::World staged=world_;
     if((next.tick+1)%plan.development_every==0){
-      cells::CellBehaviorService growth(atlas_,spatial_);
-      if(growth.restore(staged)!=cells::Status::ok)return Code::model_failure;
+      if(development_.restore(staged)!=cells::Status::ok)return Code::model_failure;
       cells::Context context{};
       context.support_proxy=next.environment; // dimensionless proxy, not actual feeding
       context.digital_signal=next.activity;
       context.lesson_active=phase==Phase::train;
-      if(growth.step(context)!=cells::Status::ok)return Code::model_failure;
-      staged=growth.world();
+      if(development_.step(context)!=cells::Status::ok)return Code::model_failure;
+      staged=development_.world();
     }
     ++next.tick;
     const auto metrics=cells::metrics(staged);
