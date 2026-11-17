@@ -4,6 +4,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <string>
 namespace anaiero::engine {
 enum class ObjectiveMetric : std::uint8_t {
   participants=1,connections=2,energy=3,learning_proxy=4
@@ -19,7 +20,9 @@ struct Candidate {
   std::uint16_t cost=0,risk=0,uncertainty=0;
 };
 struct Forecast {
-  Snapshot baseline{},trial{};
+  Snapshot baseline{},trial{}; // same starting world and trial horizon
+  std::string source_state_sha256{};
+  std::uint64_t source_revision=0;
   bool valid=false;
 };
 struct OptimizationPlan {
