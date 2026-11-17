@@ -1,0 +1,34 @@
+name: Anaiero Native Host and Linear Weighted Queue
+on:
+  push:
+    paths:
+      - 'native/include/anaiero/**'
+      - 'native/examples/controller_host_cli.cpp'
+      - 'native/examples/colony_runtime_cli.cpp'
+      - 'native/tests/native_host_tests.cpp'
+      - 'native/CMakeLists.txt'
+      - 'docs/software/CE-SW-28_native_controller_host_and_queue.md'
+      - '.github/workflows/native-host.yml'
+  pull_request:
+    paths:
+      - 'native/include/anaiero/**'
+      - 'native/examples/controller_host_cli.cpp'
+      - 'native/examples/colony_runtime_cli.cpp'
+      - 'native/tests/native_host_tests.cpp'
+      - 'native/CMakeLists.txt'
+      - 'docs/software/CE-SW-28_native_controller_host_and_queue.md'
+      - '.github/workflows/native-host.yml'
+permissions:
+  contents: read
+jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: cmake -S native -B build/host -DCE_WIND_BUILD_TESTS=ON
+      - run: cmake --build build/host --config Release --target ce_colony_runtime ce_colony_runtime_tests ce_native_host_tests anaiero
+      - run: ctest --test-dir build/host -C Release --output-on-failure -R "anaiero_native_host_ipc|anaiero_runtime_projector"
