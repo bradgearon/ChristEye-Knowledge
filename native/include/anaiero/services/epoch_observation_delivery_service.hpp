@@ -24,7 +24,8 @@ public:
   bool submit(const Observation& observation) noexcept {
     if(!ready_||observation.source_epoch==0)return false;
     std::array<std::byte,kEpochObservationFrame> frame{};
-    return codec_.encode(observation,frame)&&journal_.commit(observation,frame)&&
+    return projection_.can_accept(observation)&&codec_.encode(observation,frame)&&
+      journal_.commit(observation,frame)&&
       projection_.apply(observation);
   }
 };
