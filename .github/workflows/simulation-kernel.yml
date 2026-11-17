@@ -1,0 +1,34 @@
+name: Anaiero Reusable Simulation Engine Kernel
+on:
+  push:
+    paths:
+      - 'native/include/anaiero/**'
+      - 'native/examples/simulation_kernel_cli.cpp'
+      - 'native/tests/simulation_kernel*'
+      - 'native/CMakeLists.txt'
+      - 'native/examples/anaiero_cli.cpp'
+      - 'docs/software/CE-SW-27_reusable_simulation_kernel.md'
+      - '.github/workflows/simulation-kernel.yml'
+  pull_request:
+    paths:
+      - 'native/include/anaiero/**'
+      - 'native/examples/simulation_kernel_cli.cpp'
+      - 'native/tests/simulation_kernel*'
+      - 'native/CMakeLists.txt'
+      - 'native/examples/anaiero_cli.cpp'
+      - 'docs/software/CE-SW-27_reusable_simulation_kernel.md'
+      - '.github/workflows/simulation-kernel.yml'
+permissions:
+  contents: read
+jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: cmake -S native -B build/kernel -DCE_WIND_BUILD_TESTS=ON
+      - run: cmake --build build/kernel --config Release --target ce_simulation_kernel ce_simulation_kernel_tests anaiero
+      - run: ctest --test-dir build/kernel -C Release --output-on-failure -R "anaiero_engine_kernel"
