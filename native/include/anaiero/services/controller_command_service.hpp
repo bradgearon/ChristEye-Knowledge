@@ -10,6 +10,7 @@ namespace anaiero::host {
 class ControllerCommandService final:public ICommandService {
   runtime::IObservationRuntime& runtime_;
   contracts::IServiceExtension* extension_=nullptr;
+  IDigitalCyclePort* cycle_=nullptr;
   std::uint64_t requests_=0;
   static Reply make(std::string_view bytes,bool stop=false) noexcept {
     Reply reply{};
@@ -21,11 +22,12 @@ public:
   explicit ControllerCommandService(runtime::IObservationRuntime& runtime) noexcept:
     runtime_(runtime){}
   void set_extension(contracts::IServiceExtension* ext) noexcept {extension_=ext;}
+  void set_cycle(IDigitalCyclePort* cycle) noexcept {cycle_=cycle;}
   Reply handle(std::string_view command) noexcept override {
     ++requests_;
     Reply reply{};
     if(command=="PING")reply=make("PONG\n");
-    else if(command=="SNAPSHOT"){
+    else if(command=="SNAPSHOT"||command=="STATE"){
       const auto snapshot=runtime_.latest(0,std::numeric_limits<std::uint64_t>::max());
       char text[256]{};
       const int count=std::snprintf(text,sizeof(text),
@@ -36,6 +38,9 @@ public:
         static_cast<unsigned long long>(runtime_.pending()));
       if(count>0&&static_cast<std::size_t>(count)<sizeof(text))
         reply=make(std::string_view(text,static_cast<std::size_t>(count)));
+    }else if(command=="STEP"){
+      reply=make(cycle_&&cycle_->advance_one_simulated_tick()?
+                 "OK STEP\n":"ERR step unavailable\n");
     }else if(command=="STOP")reply=make("BYE\n",true);
     else reply=make("ERR unknown command\n");
     if(extension_)extension_->on_service_event(
