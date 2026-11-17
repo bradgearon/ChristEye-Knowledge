@@ -1,0 +1,55 @@
+name: Anaiero Epoch Recovery and Live Scientific Solver
+on:
+  push:
+    paths:
+      - 'native/include/anaiero/**'
+      - 'native/examples/scientific_*'
+      - 'native/tests/epoch_observation_tests.cpp'
+      - 'native/tests/live_solver_tests.cpp'
+      - 'native/tests/scientific_epoch_smoke.cmake'
+      - 'native/tests/scientific_live_smoke.cmake'
+      - 'native/CMakeLists.txt'
+      - 'tools/scientific/live_solver_bridge.py'
+      - 'docs/software/CE-SW-25_source_epoch_recovery.md'
+      - 'docs/software/CE-SW-26_live_multirate_solver_coupling.md'
+      - '.github/workflows/scientific-live-epochs.yml'
+  pull_request:
+    paths:
+      - 'native/include/anaiero/**'
+      - 'native/examples/scientific_*'
+      - 'native/tests/epoch_observation_tests.cpp'
+      - 'native/tests/live_solver_tests.cpp'
+      - 'native/tests/scientific_epoch_smoke.cmake'
+      - 'native/tests/scientific_live_smoke.cmake'
+      - 'native/CMakeLists.txt'
+      - 'tools/scientific/live_solver_bridge.py'
+      - 'docs/software/CE-SW-25_source_epoch_recovery.md'
+      - 'docs/software/CE-SW-26_live_multirate_solver_coupling.md'
+      - '.github/workflows/scientific-live-epochs.yml'
+permissions:
+  contents: read
+jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Configure native C++20
+        run: cmake -S native -B build/live-epochs -DCE_WIND_BUILD_TESTS=ON
+      - name: Build core and public CLI
+        run: cmake --build build/live-epochs --config Release --target anaiero ce_epoch_observation_tests ce_live_solver_tests
+      - name: Run source epoch recovery and live solver tests
+        run: ctest --test-dir build/live-epochs -C Release --output-on-failure -R "anaiero_(epoch|live_solver)"
+      - name: Public native help on Linux
+        if: runner.os != 'Windows'
+        run: ./build/live-epochs/anaiero help science
+      - name: Public native help on Windows
+        if: runner.os == 'Windows'
+        run: .\build\live-epochs\Release\anaiero.exe help science
+

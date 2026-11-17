@@ -387,7 +387,9 @@ endif()
 # Third-party scientific engines are OPTIONAL outside the Anaiero controller.
 add_executable(ce_science_lab
   examples/scientific_lab_cli.cpp
-  examples/scientific_bus_cli.cpp)
+  examples/scientific_bus_cli.cpp
+  examples/scientific_live_cli.cpp
+  examples/scientific_epoch_cli.cpp)
 target_link_libraries(ce_science_lab PRIVATE ce_wind_core Threads::Threads)
 if(MSVC)
   target_compile_options(ce_science_lab PRIVATE /W4 /WX)
@@ -418,4 +420,39 @@ if(CE_WIND_BUILD_TESTS)
     -DCE_TRACE=${CMAKE_CURRENT_SOURCE_DIR}/../examples/scientific/native-reference.cevscitrace
     -DCE_ENV_TRACE=${CMAKE_CURRENT_SOURCE_DIR}/../examples/scientific/native-environment.cevscitrace
     -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/scientific_cli_smoke.cmake)
+endif()
+
+# CE-SW-25/26: native, epoch-aware recovery and live external-solver stepping.
+if(CE_WIND_BUILD_TESTS)
+  add_executable(ce_epoch_observation_tests tests/epoch_observation_tests.cpp)
+  add_executable(ce_live_solver_tests tests/live_solver_tests.cpp)
+  target_link_libraries(ce_epoch_observation_tests PRIVATE ce_wind_core Threads::Threads)
+  target_link_libraries(ce_live_solver_tests PRIVATE ce_wind_core Threads::Threads)
+  if(MSVC)
+    target_compile_options(ce_epoch_observation_tests PRIVATE /W4 /WX)
+    target_compile_options(ce_live_solver_tests PRIVATE /W4 /WX)
+  else()
+    target_compile_options(ce_epoch_observation_tests PRIVATE -Wall -Wextra -Wconversion -Werror)
+    target_compile_options(ce_live_solver_tests PRIVATE -Wall -Wextra -Wconversion -Werror)
+  endif()
+  add_test(NAME anaiero_epoch_observations COMMAND ce_epoch_observation_tests
+    ${CMAKE_CURRENT_BINARY_DIR}/epoch-observations)
+  add_test(NAME anaiero_live_solver_contract COMMAND ce_live_solver_tests)
+  add_test(NAME anaiero_epoch_replay_cli COMMAND ${CMAKE_COMMAND}
+    -DCE_ANA=$<TARGET_FILE:anaiero>
+    -DCE_ATLAS=${CMAKE_CURRENT_SOURCE_DIR}/../examples/cells/crest-blood-neural.cevatlas
+    -DCE_TEMP=${CMAKE_CURRENT_BINARY_DIR}/epoch-replay-cli
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/scientific_epoch_smoke.cmake)
+  # Python is only a TEST and optional scientific sidecar, not a native
+  # runtime dependency. The basic C++ controller builds without it.
+  find_package(Python3 COMPONENTS Interpreter QUIET)
+  if(Python3_Interpreter_FOUND)
+    add_test(NAME anaiero_live_solver_stdio_cli COMMAND ${CMAKE_COMMAND}
+      -DCE_ANA=$<TARGET_FILE:anaiero>
+      -DCE_PYTHON=${Python3_EXECUTABLE}
+      -DCE_DRIVER=${CMAKE_CURRENT_SOURCE_DIR}/../tools/scientific/live_solver_bridge.py
+      -DCE_ATLAS=${CMAKE_CURRENT_SOURCE_DIR}/../examples/cells/crest-blood-neural.cevatlas
+      -DCE_TEMP=${CMAKE_CURRENT_BINARY_DIR}/scientific-live-cli
+      -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/scientific_live_smoke.cmake)
+  endif()
 endif()

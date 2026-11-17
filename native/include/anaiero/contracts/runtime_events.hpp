@@ -15,11 +15,13 @@ struct Observation {
   std::int32_t value=0;
   std::uint16_t urgency=0, importance=0; // 0..1000 digital queue hints
   std::uint64_t sequence=0, acquired_ns=0, evidence_tag=0;
+  std::uint64_t source_epoch=0; // nonzero for epoch-scoped v2 events
 };
 struct SourcePermission {
   std::uint32_t source=0, clock_domain=0;
   Origin origin=Origin::simulated;
   bool can_read_health=false, can_publish_digital_desires=false, can_publish_fault=false;
+  std::uint64_t source_epoch=0; // zero = locally allowed any epoch, NOT authentication
 };
 enum class Status : std::uint8_t {
   ok, invalid, unauthorized, duplicate, out_of_order, queue_full,

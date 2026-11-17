@@ -21,11 +21,13 @@ struct MetricValue {
   Origin origin=Origin::simulated;
   Quality quality=Quality::unknown;
   std::uint64_t sequence=0, acquired_ns=0, evidence_tag=0;
+  std::uint64_t source_epoch=0; // zero preserves legacy WindPacket/1 source behavior
 };
 struct SourceCursor {
   std::uint32_t id=0, clock_domain=0;
   std::uint64_t last_sequence=0, last_acquired_ns=0;
   bool has_sequence=false, gap=false;
+  std::uint64_t epoch=0; // sequence scope: (source, epoch)
 };
 struct ColonyState {
   std::uint64_t revision=0, committed_updates=0, sequence_gaps=0;
