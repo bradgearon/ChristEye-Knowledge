@@ -525,3 +525,16 @@ if(CE_WIND_BUILD_TESTS)
   endif()
   add_test(NAME anaiero_native_host_ipc COMMAND ce_native_host_tests)
 endif()
+
+# CE-SW-29: one bounded async persistence worker, checkpoint indexes, units.
+if(CE_WIND_BUILD_TESTS)
+  add_executable(ce_async_evidence_tests tests/async_evidence_tests.cpp)
+  target_link_libraries(ce_async_evidence_tests PRIVATE ce_wind_core Threads::Threads)
+  if(MSVC)
+    target_compile_options(ce_async_evidence_tests PRIVATE /W4 /WX)
+  else()
+    target_compile_options(ce_async_evidence_tests PRIVATE -Wall -Wextra -Wconversion -Werror)
+  endif()
+  add_test(NAME anaiero_async_evidence_and_units COMMAND ce_async_evidence_tests
+    ${CMAKE_CURRENT_BINARY_DIR}/async-evidence-session)
+endif()

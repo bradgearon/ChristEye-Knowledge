@@ -225,3 +225,15 @@ This is a *console/headless process*, not yet registered as an SCM service or
 systemd service, and not a secured remote mesh. Disk sync and subprocess
 timeout supervision require further hardening. See
 [CE-SW-28](../docs/software/CE-SW-28_native_controller_host_and_queue.md).
+
+## CE-SW-29 — Async evidence and physical-unit boundaries
+
+The injectable AsyncEpochJournalWorker and AsyncObservationCommitService split
+slow WindStore synchronization from the calling simulation and project events
+*after* the durable completion receipt. Bounded queue admission does not mean
+durability, and restart must replay the committed journal. The immutable
+CheckpointCatalog records individual engine checkpoint objects and their
+model digests. Exact UnitConversionService rejects incompatible/lossy
+transforms, while JournalRetentionReviewService computes a non-destructive
+candidate retention boundary. The old WindStore journal is **not** yet compacted.
+See [CE-SW-29](../docs/software/CE-SW-29_async_evidence_and_units.md).
