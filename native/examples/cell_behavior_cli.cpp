@@ -1,3 +1,6 @@
+#include "anaiero/infrastructure/weighted_queue.hpp"
+#include "anaiero/services/runtime_service.hpp"
+#include "anaiero/services/cell_behavior_service.hpp"
 // Public: anaiero cells <sample|run|inspect> <atlas.cevatlas> <state.cevcells> [ticks].
 // Only a deterministic digital illustration. No physical culture controls.
 #include "anaiero/infrastructure/cell_checkpoint.hpp"
@@ -66,7 +69,8 @@ int main(int argc,char** argv) {
     if(auto r=service.bind_plan(plan.sha256);r!=cell::Status::ok)
       return fail("plan-conflict",static_cast<int>(r));
     if(service.world().tick>plan.total_ticks)return fail("past-plan-end",2);
-    anaiero::runtime::RuntimeService runtime;
+    anaiero::runtime::WeightedQueue<> runtime_work;
+    anaiero::runtime::RuntimeService runtime(runtime_work);
     cell::CellBusAdapter bus(runtime);
     if(bus.enroll()!=anaiero::runtime::Status::ok)return fail("bus",1);
     service.set_observer(&bus);
@@ -86,7 +90,8 @@ int main(int argc,char** argv) {
   if(service.world().run_plan_digest[0]!=0)return fail("plan-bound-use-execute",2);
   std::uint32_t steps=0;
   if(!files::u32(argv[4],steps)||steps==0||steps>1000)return fail("ticks",2);
-  anaiero::runtime::RuntimeService runtime;
+  anaiero::runtime::WeightedQueue<> runtime_work;
+    anaiero::runtime::RuntimeService runtime(runtime_work);
   cell::CellBusAdapter bus(runtime);
   if(bus.enroll()!=anaiero::runtime::Status::ok)return fail("bus",1);
   service.set_observer(&bus);
