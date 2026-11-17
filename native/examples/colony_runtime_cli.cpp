@@ -1,3 +1,5 @@
+#include "anaiero/infrastructure/weighted_queue.hpp"
+#include "anaiero/services/runtime_service.hpp"
 // anaiero runtime — low-resource host-side projector and simulated bus runner.
 // This command does not provide physical cell care, network security or control.
 #include "anaiero/infrastructure/sim3_ingress.hpp"
@@ -66,7 +68,7 @@ int main(int argc,char**argv){
   sim::Runner runner;
   const auto opened=runner.open(argv[2],argv[3]);
   if(opened!=sim::Result::ok){std::cerr<<"simulation open failed\n";return 1;}
-  rt::RuntimeService runtime;
+  rt::WeightedQueue<> runtime_queue;rt::RuntimeService runtime(runtime_queue);
   rt::Sim3Ingress adapter(runtime);
   if(adapter.enroll(runner.configuration())!=rt::Status::ok)return 1;
   const auto observe=[&]()->bool{

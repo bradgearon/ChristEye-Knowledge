@@ -1,3 +1,5 @@
+#include "anaiero/infrastructure/weighted_queue.hpp"
+#include "anaiero/services/runtime_service.hpp"
 #include "anaiero/infrastructure/cell_bus_adapter.hpp"
 #include "anaiero/infrastructure/cell_position_port.hpp"
 #include "anaiero/infrastructure/cell_source_record.hpp"
@@ -14,7 +16,7 @@ int main(int argc,char**argv){
   CHECK(files::load_checked_atlas(std::filesystem::path(argv[1])/"examples/cells/crest-blood-neural.cevatlas",atlas)==Status::ok);
   BoundedPositionPort port;
   CellBehaviorService service(atlas,port);
-  rt::RuntimeService runtime;
+  rt::WeightedQueue<> runtime_queue;rt::RuntimeService runtime(runtime_queue);
   CellBusAdapter adapter(runtime);
   CHECK(adapter.enroll()==rt::Status::ok);
   service.set_observer(&adapter);
