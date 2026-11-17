@@ -12,11 +12,7 @@ INCLUDE = re.compile(r'^\s*#include\s+"anaiero/(models|contracts|services|infras
 
 # Baseline from audited commit 5f5ab33a6668b712c54dc15327a568e77af67a98.
 # Remove individual waivers as modules are inverted; do not add new waivers casually.
-KNOWN_DEBT = {
-    ("infrastructure/cell_checkpoint.hpp", "services/cell_behavior_service.hpp"),
-    ("infrastructure/windbus_adapter.hpp", "services/runtime_service.hpp"),
-    ("services/runtime_service.hpp", "infrastructure/weighted_queue.hpp"),
-}
+KNOWN_DEBT = set()  # original inversions removed; new ones are forbidden
 
 
 def internal_includes(path: Path):

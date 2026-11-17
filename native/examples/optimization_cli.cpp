@@ -1,3 +1,4 @@
+#include "anaiero/infrastructure/weighted_queue.hpp"
 // anaiero optimize demo: deterministic non-biological route search + feedback.
 #include "anaiero/services/adaptive_optimization_service.hpp"
 #include "anaiero/services/synthetic_trial_service.hpp"
@@ -27,7 +28,7 @@ int main(int argc,char** argv){
   if(argc!=2||std::string_view(argv[1])!="demo"){
     std::cerr<<"usage: anaiero optimize demo (synthetic in-memory only)\n";return 2;
   }
-  rt::RuntimeService runtime;
+  rt::WeightedQueue<> runtime_queue;rt::RuntimeService runtime(runtime_queue);
   if(runtime.enroll({30,1,rt::Origin::simulated,true,true,false})!=rt::Status::ok)return 1;
   opt::OptimizationTriggerService trigger;
   runtime.set_observer(&trigger);

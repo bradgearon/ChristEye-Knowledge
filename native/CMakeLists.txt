@@ -1,9 +1,30 @@
 cmake_minimum_required(VERSION 3.20)
 project(ChristEyeAnaieroNative LANGUAGES CXX)
 option(CE_WIND_BUILD_TESTS "Build native WindBus codec/scheduler tests" ON)
+
+# Header-only, explicit C++20 link targets: no dynamic runtime or platform SDK.
+add_library(anaiero_models INTERFACE)
+add_library(anaiero_contracts INTERFACE)
+add_library(anaiero_domain INTERFACE)
+add_library(anaiero_simulators INTERFACE)
+add_library(anaiero_infrastructure INTERFACE)
+add_library(anaiero_application INTERFACE)
+foreach(tgt anaiero_models anaiero_contracts anaiero_domain anaiero_simulators
+            anaiero_infrastructure anaiero_application)
+  target_include_directories(${tgt} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+  target_compile_features(${tgt} INTERFACE cxx_std_20)
+endforeach()
+target_link_libraries(anaiero_contracts INTERFACE anaiero_models)
+target_link_libraries(anaiero_domain INTERFACE anaiero_contracts)
+target_link_libraries(anaiero_simulators INTERFACE anaiero_domain)
+target_link_libraries(anaiero_infrastructure INTERFACE anaiero_contracts)
+target_link_libraries(anaiero_application INTERFACE anaiero_domain anaiero_simulators
+  anaiero_infrastructure)
+
 add_library(ce_wind_core INTERFACE)
 target_include_directories(ce_wind_core INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_compile_features(ce_wind_core INTERFACE cxx_std_20)
+target_link_libraries(ce_wind_core INTERFACE anaiero_application)
 
 # SIM1 demo is part of the installed runtime, even with tests disabled.
 add_executable(ce_living_sim_demo examples/living_sim_demo.cpp)

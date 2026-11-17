@@ -1,3 +1,5 @@
+#include "anaiero/infrastructure/weighted_queue.hpp"
+#include "anaiero/services/runtime_service.hpp"
 // anaiero optimize fork: actual isolated digital SW5 scenarios + durable policy event.
 #include "anaiero/services/sw5_fork_optimization_service.hpp"
 #include "anaiero/services/durable_digital_route_service.hpp"
