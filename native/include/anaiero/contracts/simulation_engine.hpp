@@ -25,6 +25,9 @@ struct Inputs {
 struct StepRequest {
   std::uint64_t expected_tick=0;
   Inputs inputs{};
+  // A coordinator retry preserves this value, the source identity and inputs.
+  // Standalone adapters may leave it at zero; it is not a wall-clock timestamp.
+  std::uint64_t controller_cycle=0;
 };
 struct Snapshot {
   std::uint32_t id=0;
@@ -53,5 +56,42 @@ struct ISimulationEngine {
 struct ISnapshotPublisher {
   virtual ~ISnapshotPublisher()=default;
   virtual bool publish(const Snapshot&) noexcept=0;
+};
+struct IEngineInputSelector {
+  virtual ~IEngineInputSelector()=default;
+  // Resolve model-specific inputs before any engine in a cycle advances.
+  // Selection must not mutate an engine; retry uses the recorded result.
+  virtual Status select(const Descriptor&,std::uint64_t controller_cycle,
+                        const Inputs& defaults,Inputs& selected) noexcept=0;
+};
+struct CoordinatorSlotProgress {
+  std::uint32_t id=0,source=0;
+  std::uint64_t source_epoch=0;
+  Kind kind=Kind::sw5;
+  std::uint8_t cadence=1;
+  std::string model_digest{};
+  Snapshot last{};
+  Inputs cycle_inputs{};
+  Status last_status=Status::not_initialized;
+};
+// Passive continuation data. Persistence belongs to an injected host/store.
+// next_slot identifies the unfinished engine in an active controller cycle.
+// A pending publication has already advanced that engine and records its exact
+// snapshot; it must be acknowledged before next_slot can move forward.
+struct CoordinatorProgress {
+  std::uint32_t schema=1;
+  std::uint64_t completed_cycles=0;
+  std::uint8_t engine_count=0,next_slot=0;
+  bool initialized=false,cycle_active=false,publication_pending=false;
+  Inputs default_inputs{};
+  Snapshot pending_snapshot{};
+  std::array<CoordinatorSlotProgress,kMaxEngines> engines{};
+};
+struct EngineRuntimeStatus {
+  Descriptor descriptor{};
+  Snapshot last{};
+  std::uint8_t cadence=1;
+  bool initialized=false,due=false,publication_pending=false;
+  Status last_status=Status::not_initialized;
 };
 } // namespace anaiero::engine
