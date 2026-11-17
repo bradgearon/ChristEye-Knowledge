@@ -13,6 +13,10 @@ struct Reply {
   std::size_t length=0;
   bool stop=false;
 };
+struct IDigitalCyclePort {
+  virtual ~IDigitalCyclePort()=default;
+  virtual bool advance_one_simulated_tick() noexcept=0;
+};
 struct ICommandService {
   virtual ~ICommandService()=default;
   virtual Reply handle(std::string_view request) noexcept=0;
