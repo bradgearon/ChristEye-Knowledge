@@ -1,6 +1,6 @@
 #pragma once
 // Immutable-by-seal synthetic cell snapshot; no donor identifiers or genomes.
-#include "anaiero/services/cell_behavior_service.hpp"
+#include "anaiero/contracts/cell_behavior.hpp"
 #include "anaiero/infrastructure/cell_atlas_file.hpp"
 #include "christeye/living/durable_io.hpp"
 #include <charconv>
@@ -107,15 +107,8 @@ inline Status deserialize_world(std::string_view bytes,const Atlas& atlas,World&
     }else return Status::corrupt_state;
   }
   if(line!="end"||next())return Status::corrupt_state;
-  // Validate all cross-references before publishing the restored value.
-  class TestSpatial final: public ISpatialPort {
-    bool translate(const Vec3&,const Vec3& proposed,Vec3& out) noexcept override {
-      out=proposed;return true;
-    }
-  } port;
-  CellBehaviorService check(atlas,port);
-  const auto result=check.restore(draft);
-  if(result!=Status::ok)return result;
+  const auto status=validate_world_invariants(draft);
+  if(status!=Status::ok)return status;
   world=draft;return Status::ok;
 }
 inline Status read_world(const std::filesystem::path& path,const Atlas& atlas,World& output) {
