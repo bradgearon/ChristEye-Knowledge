@@ -1,3 +1,5 @@
+#include "anaiero/infrastructure/weighted_queue.hpp"
+#include "anaiero/services/runtime_service.hpp"
 // SW6.2 diagnostic: two sources, repeated source after epoch restart, replay.
 #include "anaiero/infrastructure/windstore_epoch_observation_journal.hpp"
 #include "anaiero/infrastructure/epoch_runtime_projection.hpp"
@@ -21,7 +23,7 @@ int run_science_epoch_demo(int argc,char**argv) {
   {
     dur::Registry store;
     if(store.open(argv[3])!=dur::Code::ok)return 1;
-    rt::RuntimeService runtime;
+    rt::WeightedQueue<> runtime_queue;rt::RuntimeService runtime(runtime_queue);
     rt::EpochRuntimeProjectionPort projector(runtime);
     if(!projector.enroll({71,3,rt::Origin::simulated,true,false,false,0})||
        !projector.enroll({72,3,rt::Origin::simulated,true,false,false,0}))
@@ -52,7 +54,7 @@ int run_science_epoch_demo(int argc,char**argv) {
   // journal packets, never from the previous in-memory projector.
   dur::Registry reopened;
   if(reopened.open(argv[3])!=dur::Code::ok)return 1;
-  rt::RuntimeService restored;
+  rt::WeightedQueue<> restored_queue;rt::RuntimeService restored(restored_queue);
   rt::EpochRuntimeProjectionPort projector(restored);
   if(!projector.enroll({71,3,rt::Origin::simulated,true,false,false,0})||
      !projector.enroll({72,3,rt::Origin::simulated,true,false,false,0}))return 1;

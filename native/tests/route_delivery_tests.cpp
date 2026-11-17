@@ -1,3 +1,5 @@
+#include "anaiero/infrastructure/weighted_queue.hpp"
+#include "anaiero/services/runtime_service.hpp"
 // SW6.1 integration: persistent route -> typed WindPacket -> WindStore -> projector.
 #include "anaiero/services/durable_digital_route_service.hpp"
 #include "anaiero/services/route_receipt_delivery_service.hpp"
@@ -75,7 +77,7 @@ int main(int argc,char**argv){
     DurableSubscriber durable;
     CHECK(wind.subscribe(&DurableSubscriber::callback,&durable,0,
       "crest-session","DIGITAL_ROUTE_RECEIPT")==dur::Code::ok);
-    rt::RuntimeService runtime;
+    rt::WeightedQueue<> runtime_queue;rt::RuntimeService runtime(runtime_queue);
     LiveSubscriber live;runtime.set_observer(&live);
     opt::RouteReceiptWindPacketCodec codec;
     opt::WindStoreRouteReceiptJournal journal(wind,"crest-session");
@@ -134,7 +136,7 @@ int main(int argc,char**argv){
     opt::DurableDigitalRouteService controller(ledger,atlas,spatial);
     dur::Registry wind;
     CHECK(wind.open(store_dir)==dur::Code::ok);
-    rt::RuntimeService runtime;
+    rt::WeightedQueue<> runtime_queue;rt::RuntimeService runtime(runtime_queue);
     LiveSubscriber live;runtime.set_observer(&live);
     opt::RouteReceiptWindPacketCodec codec;
     opt::WindStoreRouteReceiptJournal journal(wind,"crest-session");

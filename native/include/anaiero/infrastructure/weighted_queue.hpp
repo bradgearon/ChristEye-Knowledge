@@ -8,7 +8,7 @@
 #include <limits>
 namespace anaiero::runtime {
 template<std::size_t Capacity=kMaxWork>
-class WeightedQueue {
+class WeightedQueue final: public IDispatchQueue {
   static_assert(Capacity>0 && Capacity<=1024);
   struct Slot {Observation event{};std::uint64_t inserted=0;bool used=false;};
   std::array<Slot,Capacity> slots_{};
@@ -18,9 +18,10 @@ class WeightedQueue {
   static constexpr std::array<std::int32_t,5> weights_{{0,8,5,3,2}};
   std::array<std::int32_t,5> credits_{};
 public:
-  std::size_t size() const noexcept{return size_;}
+  std::size_t size() const noexcept override{return size_;}
+  std::size_t max_size() const noexcept override{return Capacity;}
   static constexpr std::size_t capacity() noexcept{return Capacity;}
-  Status push(const Observation& event) noexcept {
+  Status push(const Observation& event) noexcept override {
     if(!valid_observation(event))return Status::invalid;
     if(size_==Capacity)return Status::queue_full;
     for(auto& slot:slots_)if(!slot.used){slot={event,ordinal_++,true};++size_;return Status::ok;}
@@ -28,7 +29,7 @@ public:
   }
   // Preserve each source's event order even when a later event has more urgency.
   // Projection can therefore use monotonic per-source sequences safely.
-  bool take(Observation& output) noexcept {
+  bool take(Observation& output) noexcept override {
     if(size_==0)return false;
     std::array<bool,5> active{};
     std::array<std::size_t,5> best{};
@@ -39,7 +40,9 @@ public:
       bool blocked=false;
       for(std::size_t j=0;j<Capacity;++j){
         if(!slots_[j].used||i==j)continue;
-        if(slots_[j].event.source==s.event.source && slots_[j].inserted<s.inserted){blocked=true;break;}
+        if(slots_[j].event.source==s.event.source&&
+           slots_[j].event.source_epoch==s.event.source_epoch&&
+           slots_[j].inserted<s.inserted){blocked=true;break;}
       }
       if(blocked)continue;
       const auto lane=static_cast<unsigned>(s.event.lane);

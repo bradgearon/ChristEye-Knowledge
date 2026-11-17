@@ -1,3 +1,4 @@
+#include "anaiero/infrastructure/weighted_queue.hpp"
 #include "anaiero/services/adaptive_optimization_service.hpp"
 #include "anaiero/services/synthetic_trial_service.hpp"
 #include "anaiero/services/service_extension_dispatcher.hpp"
@@ -86,7 +87,7 @@ int main(){
   opt::InMemoryDigitalRouteStore store2(9);
   assert(service.commit(sample(50,9),chosen,store2)==opt::Status::ok);
   assert(service.review(sample(69,10),chosen,store2)==opt::Status::ok&&store2.active(2));
-  rt::RuntimeService runtime;
+  rt::WeightedQueue<> runtime_queue;rt::RuntimeService runtime(runtime_queue);
   assert(runtime.enroll({30,1,rt::Origin::simulated,true,true,false})==rt::Status::ok);
   runtime.set_extension(&first);
   opt::OptimizationTriggerService trigger;runtime.set_observer(&trigger);

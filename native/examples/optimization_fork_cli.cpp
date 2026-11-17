@@ -1,3 +1,5 @@
+#include "anaiero/infrastructure/weighted_queue.hpp"
+#include "anaiero/services/runtime_service.hpp"
 // anaiero optimize fork: actual isolated digital SW5 scenarios + durable policy event.
 #include "anaiero/services/sw5_fork_optimization_service.hpp"
 #include "anaiero/services/durable_digital_route_service.hpp"
@@ -58,7 +60,8 @@ int run_fork(int argc,char**argv){
      return error("no digital route event");
    christeye::living::durable::Registry store;
    if(store.open(argv[5])!=christeye::living::durable::Code::ok)return error("WindStore open");
-   anaiero::runtime::RuntimeService runtime;
+   anaiero::runtime::WeightedQueue<> runtime_queue;
+   anaiero::runtime::RuntimeService runtime(runtime_queue);
    opt::RouteReceiptWindPacketCodec codec;
    opt::WindStoreRouteReceiptJournal journal(store,argv[6]);
    opt::RouteRuntimeProjectionPort projector(runtime,source,state.selected.colony);

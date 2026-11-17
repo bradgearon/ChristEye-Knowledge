@@ -2,7 +2,7 @@
 // Digital-only coordinator: source policy, weighted dispatch, projector, sinks.
 #include "anaiero/services/colony_projector.hpp"
 #include "anaiero/contracts/service_extension.hpp"
-#include "anaiero/infrastructure/weighted_queue.hpp"
+
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -22,8 +22,8 @@ public:
     return o;
   }
 };
-class RuntimeService {
-  WeightedQueue<> queue_{};
+class RuntimeService final: public IObservationRuntime {
+  IDispatchQueue& queue_;
   ColonyProjector projector_{};
   std::array<SourcePermission,kMaxSources> permissions_{};
   std::size_t permissions_count_=0;
@@ -50,7 +50,8 @@ class RuntimeService {
     return false;
   }
 public:
-  Status enroll(SourcePermission p) noexcept {
+  explicit RuntimeService(IDispatchQueue& work) noexcept:queue_(work){}
+  Status enroll(SourcePermission p) noexcept override {
     if(!p.source||!p.clock_domain||!valid_origin(p.origin)||permissions_count_==kMaxSources)
       return Status::invalid;
     for(std::size_t i=0;i<permissions_count_;++i)
@@ -70,13 +71,13 @@ public:
   }
   // Single-owner preflight used by journal-first services. It cannot authorize
   // a peer; enrollment and identity checks happen before this call.
-  Status can_accept(Observation o) const noexcept {
+  Status can_accept(Observation o) const noexcept override {
     o=AnimonPriorityService::classify(o);
     if(!valid_observation(o))return Status::invalid;
     if(!allowed(o))return Status::unauthorized;
     return projector_.can_apply(o);
   }
-  Status post(Observation o) noexcept {
+  Status post(Observation o) noexcept override {
     o=AnimonPriorityService::classify(o);
     if(!valid_observation(o))return Status::invalid;
     if(!allowed(o))return Status::unauthorized;
@@ -89,7 +90,7 @@ public:
   // Explicit bounded dispatch on the owning loop's event notification.
   // If persistence is configured, only committed events enter the projector.
   // Production ingress must authenticate peers BEFORE calling post().
-  std::size_t drain(std::size_t budget=32) noexcept {
+  std::size_t drain(std::size_t budget=32) noexcept override {
     std::size_t handled=0;
     Observation o;
     while(handled<budget){
@@ -111,10 +112,10 @@ public:
     }
     return handled;
   }
-  ColonyState latest(std::uint64_t now_ns,std::uint64_t ttl_ns) const noexcept {
+  ColonyState latest(std::uint64_t now_ns,std::uint64_t ttl_ns) const noexcept override {
     return projector_.snapshot(now_ns,ttl_ns);
   }
-  std::size_t pending() const noexcept {return queue_.size()+(retry_?1u:0u);}
+  std::size_t pending() const noexcept override {return queue_.size()+(retry_?1u:0u);}
   std::uint64_t commit_failures() const noexcept {return commit_failures_;}
   std::uint64_t rejected() const noexcept{return rejected_;}
   std::uint64_t projected() const noexcept{return committed_;}

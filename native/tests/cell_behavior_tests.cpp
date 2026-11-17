@@ -1,3 +1,4 @@
+#include "anaiero/services/cell_behavior_service.hpp"
 #include "anaiero/infrastructure/cell_checkpoint.hpp"
 #include "anaiero/infrastructure/cell_position_port.hpp"
 #include "anaiero/infrastructure/cell_source_record.hpp"

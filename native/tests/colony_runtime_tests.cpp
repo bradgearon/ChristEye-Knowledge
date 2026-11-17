@@ -1,3 +1,5 @@
+#include "anaiero/infrastructure/weighted_queue.hpp"
+#include "anaiero/services/runtime_service.hpp"
 #include "anaiero/infrastructure/sim3_ingress.hpp"
 #include "anaiero/infrastructure/windstore_sink.hpp"
 #include "anaiero/infrastructure/movement_router.hpp"
@@ -45,7 +47,7 @@ static void test_wire(){
   CHECK(rt::decode_observation(buffer,decoded)==rt::Status::malformed_wire);
 }
 static void test_projection(){
-  rt::RuntimeService r;
+  rt::WeightedQueue<> r_queue;rt::RuntimeService r(r_queue);
   CHECK(r.enroll({1,1,rt::Origin::simulated,true,true})==rt::Status::ok);
   CHECK(r.enroll({2,1,rt::Origin::external_unverified_readonly,true,false})==rt::Status::ok);
   Listener observer;observer.runtime=&r;r.set_observer(&observer);
@@ -72,7 +74,7 @@ static void test_projection(){
   CHECK(r.post(o)==rt::Status::unauthorized);
 }
 static void test_movement_contract(){
-  rt::RuntimeService runtime;
+  rt::WeightedQueue<> runtime_queue;rt::RuntimeService runtime(runtime_queue);
   CHECK(runtime.enroll({1,1,rt::Origin::simulated,false,false})==rt::Status::ok);
   rt::ObservationMovementRouter router(runtime);
   const rt::Movement transfer{1,2,1,1,rt::MovementKind::digital_data,17,1,20,11};
@@ -85,7 +87,7 @@ static void test_movement_contract(){
   CHECK(router.submit(illegal)==rt::Status::invalid);
 }
 static void test_source_isolation(){
-  rt::RuntimeService runtime;
+  rt::WeightedQueue<> runtime_queue;rt::RuntimeService runtime(runtime_queue);
   CHECK(runtime.enroll({1,1,rt::Origin::simulated,true,true})==rt::Status::ok);
   CHECK(runtime.enroll({2,1,rt::Origin::external_unverified_readonly,true,false})==rt::Status::ok);
   auto synthetic=value(1,1,rt::Metric::energy,rt::Lane::health);
@@ -138,7 +140,7 @@ static void test_priority_and_fairness(){
   CHECK(bounded.push(fault)==rt::Status::queue_full);
 }
 static void test_persistence_and_concurrency(){
-  rt::RuntimeService r;CHECK(r.enroll({1,1,rt::Origin::simulated,true,true})==rt::Status::ok);
+  rt::WeightedQueue<> r_queue;rt::RuntimeService r(r_queue);CHECK(r.enroll({1,1,rt::Origin::simulated,true,true})==rt::Status::ok);
   FailingJournal bad;r.set_journal(&bad);
   CHECK(r.post(value(1,1,rt::Metric::energy,rt::Lane::health))==rt::Status::ok);
   CHECK(r.drain()==1);CHECK(r.latest(100,100).revision==0);
@@ -168,7 +170,7 @@ static void test_sim3_input(const std::filesystem::path& root){
   const auto temp=std::filesystem::temp_directory_path()/"anaiero-runtime-state-test";
   std::error_code ec;std::filesystem::remove_all(temp,ec);
   CHECK(run.open(root/"examples/connected-gardens.cev",temp)==sim::Result::ok);
-  rt::RuntimeService service;rt::Sim3Ingress input(service);
+  rt::WeightedQueue<> service_queue;rt::RuntimeService service(service_queue);rt::Sim3Ingress input(service);
   CHECK(input.enroll(run.configuration())==rt::Status::ok);
   CHECK(input.import(run.configuration(),run.state())==rt::Status::ok);
   while(service.pending())service.drain(64);
@@ -184,7 +186,7 @@ static void test_sim3_input(const std::filesystem::path& root){
   db::Registry database;
   CHECK(database.open(temp/"projector-ledger")==db::Code::ok);
   rt::WindStoreSink sink(database);
-  rt::RuntimeService durable_service;
+  rt::WeightedQueue<> durable_service_queue;rt::RuntimeService durable_service(durable_service_queue);
   CHECK(durable_service.enroll({11,1,rt::Origin::simulated,true,true})==rt::Status::ok);
   durable_service.set_journal(&sink);
   CHECK(durable_service.post(value(11,1,rt::Metric::energy,rt::Lane::health))==rt::Status::ok);

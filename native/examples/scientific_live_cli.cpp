@@ -1,3 +1,5 @@
+#include "anaiero/infrastructure/weighted_queue.hpp"
+#include "anaiero/services/runtime_service.hpp"
 // Anaiero science live: native C++20 multirate controller over a bounded
 // optional external solver stdio channel. No device or biological actuation.
 #include "anaiero/infrastructure/cell_source_record.hpp"
@@ -51,7 +53,7 @@ int run_science_live(int argc,char**argv) {
   if(cell::files::load_checked_atlas(argv[2],atlas)!=cell::Status::ok)return 1;
   durable::Registry store;
   if(store.open(argv[3])!=durable::Code::ok)return 1;
-  rt::RuntimeService runtime;
+  rt::WeightedQueue<> runtime_queue;rt::RuntimeService runtime(runtime_queue);
   rt::EpochRuntimeProjectionPort port(runtime);
   constexpr std::uint32_t source=64;
   if(!port.enroll({source,3,rt::Origin::simulated,true,false,false,0}))return 1;

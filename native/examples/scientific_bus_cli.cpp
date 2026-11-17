@@ -1,3 +1,5 @@
+#include "anaiero/infrastructure/weighted_queue.hpp"
+#include "anaiero/services/runtime_service.hpp"
 // End-to-end native synthetic multirate SW5 -> WindPacket/1 -> SW4 ColonyState.
 #include "anaiero/infrastructure/scientific_windbus.hpp"
 #include "anaiero/infrastructure/cell_position_port.hpp"
@@ -15,7 +17,7 @@ int run_science_bus(const cell::Atlas& atlas){
   cell::Cell c=a;c.id=5;c.kind=cell::Kind::astrocyte;c.position={21,18,2};
   if(starter.add(a)!=cell::Status::ok||starter.add(b)!=cell::Status::ok||
      starter.add(c)!=cell::Status::ok||starter.encourage(3,4,700)!=cell::Status::ok)return 1;
-  rt::RuntimeService runtime;
+  rt::WeightedQueue<> runtime_queue;rt::RuntimeService runtime(runtime_queue);
   sci::ScientificWindBusPublisher bus(runtime);
   if(!bus.enroll(61,1))return 1;
   sci::ReferenceElectricalService electrical;

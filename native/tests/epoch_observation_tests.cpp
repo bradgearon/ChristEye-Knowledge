@@ -1,3 +1,5 @@
+#include "anaiero/infrastructure/weighted_queue.hpp"
+#include "anaiero/services/runtime_service.hpp"
 // SW6.2 native Windows/Linux general observation epoch and recovery tests.
 #include "anaiero/infrastructure/windstore_epoch_observation_journal.hpp"
 #include "anaiero/infrastructure/epoch_runtime_projection.hpp"
@@ -72,7 +74,7 @@ int main(int argc,char**argv) {
   const auto store_path=root/"events";
   {
     dur::Registry store;CHECK(store.open(store_path)==dur::Code::ok);
-    rt::RuntimeService runtime;
+    rt::WeightedQueue<> runtime_queue;rt::RuntimeService runtime(runtime_queue);
     rt::EpochRuntimeProjectionPort view(runtime);
     CHECK(view.enroll({71,3,rt::Origin::simulated,true,false,false,0}));
     CHECK(view.enroll({72,3,rt::Origin::simulated,true,false,false,0}));
@@ -106,7 +108,7 @@ int main(int argc,char**argv) {
   }
   {
     dur::Registry store;CHECK(store.open(store_path)==dur::Code::ok);
-    rt::RuntimeService runtime;
+    rt::WeightedQueue<> runtime_queue;rt::RuntimeService runtime(runtime_queue);
     rt::EpochRuntimeProjectionPort view(runtime);
     CHECK(view.enroll({71,3,rt::Origin::simulated,true,false,false,0}));
     CHECK(view.enroll({72,3,rt::Origin::simulated,true,false,false,0}));

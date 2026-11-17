@@ -1,7 +1,7 @@
 #pragma once
 // WindPacket transport adapter; never authenticates network/device identity.
 // Wire conversion preserves exactly the typed contract; no native struct casts.
-#include "anaiero/services/runtime_service.hpp"
+#include "anaiero/contracts/runtime_events.hpp"
 #include "christeye/wind/packet.hpp"
 #include <array>
 #include <bit>
@@ -85,7 +85,7 @@ inline Status decode_observation(std::span<const std::byte> packet,Observation& 
      v.header.delivery_class!=expected)return Status::malformed_wire;
   result=o;return Status::ok;
 }
-inline Status ingress_frame(RuntimeService& runtime,std::span<const std::byte> packet) noexcept {
+inline Status ingress_frame(IObservationRuntime& runtime,std::span<const std::byte> packet) noexcept {
   Observation observation{};
   const auto r=decode_observation(packet,observation);
   return r==Status::ok?runtime.post(observation):r;

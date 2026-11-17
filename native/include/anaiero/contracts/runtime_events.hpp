@@ -43,6 +43,23 @@ inline constexpr bool valid_observation(const Observation& o) noexcept {
          (o.metric!=Metric::digital_desire || o.lane==Lane::desire) &&
          (o.metric!=Metric::digital_learning || o.origin==Origin::simulated);
 }
+// Portable ports for injectable bounded dispatch and observation runtimes.
+struct IDispatchQueue {
+  virtual ~IDispatchQueue()=default;
+  virtual Status push(const Observation&) noexcept=0;
+  virtual bool take(Observation&) noexcept=0;
+  virtual std::size_t size() const noexcept=0;
+  virtual std::size_t max_size() const noexcept=0;
+};
+struct IObservationRuntime {
+  virtual ~IObservationRuntime()=default;
+  virtual Status enroll(SourcePermission) noexcept=0;
+  virtual Status can_accept(Observation) const noexcept=0;
+  virtual Status post(Observation) noexcept=0;
+  virtual std::size_t drain(std::size_t budget) noexcept=0;
+  virtual ColonyState latest(std::uint64_t,std::uint64_t) const noexcept=0;
+  virtual std::size_t pending() const noexcept=0;
+};
 // Port is an infrastructural interface. Receipts are nonblocking notifications;
 // all physical care, treatment, and stimulation remain out of scope.
 struct IUpdateObserver {
