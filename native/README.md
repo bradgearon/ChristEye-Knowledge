@@ -1,8 +1,48 @@
-# Anaiero native WindBus SW1 prototype
+# Anaiero native runtime
+
+## Integrated native sessions and mesh (CE-SW-31–35)
+
+The native controller composes SW5, SIM3 and supervised scientific engines,
+durable operations, reusable isolated experiments, staged outcome feedback,
+segmented storage, checkpoint recovery and cached operator state. Windows and
+Linux have native local IPC and process/service lifecycle adapters. See
+[experiments](../docs/software/CE-SW-32_reusable_native_experiments.md),
+[storage](../docs/software/CE-SW-33_sustained_storage.md),
+[scientific sessions](../docs/software/CE-SW-34_supervised_scientific_sessions.md)
+and the [current implementation index](../docs/software/native_implementation_status.md).
+
+The optional **authenticated evidence mesh** adds TLS 1.3 mutual certificate
+authentication, operator enrollment, exact stream scopes, durable replay and
+bounded artifact transfer. It runs natively on Windows and Linux using OpenSSL
+3. Enable it with `-DANAIERO_ENABLE_MESH=ON`; ordinary controller builds retain
+their existing dependencies. `anaiero mesh` is available in full builds, and
+`ce_mesh` is available in the compact controller profile. See the
+[mesh architecture](../docs/software/CE-SW-35_authenticated_native_mesh.md) and
+[two-node operating guide](../examples/mesh/README.md).
+
+```sh
+anaiero runtime session examples/runtime/mixed-sustained.cevsession ./mixed-state 4
+anaiero runtime start /tmp/anaiero-mixed.sock examples/runtime/mixed-sustained.cevsession ./mixed-state
+anaiero runtime query /tmp/anaiero-mixed.sock 'SUBMIT 100 EXPERIMENT "examples/experiments/sw5-guidance.cevexperiment"'
+anaiero runtime query /tmp/anaiero-mixed.sock "RESULT 100"
+anaiero runtime query /tmp/anaiero-mixed.sock "EXPERIMENT_STATE"
+```
+
+On Windows use a named endpoint such as `anaiero-mixed`. Version 2 storage
+rotates bounded segments and retains historical evidence in verified archives.
+Disk headroom and explicit source/index limits still apply. Version 1 keeps its
+legacy bounded storage behavior.
+Building does not install an operating-system service. Deployment examples are
+in [deployment/native](../deployment/native/README.md).
+
+The sections below retain the component history and its original boundaries;
+CE-SW-31–35 identify the currently integrated behavior. A compact controller
+build uses `-DANAIERO_CONTROLLER_ONLY=ON`; it exposes `ce_colony_runtime`
+directly and does not build the multiplexer or the legacy/demo CLI collection.
 
 ## Public executable: anaiero
 
-**Native host parity:** Anaiero's planned lightweight long-running controller is a **native Windows and native Linux** application with one portable C++20 core. Both platforms are first-class, using IOCP/named pipes/SCM or epoll/Unix-domain sockets/systemd in infrastructure adapters. It will not require WSL, containers or a scripting runtime. Today's CLI/tools already build on Windows and Linux; full supervised host adapters are planned, not yet delivered. See [ADR-002](../docs/software/ADR-002_native_windows_linux_parity.md).
+**Native host parity:** Anaiero's controller is a **native Windows and native Linux** application with one portable C++20 core. Both platforms are first-class, with named-pipe/SCM or Unix-domain-socket/systemd infrastructure adapters. The controller requires no WSL, containers or scripting runtime. The integrated session includes local IPC, cancellation, an SCM entrypoint, systemd readiness, sustained storage and owned solver processes. Optional remote evidence replication uses enrolled TLS identities and scoped durable receipts. See [ADR-002](../docs/software/ADR-002_native_windows_linux_parity.md).
 
 Use **`anaiero`** as the single public native command. The old `ce_*` programs remain as internal backends for compatibility, but new user scripts should call `anaiero`:
 
@@ -20,7 +60,7 @@ cmake --build build/native --config Release --target anaiero
 On Windows, the executable is generally under `build/native/Release/anaiero.exe`.
 See [CE-SW-17](../docs/software/CE-SW-17_anaiero_unified_native_cli.md).
 
-**Status: digital-only portable C++20 reference implementation; not a security/biological-control release.**
+**Status: digital-only native C++20 research runtime with optional authenticated evidence replication.**
 
 This directory implements the initial **SW1** scope from [CE-SW-01](../docs/software/CE-SW-01_native_mesh_architecture.md):
 
@@ -36,7 +76,7 @@ cmake --build build/native --config Release
 ctest --test-dir build/native -C Release --output-on-failure
 ```
 
-### What this code does *not* do
+### Original SW1 codec boundaries
 
 - **No network transport**: the codec is not a QUIC, Noise or TLS implementation. A packet flag never authenticates a peer. Future adapters must verify the secure session, ACL, source-slot mapping, schema and consent scope before accepting records.
 - **No durable delivery**: `accepted` means an in-memory queue slot, not persisted, network acknowledged, delivered or biologically acted upon. Future SW2 adds WindStore/WindChange durability.

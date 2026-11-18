@@ -1,0 +1,6 @@
+CEVSESSION/1
+name mixed-reference
+period_ms 100
+engine 101 sw5 61 1 1 "../cells/crest-blood-neural.cevatlas" "two-neurons.cevcells" 75 0 64 1
+engine 201 sim3 71 1 2 "../connected-gardens.cev" "-" 0 0 0 0
+end

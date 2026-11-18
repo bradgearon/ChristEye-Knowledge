@@ -1,0 +1,19 @@
+CEVEXPERIMENT/1
+name sw5-guidance
+engine 101 1 7d75c51c925cd549a80d1c992fbbed83e7964f33b84480b3f7ffaae2e75073b5 "anaiero-sw5/1"
+identity 1 101 0 0 11306399a9893134e10ad9c8cc85156c85e5e265e421960ca71cf049c31a21b0
+optimization 18 1 3
+objective 2 1 6 1
+objective 1 2 2 1
+objective 4 40 1 0
+outcome 18 0 0 0
+stages 2
+stage mature 9 75 0 64 1
+stage observe 9 75 0 64 1
+candidates 3
+candidate 101 101 2 1 1 1 3 4 400 0
+candidate 102 102 3 1 2 1 3 4 700 0
+candidate 103 103 300 100 100 1 3 4 900 0
+artifacts 0
+learning "" "" "" ""
+seal f54723486b7ac9c69f0518b8fc5083f582799534d05c192e1aab8fbcd136f708

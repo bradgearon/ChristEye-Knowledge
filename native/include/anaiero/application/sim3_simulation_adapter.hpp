@@ -16,7 +16,11 @@ public:
     runner_(runner),id_(id),source_(source),epoch_(epoch){}
   engine::Descriptor describe()const noexcept override {
     return {id_,source_,epoch_,engine::Kind::sim3,
-      runner_.configuration().hash,"SYNTHETIC_UNCALIBRATED",true,false};
+      runner_.configuration().hash,"SYNTHETIC_UNCALIBRATED",true,false,
+      {true,true,false,2,2,1,id_,0,
+       {engine::SummarySemantic::live_cells,engine::SummarySemantic::configured_colony_links,
+        engine::SummarySemantic::model_energy_proxy,engine::SummarySemantic::learning_proxy},
+       "anaiero-sim3/2"}};
   }
   engine::Status initialize()noexcept override {
     return runner_.is_open()&&id_&&source_&&epoch_?
@@ -28,7 +32,9 @@ public:
     result={};
     result.id=id_;result.source_epoch=epoch_;result.tick=state.tick;
     result.revision=state.tick;
-    result.participants=static_cast<std::uint32_t>(state.cells.size());
+    // Dead lineage records remain in the durable model, but do not count as viable.
+    result.participants=static_cast<std::uint32_t>(std::count_if(state.cells.begin(),state.cells.end(),
+      [](const auto& cell){return cell.alive;}));
     result.connections=static_cast<std::uint32_t>(runner_.configuration().links.size());
     for(const auto& cell:state.cells) {
       result.energy+=cell.energy;result.learning_proxy+=cell.learning;

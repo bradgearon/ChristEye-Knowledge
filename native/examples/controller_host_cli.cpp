@@ -5,17 +5,23 @@
 #include "anaiero/services/controller_command_service.hpp"
 #include "anaiero/application/sim3_controller_cycle.hpp"
 #include <iostream>
+#include <filesystem>
 #include <string>
 #include <string_view>
 namespace host=anaiero::host;
 namespace rt=anaiero::runtime;
 namespace sim3=christeye::living::sim3;
+int run_session_host(int argc,char**argv);
 int run_host_command(int argc,char**argv) {
+  if(argc>=2&&(std::string_view(argv[1])=="session"||std::string_view(argv[1])=="service"||std::string_view(argv[1])=="maintain"))
+    return run_session_host(argc,argv);
+  if(argc==5&&std::string_view(argv[1])=="start"&&std::filesystem::path(argv[3]).extension()==".cevsession")
+    return run_session_host(argc,argv);
   if(argc>=2&&std::string_view(argv[1])=="query"){
     if(argc!=4)return 2;
     const auto command=std::string_view(argv[3]);
-    if(command!="PING"&&command!="STATE"&&command!="SNAPSHOT"&&
-       command!="STEP"&&command!="STOP")return 2;
+    if(command.empty()||command.size()>4090||command.find('\n')!=command.npos||
+       command.find('\r')!=command.npos)return 2;
     std::string response;
     if(!host::NativeIpcClient::request(argv[2],command,response))return 1;
     std::cout<<response;
@@ -23,7 +29,9 @@ int run_host_command(int argc,char**argv) {
   }
   if(argc!=5||std::string_view(argv[1])!="start"){
     std::cerr<<"anaiero runtime start <endpoint> <sim3.cev> <state-dir>\n"
-             <<"anaiero runtime query <endpoint> PING|STATE|STEP|STOP\n";
+             <<"anaiero runtime query <endpoint> \"COMMAND [arguments]\"\n"
+             <<"anaiero runtime session <session.cevsession> <state-dir> [cycles]\n"
+             <<"anaiero runtime service <endpoint> <session.cevsession> <state-dir>\n";
     return 2;
   }
   if(!host::valid_endpoint(argv[2],

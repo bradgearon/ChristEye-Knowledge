@@ -43,6 +43,9 @@ public:
          !o.importance||o.importance>1000)return false;
       present[index]=true;
     }
+    Selection next{};Forecast reference{};bool have_reference=false;
+    for(std::size_t j=0;j<candidates.size();++j)
+      for(std::size_t k=0;k<j;++k)if(candidates[j].id==candidates[k].id)return false;
     for(const auto& candidate:candidates){
       if(!candidate.id||!candidate.policy_token||candidate.cost>1000||
          candidate.risk>1000||candidate.uncertainty>1000)return false;
@@ -57,6 +60,17 @@ public:
          forecast.source_state_sha256.size()!=64)return false;
       for(char c:forecast.source_state_sha256)
         if(!((c>='0'&&c<='9')||(c>='a'&&c<='f')))return false;
+      // Every candidate in this decision must share the same immutable source
+      // and unchanged baseline. An adapter cannot silently mix worlds/horizons.
+      if(have_reference){
+        const auto& a=reference.baseline;const auto& b=forecast.baseline;
+        if(reference.source_state_sha256!=forecast.source_state_sha256||
+           reference.source_revision!=forecast.source_revision||a.id!=b.id||
+           a.source_epoch!=b.source_epoch||a.tick!=b.tick||a.revision!=b.revision||
+           a.participants!=b.participants||a.connections!=b.connections||
+           a.energy!=b.energy||a.learning_proxy!=b.learning_proxy||
+           a.state_sha256!=b.state_sha256)return false;
+      }else{reference=forecast;have_reference=true;}
       std::int64_t score=0;bool allowed=true;
       for(std::size_t k=0;k<plan.goal_count;++k){
         const auto& o=plan.objectives[k];
@@ -71,10 +85,11 @@ public:
         static_cast<std::int64_t>(candidate.risk)*20-
         static_cast<std::int64_t>(candidate.uncertainty)*15;
       if(score<plan.minimum_score)continue;
-      if(!result.approved||score>result.score||
-         (score==result.score&&candidate.id<result.candidate.id))
-        result={candidate,forecast,score,0,true};
+      if(!next.approved||score>next.score||
+         (score==next.score&&candidate.id<next.candidate.id))
+        next={candidate,forecast,score,0,true};
     }
+    result=std::move(next);
     if(result.approved&&observer_)
       observer_->on_service_event({contracts::ServiceId::adaptive_optimization,
         contracts::ServicePhase::proposed,result.forecast.baseline.revision,

@@ -6,10 +6,12 @@
 #include <cstdint>
 #include <string_view>
 namespace anaiero::host {
+inline constexpr std::size_t kMaxRequestBytes=4096;
+inline constexpr std::size_t kMaxReplyBytes=16384;
 enum class Code : std::uint8_t {ok,invalid,bind_failure,permission_denied,
                                  read_failure,write_failure,interrupted};
 struct Reply {
-  std::array<char,256> bytes{};
+  std::array<char,kMaxReplyBytes> bytes{};
   std::size_t length=0;
   bool stop=false;
 };
@@ -24,5 +26,7 @@ struct ICommandService {
 struct ILocalServer {
   virtual ~ILocalServer()=default;
   virtual Code serve(ICommandService&,std::size_t max_requests=0) noexcept=0;
+  // Thread-safe, idempotent cancellation; wakes an idle listener or client I/O.
+  virtual void request_stop() noexcept=0;
 };
 } // namespace anaiero::host

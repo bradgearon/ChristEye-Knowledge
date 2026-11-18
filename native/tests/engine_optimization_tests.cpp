@@ -63,6 +63,39 @@ static void security() {
   e.origin=anaiero::runtime::Origin::simulated;
   p.ended=true;CHECK(!service.may_publish(p,e));
 }
+struct MixedForecasts final:eng::IScenarioEvaluator {
+  unsigned fault=0;
+  bool evaluate(const eng::OptimizationPlan& plan,const eng::Candidate& candidate,
+                eng::Forecast& forecast) noexcept override {
+    forecast={};forecast.baseline.id=401;forecast.baseline.source_epoch=2;
+    forecast.baseline.tick=plan.horizon;forecast.baseline.revision=7;
+    forecast.source_revision=7;forecast.source_state_sha256=std::string(64,'a');
+    if(candidate.id==2){
+      if(fault==1)++forecast.baseline.id;
+      if(fault==2)++forecast.baseline.source_epoch;
+      if(fault==3){++forecast.baseline.revision;++forecast.source_revision;}
+      if(fault==4)forecast.source_state_sha256=std::string(64,'b');
+      if(fault==5)++forecast.baseline.tick;
+      if(fault==6)++forecast.baseline.energy;
+    }
+    forecast.trial=forecast.baseline;forecast.trial.connections=candidate.id;
+    forecast.valid=true;return true;
+  }
+};
+static void shared_context_regressions(){
+  const std::array<eng::Candidate,2> candidates{{{1,1,0,0,0},{2,2,0,0,0}}};
+  eng::OptimizationPlan plan{};plan.horizon=18;plan.goal_count=1;
+  plan.objectives[0]={eng::ObjectiveMetric::connections,10,1,false};
+  MixedForecasts evaluator;eng::EngineOptimizationService optimizer(evaluator);eng::Selection selected;
+  CHECK(optimizer.analyze(plan,candidates,selected)&&selected.candidate.id==2);
+  for(unsigned fault=1;fault<=6;++fault){
+    evaluator.fault=fault;
+    CHECK(!optimizer.analyze(plan,candidates,selected));
+    CHECK(!selected.approved&&selected.candidate.id==0); // no partially valid result leaks
+  }
+  evaluator.fault=0;auto duplicates=candidates;duplicates[1].id=duplicates[0].id;
+  CHECK(!optimizer.analyze(plan,duplicates,selected)&&!selected.approved);
+}
 static cells::World seed(const cells::Atlas& atlas,cells::ISpatialPort& spatial){
   cells::CellBehaviorService domain(atlas,spatial);
   cells::Cell a{};a.id=3;a.kind=cells::Kind::central_neuron;
@@ -74,7 +107,7 @@ static cells::World seed(const cells::Atlas& atlas,cells::ISpatialPort& spatial)
 }
 int main(int argc,char**argv){
   CHECK(argc==3);
-  security();
+  security();shared_context_regressions();
   cells::Atlas atlas{};
   CHECK(cells::files::load_checked_atlas(argv[1],atlas)==cells::Status::ok);
   cells::BoundedPositionPort spatial{};

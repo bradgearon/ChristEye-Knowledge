@@ -96,10 +96,10 @@ int main(){
   obs.origin=rt::Origin::simulated;obs.value=50;obs.sequence=1;obs.acquired_ns=100;
   assert(runtime.post(obs)==rt::Status::ok);
   runtime.drain();
-  assert(first.dispatched==1&&trigger.take_pending_revision()==1);
+  assert(first.dispatched==1&&first.projected==1&&trigger.take_pending_revision()==1);
   assert(trigger.take_pending_revision()==0);
   rt::ColonyProjector projector;projector.set_extension(&first);
-  assert(projector.apply(obs)==rt::Status::ok&&first.projected==1);
+  assert(projector.apply(obs)==rt::Status::ok&&first.projected==2);
   struct ReadingHook:contracts::IServiceExtension {
     rt::ColonyProjector* owner=nullptr;int calls=0;
     void on_service_event(const contracts::ServiceEvent&) noexcept override {

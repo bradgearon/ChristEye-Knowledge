@@ -4,6 +4,7 @@
 #include "anaiero/contracts/checkpoint_catalog.hpp"
 #include "christeye/living/durable_registry.hpp"
 #include "christeye/living/plan_hash.hpp"
+#include <array>
 #include <charconv>
 #include <cstdint>
 #include <sstream>
@@ -34,12 +35,13 @@ public:
     if(!db_.is_open()||checkpoint.empty()||
        christeye::living::plans::sha256_hex(checkpoint)!=r.checkpoint_sha256)return false;
     const auto name=entity(r.engine),tag=clock(r.epoch);
-    for(const auto& e:db_.events())
-      if(e.kind=="CULTURE_CHECKPOINT"&&e.entity==name&&
-         e.clock==tag&&e.source_tick==r.revision)return false; // immutable version
+    christeye::living::durable::Event previous;bool found=false;
+    if(!db_.latest_event("CULTURE_CHECKPOINT",name,tag,previous,found)||
+       (found&&r.revision<=previous.source_tick))return false; // immutable monotonic version
     const auto payload=db_.put(checkpoint);
     if(payload.code!=Code::ok||payload.hash!=r.checkpoint_sha256)return false;
-    const auto manifest=db_.put(wire(r));
+    const std::array<std::string,1> references{r.checkpoint_sha256};
+    const auto manifest=db_.put_referenced(wire(r),references);
     if(manifest.code!=Code::ok)return false;
     return db_.publish("CULTURE_CHECKPOINT",name,manifest.hash,
        "SIMULATED",r.revision,tag,producer(r.source)).code==Code::ok;
@@ -47,10 +49,10 @@ public:
   bool latest(std::uint32_t id,std::uint64_t epoch,CheckpointRecord& out,
               std::string& checkpoint) noexcept override {
     const auto name=entity(id),tag=clock(epoch);
-    const auto& events=db_.events();
-    for(auto it=events.rbegin();it!=events.rend();++it) {
-      if(it->kind!="CULTURE_CHECKPOINT"||it->entity!=name||it->clock!=tag)
-        continue;
+    christeye::living::durable::Event event;bool found=false;
+    if(!db_.latest_event("CULTURE_CHECKPOINT",name,tag,event,found)||!found)return false;
+    const auto* it=&event;
+    {
       std::string raw;
       if(!db_.get(it->object_hash,raw))return false;
       std::istringstream input(raw);
@@ -75,7 +77,6 @@ public:
       out={id,static_cast<std::uint32_t>(n[1]),epoch,n[3],model,payload};
       return true;
     }
-    return false;
   }
 };
 } // namespace anaiero::engine

@@ -1,0 +1,9 @@
+CEVCELLSTATE/1
+atlas 7d75c51c925cd549a80d1c992fbbed83e7964f33b84480b3f7ffaae2e75073b5
+tick 0
+generation 2
+plan none
+cell 3 0 central_neuron 0 20 17 2 100 0 0 0 0 0 0 1 0
+cell 4 0 central_neuron 0 23 17 2 100 0 0 0 0 0 0 1 0
+end
+seal 316974edd69d4ed390774ececf8c2b324bc2123e4c173c7b55666c193a1825dc

@@ -18,6 +18,8 @@ namespace sim=christeye::living::sim3;
 namespace durable=christeye::living::durable;
 inline const char* metric_name(rt::Metric metric) noexcept {
   switch(metric){
+    case rt::Metric::membrane_voltage:return "membrane_voltage_microvolt";
+    case rt::Metric::environmental_concentration:return "concentration_micromolar";
     case rt::Metric::viability:return "viability";
     case rt::Metric::energy:return "energy";
     case rt::Metric::support:return "support";
@@ -59,7 +61,8 @@ inline void print_latest(const rt::RuntimeService& runtime,std::uint64_t now_ns)
 int run_host_command(int argc,char**argv);
 int main(int argc,char**argv){
   if(argc>=2&&(std::string_view(argv[1])=="start"||
-      std::string_view(argv[1])=="query"))return run_host_command(argc,argv);
+      std::string_view(argv[1])=="query"||std::string_view(argv[1])=="session"||
+      std::string_view(argv[1])=="service"||std::string_view(argv[1])=="maintain"))return run_host_command(argc,argv);
   if(argc<4 || argc>5 ||
      (std::string_view(argv[1])!="simulate"&&std::string_view(argv[1])!="serve")){
     std::cerr<<"usage: anaiero runtime simulate|serve <run.cev> <state-dir> [ticks]\n"

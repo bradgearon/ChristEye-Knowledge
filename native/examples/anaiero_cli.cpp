@@ -21,7 +21,16 @@
 namespace anaiero {
 namespace fs=std::filesystem;
 struct Module {std::string_view name, backend, purpose, example;};
-constexpr std::array<Module,15> modules{{
+constexpr std::array<Module,
+#ifdef ANAIERO_HAS_MESH
+17
+#else
+16
+#endif
+> modules{{
+#ifdef ANAIERO_HAS_MESH
+  {"mesh","ce_mesh","Authenticated evidence replication and scoped artifacts","anaiero mesh help"},
+#endif
   {"vm","ce_vlm","Virtual Living Machines","anaiero vm inspect examples/vlm/crest-garden.avlm"},
   {"process","ce_vlm_process","Timed VLM2 processes","anaiero process inspect examples/vlm/process-garden.avlm"},
   {"plan","ce_vlm_plan","Crystal/RNA/learning plans","anaiero plan inspect examples/vlm/bread-first.cevplan examples/vlm/plan-garden.avlm ."},
@@ -35,6 +44,7 @@ constexpr std::array<Module,15> modules{{
   {"cells","ce_cell_behavior","Behavior atlas and synthetic cell development","anaiero cells execute examples/cells/crest-blood-neural.cevatlas ./digital-culture.cevcells examples/cells/reference-development.cevcellrun"},
   {"optimize","ce_optimization","Digital route analysis, trial scoring and feedback","anaiero optimize demo"},
   {"science","ce_science_lab","Coupled cell and scientific-model simulations","anaiero science compare examples/cells/crest-blood-neural.cevatlas"},
+  {"calibrate","ce_scientific_calibrate","Training-only environmental model selection and held-out fidelity","anaiero calibrate examples/scientific/calibration/reference.cevcalibration ./qualification.json"},
   {"kernel","ce_simulation_kernel","Reusable SW5/SIM3 simulation engine orchestration","anaiero kernel demo examples/cells/crest-blood-neural.cevatlas examples/connected-gardens.cev ./kernel-session"},
   {"sim","ce_living_sim_demo","SIM1 synthetic demonstration","anaiero sim"}
 }};

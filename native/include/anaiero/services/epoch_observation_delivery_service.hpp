@@ -2,7 +2,7 @@
 // SW6.2 service: bounded, ordered, journal-first epoch observation delivery.
 // Distinct source epochs can restart sequence numbers without aliasing.
 #include "anaiero/contracts/epoch_observation.hpp"
-#include <array>
+#include "anaiero/services/observation_checkpoint_service.hpp"
 #include <array>
 #include <cstddef>
 namespace anaiero::runtime {
@@ -36,6 +36,19 @@ class EpochObservationDeliveryService final:private IObservationEpochReplay {
   void record(const Observation& o,Cursor* existing) noexcept {
     if(existing){existing->sequence=o.sequence;existing->last=o;}
     else cursors_[count_++]={o.source,o.source_epoch,o.sequence,o};
+  }
+  bool supports_checkpoint()const noexcept override{return true;}
+  bool restore(const ObservationReplayCheckpoint& saved)noexcept override {
+    if(ready_||count_)return false;
+    ObservationCheckpointService validation;
+    if(!validation.restore(saved))return false;
+    for(std::size_t i=0;i<saved.count;++i){const auto& last=saved.last[i];const auto& source=saved.state.cursors[i];
+      if(!valid_observation(last)||last.source!=source.id||last.source_epoch!=source.epoch||
+        last.sequence!=source.last_sequence||last.clock_domain!=source.clock_domain||last.acquired_ns!=source.last_acquired_ns)return false;
+    }
+    if(!projection_.restore(saved.state))return false;
+    for(std::size_t i=0;i<saved.count;++i)record(saved.last[i],nullptr);
+    return true;
   }
   bool accept(std::span<const std::byte> wire) noexcept override {
     Observation o{};

@@ -82,3 +82,13 @@ These documents extend the existing [v3 architecture](../../specifications/v3/ma
 - [CE-A11 connective controller design](../../specifications/v3/design/CE-A11_connective_controllers_Design.md)
 - [CE-A22 independent limits design](../../specifications/v3/design/CE-A22_independent_limits_and_governance_Design.md)
 - [Scientific source-provenance and publication policy](../../PUBLICATION_POLICY.md)
+
+## Current native integration
+
+- [CE-SW-36 — Native environment and frozen calibration evidence](CE-SW-36_environment_and_calibration.md)
+- [CE-SW-35 — Authenticated native evidence mesh](CE-SW-35_authenticated_native_mesh.md)
+- [CE-SW-32 — Reusable native experiments and durable operations](CE-SW-32_reusable_native_experiments.md)
+- [CE-SW-33 — Sustained native storage and recovery](CE-SW-33_sustained_storage.md)
+- [CE-SW-34 — Supervised scientific engine sessions](CE-SW-34_supervised_scientific_sessions.md)
+- [CE-SW-31 — Integrated native sessions](CE-SW-31_integrated_native_sessions.md)
+- [Native implementation checkpoint and next batches](native_implementation_status.md)

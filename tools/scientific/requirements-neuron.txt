@@ -1,0 +1,2 @@
+# Optional external model adapter; the native C++ controller has no Python dependency.
+neuron==9.0.1

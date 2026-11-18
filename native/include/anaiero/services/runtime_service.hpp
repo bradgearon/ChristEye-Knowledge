@@ -61,7 +61,7 @@ public:
   }
   void set_observer(IUpdateObserver* listener) noexcept {observer_=listener;}
   // Trusted, nonblocking observer; register before starting the owner loop.
-  void set_extension(contracts::IServiceExtension* ext) noexcept {extension_=ext;}
+  void set_extension(contracts::IServiceExtension* ext) noexcept {extension_=ext;projector_.set_extension(ext);}
   void set_journal(IEventCommit* journal) noexcept {
     journal_=journal;
     if(retry_&&wakeup_)wakeup_(wake_context_);
@@ -111,6 +111,12 @@ public:
         contracts::ServicePhase::committed,projector_.revision(),o.animon,0});
     }
     return handled;
+  }
+  Status restore(const ColonyState& state) noexcept override {
+    if(queue_.size()||retry_)return Status::invalid;
+    const auto result=projector_.restore(state);
+    if(result==Status::ok)committed_=state.committed_updates;
+    return result;
   }
   ColonyState latest(std::uint64_t now_ns,std::uint64_t ttl_ns) const noexcept override {
     return projector_.snapshot(now_ns,ttl_ns);

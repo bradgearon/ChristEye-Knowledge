@@ -1,0 +1,48 @@
+name: Anaiero Integrated Native Sessions
+on:
+  push:
+    paths: ['native/**', 'examples/runtime/**', 'examples/scientific/**', 'tools/scientific/**', '.gitattributes', '.github/workflows/native-session.yml']
+  pull_request:
+    paths: ['native/**', 'examples/runtime/**', 'examples/scientific/**', 'tools/scientific/**', '.gitattributes', '.github/workflows/native-session.yml']
+permissions:
+  contents: read
+jobs:
+  native-session:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S native -B build/native -DCE_WIND_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release
+      - name: Build integrated runtime and contracts
+        run: cmake --build build/native --config Release --parallel 2 --target ce_colony_runtime ce_native_session_tests ce_session_record_tests ce_session_host_control_tests ce_native_host_tests ce_simulation_kernel_tests ce_async_evidence_tests ce_experiment_tests ce_operation_tests ce_segmented_storage_tests ce_supervised_science_tests ce_scientific_solver_provider ce_scientific_config ce_session_batch_tests
+      - name: Verify session recovery and native host
+        env:
+          ANAIERO_REQUIRE_IPC: '1'
+        run: ctest --test-dir build/native -C Release --output-on-failure -R "anaiero_(native_session|session_|native_host_ipc|engine_kernel$|async_evidence_and_units|experiment_runtime|operation_recovery|segmented_storage|supervised_science)"
+      - name: Configure controller profile without Python
+        run: cmake -S native -B build/controller -DANAIERO_CONTROLLER_ONLY=ON -DCE_WIND_BUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_DISABLE_FIND_PACKAGE_Python3=TRUE
+      - name: Build controller profile
+        run: cmake --build build/controller --config Release --parallel 2
+  neuron-qualification:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pinned optional solver
+        run: python -m pip install -r tools/scientific/requirements-neuron.txt
+      - name: Configure native qualification controller
+        run: cmake -S native -B build/neuron -DANAIERO_CONTROLLER_ONLY=ON -DCE_WIND_BUILD_TESTS=ON -DANAIERO_NEURON_PYTHON=$(which python) -DCMAKE_BUILD_TYPE=Release
+      - name: Build native qualification
+        run: cmake --build build/neuron --parallel 2 --target ce_neuron_qualification_tests
+      - name: Verify external model and checkpoint continuation
+        run: ctest --test-dir build/neuron --output-on-failure -R anaiero_neuron_qualification
+      - uses: actions/upload-artifact@v4
+        with:
+          name: neuron-qualification
+          path: build/neuron/neuron-qualification/qualification.json
