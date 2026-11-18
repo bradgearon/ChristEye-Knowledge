@@ -90,6 +90,13 @@ void inventory(const fs::path& root){
     "\",\"module_sha256\":\""+module+"\",\"files\":[{\"path\":\""+relative+"\",\"sha256\":\""+s::sha256(host)+"\",\"bytes\":"+std::to_string(host.size())+"}]}";
   write(root/"package-manifest.json",manifest);d::VerifiedPackage result;require(d::verify_native_package(root.string(),module,result,false));
   CHECK(result.files==1&&result.host==host&&result.identity.manifest_sha256==s::sha256(manifest));
+  auto unspecified=manifest;const auto configuration=unspecified.find("\"configuration\":\"Release\"");CHECK(configuration!=std::string::npos);
+  unspecified.replace(configuration,std::string("\"configuration\":\"Release\"").size(),"\"configuration\":\"\"");
+  write(root/"package-manifest.json",unspecified);require(d::verify_native_package(root.string(),module,result,false));
+  CHECK(result.identity.manifest_sha256==s::sha256(unspecified));
+  auto missing_configuration=manifest;missing_configuration.erase(configuration,std::string("\"configuration\":\"Release\",").size());
+  write(root/"package-manifest.json",missing_configuration);CHECK(d::verify_native_package(root.string(),module,result,false).code==s::Code::corrupt);
+  write(root/"package-manifest.json",manifest);
   CHECK(d::verify_native_package(root.string(),s::sha256("wrong"),result,false).code==s::Code::unsupported);
   write(root/relative,host+"!");CHECK(!d::verify_native_package(root.string(),module,result,false));write(root/relative,host);
   auto changed=host;changed.back()='X';write(root/relative,changed);CHECK(!d::verify_native_package(root.string(),module,result,false));write(root/relative,host);

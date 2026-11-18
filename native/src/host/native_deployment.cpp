@@ -140,7 +140,10 @@ std::string selected_executable(const Package& p){
 Result verify_native_package(std::string_view requested,std::string_view module,VerifiedPackage& out,bool probe){
   out={};try{
     const auto root=directory(requested);const auto raw=read(root/"package-manifest.json",4U*1024U*1024U);const auto manifest=Parser(raw).parse();
-    require(manifest.schema=="anaiero.native-package/1"&&valid_digest(manifest.module)&&valid_token(manifest.profile,128)&&valid_token(manifest.configuration,32)&&!manifest.files.empty(),Code::corrupt,"native package metadata is invalid");
+    // An explicitly empty CMake configuration is a real single-config build
+    // identity. Preserve it instead of relabeling an unspecified build Release.
+    require(manifest.schema=="anaiero.native-package/1"&&valid_digest(manifest.module)&&valid_token(manifest.profile,128)&&
+      (manifest.configuration.empty()||valid_token(manifest.configuration,32))&&!manifest.files.empty(),Code::corrupt,"native package metadata is invalid");
 #ifdef _WIN32
     require(manifest.system=="Windows",Code::unsupported,"package is not a Windows native installation");
 #else
