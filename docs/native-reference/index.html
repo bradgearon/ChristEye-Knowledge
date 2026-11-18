@@ -22,7 +22,7 @@
   <div class="workspace">
     <nav class="navigation" aria-label="Reference navigation">
       <div class="nav-content"><div class="nav-caption">WORKSPACE</div><button class="nav-link" id="overview-nav" data-route="overview"><span class="nav-icon">◈</span>Overview</button><button class="nav-link" id="guides-nav" data-route="guides"><span class="nav-icon">▤</span>Guides & architecture</button><div class="nav-caption section-gap">API REFERENCE</div><button class="nav-link" data-layer="all"><span class="nav-icon">⌘</span>Browse native API<span class="nav-count" id="all-count" title="Classes, interfaces, and data types"></span></button><div id="layer-nav"></div><button class="nav-link" id="files-nav" data-route="files"><span class="nav-icon">▧</span>Source files<span class="nav-count" id="file-count"></span></button></div>
-      <div class="nav-bottom"><a class="download-link" href="anaiero-native-reference.html.gz" download="anaiero-native-reference.html"><svg viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></svg>Download offline reference<span>↗</span></a><div class="snapshot-note"><span class="status-dot"></span>Snapshot of latest native branch<br><span id="branch-name"></span></div></div>
+      <div class="nav-bottom"><a class="download-link" href="#download-offline" download="anaiero-native-reference.html"><svg viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></svg>Download offline reference<span>↗</span></a><div class="snapshot-note"><span class="status-dot"></span>Pinned native source snapshot<br><span id="branch-name"></span></div></div>
     </nav>
     <aside class="symbol-panel" aria-label="Symbol browser">
       <div class="symbol-heading"><div><span class="eyebrow" id="scope-eyebrow">API INDEX</span><h2 id="scope-title">All symbols</h2><button class="scope-reset" id="search-all-layers" hidden>Search all layers ↗</button></div><button class="icon-button close-browser" id="close-browser" aria-label="Close symbol browser">×</button></div>
@@ -38,16 +38,16 @@
   <script>
   (async function(){
     try {
-      async function expanded(name){
-        const response=await fetch(name);
-        if(!response.ok)throw new Error('Could not load '+name+' (HTTP '+response.status+')');
-        const bytes=new Uint8Array(await response.arrayBuffer());
-        if(bytes[0]!==31||bytes[1]!==139)return new TextDecoder('utf-8').decode(bytes);
-        if(!('DecompressionStream' in window))throw new Error('This browser does not support the compressed reference data. Please use an up-to-date browser.');
-        const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
-        return await new Response(stream).text();
+      async function expanded(kind){
+        const paths=Array.from({length:24},(_,i)=>kind+'-parts/'+String(i).padStart(2,'0')+'.txt');
+        const parts=await Promise.all(paths.map(async path=>{
+          const response=await fetch(path);
+          if(!response.ok)throw new Error('Unable to load '+path+' (HTTP '+response.status+')');
+          return response.text();
+        }));
+        return parts.join('');
       }
-      const source=await expanded('data.js.gz');
+      const source=await expanded('data');
       const script=document.createElement('script');
       script.textContent=source;
       document.body.appendChild(script);
@@ -61,7 +61,7 @@
         event.preventDefault();
         link.style.pointerEvents='none';
         try {
-          const text=await expanded('anaiero-native-reference.html.gz');
+          const text=await expanded('offline');
           const blob=new Blob([text],{type:'text/html;charset=utf-8'});
           const url=URL.createObjectURL(blob);
           const a=document.createElement('a');a.href=url;a.download='anaiero-native-reference.html';
