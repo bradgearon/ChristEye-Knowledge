@@ -8,6 +8,19 @@ reviewed_commit: "5f5ab33a6668b712c54dc15327a568e77af67a98"
 
 # ADR-001: runtime composition, ownership and evidence delivery
 
+## Implementation note — 2026-11-17
+
+The front matter and rationale below retain the original proposal baseline.
+CE-SW-31–36 now implement mixed native sessions, persisted cycle/operation
+intent, source/epoch-aware evidence, commit-before-projection, owned scientific
+processes and authenticated evidence replication. The original reverse-layer
+dependencies named below have been removed and are guarded against regression.
+Per-engine recoverable publication does not imply an atomic group snapshot.
+Compiled library isolation and representative deployment qualification remain
+open. See the [implementation checkpoint](native_implementation_status.md) and
+[current development plan](native_development_plan.md) for exact scope and
+next acceptance gates.
+
 ## Decision
 
 1. **Single public anaiero executable.** The existing subcommands remain; anaiero runtime start becomes the host supervisor through a separate application composition root. ce_* backends remain compatibility shims until their libraries are extracted.

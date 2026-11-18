@@ -1,10 +1,48 @@
-# ChristEye Anaiero — Native Software Architecture
+# ChristEye Anaiero — Native Software Architecture and Implementation
 
-**Status:** Proposed C++20 architecture and research-software design; not an implemented production transport, verified biological controller, or validated physical Crystal system.
+**Status:** implemented native C++20 research runtime on Windows and Linux,
+with durable mixed-engine sessions, reusable digital experiments, supervised
+scientific providers and optional authenticated evidence replication.
+Production-scale qualification and empirical biological validation remain
+separate milestones.
 
-## Specifications
+## Current capability map
 
-| Contract | Purpose | Implementation status |
+Start with the [implementation checkpoint](native_implementation_status.md)
+for what runs and the [readiness assessment and development plan](native_development_plan.md)
+for ratings, priorities and completion gates.
+
+| Integrated capability | Current specification |
+|---|---|
+| Mixed native sessions, restart, operations and local control | [CE-SW-31](CE-SW-31_integrated_native_sessions.md) |
+| Reusable SW5/SIM3 trials, durable receipts and SW5 outcomes | [CE-SW-32](CE-SW-32_reusable_native_experiments.md) |
+| Segmented storage, checkpoint recovery and maintenance | [CE-SW-33](CE-SW-33_sustained_storage.md) |
+| Owned native scientific processes and pinned continuation | [CE-SW-34](CE-SW-34_supervised_scientific_sessions.md) |
+| Enrolled mutual TLS, scoped evidence replay and artifacts | [CE-SW-35](CE-SW-35_authenticated_native_mesh.md) |
+| Scalar environmental model and frozen calibration evidence | [CE-SW-36](CE-SW-36_environment_and_calibration.md) |
+
+### Native build profiles
+
+| Profile | Operator entry point | Scope |
+|---|---|---|
+| Full native build | `anaiero` | Dispatcher plus compatible `ce_*` backends and legacy/demo tools |
+| `ANAIERO_CONTROLLER_ONLY=ON` | `ce_colony_runtime`, scientific configuration/provider/calibration tools | Native session controller and selected utilities; does not build the `anaiero` dispatcher or discover Python |
+| Either profile with `ANAIERO_ENABLE_MESH=ON` | `ce_mesh`; also `anaiero mesh` in the full profile | Optional OpenSSL 3 evidence mesh |
+
+Use the [native build instructions](../../native/README.md),
+[mixed-session commands](CE-SW-31_integrated_native_sessions.md),
+[scientific examples](../../examples/scientific/README.md) and
+[mesh guide](../../examples/mesh/README.md). A successful build does not
+install an OS service; see the [deployment examples](../../deployment/native/README.md).
+
+## Historical specifications and increment records
+
+The status column below records each document's original increment. Later
+CE-SW-31–36 integrations supersede several original “pending” statements.
+Use the current capability map above for present behavior; preserve these
+records for design history and the scientific boundaries of each increment.
+
+| Contract | Purpose | Status when introduced |
 |---|---|---|
 | [CE-SW-01: Native Mesh, WindBus and Evidence Changesets](CE-SW-01_native_mesh_architecture.md) | Cross-platform C++20 core; compact versioned WindPacket; authenticated sessions; interrupt/event-driven transport; weighted endpoint queues; append-only content-addressed WindStore; durable WindChange DAG and provenance; secure replication | **Design only** |
 | [CE-SW-02: Developmental WindBus and Evidence-Guided Integration](CE-SW-02_developmental_windbus_architecture.md) | Read-only developmental observation and evidence records for candidate cell lineage, axons, neurites/spines, local RNA measurements, multirate sensor fusion, developmental hypotheses, experimental case histories, and validated digital-model improvements | **Design only** |
@@ -24,7 +62,6 @@
 | [CE-SW-18: Bounded ColonyState, Animon priorities and controller runtime](CE-SW-18_colony_state_runtime_projector.md) | Thread-safe latest state, weighted event-driven queues, typed WindPacket movement, simulated-only priority and optional WindStore adapter | **Native prototype and tests; no physical actuation / secure mesh** |
 | [CE-SW-13: SIM3.1 Unified Living Laboratory](CE-SW-13_unified_living_laboratory.md) | Versioned synthetic laws, SHA-pinned VLM2 projections, WindStore checkpoint indexes, synthetic reference evaluations, validated frame schemas and interactive 3D replay | **Native + viewer prototype; biology not validated** |
 | [CE-SW-12: SIM3 Persistent Multi-Colony Runner and 3D Models](CE-SW-12_persistent_multicolony_runner.md) | Restartable SHA-256-pinned host runner, two-colony synthetic resource/data/Stimubus links, lineage tombstones, read-only mmap checkpoint views, golden SVG/OBJ test artifacts and source-provenance descriptors | **Host-side digital-only prototype and native tests** |
-
 | [CE-SW-20: Anaiero v0.015 Native C++ Architecture Pass](CE-SW-20_anaiero_v0015_cpp_architecture_pass.md) | Audited dependency map, controller topology, event/outbox ordering, scheduling, security and safe migration roadmap | **Architecture proposal with regression guard; no new daemon or mesh** |
 | [ADR-001: Native Runtime Ownership](ADR-001_native_runtime_ownership.md) | Target ownership boundaries, common observation envelope, source epochs and transactional digital outbox | **Proposed decision; implementation pending** |
 | [CE-SW-22: SW5 Forked Optimization and Durable Routes](CE-SW-22_forked_simulation_optimization_and_durable_routes.md) | Actual SW5 forks, multi-goal scoring, CAS-pinned route state and recoverable outbox | **Native synthetic reference; authenticated delivery pending** |
@@ -46,9 +83,9 @@ See also [proposed Colony Intelligence and control schemas](../../schemas/softwa
 
 These documents extend the existing [v3 architecture](../../specifications/v3/master_architecture.md) without replacing its logical WindEnvelope contract, current Python prototype or laboratory safety boundary.
 
-- **CE-A11** owns typed route contracts and permitted electronic connections; CE-SW-01 specifies future native/distributed implementation.
+- **CE-A11** owns typed route contracts and permitted electronic connections; CE-SW-01 records the original distributed design and CE-SW-35 implements the bounded native evidence mesh.
 - **CE-A19** owns authorized ingress and source quarantine; binary packets cannot bypass its authority.
-- **CE-A20** owns immutable content and snapshots; WindStore details the future durable native implementation.
+- **CE-A20** owns immutable content and snapshots; CE-SW-33 records the current sustained native storage integration.
 - **CE-A12** coordinates plans; **CE-A22** independently authorizes or vetoes any qualified physical action.
 - **CE-A16** owns retained Root-evidence contracts, not inferred cell identity or unverified memory.
 - **P02/P02B** describe instrumentation limits, independently timestamped acquisition, and the simulated observation-only bridge.
@@ -65,7 +102,11 @@ These documents extend the existing [v3 architecture](../../specifications/v3/ma
 7. Growth/connection/Crystal hypotheses remain hypotheses until independent experiments validate them; a network or protocol is not evidence that a biological learning mechanism exists.
 8. Unauthorized or stale messages cannot override laboratory equipment, A22 limits, safety interlocks or regulator-approved study controls.
 
-## Proposed implementation order
+## Original implementation sequence
+
+This SW1–SW5 outline records the initial architecture sequence. The
+[current development order](native_development_plan.md#revised-delivery-order)
+starts from the integrated implementation and governs new work.
 
 1. **SW1 — Core codec and simulator.** Shared freestanding WindPacket serializer/parser, fixed-size bounded queues, deterministic simulated endpoints, fuzz/property tests and version negotiation.
 2. **SW2 — Native local durability.** WindStore journal, atomic content-addressed objects, deduplication, crash recovery, and receipt semantics.
@@ -73,7 +114,11 @@ These documents extend the existing [v3 architecture](../../specifications/v3/ma
 4. **SW4 — Developmental read-only observations.** Synthetic cell, imaging, electrophysiology and sparse molecular events; evidence-scored connection graph and developmental twin.
 5. **SW5 — Independent evaluation.** Withheld-case comparisons, calibration of prediction uncertainty, reproducibility, offline replay and research-review gates.
 
-**Release gate:** These are architectural specifications. Passing existing Python unit tests does not establish any of the SW1–SW5 milestones. No direct biological stimulation, culture changes, virus handling, or material-delivery commands are authorized by these proposals.
+**Release evidence:** assess each implemented capability using its native
+integration and failure tests, not Python tests alone. Passing software tests
+does not establish biological validity or authorize physical intervention.
+The current assessment links the exact native Windows/Linux results and
+identifies the operational qualification still needed.
 
 ## Related documents
 
@@ -83,12 +128,7 @@ These documents extend the existing [v3 architecture](../../specifications/v3/ma
 - [CE-A22 independent limits design](../../specifications/v3/design/CE-A22_independent_limits_and_governance_Design.md)
 - [Scientific source-provenance and publication policy](../../PUBLICATION_POLICY.md)
 
-## Current native integration
+## Current development
 
-- [CE-SW-36 — Native environment and frozen calibration evidence](CE-SW-36_environment_and_calibration.md)
-- [CE-SW-35 — Authenticated native evidence mesh](CE-SW-35_authenticated_native_mesh.md)
-- [CE-SW-32 — Reusable native experiments and durable operations](CE-SW-32_reusable_native_experiments.md)
-- [CE-SW-33 — Sustained native storage and recovery](CE-SW-33_sustained_storage.md)
-- [CE-SW-34 — Supervised scientific engine sessions](CE-SW-34_supervised_scientific_sessions.md)
-- [CE-SW-31 — Integrated native sessions](CE-SW-31_integrated_native_sessions.md)
-- [Native implementation checkpoint and next batches](native_implementation_status.md)
+- [Native implementation checkpoint](native_implementation_status.md)
+- [Readiness assessment, priorities and acceptance gates](native_development_plan.md)

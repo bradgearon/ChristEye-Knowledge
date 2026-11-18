@@ -2,6 +2,26 @@
 
 The project's phases are evidence-gated, not date-gated. An insertion or revision must preserve the older phase identifiers and decision records.
 
+## Native software development
+
+The native Windows/Linux research runtime has integrated sessions, durable
+evidence, isolated digital experiments, supervised scientific providers and
+authenticated evidence replication. Its current engineering priorities are:
+
+1. Execute existing CEVPLAN programs as recoverable native-session workloads.
+2. Qualify sustained storage, source/epoch retirement and measured recovery.
+3. Add recoverable SIM3 policy application.
+4. Qualify scientific input programs, isolated trials and external references.
+5. Expand continuous evidence mesh operation after lifecycle qualification.
+
+See the [native implementation checkpoint](software/native_implementation_status.md)
+for completed capabilities and the
+[readiness assessment and development plan](software/native_development_plan.md)
+for ratings, evidence, dependencies and completion gates. Native software
+progress does not itself satisfy the scientific or physical phase gates below.
+
+## Scientific and physical phases
+
 | Phase | Purpose | Current status | Exit evidence |
 |---|---|---|---|
 | P00 | ontology, scientific claims, responsibilities | Documented | versioned source register |
