@@ -170,7 +170,19 @@ class Extract:
         if kind == "enum_specifier":
             name_node = node.child_by_field_name("name") or named_child(node, {"type_identifier", "identifier"})
             if name_node:
-                self.emit("enum", normalized(node_text(self.data, name_node)), scope, node, access, owner)
+                name = normalized(node_text(self.data, name_node))
+                self.emit("enum", name, scope, node, access, owner)
+                body = named_child(node, {"enumerator_list"})
+                if body:
+                    next_scope = scope + (name,)
+                    next_owner = "::".join(next_scope)
+                    for value in body.named_children:
+                        if value.type != "enumerator":
+                            continue
+                        item = value.child_by_field_name("name") or named_child(value, {"identifier"})
+                        if item:
+                            self.emit("enumerator", normalized(node_text(self.data, item)), next_scope,
+                                      value, "public", next_owner, node_text(self.data, value))
             return
         if kind in {"alias_declaration", "type_definition"}:
             value = node_text(self.data, node)
@@ -203,11 +215,18 @@ class Extract:
                 if name:
                     self.emit(label, simple, scope, node, access, owner, signature=text)
                 return
-            if kind == "field_declaration" and owner:
-                value = normalized(node_text(self.data, node))
+            value = normalized(node_text(self.data, node))
+            is_constant = bool(re.search(r"\b(?:constexpr|constinit)\b", value))
+            if (kind == "field_declaration" and owner) or (kind == "declaration" and is_constant):
                 m = re.search(r"([a-zA-Z_]\w*)\s*(?:[;={]|$)", value)
                 if m:
-                    self.emit("field", m.group(1), scope, node, access, owner, signature=value)
+                    self.emit("constant" if is_constant else "field", m.group(1), scope,
+                              node, access, owner, signature=value)
+            return
+        if kind == "preproc_def":
+            ident = named_child(node, {"identifier"})
+            if ident:
+                self.emit("macro", node_text(self.data, ident), scope, node, access, owner)
             return
         for child in node.named_children:
             self.visit(child, scope, owner, access)
@@ -265,7 +284,8 @@ def generate(source, site, source_ref, check=False, strict=False):
     commit = git_commit(source)
     symbols, files, warnings = collect(source, load_annotations(site))
     counts = Counter(s["kind"] for s in symbols)
-    if strict and (len(symbols) < 1000 or len(files) < 80 or len(warnings) > 50):
+    print("Native index declaration kinds:", dict(sorted(counts.items())))
+    if strict and (len(symbols) < 4000 or len(files) < 150 or len(warnings) > 50):
         raise ValueError(f"Native coverage gate: {len(symbols)} symbols, {len(files)} files, {len(warnings)} parser errors")
     short = commit[:12]
     data_root = site / "data" / short
