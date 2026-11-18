@@ -2,6 +2,11 @@ name: Manual Anaiero GitHub Pages deployment
 # Optional manual deployment only. The repository's built-in Pages
 # build/deployment handles ordinary branch-based publication.
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/native-reference/**'
+      - '.github/workflows/pages.yml'
   workflow_dispatch:
 permissions:
   contents: read

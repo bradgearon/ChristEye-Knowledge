@@ -1,21 +1,15 @@
-# Anaiero Native Reference
+# Anaiero Native C++ Reference
 
-Source-pinned C++20 API reference at https://bradgearon.github.io/ChristEye-Knowledge/native-reference/.
+The reference at [the GitHub Pages URL](https://bradgearon.github.io/ChristEye-Knowledge/native-reference/) is the full browsable site from the supplied **anaiero-native-reference** package, not the former header crawler.
 
-Version 2 is generated from the native source branch with Tree-sitter and a separate native CMake compilation gate.
-The first generated version is expected at commit c5a4e8a04616c76decab52d237de53a3f3b09f23.
+## Contents
 
-The three-pane reader loads versions.json and a compact search index at startup. Declaration buckets and full
-source text are requested only when a symbol or source file is opened. Each version has immutable snapshot data
-under data/<commit-short> and exact source links. Features include class-member groups, overloads, search facets,
-keyboard navigation, version selection, declaration diffs, source previews, and persistent deep links.
+- `index.html` — three-panel API navigation, filters, tree browsing and offline export.
+- `styles.css` and `app.js` — the supplied frontend.
+- `data-parts/00.txt` through `23.txt` — exact contiguous segments of the supplied `data.js` (5,030 indexed declarations from the pinned source snapshot).
+- `offline-parts/00.txt` through `23.txt` — exact contiguous segments of the supplied self-contained HTML edition, downloadable from the site.
+- Original source repository: `bradgearon/ChristEye-Knowledge`. The browser preserves the source commit and branch identifiers recorded by the supplied package.
 
-The original supplied reference, its 24 data parts, original app.js/styles.css and its offline edition are retained.
-The original index is saved as legacy.html by the generator and remains a rollback path.
+GitHub's file API rejected uploading 7+ MB assets as single blobs. The browser reconstructs each source asset in order from 24 static parts, requiring no backend or build pipeline. The downloadable standalone reference is reconstructed to an ordinary `.html` file in the browser.
 
-Do not hand-edit generated symbols. To regenerate, update or invoke tools/native_docs/generate.py and the
-GitHub Actions native-reference workflow. Its separate README documents the parser, quality threshold, and
-publishing prerequisite. A failed validation leaves the previously published site unchanged.
-
-Scientific classification is not derived from C++ symbol documentation. Digital/runtime tests are not evidence
-of biological learning or physical validation.
+Source descriptions, declared functions, class ownership and overloads come from the supplied package. The index is a **snapshot**, not an assertion that it was regenerated from today's branch head.

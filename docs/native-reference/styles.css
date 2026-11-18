@@ -13,3 +13,12 @@
 @media(max-width:1250px){:root{--list-width:300px}.type-link .symbol-context{max-width:215px}.symbol-filters{padding-left:14px;padding-right:14px}.filter{font-size:9px;padding:6px 9px}}
 @media(max-width:1050px){:root{--list-width:300px}.browse-category-grid{grid-template-columns:1fr}}
 @media(max-width:740px){.symbol-filters{grid-template-columns:1fr 1fr;padding:0 22px 15px;gap:7px}.filter{font-size:12px;padding:8px 12px}.category-count{font-size:10px}.symbol-list{padding-left:16px;padding-right:16px}.namespace-group>summary{font-size:11px;padding:11px 5px}.namespace-count{font-size:10px}.type-link.symbol-item{padding:12px 7px 12px 0}.type-link .symbol-name{font-size:13px}.type-link .symbol-context{font-size:10px;max-width:none}.tree-toggle{height:46px;width:27px;min-width:27px}.type-children{margin-left:16px;padding-left:12px}.tree-section-label{font-size:9px;margin-top:14px}.member-item.symbol-item{padding:9px 6px}.member-item .symbol-name{font-size:12px}.member-item .symbol-context{font-size:10px}.family-label{font-size:12px}.family-toggle{padding:10px 4px}.overload-count{font-size:9px}.search-context-note{font-size:10px}.detail-overload>summary{font-size:11px;gap:7px;flex-wrap:wrap}.detail-expand{font-size:9px}.member-name{font-size:11px}.member-sig{font-size:10px}.member-desc{font-size:12px}.browse-category-grid{grid-template-columns:1fr 1fr}.browse-category-card{padding:16px}.browse-category-card p{font-size:10px}.browse-category-card h3{font-size:12px}.index-coverage{font-size:10px}.detail-overload-items{padding-left:12px;margin-left:5px}}
+
+/* 2026-11-18: readability-only adjustment to the ORIGINAL native reference sidebar.
+   Do not change API data, navigation, document content, or symbol grouping. */
+.namespace-group > summary { font-size: 13px; font-weight: 700; line-height: 1.5; }
+.namespace-name { font-size: 13px; }
+.tree-section-label { font-size: 12px; font-weight: 700; }
+.type-link .symbol-name { font-size: 14px; font-weight: 650; }
+.nested-type .type-link .symbol-name { font-size: 13px; }
+.family-label { font-size: 13px; font-weight: 650; }
