@@ -10,6 +10,12 @@ enum class SubscriptionPhase : std::uint32_t { active=0,suspended,expired,closed
 enum class PinKind : std::uint32_t { recovery=0,program,module,operation,reader,backup,operator_pin };
 enum class HistoryAvailability : std::uint32_t { retained=0,archived,expired };
 enum class MaintenancePhase : std::uint32_t { reviewed=0,activated,completed };
+enum class SourceAuthorityKind : std::uint32_t { local=0,relay=1 };
+
+struct SourceAuthority {
+  std::string uid,owner,clock_domain;
+  SourceAuthorityKind kind=SourceAuthorityKind::local;
+};
 
 struct Options {
   std::size_t max_active_sources=32,max_metrics=256,max_active_peers=32,
@@ -139,6 +145,11 @@ public:
   Result open();
   Result snapshot(Snapshot&) const;
   Result source(const SourceRef&,Source&) const;
+  Result source_authority(std::string_view uid,SourceAuthority&) const;
+  // One immutable UID owner/clock/role across local engines and authenticated
+  // relay streams. Stage in the caller's SAME canonical transaction so racing
+  // first registrations cannot establish separate ownership authorities.
+  Result stage_source_authority(evidence::CommitBatch&,const SourceAuthority&);
   Result register_engine(const EngineIdentity&,std::string owner,std::string operation_id);
   Result activate(const SourceRef&,std::string operation_id);
   Result begin_drain(const SourceRef&,std::string operation_id);

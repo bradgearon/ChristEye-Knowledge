@@ -69,6 +69,43 @@ struct Fixture {
   }
 };
 
+static void unified_source_authority(const fs::path& root){
+  Fixture fixture(root/"unified-authority");
+  const auto batch_for=[](std::string operation){ev::CommitBatch batch;batch.operation_id=operation;batch.request_digest=sdk::sha256(operation);return batch;};
+  auto relay=batch_for("relay-reserve");
+  require(fixture.service->stage_source_authority(relay,{"relay-uid","peer","logical",lc::SourceAuthorityKind::relay}));
+  fixture.commit(relay);
+  lc::SourceAuthority retained;require(fixture.service->source_authority("relay-uid",retained));
+  CHECK(retained.owner=="peer"&&retained.kind==lc::SourceAuthorityKind::relay);
+  CHECK(fixture.service->register_engine(identity("relay-uid"),"owner","cannot-local-register-relay").code==sdk::Code::unauthorized);
+  auto changed=batch_for("change-relay-owner");
+  CHECK(fixture.service->stage_source_authority(changed,{"relay-uid","different","logical",lc::SourceAuthorityKind::relay}).code==sdk::Code::unauthorized);
+  changed=batch_for("change-relay-clock");
+  CHECK(fixture.service->stage_source_authority(changed,{"relay-uid","peer","different",lc::SourceAuthorityKind::relay}).code==sdk::Code::unauthorized);
+
+  require(fixture.service->register_engine(identity("local-uid"),"owner","local-register"));
+  auto local_collision=batch_for("relay-after-local");
+  CHECK(fixture.service->stage_source_authority(local_collision,{"local-uid","peer","logical",lc::SourceAuthorityKind::relay}).code==sdk::Code::unauthorized);
+  // Both actors can prepare before either commits, but only one can win the
+  // shared absent-key guard. The losing actor cannot create a parallel owner.
+  auto staged_relay=batch_for("race-relay");
+  require(fixture.service->stage_source_authority(staged_relay,{"race-uid","peer","logical",lc::SourceAuthorityKind::relay}));
+  require(fixture.service->register_engine(identity("race-uid"),"owner","race-local"));
+  ev::CommitReceipt receipt;CHECK(fixture.store->commit(staged_relay,receipt).code==sdk::Code::conflict);
+
+  // Retained pre-ownership witnesses also prevent re-enrollment. Their bytes
+  // need not be interpreted to know the UID cannot change its authority role.
+  auto legacy=batch_for("legacy-witnesses");
+  legacy.records.push_back({"mesh.receive.owner",sdk::sha256("legacy-relay"),"historical relay witness",{},false});
+  legacy.records.push_back({"lifecycle.fence",sdk::sha256("legacy-local"),"historical local witness",{},false});
+  fixture.commit(legacy);
+  CHECK(fixture.service->register_engine(identity("legacy-relay"),"owner","legacy-local-collision").code==sdk::Code::unauthorized);
+  auto legacy_collision=batch_for("legacy-relay-collision");
+  CHECK(fixture.service->stage_source_authority(legacy_collision,{"legacy-local","peer","logical",lc::SourceAuthorityKind::relay}).code==sdk::Code::unauthorized);
+  fixture.reopen();require(fixture.service->source_authority("relay-uid",retained));
+  CHECK(retained.owner=="peer"&&retained.clock_domain=="logical");
+}
+
 static void source_churn(const fs::path& root){
   constexpr std::uint64_t epochs=12; // Six times the declared live-source cap.
   lc::Options limits;limits.max_active_sources=2;limits.max_metrics=2;
@@ -320,7 +357,7 @@ static void native_restore(const fs::path& root){
 int main(int argc,char** argv){
   CHECK(argc==2||argc==3);const fs::path root(argv[1]);const std::string scenario=argc==3?argv[2]:"all";
   CHECK(scenario=="all"||scenario=="retries"||scenario=="restore");fs::remove_all(root);fs::create_directories(root);
-  if(scenario=="all")source_churn(root);
+  if(scenario=="all"){unified_source_authority(root);source_churn(root);}
   if(scenario=="all"||scenario=="retries"){subscription_generations(root);retention_and_bootstrap(root);}
   if(scenario=="all"){restored_authority(root);archive_quota(root);}
   if(scenario=="all"||scenario=="restore")native_restore(root);

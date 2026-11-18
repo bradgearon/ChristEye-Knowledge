@@ -52,6 +52,9 @@ if(TARGET anaiero_evidence)
 endif()
 include(${CMAKE_CURRENT_LIST_DIR}/NativeLifecycle.cmake OPTIONAL)
 include(${CMAKE_CURRENT_LIST_DIR}/NativeEngines.cmake OPTIONAL)
+include(${CMAKE_CURRENT_LIST_DIR}/NativeHost.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/NativeContinuousMesh.cmake OPTIONAL)
+include(${CMAKE_CURRENT_LIST_DIR}/NativeQualification.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/ModularSessionTests.cmake)
 
 install(TARGETS anaiero_contracts anaiero_catalog anaiero_projection anaiero_runtime anaiero_experiments
@@ -59,7 +62,7 @@ install(TARGETS anaiero_contracts anaiero_catalog anaiero_projection anaiero_run
   EXPORT AnaieroTargets ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(DIRECTORY sdk/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(FILES docs/module-sdk.md docs/canonical-evidence.md docs/modular-lifecycle.md
-  docs/sdk-reference.md DESTINATION ${CMAKE_INSTALL_DATADIR}/anaiero)
+  docs/sdk-reference.md docs/continuous-mesh.md DESTINATION ${CMAKE_INSTALL_DATADIR}/anaiero)
 configure_package_config_file(${CMAKE_CURRENT_LIST_DIR}/AnaieroConfig.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/AnaieroConfig.cmake
   INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Anaiero)

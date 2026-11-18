@@ -23,15 +23,18 @@ namespace fs=std::filesystem;
 struct Module {std::string_view name, backend, purpose, example;};
 constexpr std::array<Module,
 #ifdef ANAIERO_HAS_MESH
-18
+21
 #else
-17
+19
 #endif
 > modules{{
 #ifdef ANAIERO_HAS_MESH
   {"mesh","ce_mesh","Authenticated evidence replication and scoped artifacts","anaiero mesh help"},
+  {"mesh-live","ce_modular_mesh","Continuous authenticated canonical evidence delivery","anaiero mesh-live help"},
 #endif
   {"session","ce_modular_session","Registered engines, durable shared plans and evidence lifecycle","anaiero session help"},
+  {"host","ce_modular_host","Continuous native modular sessions and local control","anaiero host help"},
+  {"qualify","ce_native_qualification","Predeclared native evidence and lifecycle measurements","anaiero qualify help"},
   {"vm","ce_vlm","Virtual Living Machines","anaiero vm inspect examples/vlm/crest-garden.avlm"},
   {"process","ce_vlm_process","Timed VLM2 processes","anaiero process inspect examples/vlm/process-garden.avlm"},
   {"plan","ce_vlm_plan","Crystal/RNA/learning plans","anaiero plan inspect examples/vlm/bread-first.cevplan examples/vlm/plan-garden.avlm ."},

@@ -18,6 +18,11 @@ Continuous delivery through the existing authenticated mesh is M5. Long-duration
 resource measurements, deployment qualification and release packaging are M6.
 Those remaining gates are not replaced by successful functional tests.
 
+**Continuation:** [CE-SW-39](CE-SW-39_continuous_native_operation.md) adds the
+continuous canonical host/mesh, reviewed journal-prefix compaction and native
+package/measurement tooling. This document retains the original M1–M4 scope;
+its forward references to those capabilities describe the earlier checkpoint.
+
 ## 1. What changed
 
 | Batch | Implemented capability | Operator or integration proof |

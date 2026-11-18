@@ -1,0 +1,23 @@
+[Unit]
+Description=Anaiero canonical modular session
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=notify
+NotifyAccess=main
+WorkingDirectory=%h/.local/share/anaiero
+ExecStart=%h/.local/lib/anaiero/bin/ce_modular_host start %t/anaiero-modular/control.sock %h/.local/state/anaiero/modular 100
+RuntimeDirectory=anaiero-modular
+RuntimeDirectoryMode=0700
+UMask=0077
+KillSignal=SIGTERM
+KillMode=control-group
+TimeoutStartSec=60
+TimeoutStopSec=60
+Restart=on-failure
+RestartSec=2
+NoNewPrivileges=true
+
+[Install]
+WantedBy=default.target

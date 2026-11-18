@@ -5,12 +5,12 @@ file(GLOB_RECURSE anaiero_builtin_inputs CONFIGURE_DEPENDS
   "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/examples/modular_session_cli.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/examples/modular_host_cli.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/examples/modular_mesh_cli.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/examples/native_qualification_cli.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/sdk/include/*.hpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/sdk/include/*.h"
-  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/NativeModules.cmake"
-  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/NativeEngines.cmake"
-  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/NativeEvidence.cmake"
-  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/NativeLifecycle.cmake"
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/*.cmake"
   "${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt"
   "${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp")
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${anaiero_builtin_inputs})

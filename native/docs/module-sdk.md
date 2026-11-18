@@ -171,6 +171,35 @@ owned child through native Windows/Linux process supervision, and a fresh proces
 can restore the last committed checkpoint. The supervision boundary does not
 claim an OS security sandbox or an enforced child-memory/CPU quota.
 
+## Continuous host and authenticated mesh
+
+`host.hpp` exposes `NativeContinuousHost`, bounded control/status records and
+`IStoreTaskExecutor`. `native_session.hpp` provides native composition for an
+already initialized canonical modular session. Borrowed runtime/runner/store
+objects outlive the host and are never called concurrently outside its ownership
+boundary. Accepted storage jobs own their captures, reserve completion capacity
+and complete exactly once. Stop closes admission and drains accepted jobs.
+
+`mesh.hpp` is the portable canonical mesh service and cost-aware scheduler.
+`native_mesh.hpp` is the optional native authenticated adapter. It submits
+storage tasks to the same host lane used by engines, and consumes coalesced
+commit availability signals. Native transport and platform headers remain
+outside the installed SDK. Link `anaiero::anaiero_mesh_native` only in the
+optional mesh profile; `anaiero::anaiero_mesh_service` remains transport-free.
+
+Signal-only wake callbacks must not reenter the host or inspect the borrowed
+store. Local administration has a nonblocking submission API with owned result
+bytes; its synchronous convenience adapter is for a separate caller, not the
+serialized IPC/status handler. Peer/session/grant records do not authorize
+remote arbitrary code execution. See [continuous mesh](continuous-mesh.md) and
+[CE-SW-39](../../docs/software/CE-SW-39_continuous_native_operation.md) for concrete
+host composition, lifecycle, retries and profile limits.
+
+`storage_tools.hpp` also exposes reviewed canonical compaction. Existing
+operation identities remain valid when receipts are retained. Explicit receipt
+expiry requires an application-owned new intent/operation namespace; fetching
+the current epoch and automatically stamping an uncertain retry is incorrect.
+
 ## Verification limits
 
 The conformance tests cover canonical codecs, an engine absent from the core,

@@ -1,5 +1,98 @@
 # Native host deployment
 
+## Canonical modular host
+
+For the compiled SDK sessions in CE-SW-38, use **`ce_modular_host`**. Initialize
+the canonical session once, then run its native host directly under the
+supervisor:
+
+```sh
+anaiero session init examples/runtime/modular-native.cevsession /absolute/state/modular
+ce_modular_host start /absolute/runtime/control.sock /absolute/state/modular 100
+anaiero host query /absolute/runtime/control.sock STATUS
+anaiero host query /absolute/runtime/control.sock PAUSE
+anaiero host query /absolute/runtime/control.sock THROUGH 20
+anaiero host query /absolute/runtime/control.sock ENGINE_PAUSE environment pause-environment-1
+anaiero host query /absolute/runtime/control.sock STOP
+```
+
+The period is wall monotonic milliseconds between completed cycles; it never
+changes an engine's logical clock. Missed deadlines do not accumulate catch-up
+work. `paused` after the period starts with automatic scheduling disabled.
+An already committed cycle intent is completed even in paused mode. `RUN` and
+`PAUSE` affect automatic scheduling; `THROUGH` requests an absolute cycle
+target, with at most 10,000 new cycles in one request. A process restart retains
+committed cycle progress and intent, but does not preserve the host's transient
+run/through request. The service command defines its startup mode.
+
+Local admission returns a ticket with `durable:false`. `RESULT ticket` reports
+completion for the bounded recent ticket window. Engine controls require a
+stable operation ID and reconcile through canonical evidence; repeating the
+same operation cannot apply the transition twice. A run/pause/through ticket
+records scheduling acceptance, not completion of all requested cycles.
+`STATUS [engine-offset]` reads an immutable cached page of up to eight engines
+while storage or model work is active. It reports pending cycles, canonical
+generation, accounted quota, queue counts and owner wakeups. It does not expose
+checkpoint payloads through the 16 KiB local frame.
+
+Shutdown stops new admission, completes the active durable cycle and accepted
+storage tasks, and returns explicit cancellation for queued local controls.
+The stop path has reserved signaling capacity even when both work queues are
+full. If storage has already failed, shutdown leaves the exact pending intent
+for explicit recovery instead of reporting a completed cycle. The serial
+domain owner and storage worker are separate from the IPC listener. A slow
+storage task cannot turn a cached status request into a filesystem scan.
+
+The `anaiero-modular.service` example uses systemd user service notification and
+the signal drain path. It expects an initialized store at
+`~/.local/state/anaiero/modular`. The Windows helper
+`manage-modular-service.ps1` registers the real `ce_modular_host.exe` process as
+`AnaieroModular`, requires an explicit account, runs a quiescent compatibility
+check, and uses manual startup. Its Remove action removes the registration and
+preserves evidence. Same-user local IPC means the client must run as that
+service account.
+
+### Package and upgrade verification
+
+Build a complete native installation before packaging. The packaging recipe
+uses CMake and the installed native host; it does not require Python:
+
+```sh
+cmake -DANAIERO_BUILD_DIR=/absolute/build \
+  -DANAIERO_PACKAGE_DIR=/absolute/releases/anaiero-candidate \
+  -DANAIERO_CONFIG=Release \
+  -DANAIERO_PROFILE=native-canonical-functional \
+  -P native/cmake/BuildNativePackage.cmake
+cmake -DANAIERO_PACKAGE_DIR=/absolute/releases/anaiero-candidate \
+  -P native/cmake/VerifyNativePackage.cmake
+```
+
+The manifest inventories every installed file by relative path, SHA-256 and
+byte count, and records the exact compiled builtin identity and profile.
+Verification rejects missing, altered, extra and symlink entries, then executes
+the installed host's identity check. A manifest digest is package integrity,
+not an independently authenticated publisher signature. System libraries and
+optional OpenSSL remain dependencies of the declared native installation;
+this recipe does not claim to bundle an arbitrary operating-system runtime.
+An optional `ANAIERO_ARCHIVE` creates a tar.gz transport artifact without
+overwriting an existing destination.
+
+Install the candidate beside the current package. Stop the old host and run
+verification with `-DANAIERO_STORE_DIR=/absolute/state/modular` before changing
+the supervisor command. A compatible retained engine build is required;
+changing its implementation identity requires an explicit supported state
+migration or source retirement. No transparent hot upgrade is implied. The
+host retains and pins its executable independently from the session CLI's
+engine package, so both programs can use the same compiled engine identity.
+
+Preserve the previous package and a consistent recovery copy. After new
+canonical writes have been acknowledged, reverting an old backup would lose
+the suffix and is not an upgrade rollback. Keep the new evidence available to
+a compatible binary or migrate it explicitly. Uninstalling a service or
+package does not remove canonical evidence.
+
+## Earlier runtime host
+
 The installed `ce_colony_runtime` backend is the long-running process. Use it
 directly under an operating-system supervisor so service control and signals
 reach the process that owns the session. `anaiero` remains the public command

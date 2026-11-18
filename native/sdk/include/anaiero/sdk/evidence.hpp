@@ -95,13 +95,27 @@ struct StoreInfo {
   std::uint64_t maintenance_reserve_bytes=0,ordinary_limit_bytes=0;
   Digest root_digest,index_root;
   bool writable=false,index_ready=false;
+  // Canonical bytes before this generation were replaced by a verified base.
+  // Exact operation receipts are retained unless an explicit compaction rotates
+  // their namespace. Unknown older-epoch operations then fail HISTORY_EXPIRED.
+  std::uint64_t canonical_base_generation=0,operation_epoch=0;
+  // Last durably admitted native UTC sample; persists through compaction.
+  std::uint64_t admitted_unix_s=0;
+  Digest canonical_base_digest;
+  // Conservative obsolete-file upper bound until durable cleanup completes.
+  std::uint64_t pending_reclamation_bytes=0;
 };
 struct AuditReport {
   std::uint64_t generations=0,records=0,blobs=0,expired_blobs=0;
   std::uint64_t index_nodes_read=0,canonical_records_read=0;
+  std::uint64_t summarized_generations=0,summarized_record_versions=0;
+  std::uint64_t expired_observations=0,base_pages=0;
+  Digest canonical_base_digest;
 };
 struct IndexStatistics {
   std::uint64_t nodes_read=0,nodes_written=0,point_queries=0,range_queries=0;
+  std::uint64_t staged_nodes=0,staged_spills=0,transient_nodes_elided=0;
+  std::uint64_t cache_peak_nodes=0,cache_peak_bytes=0;
 };
 class IAdmissionClock {
 public:
@@ -122,7 +136,8 @@ struct StoreOptions {
   std::uint64_t maintenance_reserve_bytes=16U*1024U*1024U;
 };
 enum class FaultPoint : std::uint32_t {
-  none,after_objects,after_transaction,after_root,before_index,after_index
+  none,after_objects,after_transaction,after_root,before_index,after_index,
+  compaction_after_base,compaction_after_root,compaction_during_cleanup
 };
 // Typed indexed reads are independent of the canonical writer and blob I/O.
 // A missing/corrupt index cannot be interpreted as evidence of absence.

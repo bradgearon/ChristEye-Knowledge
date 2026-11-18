@@ -16,6 +16,12 @@ five-item delivery order. [CE-SW-38](CE-SW-38_compiled_runtime_and_lifecycle.md)
 now implements M1–M4 in the compiled modular session. The older ratings and
 CI table below remain a historical CE-SW-36 comparison, not current release proof.
 
+**Operational continuation — 2026-11-18:**
+[CE-SW-39](CE-SW-39_continuous_native_operation.md) delivers continuous canonical
+mesh, reviewed canonical compaction, a continuous native host/package path and
+measured operating profiles. These are the next four concrete deliveries under
+M5/M6; the long-duration release gates remain separate.
+
 Use the [implementation checkpoint](native_implementation_status.md) for what
 currently runs. This document tracks CE-SW-37's forward order and retains the
 readiness evidence and detailed capability subplans. Historical
@@ -24,26 +30,30 @@ increments; their old TODOs are not the current backlog. The
 [project phase roadmap](../roadmap.md) separately records scientific and
 physical qualification.
 
-## Current assessment after M1–M4
+## Current assessment after the continuous-operation changes
 
 **Approximately 8.5/10 as a native engineering research platform**, as an
 engineering review judgment rather than a measured completion percentage.
 Extension/reuse and integrated plan execution move from material capability
 gaps to implemented paths with installed-consumer, equivalence and recovery
-fixtures. Sustained operation remains the limiting category.
+fixtures. Continuous operation now has a canonical host/mesh path and explicit
+history compaction. Sustained deployment evidence remains the limiting category;
+the overall rating stays approximately 8.5 until representative longer runs and
+independent application adoption support a higher judgment.
 
 | Area | Current judgment | Implemented improvement | Remaining evidence |
 |---|---:|---|---|
 | Extension and library reuse | 8.5/10 | Compiled SDK, typed catalog, native/process admission, independent installed consumer | Independent application adoption and supported ABI/package upgrade matrix |
 | Integrated plans and digital experiments | 8.5/10 | Real retained VLM execution; coherent SW5/SIM3 changes; frozen selection and canonical outcomes | Broader declared workloads and variant/scientific capability qualification |
-| Evidence and recovery | 8.5/10 | Single canonical commit, verified historical index, expiry guards, migration and crash cuts | Filesystem/power-loss qualification and large retained-history profiles |
-| Source/retention operation | 7/10 | Reusable active slots, indexed history, leases, archive/expiry, payload reclamation and quarantine | Continuous mesh binding, prolonged resource evidence and optional prefix-pruning |
-| Documentation and SDK entry points | 8/10 | Current operator guide, installed SDK example and generated exact public reference | Release/package documentation verified against each shipped profile |
+| Evidence and recovery | 8.5/10 | Single canonical commit; verified historical index; reviewed base/suffix compaction; explicit retry-history floors; migration and process/fault recovery | Filesystem/power-loss qualification and the dedicated million-observation profile |
+| Source/retention operation | 8/10 | Reusable active slots; indexed history; leases/archive/expiry; canonical prefix reclamation; continuous host/mesh binding | Mixed 24-hour/seven-day deployment evidence and policy for arbitrary retained-identity growth |
+| Documentation and SDK entry points | 8.5/10 | Current host/mesh/compaction guides, installed SDK example, package verifier and generated public reference | Supported package upgrade matrix and evidence for each shipped deployment profile |
 
-The numerical scope and authenticated transport retain their prior evidence;
-new lifecycle services do not by themselves upgrade the existing mesh to
-continuous operation. Biological validity remains unestablished. These ratings
-do not assert M5/M6 completion or replace the exact Windows/Linux CI evidence.
+The numerical scope retains its prior evidence. CE-SW-39 binds the new
+authenticated mesh to the modular session rather than inferring integration
+from component existence. Biological validity remains unestablished. These
+ratings do not assert M6 release qualification or replace exact Windows/Linux
+CI reports, measured operating profiles or hardware-specific evidence.
 
 ## Historical CE-SW-36 assessment
 
@@ -113,8 +123,9 @@ capability and scale gaps.
 
 The findings below describe the reviewed CE-SW-36 paths. CE-SW-38 closes the
 compiled-module, shared-session VLM, supported SIM3 live-change and modular
-source-lifecycle gaps through a new versioned path. Existing mesh callers still
-need M5 integration. The details remain useful compatibility context.
+source-lifecycle gaps through a new versioned path. CE-SW-39 supplies the M5
+canonical mesh integration; legacy mesh callers retain their original versioned
+path until explicitly adopted. The details remain useful compatibility context.
 
 ### Existing plans execute, but not through the integrated experiment path
 
@@ -198,8 +209,9 @@ modules retain the compact standard deployment.
 Each batch is approximately five related increments delivered as one usable
 capability, including services, adapters, operator wiring, failure tests,
 native Windows/Linux verification and documentation. Internal commits may be
-reviewed separately. M1–M4 are implemented in CE-SW-38 within its stated
-profile; M5/M6 remain forward work.
+reviewed separately. M1–M4 are implemented in CE-SW-38; CE-SW-39 implements the
+continuous operational path and M6's package/profile tooling. Sustained release
+qualification remains an explicit gate.
 
 | Order | Architecture batch | Usable result | Dependency |
 |---|---|---|---|
@@ -207,21 +219,27 @@ profile; M5/M6 remain forward work.
 | M2 — implemented | Canonical transitions and indexed evidence | One recoverable commit/root contract, asynchronous storage and verified historical indexes | M1 contracts |
 | M3 — implemented | Complete engine execution and change paths | Finite durable VLM plans and engine-owned SW5/SIM3 trial/change paths with configuration/state recovery | M1 and M2 |
 | M4 — implemented | Source, peer, subscription and retention lifecycle | Reusable active capacity, versioned checkpoints, archive policy, leases and explicit replay floors | M1 and M2; can proceed alongside M3 |
-| M5 | Continuous mesh service | Event-driven live delivery, byte/work fairness, identity/artifact lifecycle and rebootstrap | M2 and M4 |
-| M6 | Qualified native release | Reproducible packages, compatibility proof, failure matrix and sustained resource/recovery evidence | Integration of preceding batches |
+| M5 — implemented operational path | Continuous mesh service | Canonical shared-host live delivery, bounded TLS admission, byte/work fairness, scoped lifecycle/artifacts/rebootstrap and native multi-peer fixtures | M2 and M4; CE-SW-39 |
+| M6 — tooling and functional evidence; release gate open | Qualified native release | Native host/service packages, installed integrity/compatibility checks, process/fault matrix and measured profiles; prolonged deployment qualification still required | Integration of preceding batches |
 
 See [CE-SW-37's delivery sequence](CE-SW-37_modular_runtime_and_evidence_lifecycle.md#14-delivery-sequence)
 for approximately five related increments per batch and exact closure gates.
-The next implementation changeset is **M5**, connecting continuous authenticated
-transport to the new canonical/index/lifecycle services. M6 must publish a
-measured operating envelope before production readiness is claimed.
+The four-delivery CE-SW-39 changeset connects transport to canonical sessions,
+adds authority-preserving prefix compaction, makes the session continuously
+operable and supplies executable qualification/package gates. The next closure
+work is the dedicated M6 operating envelope: mixed sustained workloads,
+declared device profiles, longer history scale, actual pressure/crash behavior
+and supported upgrade/rollback procedures. Production readiness is not inferred
+from the new architecture or a passing short test.
 
 Implementation decisions are explicit: a sealed native AVL backend replaces
 the recommended SQLite dependency; old evidence migrates without pretending to
-upgrade old live session state; expired payloads are reclaimed but historical
-canonical metadata remains quota-bounded. The runtime reserves maintenance
-headroom and stops admission at finite capacity. Canonical prefix-pruning needs
-its own authority-summary and restore proof before being enabled.
+upgrade old live session state; verified canonical bases now permit reviewed
+prefix-pruning while preserving latest authority and exact operation receipts
+by default. Explicit receipt expiry requires a new operation namespace and is
+not enabled for existing modular sessions. Arbitrary retained identity
+cardinality remains finite and quota-bounded. The runtime reserves maintenance
+headroom and stops admission when its declared policy cannot reclaim more.
 
 The detailed A–E capability plans below are retained as subplans: A (VLM) and
 C (SIM3 changes) map to M3; B maps to M2/M4/M6; E maps to M5. D remains a

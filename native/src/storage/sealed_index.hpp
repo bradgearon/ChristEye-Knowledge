@@ -28,6 +28,7 @@ public:
   Digest put(const Digest&,std::string key,std::string value);
   Node load(const Digest&);
   void begin();
+  void discard_cache() noexcept;
   void publish_cleanup(const Digest&);
   void finish_cleanup(const Digest&);
   void audit(const Digest&);
@@ -36,7 +37,7 @@ public:
 private:
   fs::path directory_;
   std::map<Digest,Node> cache_;
-  std::set<Digest> obsolete_;
+  std::set<Digest> obsolete_,pending_;
   bool caching_=false;
   std::size_t cache_bytes_=0;
   void cache(const Digest&,const Node&);

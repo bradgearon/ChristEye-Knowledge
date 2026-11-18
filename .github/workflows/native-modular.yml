@@ -1,9 +1,9 @@
 name: Anaiero Modular Runtime and Evidence Lifecycle
 on:
   push:
-    paths: ['native/**', 'examples/runtime/**', 'tools/sdk-reference/**', '.github/workflows/native-modular.yml']
+    paths: ['native/**', 'examples/runtime/**', 'qualification/native/**', 'deployment/native/**', 'tools/sdk-reference/**', '.github/workflows/native-modular.yml']
   pull_request:
-    paths: ['native/**', 'examples/runtime/**', 'tools/sdk-reference/**', '.github/workflows/native-modular.yml']
+    paths: ['native/**', 'examples/runtime/**', 'qualification/native/**', 'deployment/native/**', 'tools/sdk-reference/**', '.github/workflows/native-modular.yml']
 permissions:
   contents: read
 jobs:
@@ -13,7 +13,7 @@ jobs:
       matrix:
         os: [ubuntu-24.04, windows-2022]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       - name: Configure native runtime and regression contracts
@@ -28,6 +28,8 @@ jobs:
         run: cmake -S native -B build/controller -DANAIERO_CONTROLLER_ONLY=ON -DCE_WIND_BUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_DISABLE_FIND_PACKAGE_Python3=TRUE
       - name: Build controller profile
         run: cmake --build build/controller --config Release --parallel 3
+      - name: Measure 100000 observations and 100 epoch transitions against declared budgets
+        run: cmake -DANAIERO_BUILD_DIR=build/modular -DANAIERO_PROFILE=qualification/native/evidence-100k.cevqualification -DANAIERO_OUTPUT=build/qualification-100k -DANAIERO_CONFIG=Release -P native/cmake/RunNativeQualification.cmake
       - name: Preserve native verification logs and module manifests
         if: always()
         uses: actions/upload-artifact@v4
@@ -36,6 +38,11 @@ jobs:
           path: |
             build/modular/Testing/Temporary/*.log
             build/modular/anaiero-builtin-manifest*.txt
+            build/modular/qualification-smoke/report.json
+            build/modular/qualification-smoke/profile.cevqualification
+            build/qualification-100k/report.json
+            build/qualification-100k/profile.cevqualification
+            build/modular/native-package-tests/native package/package-manifest.json
           if-no-files-found: ignore
   sdk-reference:
     runs-on: ubuntu-24.04

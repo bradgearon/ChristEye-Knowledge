@@ -1,6 +1,7 @@
 // Real TLS sessions and adversarial clients. The CA and private keys are
 // generated inside the test directory; no deployable credentials are shipped.
 #include "mesh_test_credentials.hpp"
+#include <array>
 #include <atomic>
 #include <chrono>
 #include <cstdlib>
@@ -152,16 +153,20 @@ static void malformed_frames(tls::Context& server,const mesh::test::Credentials&
     Code received=Code::invalid;
     std::thread owner([&]{
       tls::Connection peer;CHECK(listener.accept(peer,kDeadline)==Code::ok);
-      std::vector<std::byte> frame{std::byte{1}};received=peer.read_frame(frame,150);
+      // Complete invalid headers test framing rejection, so scheduler load must
+      // not turn them into a deadline test. Partial frames keep the short bound.
+      std::vector<std::byte> frame{std::byte{1}};received=peer.read_frame(frame,fault<2?kDeadline:150);
       CHECK(frame.empty()&&!peer.peer().verified());
     });
     RawClient raw;CHECK(raw.connect(listener.local_endpoint(),credentials.client));
-    std::vector<std::byte> bytes;
-    if(fault==0)bytes={std::byte{0},std::byte{1},std::byte{0},std::byte{1}}; // 65537
-    if(fault==1)bytes=std::vector<std::byte>(4); // empty frame is forbidden
-    if(fault==2)bytes={std::byte{0},std::byte{0}}; // incomplete length
-    if(fault==3)bytes={std::byte{0},std::byte{0},std::byte{0},std::byte{100},std::byte{1}};
-    CHECK(raw.write(bytes));owner.join();
+    const std::array<std::array<std::byte,5>,4> frames{{
+      {std::byte{0},std::byte{1},std::byte{0},std::byte{1},std::byte{0}}, // 65537
+      {}, // empty frame is forbidden
+      {}, // incomplete length
+      {std::byte{0},std::byte{0},std::byte{0},std::byte{100},std::byte{1}}
+    }};
+    constexpr std::array<std::size_t,4> lengths{4,4,2,5};
+    CHECK(raw.write(std::span(frames[fault]).first(lengths[fault])));owner.join();
     CHECK(received==(fault<2?Code::frame_too_large:Code::timeout));
   }
 }

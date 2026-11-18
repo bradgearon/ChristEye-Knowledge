@@ -796,6 +796,10 @@ sustained deployment evidence.
 | M6 | Qualified native release | Reproducible profiles/packages; SDK/API/protocol compatibility; full crash/restore matrix; soak/resource measurements; published release evidence and limits | Both native platforms meet the declared operating envelope; unsupported envelopes are explicit |
 
 M1–M4 are implemented in CE-SW-38 within its stated native profile.
+[CE-SW-39](CE-SW-39_continuous_native_operation.md) implements the continuous
+host/mesh path, reviewed canonical prefix compaction and M6 package/profile
+tooling. The M6 sustained-release gates below are not inferred from that
+functional implementation or its shorter measurements.
 M1 establishes the contract boundary. M2 establishes the commit/index foundation.
 M3 and M4 can proceed in parallel after those foundations; M5 requires M4.
 M6 collects release evidence while each earlier batch already carries its own
