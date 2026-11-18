@@ -29,6 +29,16 @@ namespace fs=std::filesystem;
 using Code=mesh::TransportCode;
 using namespace std::chrono_literals;
 static constexpr mesh::Scope kForward{101,1,1,101},kReverse{201,1,1,201};
+static bool tls_required() {
+#ifdef _WIN32
+  // An empty value still requires TLS; only absence permits a skip.
+  ::SetLastError(ERROR_SUCCESS);
+  return ::GetEnvironmentVariableA("ANAIERO_REQUIRE_MESH_TLS",nullptr,0)!=0||
+    ::GetLastError()!=ERROR_ENVVAR_NOT_FOUND;
+#else
+  return std::getenv("ANAIERO_REQUIRE_MESH_TLS")!=nullptr;
+#endif
+}
 static void check(bool success,std::string_view explanation){
   if(!success){std::cerr<<"FAILED integration: "<<explanation<<'\n';std::abort();}
 }
@@ -343,7 +353,7 @@ int main(int argc,char** argv){
   CHECK(client.open(credentials.client,tls::Role::client)==Code::ok);
   tls::Listener probe;const auto status=probe.open(server,{"127.0.0.1",0});
   if(status==Code::permission_denied){
-    if(std::getenv("ANAIERO_REQUIRE_MESH_TLS")){std::cerr<<"Required TCP/TLS unavailable\n";return 1;}
+    if(tls_required()){std::cerr<<"Required TCP/TLS unavailable\n";return 1;}
     std::cout<<"SKIP: environment denies native TCP sockets\n";return 77;
   }
   CHECK(status==Code::ok);probe.close();
