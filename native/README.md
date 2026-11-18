@@ -1,5 +1,39 @@
 # Anaiero native runtime
 
+## Compiled modular sessions (CE-SW-38)
+
+The current modular path is `anaiero session` in the full build, or
+`ce_modular_session` in the controller-only profile. It combines five registered
+engines, canonical indexed evidence, recoverable VLM plans and SW5/SIM3 changes,
+recorded experiments, source retirement, protected retention and quarantined
+restore. Model state and projected observations advance after canonical commit.
+
+```sh
+cmake -S native -B build/native -DCMAKE_BUILD_TYPE=Release -DCE_WIND_BUILD_TESTS=ON
+cmake --build build/native --config Release --parallel 3
+./build/native/anaiero session init examples/runtime/modular-native.cevsession ./modular-state
+./build/native/anaiero session run ./modular-state 20
+./build/native/anaiero session status ./modular-state
+```
+
+On Windows use `build/native/Release/anaiero.exe`. A controller-only build uses
+`-DANAIERO_CONTROLLER_ONLY=ON` and the `ce_modular_session` executable with the
+arguments after `session`. `run` takes an absolute committed cycle target.
+The example's VLM plan completes at tick 12 while the other engines continue.
+The full [operator and implementation guide](../docs/software/CE-SW-38_compiled_runtime_and_lifecycle.md)
+describes commands, compatibility, finite limits and remaining M5/M6 work.
+
+The [installed SDK guide](docs/module-sdk.md),
+[exact public API reference](docs/sdk-reference.md),
+[evidence contract](docs/canonical-evidence.md) and
+[lifecycle guide](docs/modular-lifecycle.md) describe reusable compiled modules.
+`find_package(Anaiero 1 CONFIG)` exposes the installed native C++20 SDK without
+private simulation headers or a scripting runtime dependency.
+
+The following sections document compatible earlier runtime/mesh and component
+paths. Their formats are preserved; they are not silently upgraded to the new
+canonical store.
+
 ## Integrated native sessions and mesh (CE-SW-31–35)
 
 The native controller composes SW5, SIM3 and supervised scientific engines,

@@ -67,6 +67,40 @@ def internal_includes(path: Path):
 
 
 class NativeArchitectureTests(unittest.TestCase):
+    def test_installed_sdk_does_not_export_private_or_platform_headers(self):
+        sdk = ROOT.parents[1] / "sdk" / "include"
+        files = sorted(sdk.rglob("*.hpp")) + sorted(sdk.rglob("*.h"))
+        self.assertTrue(files, "The independently installed SDK must exist")
+        includes = re.compile(r'^\s*#\s*include\s*["<]([^">]+)[">]', re.M)
+        forbidden = {"windows.h", "unistd.h", "filesystem", "fstream", "thread",
+                     "winsock2.h", "sys/socket.h", "sys/mman.h"}
+        for path in files:
+            for header in includes.findall(path.read_text(encoding="utf-8")):
+                with self.subTest(path=path.relative_to(sdk), header=header):
+                    self.assertNotIn(header, forbidden)
+                    self.assertFalse(header.startswith(("christeye/", "../", "src/")))
+                    if header.startswith("anaiero/"):
+                        self.assertTrue(header.startswith("anaiero/sdk/"))
+                        self.assertTrue((sdk / header).is_file())
+
+    def test_compiled_domain_excludes_io_and_concrete_engine_dependencies(self):
+        source = ROOT.parents[1] / "src"
+        portable = [source / "sdk" / name for name in
+                    ("catalog.cpp", "runtime.cpp", "projection.cpp", "experiments.cpp", "observer.cpp")]
+        portable += list((source / "session").glob("*.cpp"))
+        portable += [source / "lifecycle" / "lifecycle.cpp", source / "lifecycle" / "records.hpp"]
+        includes = re.compile(r'^\s*#\s*include\s*["<]([^">]+)[">]', re.M)
+        for path in portable:
+            self.assertTrue(path.is_file(), str(path))
+            for header in includes.findall(path.read_text(encoding="utf-8")):
+                with self.subTest(path=path.relative_to(source), header=header):
+                    self.assertFalse(header.startswith(("christeye/", "anaiero/infrastructure/",
+                        "anaiero/services/", "anaiero/models/", "openssl/", "sys/")))
+                    self.assertNotIn(header, {"filesystem", "fstream", "thread", "windows.h", "unistd.h"})
+        projector = (source / "sdk" / "projection.cpp").read_text(encoding="utf-8")
+        self.assertNotIn('"anaiero/sdk/experiments.hpp"', projector)
+        self.assertNotIn('"anaiero/sdk/runtime.hpp"', projector)
+
     def test_passive_models(self):
         files = headers("models")
         self.assertTrue(files, "Missing native Anaiero model headers")

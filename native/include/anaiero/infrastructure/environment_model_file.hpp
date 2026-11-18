@@ -13,10 +13,9 @@ inline std::string serialize_environment_model(const EnvironmentCompartmentModel
     <<"\nconsumption_ppm_per_second "<<model.consumption_ppm_per_second<<"\nend\n";
   return output.str();
 }
-inline bool read_environment_model(const std::filesystem::path& path,EnvironmentCompartmentModel& model,std::string& sha){
-  std::string bytes;
-  if(!christeye::living::durable::read_bounded(path,4096,bytes))return false;
-  std::istringstream input(bytes);input.imbue(std::locale::classic());
+inline bool parse_environment_model(std::string_view bytes,EnvironmentCompartmentModel& model,std::string& sha){
+  if(bytes.size()>4096)return false;
+  std::istringstream input{std::string(bytes)};input.imbue(std::locale::classic());
   std::string header,initial,inlet,tau,consumption,end,extra;
   EnvironmentCompartmentModel next{};
   if(!(input>>header>>initial>>next.initial_micromolar>>inlet>>next.inlet_max_micromolar>>
@@ -26,5 +25,10 @@ inline bool read_environment_model(const std::filesystem::path& path,Environment
   // Only syntax and byte provenance belong to this file adapter. Numerical
   // bounds are enforced by EnvironmentCompartmentService before any use.
   model=next;sha=christeye::living::plans::sha256_hex(bytes);return true;
+}
+inline bool read_environment_model(const std::filesystem::path& path,EnvironmentCompartmentModel& model,std::string& sha){
+  std::string bytes;
+  return christeye::living::durable::read_bounded(path,4096,bytes)&&
+    parse_environment_model(bytes,model,sha);
 }
 } // namespace anaiero::science::files

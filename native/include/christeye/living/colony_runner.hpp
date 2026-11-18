@@ -126,11 +126,12 @@ using Seed=anaiero::models::sim3::Seed;
 using Link=anaiero::models::sim3::Link;
 using Process=anaiero::models::sim3::Process;
 struct Configuration:anaiero::models::sim3::ConfigurationData {
-  static Result load(const fs::path& file, Configuration& result) {
-    std::string input;
-    if(!bounded_read(file,kMaxConfigBytes,input))return Result::io_error;
+  // Parsing is independent of the host filesystem. Admission still verifies
+  // every retained source through load() or the modular bundle resolver.
+  static Result parse(std::string_view input, Configuration& result) {
+    if(input.size()>kMaxConfigBytes)return Result::capacity;
     Configuration candidate;
-    std::istringstream in(input);std::string line;unsigned section=0;
+    std::istringstream in{std::string(input)};std::string line;unsigned section=0;
     bool saw_end=false;
     bool law_version_seen=false;
     std::set<std::string> law_keys;
@@ -189,6 +190,14 @@ struct Configuration:anaiero::models::sim3::ConfigurationData {
          !cell_ids.contains(p.colony+"/"+std::to_string(p.subject)))return Result::bad_config;
       if(p.kind==ProcessKind::divide && (p.value==0||cell_ids.contains(p.colony+"/"+std::to_string(p.value))))return Result::bad_config;
     }
+    candidate.hash=pl::sha256_hex(input);result=std::move(candidate);
+    return Result::ok;
+  }
+  static Result load(const fs::path& file, Configuration& result) {
+    std::string input;
+    if(!bounded_read(file,kMaxConfigBytes,input))return Result::io_error;
+    Configuration candidate;
+    if(const auto parsed=parse(input,candidate);parsed!=Result::ok)return parsed;
     const fs::path root=file.parent_path();
     std::vector<std::pair<std::string,std::string>> checks{{candidate.material_path,candidate.material_sha}};
     for(const auto& c:candidate.colonies)checks.emplace_back(c.source_path,c.source_sha);

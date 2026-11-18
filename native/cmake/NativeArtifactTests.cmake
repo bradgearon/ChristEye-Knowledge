@@ -1,0 +1,7 @@
+if(CE_WIND_BUILD_TESTS)
+  add_executable(anaiero_artifact_tests tests/artifact_tests.cpp)
+  anaiero_sdk_target(anaiero_artifact_tests)
+  target_include_directories(anaiero_artifact_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+  target_link_libraries(anaiero_artifact_tests PRIVATE anaiero_engine_files)
+  add_test(NAME anaiero_artifact_publication COMMAND anaiero_artifact_tests)
+endif()

@@ -5,14 +5,13 @@ Verify the current engineering branch and CI when continuing work.
 
 The [native readiness and development plan](native_development_plan.md) records
 the 2026-11-17 assessment, commit-pinned evidence, priority order and completion
-gates. This checkpoint describes implemented behavior; the plan describes
-future capabilities.
+gates. This checkpoint describes implemented behavior; the plan distinguishes
+delivered capabilities from remaining qualification.
 
-The [CE-SW-37 architecture proposal](CE-SW-37_modular_runtime_and_evidence_lifecycle.md)
-extends that plan with compiled module boundaries, registered engine
-capabilities, a canonical commit/index protocol, complete identity/retention
-lifecycles and continuous-mesh qualification. It is planned work; CE-SW-36
-remains the current implemented batch.
+[CE-SW-38](CE-SW-38_compiled_runtime_and_lifecycle.md) implements M1–M4 of
+[CE-SW-37](CE-SW-37_modular_runtime_and_evidence_lifecycle.md) through the new
+compiled modular session path. Continuous mesh integration (M5), sustained
+release qualification (M6), and independent scientific evidence remain separate.
 
 ## Standing delivery preference
 
@@ -21,7 +20,56 @@ Deliver a substantial complete capability with implementation, adapters,
 runtime/CLI wiring, meaningful Windows/Linux tests and documentation. Keep
 related work in one changeset with reviewable internal commits.
 
-## Current integrated batch — CE-SW-36 environment and calibration
+## Current integrated batch — CE-SW-38 compiled runtime and lifecycle
+
+`anaiero session` (full build) and `ce_modular_session` (controller profile) run
+five registered engine families through a common canonical commit store. The
+new `ANAIEROSESSION/1` example runs real SW5 cells, SIM3 colonies, a finite VLM
+plan, passive voltage and scalar environment together. The VLM completes at
+tick 12 while the other engines continue. Its original image and receipts match
+the existing standalone interpreter, including recovery after every plan tick.
+
+The installed SDK separates compiled contracts, catalog, runtime, projection,
+experiments, observers and concrete adapters. An independently built additional
+engine uses only installed headers/libraries and exercises linked, native C ABI
+and supervised process admission. See the [SDK guide](../../native/docs/module-sdk.md)
+and [generated public API reference](../../native/docs/sdk-reference.md).
+
+State/configuration, observations, receipts, source tips and active lifecycle
+checkpoints commit together. The bounded writer signals completion; model state
+and the Projector advance after commitment. Stable operation IDs and persisted
+cycle intents finish interrupted work once. Registered changes support actual
+SW5 routes and SIM3 link units/future teaching, including explicit cancellation
+before teaching executes. Recorded experiments retain their original source,
+program, strategy, result and measured outcome independently of the Projector.
+
+The native sealed AVL index provides historical operation, record, observation,
+event and blob lookup with verified coverage and explicit repair. Legacy
+Registry/segmented evidence migrates through a locked snapshot and staged
+verified activation. This is evidence migration; legacy live session state
+continues to use its compatible runtime until explicitly migrated.
+
+Sources drain, seal and retire without filling active memory with historical
+epochs. Peer/subscription generations, expiry, exact offers/ACKs, protected pins,
+archive availability and replay floors use the same canonical store. Native
+restore verifies a quiescent copy, publishes quarantine, invalidates restored
+grants on explicit reauthorization, and requires a fresh source incarnation.
+See [storage](../../native/docs/canonical-evidence.md) and
+[lifecycle](../../native/docs/modular-lifecycle.md) for bounded policies.
+
+The store reclaims expired payload files and reserves maintenance headroom.
+Historical canonical metadata and identity fences remain retained under a finite
+accounted-byte budget (distinct from allocated filesystem blocks); journal-prefix pruning is not implemented. Admission stops when
+that budget is exhausted. Separate archives/backups consume their own declared
+storage. No indefinite-operation or sustained-throughput claim follows from
+this functional implementation.
+
+The Windows/Linux `native-modular.yml` gate builds the complete native
+distribution, runs existing and new regression suites, installs and exercises
+the independent SDK consumer, and builds a controller profile without Python
+discovery. Exact commit/run evidence is recorded with the implementation PR.
+
+## Previous integrated batch — CE-SW-36 environment and calibration
 
 The native controller now runs a second scientific quantity: a fixed-volume,
 well-mixed scalar concentration model with an explicit simulated nanosecond
@@ -116,62 +164,47 @@ numerical envelope, and 160 identical restored continuation samples.
 
 ## Deliberate remaining limits
 
-- Mesh subscriptions currently carry one complete simulated source/epoch stream
-  with fixed colony and clock. A different publishing principal requires a new
-  epoch; a different clock requires a new source ID. Relay receipts record the
-  verified connection, not a transferable original-author signature.
-- Mesh reconciliation runs on explicit connect/user requests, with a finite
-  per-invocation page budget. Discovery, QUIC, continual live fan-out, remote
-  experiment control and physical acquisition adapters are later capabilities.
-- Artifact uploads remain local administration; remote download grants exact
-  digests. Interrupted staging restarts at byte zero; completed receipts persist.
-- Historical archives and SIM3 tick snapshots consume disk; source retirement,
-  archive deletion and index repartitioning are separate policies.
-- Session publication is recoverable per engine, not an atomic group snapshot.
-- SIM3 can evaluate candidates but cannot apply them live or restore arbitrary
-  checkpoints; its existing model tick ceiling remains 10,000.
-- CEVPLAN already executes through its standalone CEVLM/2 interpreter. In
-  integrated reusable experiments, those references are validated provenance;
-  they do not replace the explicit engine input schedules or supply a durable
-  VLM-plan engine in a mixed session.
-- Scientific sessions expose modeled passive voltage and generic scalar
-  concentration. Offline environmental parameter calibration is available;
-  biological calibration, scientific experimental forks, live application,
-  spatial environmental dynamics and inter-model scientific coupling remain
-  separate capabilities.
-- Core modules remain largely header-oriented. Recursive dependency checks and
-  the controller build profile improve boundaries without claiming binary ABI
-  isolation or a dynamically loaded plugin system.
+- The new canonical/lifecycle services are integrated into the modular session.
+  The existing CE-SW-35 authenticated mesh remains on its compatibility path.
+  M5 must connect continuous transport, replay, byte/work fairness and artifact
+  scheduling to these services; connection-triggered sync is still the current
+  mesh behavior.
+- The new native index replaces the proposed required SQLite adapter. Historical
+  transaction metadata is retained; payload reclamation and finite admission
+  quotas are implemented, but canonical journal-prefix pruning is not.
+- Legacy evidence migration preserves opaque provenance and original sealed
+  event bytes. It does not automatically upgrade live CEVSESSION/2 engine state.
+- The modular operator uses CLI commands. Existing IPC/SCM/systemd control
+  remains provided by the established runtime; a long-running modular mesh
+  owner and deployment installation are separate integration work.
+- Runtime commitment is per engine, with recoverable cycle intent, not an
+  all-engine atomic snapshot. VLM plans are bounded finite executions; arbitrary
+  program variants are not optimization candidates.
+- SIM3 supports the named digital changes and coherent recovery. Its model
+  ceiling remains 10,000 ticks. Executed teaching cannot be undone by cancelling
+  its old schedule.
+- Scientific quantities remain modeled passive voltage and scalar concentration.
+  Independent biological calibration, scientific trial/application capability,
+  spatial environment dynamics and physical acquisition remain separate.
+- API/package compatibility and the native failure suites are useful engineering
+  evidence. Deployment hardware, filesystem power-loss behavior, prolonged
+  workloads and representative operational resource bounds still need M6.
 
 ## Next substantial capabilities
 
-The detailed scope, dependencies and acceptance gates are maintained in the
-[development plan](native_development_plan.md#revised-delivery-order):
+1. **M5 — Continuous evidence mesh:** bind the new canonical/index/lifecycle
+   services into a long-running native owner; commit-triggered delivery,
+   bounded handshake/artifact work, byte/work fairness, live revocation,
+   explicit expired/archive/rebootstrap results and multi-peer recovery.
+2. **M6 — Qualified native release:** declare supported workload profiles,
+   measure RSS/disk/lookup/startup/lag and shutdown behavior, validate packages
+   and retained dependencies, run both-platform fault/restore and sustained
+   tests, and publish exact evidence. Add canonical prefix-pruning only with
+   verified authority summaries and compatibility/recovery proof; finite quota
+   stop remains the supported policy until then.
 
-1. **M1 — Compiled modules and registered capabilities:** public/private
-   targets, engine-owned bindings, typed schemas, module admission and an
-   installed SDK. Prove a separately built engine works without core edits.
-2. **M2 — Canonical transitions and indexed evidence:** durable state/evidence
-   commitment, bounded asynchronous storage, verified index coverage,
-   compatibility migration and crash/complexity qualification.
-3. **M3 — Complete execution and change paths:** real finite CEVPLAN/CEVLM2
-   execution, retained-artifact recovery, engine-owned SW5 trial/change
-   semantics and coherent SIM3 configuration/state application.
-4. **M4 — Complete lifecycle and retention:** source/peer/subscription state,
-   versioned active checkpoints, historical catalogs, leases, archive policy,
-   quotas and explicit replay/bootstrap boundaries.
-5. **M5 — Continuous evidence mesh:** commit-triggered delivery, byte/work
-   fairness, bounded handshake/artifact work and identity/rebootstrap behavior.
-6. **M6 — Qualified native release:** package/API compatibility, both-platform
-   crash/restore evidence, measured operating profiles and sustained soak runs.
-
-Each item is a substantial capability batch with services, adapters, operator
-wiring, failure tests and both-platform evidence. The next batch proves an
-installed public SDK and independent engine integration. The three-stage
-CEVPLAN session/restart/replay workflow remains the concrete M3 execution gate.
-Scientific model/reference qualification remains a separate evidence
-workstream; architectural completion does not establish biological validity.
-
-The Projector stays observational. Optimization stays independent. Native
-Windows and native Linux remain first-class, with all domain decisions in
-services and transport/storage/process mechanisms behind typed ports.
+The detailed dependency and acceptance gates remain in the
+[development plan](native_development_plan.md#revised-delivery-order).
+Scientific model/reference qualification remains an independent evidence
+workstream. The Projector stays observational, optimization stays independent,
+and Windows and Linux remain first-class native hosts.

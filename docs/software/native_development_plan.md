@@ -1,8 +1,10 @@
 # Native readiness and development plan
 
-**Review date:** 2026-11-17 (America/Chicago).
+**Current implementation update:** 2026-11-18 (America/Chicago).
 
-**Implementation baseline:** [`c5a4e8a`](https://github.com/bradgearon/ChristEye-Knowledge/commit/c5a4e8a04616c76decab52d237de53a3f3b09f23), through CE-SW-36.
+**Original baseline review:** 2026-11-17 (America/Chicago).
+
+**Historical assessment baseline:** [`c5a4e8a`](https://github.com/bradgearon/ChristEye-Knowledge/commit/c5a4e8a04616c76decab52d237de53a3f3b09f23), through CE-SW-36.
 
 **Purpose:** assess implemented native software, identify the next usable
 capabilities, and make their completion criteria explicit.
@@ -10,8 +12,9 @@ capabilities, and make their completion criteria explicit.
 **Architecture amendment — 2026-11-18:** [CE-SW-37](CE-SW-37_modular_runtime_and_evidence_lifecycle.md)
 now defines the complete module, capability, commit/index, lifecycle and
 continuous-mesh architecture. Its M1–M6 sequence below supersedes the earlier
-five-item delivery order. The ratings and CI evidence remain pinned to the
-implemented baseline; the new architecture is a proposal.
+five-item delivery order. [CE-SW-38](CE-SW-38_compiled_runtime_and_lifecycle.md)
+now implements M1–M4 in the compiled modular session. The older ratings and
+CI table below remain a historical CE-SW-36 comparison, not current release proof.
 
 Use the [implementation checkpoint](native_implementation_status.md) for what
 currently runs. This document tracks CE-SW-37's forward order and retains the
@@ -21,7 +24,28 @@ increments; their old TODOs are not the current backlog. The
 [project phase roadmap](../roadmap.md) separately records scientific and
 physical qualification.
 
-## Assessment
+## Current assessment after M1–M4
+
+**Approximately 8.5/10 as a native engineering research platform**, as an
+engineering review judgment rather than a measured completion percentage.
+Extension/reuse and integrated plan execution move from material capability
+gaps to implemented paths with installed-consumer, equivalence and recovery
+fixtures. Sustained operation remains the limiting category.
+
+| Area | Current judgment | Implemented improvement | Remaining evidence |
+|---|---:|---|---|
+| Extension and library reuse | 8.5/10 | Compiled SDK, typed catalog, native/process admission, independent installed consumer | Independent application adoption and supported ABI/package upgrade matrix |
+| Integrated plans and digital experiments | 8.5/10 | Real retained VLM execution; coherent SW5/SIM3 changes; frozen selection and canonical outcomes | Broader declared workloads and variant/scientific capability qualification |
+| Evidence and recovery | 8.5/10 | Single canonical commit, verified historical index, expiry guards, migration and crash cuts | Filesystem/power-loss qualification and large retained-history profiles |
+| Source/retention operation | 7/10 | Reusable active slots, indexed history, leases, archive/expiry, payload reclamation and quarantine | Continuous mesh binding, prolonged resource evidence and optional prefix-pruning |
+| Documentation and SDK entry points | 8/10 | Current operator guide, installed SDK example and generated exact public reference | Release/package documentation verified against each shipped profile |
+
+The numerical scope and authenticated transport retain their prior evidence;
+new lifecycle services do not by themselves upgrade the existing mesh to
+continuous operation. Biological validity remains unestablished. These ratings
+do not assert M5/M6 completion or replace the exact Windows/Linux CI evidence.
+
+## Historical CE-SW-36 assessment
 
 **Overall: approximately 8/10 as a native engineering research platform.**
 The service boundaries, durable evidence, mixed-engine sessions and failure
@@ -85,7 +109,12 @@ experiment. No new correctness defect requiring an immediate hotfix was
 identified in the sampled paths; the priorities below address demonstrated
 capability and scale gaps.
 
-## Findings that determine the order
+## Original findings and their disposition
+
+The findings below describe the reviewed CE-SW-36 paths. CE-SW-38 closes the
+compiled-module, shared-session VLM, supported SIM3 live-change and modular
+source-lifecycle gaps through a new versioned path. Existing mesh callers still
+need M5 integration. The details remain useful compatibility context.
 
 ### Existing plans execute, but not through the integrated experiment path
 
@@ -169,21 +198,30 @@ modules retain the compact standard deployment.
 Each batch is approximately five related increments delivered as one usable
 capability, including services, adapters, operator wiring, failure tests,
 native Windows/Linux verification and documentation. Internal commits may be
-reviewed separately. These are proposed capabilities, not implemented features.
+reviewed separately. M1–M4 are implemented in CE-SW-38 within its stated
+profile; M5/M6 remain forward work.
 
 | Order | Architecture batch | Usable result | Dependency |
 |---|---|---|---|
-| M1 | Compiled modules and registered capabilities | Installed public SDK, private implementations and independently added engines using typed capability bindings | Current native implementation |
-| M2 | Canonical transitions and indexed evidence | One recoverable commit/root contract, asynchronous storage and verified historical indexes | M1 contracts |
-| M3 | Complete engine execution and change paths | Finite durable VLM plans and engine-owned SW5/SIM3 trial/change paths with configuration/state recovery | M1 and M2 |
-| M4 | Source, peer, subscription and retention lifecycle | Reusable active capacity, versioned checkpoints, archive policy, leases and explicit replay floors | M1 and M2; can proceed alongside M3 |
+| M1 — implemented | Compiled modules and registered capabilities | Installed public SDK, private implementations and independently added engines using typed capability bindings | Current native implementation |
+| M2 — implemented | Canonical transitions and indexed evidence | One recoverable commit/root contract, asynchronous storage and verified historical indexes | M1 contracts |
+| M3 — implemented | Complete engine execution and change paths | Finite durable VLM plans and engine-owned SW5/SIM3 trial/change paths with configuration/state recovery | M1 and M2 |
+| M4 — implemented | Source, peer, subscription and retention lifecycle | Reusable active capacity, versioned checkpoints, archive policy, leases and explicit replay floors | M1 and M2; can proceed alongside M3 |
 | M5 | Continuous mesh service | Event-driven live delivery, byte/work fairness, identity/artifact lifecycle and rebootstrap | M2 and M4 |
 | M6 | Qualified native release | Reproducible packages, compatibility proof, failure matrix and sustained resource/recovery evidence | Integration of preceding batches |
 
 See [CE-SW-37's delivery sequence](CE-SW-37_modular_runtime_and_evidence_lifecycle.md#14-delivery-sequence)
 for approximately five related increments per batch and exact closure gates.
-The next implementation changeset is M1, with an external SDK consumer and
-independently built engine as the proof of actual isolation and extensibility.
+The next implementation changeset is **M5**, connecting continuous authenticated
+transport to the new canonical/index/lifecycle services. M6 must publish a
+measured operating envelope before production readiness is claimed.
+
+Implementation decisions are explicit: a sealed native AVL backend replaces
+the recommended SQLite dependency; old evidence migrates without pretending to
+upgrade old live session state; expired payloads are reclaimed but historical
+canonical metadata remains quota-bounded. The runtime reserves maintenance
+headroom and stops admission at finite capacity. Canonical prefix-pruning needs
+its own authority-summary and restore proof before being enabled.
 
 The detailed A–E capability plans below are retained as subplans: A (VLM) and
 C (SIM3 changes) map to M3; B maps to M2/M4/M6; E maps to M5. D remains a
@@ -225,7 +263,7 @@ standalone executor and an isolated replay.
 
 **Proposed initial scope:** at most eight stages and 128 logical ticks, an
 initially quiescent CEVLM/2 base, no runtime plan replacement and no candidate
-mutation. These are future admission bounds, not existing guarantees. Check
+mutation. These bounds are implemented in the CE-SW-38 VLM binding. Check
 ProcessMachine task, journal and event capacity in addition to stage count.
 The existing three-stage, twelve-tick example is the first complete workflow.
 

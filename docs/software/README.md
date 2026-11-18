@@ -22,14 +22,15 @@ for ratings, priorities and completion gates.
 | Scientific provider | Numerical Model Engine | Pinned numerical models such as passive voltage and scalar concentration |
 
 These are different model/execution families. Historical codes remain aliases
-in existing formats. VLM plans already execute standalone; the shared-session
-binding is planned. The complete explanation and architecture are in
+in existing formats. VLM plans execute both standalone and through the compiled shared-session
+binding in CE-SW-38. The complete explanation and architecture are in
 [CE-SW-37](CE-SW-37_modular_runtime_and_evidence_lifecycle.md).
 
 ### Implemented integrations
 
 | Integrated capability | Current specification |
 |---|---|
+| Compiled SDK, canonical evidence, real shared VLM and lifecycle/retention | [CE-SW-38](CE-SW-38_compiled_runtime_and_lifecycle.md) |
 | Mixed native sessions, restart, operations and local control | [CE-SW-31](CE-SW-31_integrated_native_sessions.md) |
 | Reusable SW5/SIM3 trials, durable receipts and SW5 outcomes | [CE-SW-32](CE-SW-32_reusable_native_experiments.md) |
 | Segmented storage, checkpoint recovery and maintenance | [CE-SW-33](CE-SW-33_sustained_storage.md) |
@@ -42,7 +43,7 @@ binding is planned. The complete explanation and architecture are in
 | Profile | Operator entry point | Scope |
 |---|---|---|
 | Full native build | `anaiero` | Dispatcher plus compatible `ce_*` backends and legacy/demo tools |
-| `ANAIERO_CONTROLLER_ONLY=ON` | `ce_colony_runtime`, scientific configuration/provider/calibration tools | Native session controller and selected utilities; does not build the `anaiero` dispatcher or discover Python |
+| `ANAIERO_CONTROLLER_ONLY=ON` | `ce_modular_session`, `ce_colony_runtime`, scientific configuration/provider/calibration tools | Native session controller and selected utilities; does not build the `anaiero` dispatcher or discover Python |
 | Either profile with `ANAIERO_ENABLE_MESH=ON` | `ce_mesh`; also `anaiero mesh` in the full profile | Optional OpenSSL 3 evidence mesh |
 
 Use the [native build instructions](../../native/README.md),
@@ -54,17 +55,18 @@ install an OS service; see the [deployment examples](../../deployment/native/REA
 ## Target architecture
 
 [CE-SW-37 — Modular runtime, durable execution and evidence lifecycle](CE-SW-37_modular_runtime_and_evidence_lifecycle.md)
-is the proposed architecture for the next implementation batches. It specifies
+is the target architecture. [CE-SW-38](CE-SW-38_compiled_runtime_and_lifecycle.md)
+implements its M1–M4 batches in the modular session. The architecture specifies
 compiled public/private modules, registered capabilities, recoverable state/
 evidence transactions, verified indexes, complete lifecycle/retention rules,
 continuous mesh scheduling and native qualification gates. Its M1–M6 sequence
-is reflected in the development plan. These targets are separate from the
-implemented integrations above.
+is reflected in the development plan. M5 continuous mesh and M6 sustained
+release qualification remain distinct from the implemented integrations.
 
 ## Historical specifications and increment records
 
 The status column below records each document's original increment. Later
-CE-SW-31–36 integrations supersede several original “pending” statements.
+CE-SW-31–38 integrations supersede several original “pending” statements.
 Use the current capability map above for present behavior; preserve these
 records for design history and the scientific boundaries of each increment.
 
