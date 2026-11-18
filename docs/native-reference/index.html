@@ -2,80 +2,64 @@
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="dark light">
-  <meta name="description" content="A searchable reference to the Anaiero native C++ library. Explore services, contracts, functions, and the implementation behind them.">
-  <title>Anaiero · Native Reference</title>
-  <link rel="stylesheet" href="styles.css">
-  <script>try{document.documentElement.dataset.theme=localStorage.getItem('anaiero-theme')||'dark'}catch(e){}</script>
+  <meta name="description" content="ChristEye Anaiero native C++20 reference: source-pinned classes, methods, interfaces, contracts and architecture.">
+  <title>Anaiero — Native C++ API</title>
+  <link rel="stylesheet" href="reference.css">
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem('anaiero-theme')||'dark'}catch(_){}</script>
+  <script src="reference.js" defer></script>
 </head>
 <body>
-  <a class="skip-link" href="#main-content">Skip to documentation</a>
-  <header class="topbar">
-    <div class="brand-wrap">
-      <button class="icon-button mobile-menu" id="menu-toggle" aria-label="Open navigation" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
-      <a class="brand" href="#overview" aria-label="Anaiero reference home"><span class="brand-mark" aria-hidden="true">a<span>.</span></span><span>Anaiero<small>NATIVE REFERENCE</small></span></a>
-    </div>
-    <div class="search-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><input type="search" id="search" placeholder="Search functions, types, or behavior…" aria-label="Search API reference" autocomplete="off" spellcheck="false"><kbd>/</kbd></div>
-    <div class="header-actions"><span class="version-label">C++20 <span>·</span> <span id="head-sha">source</span></span><button class="icon-button" id="browse-toggle" aria-label="Browse symbols"><svg viewBox="0 0 24 24"><path d="M9 5h11M9 12h11M9 19h11M4 5h.01M4 12h.01M4 19h.01"/></svg></button><button class="icon-button" id="theme-toggle" aria-label="Switch color theme"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.4 1.4M17.6 17.6 19 19M5 19l1.4-1.4M17.6 6.4 19 5"/></svg></button><a class="icon-button" id="github-top" href="https://github.com/bradgearon/ChristEye-Knowledge" target="_blank" rel="noopener noreferrer" aria-label="Open source repository"><svg viewBox="0 0 24 24"><path d="M8 17c-4 1-4-2-6-2m12 6v-3.9a3.4 3.4 0 0 0-.9-2.6c3-.3 6.2-1.5 6.2-6.9a5.4 5.4 0 0 0-1.5-3.8 5 5 0 0 0-.1-3.8S15.5-.3 12 2a13 13 0 0 0-7 0C1.5-.3-.7 0-.7 0a5 5 0 0 0-.1 3.8A5.4 5.4 0 0 0-2.3 7.6c0 5.4 3.2 6.6 6.2 6.9a3.4 3.4 0 0 0-.9 2.6V21" transform="translate(4 1) scale(.85)"/></svg></a></div>
-  </header>
-  <div class="workspace">
-    <nav class="navigation" aria-label="Reference navigation">
-      <div class="nav-content"><div class="nav-caption">WORKSPACE</div><button class="nav-link" id="overview-nav" data-route="overview"><span class="nav-icon">◈</span>Overview</button><button class="nav-link" id="guides-nav" data-route="guides"><span class="nav-icon">▤</span>Guides & architecture</button><div class="nav-caption section-gap">API REFERENCE</div><button class="nav-link" data-layer="all"><span class="nav-icon">⌘</span>Browse native API<span class="nav-count" id="all-count" title="Classes, interfaces, and data types"></span></button><div id="layer-nav"></div><button class="nav-link" id="files-nav" data-route="files"><span class="nav-icon">▧</span>Source files<span class="nav-count" id="file-count"></span></button></div>
-      <div class="nav-bottom"><a class="download-link" href="#download-offline" download="anaiero-native-reference.html"><svg viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></svg>Download offline reference<span>↗</span></a><div class="snapshot-note"><span class="status-dot"></span>Pinned native source snapshot<br><span id="branch-name"></span></div></div>
-    </nav>
-    <aside class="symbol-panel" aria-label="Symbol browser">
-      <div class="symbol-heading"><div><span class="eyebrow" id="scope-eyebrow">API INDEX</span><h2 id="scope-title">All symbols</h2><button class="scope-reset" id="search-all-layers" hidden>Search all layers ↗</button></div><button class="icon-button close-browser" id="close-browser" aria-label="Close symbol browser">×</button></div>
-      <div class="symbol-filters" role="group" aria-label="API category"><button class="filter active" data-kind="classes">Classes <span class="category-count"></span></button><button class="filter" data-kind="data">Data types <span class="category-count"></span></button><button class="filter" data-kind="functions">Free functions <span class="category-count"></span></button><button class="filter" data-kind="constants">Constants <span class="category-count"></span></button></div>
-      <div class="symbol-options"><span id="result-count" role="status" aria-live="polite"></span><label><input id="show-internal" type="checkbox"> Internals</label></div>
-      <div id="symbol-list" class="symbol-list"></div>
-      <div class="symbol-foot"><kbd>↑</kbd><kbd>↓</kbd> navigate <span><kbd>↵</kbd> open</span></div>
-    </aside>
-    <main id="main-content" class="documentation" tabindex="-1"><div id="document"></div></main>
+<a class="skip" href="#content">Skip to documentation</a>
+<header class="topbar">
+  <a class="brand" href="#/overview" aria-label="Anaiero reference overview"><span class="brand-mark">a<span>.</span></span><span><strong>Anaiero</strong><small>NATIVE REFERENCE</small></span></a>
+  <div class="search-frame">
+    <span class="search-icon" aria-hidden="true">⌕</span>
+    <input id="search" type="search" placeholder="Search symbols, methods and namespaces" aria-label="Search native API" autocomplete="off" spellcheck="false">
+    <kbd>⌘ K</kbd>
   </div>
-  <button class="scrim" id="scrim" aria-label="Close navigation"></button>
-  <div id="toast" role="status" aria-live="polite"></div>
-  <script>
-  (async function(){
-    try {
-      async function expanded(kind){
-        const paths=Array.from({length:24},(_,i)=>kind+'-parts/'+String(i).padStart(2,'0')+'.txt');
-        const parts=await Promise.all(paths.map(async path=>{
-          const response=await fetch(path);
-          if(!response.ok)throw new Error('Unable to load '+path+' (HTTP '+response.status+')');
-          return response.text();
-        }));
-        return parts.join('');
-      }
-      const source=await expanded('data');
-      const script=document.createElement('script');
-      script.textContent=source;
-      document.body.appendChild(script);
-      const app=document.createElement('script');
-      app.src='app.js';
-      app.onerror=function(){throw new Error('Could not load app.js')};
-      document.body.appendChild(app);
-      document.addEventListener('click',async function(event){
-        const link=event.target.closest('a.download-link');
-        if(!link)return;
-        event.preventDefault();
-        link.style.pointerEvents='none';
-        try {
-          const text=await expanded('offline');
-          const blob=new Blob([text],{type:'text/html;charset=utf-8'});
-          const url=URL.createObjectURL(blob);
-          const a=document.createElement('a');a.href=url;a.download='anaiero-native-reference.html';
-          document.body.appendChild(a);a.click();a.remove();
-          setTimeout(()=>URL.revokeObjectURL(url),60000);
-        }catch(error){alert('Offline reference download failed: '+error.message)}
-        finally{link.style.pointerEvents=''}
-      },true);
-    } catch(error){
-      document.getElementById('document').innerHTML='<article style="margin:2rem;max-width:50rem"><h1>Could not load native reference</h1><p></p><a href="https://github.com/bradgearon/ChristEye-Knowledge">Open the source repository</a></article>';
-      document.querySelector('#document p').textContent=error.message;
-      console.error(error);
-    }
-  })();
-  </script>
+  <div class="actions">
+    <label class="version-picker"><span>Version</span><select id="version" aria-label="Choose native source version"></select></label>
+    <button type="button" class="icon-btn" id="theme" title="Toggle color theme" aria-label="Toggle color theme">◐</button>
+    <a class="github" href="https://github.com/bradgearon/ChristEye-Knowledge" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+    <button type="button" class="icon-btn mobile-only" id="menu" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+  </div>
+</header>
+<div class="layout">
+  <nav class="rail" aria-label="Documentation navigation" id="rail">
+    <div class="nav-category">GET STARTED</div>
+    <a class="navlink" href="#/overview">◈ <span>Overview</span></a>
+    <a class="navlink" href="#/guides">▤ <span>Guides & architecture</span></a>
+    <a class="navlink" href="#/versions">◷ <span>Versions and provenance</span></a>
+    <div class="nav-category">NATIVE LIBRARY</div>
+    <button type="button" class="navlink" data-layer="all">⌘ <span>All modules</span> <small id="total-count"></small></button>
+    <div id="layers"></div>
+    <button type="button" class="navlink" data-kind="files">▧ <span>Source files</span></button>
+    <div class="rail-bottom">
+      <div class="status"><span class="dot"></span><span id="status">Loading source index…</span></div>
+      <a href="legacy.html">Legacy reference and offline edition ↗</a>
+    </div>
+  </nav>
+  <aside class="browser" aria-label="Symbol browser" id="browser">
+    <div class="browser-head"><span class="eyebrow" id="scope">API INDEX</span><h2 id="list-title">Explore symbols</h2>
+      <div class="facets" role="group" aria-label="Symbol category">
+        <button type="button" class="facet active" data-kind="types">Types</button>
+        <button type="button" class="facet" data-kind="methods">Methods</button>
+        <button type="button" class="facet" data-kind="functions">Functions</button>
+        <button type="button" class="facet" data-kind="values">Values</button>
+        <button type="button" class="facet" data-kind="files">Files</button>
+      </div>
+      <div class="filter-row"><span id="result-count" role="status" aria-live="polite"></span><label><input type="checkbox" id="internal"> Show internals</label></div>
+    </div>
+    <div id="results" class="results"></div>
+    <div class="browser-foot">↑ ↓ to browse · Enter to open · / to search</div>
+  </aside>
+  <main id="content" tabindex="-1"><div id="article" class="article">
+    <h1>Native C++ reference</h1><p>Loading versioned API metadata…</p>
+  </div></main>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+<noscript><p class="nojs">JavaScript is required for the API explorer. <a href="legacy.html">Open the legacy reference</a> or browse the source on GitHub.</p></noscript>
 </body>
 </html>
