@@ -230,8 +230,9 @@ def collect(source, annotations):
         path = p.relative_to(source).as_posix()
         data = p.read_bytes()
         e = Extract(data, path, annotations)
+        parsed = e.parse()
         warnings += e.warnings
-        for symbol in e.parse():
+        for symbol in parsed:
             original = records.get(symbol["id"])
             if original and (original["qualified"], original["kind"]) != (symbol["qualified"], symbol["kind"]):
                 raise ValueError("Symbol ID hash collision")
@@ -268,7 +269,7 @@ def generate(source, site, source_ref, check=False, strict=False):
         raise ValueError(f"Native coverage gate: {len(symbols)} symbols, {len(files)} files, {len(warnings)} parser errors")
     short = commit[:12]
     data_root = site / "data" / short
-    compact_index = [{key:s.get(key) for key in ("id","name","qualified","kind","layer","fileId","parentId","parent","line","description","access","signature")} for s in symbols]
+    compact_index = [{key:(s.get(key)[:150] if key == "description" and isinstance(s.get(key), str) else s.get(key)) for key in ("id","name","qualified","kind","layer","fileId","parentId","parent","line","description","access","signature")} for s in symbols]
     buckets = defaultdict(dict)
     for s in symbols:
         buckets[s["id"][2:4]][s["id"]] = s

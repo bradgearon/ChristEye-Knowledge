@@ -291,7 +291,7 @@ function renderVersions() {
     '">Browse source tree on GitHub ↗</a></p></div>';
 }
 async function readRoute() {
-  const hash = decodeURIComponent(location.hash || "#/overview");
+  let hash; try { hash = decodeURIComponent(location.hash || "#/overview"); } catch (_) { hash = "#/overview"; }
   const pair = hash.replace(/^#\/?/,"").split("/");
   const token = ++ui.routeToken;
   try {
@@ -328,10 +328,12 @@ function bind() {
   document.querySelectorAll(".facet").forEach(b => b.addEventListener("click",()=>{
     ui.kind=b.dataset.kind;ui.cursor=0;renderResults();
   }));
-  document.querySelectorAll("[data-layer]").forEach(b => b.addEventListener("click",()=>{
+  document.addEventListener("click", event => {
+    const b = event.target.closest("[data-layer]");
+    if (!b) return;
     ui.layer=b.dataset.layer;ui.query="";$("search").value="";
     ui.kind="types";location.hash="#/overview";renderResults();
-  }));
+  });
   $("version").addEventListener("change", e => {location.assign(versionLink(e.target.value,location.hash));});
   $("theme").addEventListener("click", () => {
     const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
