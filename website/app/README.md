@@ -27,7 +27,7 @@ The public pages distinguish software test results, vendor/external scientific f
 
 ## Public beta and independent hosting
 
-The Vite base path is configurable through `ANAIERO_SITE_BASE`. For the GitHub Pages beta published under `/ChristEye-Knowledge/portal/`, the release workflow uses `ANAIERO_SITE_BASE=/ChristEye-Knowledge/portal/`. For production at the repository root, use `/ChristEye-Knowledge/`. For a custom web server hosted at the domain root, use `/`.
+The Vite base path is configurable through `ANAIERO_SITE_BASE`. For the GitHub Pages beta published under `/ChristEye-Knowledge/portal/`, the release workflow uses `ANAIERO_SITE_BASE=/ChristEye-Knowledge/portal/`. For Cloudflare production or a custom web server hosted at the domain root, use `/`.
 
 The output directory `dist/` is a self-contained static artifact; copy its entire contents to the configured public URL path. No Python backend is necessary for the existing interactive digital simulations. The generated corpus is **public** by design, so do not add credentials, personal logs, or confidential patent documents to the import registry.
 

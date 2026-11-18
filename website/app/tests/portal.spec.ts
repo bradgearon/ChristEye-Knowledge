@@ -46,8 +46,6 @@ test('mobile navigation and no horizontal overflow',async ({page})=>{
  await expect(page.locator('.site-sidebar')).not.toHaveClass(/open/);
  await page.screenshot({path:'test-results/living-mobile.png',fullPage:false});
 });
-
-
 test('interest and privacy are visible, but signups remain disabled without Cloudflare configuration',async({page})=>{
  await page.route('**/api/interest/config',r=>r.fulfill({
    status:200,contentType:'application/json',

@@ -56,3 +56,7 @@ These are read-only or offline checks. They never collect personal details or de
 Project research stays in specifications/, processes/, research/, phases/, schemas/ and registries/. Build-time generated content should not diverge from those sources. © 2026 We Develop Software LLC; [WDS Public Research Reference License](../LICENSE.md). Actual patent documents remain unpublished.
 
 Historical [S01 blueprint](planning/00-s01-original-website-readme.md) is preserved rather than rewritten.
+
+## React portal and GitHub Pages preview
+
+The React/Vite portal is the current implementation of the source-linked research site. It supports the GitHub Pages beta at `/ChristEye-Knowledge/portal/` as well as independent static hosting; its architecture and build instructions are in [the app README](app/README.md). The production Cloudflare deployment and GitHub Pages preview are separate targets.
