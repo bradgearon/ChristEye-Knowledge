@@ -22,6 +22,14 @@ mesh, reviewed canonical compaction, a continuous native host/package path and
 measured operating profiles. These are the next four concrete deliveries under
 M5/M6; the long-duration release gates remain separate.
 
+**Operating-envelope continuation — 2026-11-18:**
+[CE-SW-40](CE-SW-40_operating_envelope_and_package_lifecycle.md) reduces avoidable
+index work, adds a real five-engine continuous-host qualification path, supplies
+reviewed receiver payload/receipt retention and implements canonical package
+selection with suffix-preserving rollback. These close specific operational
+paths within M4/M5/M6; elapsed release evidence and semantic engine migration
+remain explicit work.
+
 Use the [implementation checkpoint](native_implementation_status.md) for what
 currently runs. This document tracks CE-SW-37's forward order and retains the
 readiness evidence and detailed capability subplans. Historical
@@ -49,6 +57,13 @@ independent application adoption support a higher judgment.
 | Source/retention operation | 8/10 | Reusable active slots; indexed history; leases/archive/expiry; canonical prefix reclamation; continuous host/mesh binding | Mixed 24-hour/seven-day deployment evidence and policy for arbitrary retained-identity growth |
 | Documentation and SDK entry points | 8.5/10 | Current host/mesh/compaction guides, installed SDK example, package verifier and generated public reference | Supported package upgrade matrix and evidence for each shipped deployment profile |
 
+CE-SW-40 adds bounded receiver observation/receipt/artifact/bootstrap reclamation
+and a tested package-selection matrix for unchanged compiled engine identity.
+The mixed qualification executable now measures the actual five-engine host;
+its short profile does not replace the elapsed 24-hour/seven-day gates. The
+assessment remains approximately **8.5/10** until the declared sustained
+envelopes and independent adoption are demonstrated.
+
 The numerical scope retains its prior evidence. CE-SW-39 binds the new
 authenticated mesh to the modular session rather than inferring integration
 from component existence. Biological validity remains unestablished. These
@@ -60,6 +75,11 @@ passed its recovery, audit, memory, disk and indexed-read gates but failed the
 unchanged batch-commit p99 upper-bound budget (2.147 seconds against 2 seconds).
 That negative result remains recorded separately from hosted CI qualification;
 it reinforces the need to declare and measure each deployment's operating limits.
+The [hosted Windows run at `c196e56`](../../qualification/reports/2026-11-18-hosted-windows-100k/README.md)
+also completed and failed only that same unchanged commit-p99 upper-bound gate.
+Its report is retained independently of subsequent optimization runs. All its
+correctness, audit, memory, disk and lookup gates passed; none of those outcomes
+makes the failed latency gate a pass.
 
 ## Historical CE-SW-36 assessment
 
@@ -237,6 +257,21 @@ work is the dedicated M6 operating envelope: mixed sustained workloads,
 declared device profiles, longer history scale, actual pressure/crash behavior
 and supported upgrade/rollback procedures. Production readiness is not inferred
 from the new architecture or a passing short test.
+
+### Next closure work after CE-SW-40
+
+| Order | Concrete work | Completion evidence |
+|---|---|---|
+| 1 | Complete the optimized 100,000-observation Windows/Linux measurements and retain both positive and negative reports | Exact profile/build/run witnesses, unchanged budgets, audit and recovery identity; no inferred success from short diagnostics |
+| 2 | Run the existing one-million-observation profile on a declared dedicated device and compare 10k/100k/1m index and allocation costs | Completed report plus device/filesystem/dependency declaration; retained failure evidence if a gate is missed |
+| 3 | Run the new elapsed mixed 24-hour/seven-day profiles, then add real TLS peer lag/churn/rotation and actual storage pressure to that operating envelope | Full-duration native reports on both platforms; separate dispatch/commit/projection/remote-ACK measurements and failure classifications |
+| 4 | Extend the conservative package matrix through explicit engine/runtime state migrations and qualify supervisor installation/uninstallation; remove bootstrap producer quiescence only with a pinned continuation contract | Preserved accepted suffix, exact old/new implementation evidence, migration/crash/rollback fixtures and deployment-device qualification |
+
+CE-SW-40 already implements complete-page receiver expiry, explicit cleanup of
+overlapping receipt copies, protected current cursors/projections, artifact and
+superseded-checkpoint reclamation, and missing-file accounting recovery. Permanent
+ownership, retry, tombstone and selected-package witnesses still consume finite
+metadata quota. Automatic deletion of those witnesses is not an implied policy.
 
 Implementation decisions are explicit: a sealed native AVL backend replaces
 the recommended SQLite dependency; old evidence migrates without pretending to

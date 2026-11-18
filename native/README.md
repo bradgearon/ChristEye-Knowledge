@@ -1,5 +1,25 @@
 # Anaiero native runtime
 
+## Operating envelope and package lifecycle (CE-SW-40)
+
+`anaiero qualify mixed PROFILE SESSION NEW_OUTPUT` measures all five compiled
+engine families through the real continuous host, with bounded pressure,
+durable control retry, historical probes, exact restart and audit. The
+[mixed profile guide](../qualification/native/MIXED.md) separates the short
+CI run from the elapsed 24-hour/seven-day qualification gates.
+
+The [mesh guide](docs/continuous-mesh.md) now includes reviewed receiver
+observation/receipt/artifact/bootstrap expiry and resumable deletion. Canonical
+authority and current cursor/projection/pin roots remain protected. The
+[package lifecycle guide](../deployment/native/package-lifecycle.md) covers
+exact package admission, fenced activation and rollback against the current
+store without discarding accepted writes. Compatibility currently requires
+unchanged compiled engine identity and a stopped supervisor switch.
+
+See [CE-SW-40](../docs/software/CE-SW-40_operating_envelope_and_package_lifecycle.md)
+for these contracts, the derived-index optimization and preserved failed
+measurement evidence. Performance budgets and canonical formats are unchanged.
+
 ## Continuous canonical operation (CE-SW-39)
 
 `anaiero host` now runs the modular session continuously through native local

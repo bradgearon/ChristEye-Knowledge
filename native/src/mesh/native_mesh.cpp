@@ -380,6 +380,36 @@ static Result administer_store(evidence::ICommitStore& store,std::string_view co
       if(words.size()!=3)return fail(Code::invalid,"cancel-bootstrap OFFER_ID OPERATION");
       return mesh.cancel_bootstrap(words[1],words[2]);
     }
+    if(words[0]=="receiver-retention-review"){
+      std::uint64_t epoch=0,first=0,last=0;
+      if(words.size()<8||!integer(words[4],epoch)||!integer(words[5],first)||!integer(words[6],last))
+        return fail(Code::invalid,"receiver-retention-review PLAN PRINCIPAL SOURCE EPOCH FIRST LAST OPERATION [artifact:SHA|bootstrap:ID|receipt:SHA...]");
+      ReceiverRetentionRequest request{words[1],words[2],{words[3],epoch},first,last,{},{}};
+      for(std::size_t i=8;i<words.size();++i){
+        if(words[i].starts_with("artifact:"))request.artifacts.push_back(words[i].substr(9));
+        else if(words[i].starts_with("bootstrap:"))request.bootstrap_ids.push_back(words[i].substr(10));
+        else if(words[i].starts_with("receipt:"))request.delivery_receipts.push_back(words[i].substr(8));
+        else return fail(Code::invalid,"receiver retention object requires artifact:, bootstrap: or receipt: prefix");
+      }
+      ReceiverRetentionPlan plan;const auto result=mesh.review_receiver_retention(request,words[7],plan);
+      if(result.committed()){
+        const auto phase=plan.phase==lifecycle::MaintenancePhase::reviewed?"reviewed":plan.phase==lifecycle::MaintenancePhase::activated?"activated":"completed";
+        output="RECEIVER_RETENTION "+plan.request.id+' '+phase+" GENERATION "+number(plan.reviewed_generation)+
+          " OBJECTS "+number(plan.objects.size())+" BYTES "+number(plan.expected_bytes)+" ROOT "+plan.reviewed_root+"\n";
+      }
+      return result;
+    }
+    if(words[0]=="receiver-retention-status"){
+      if(words.size()!=2)return fail(Code::invalid,"receiver-retention-status PLAN");
+      ReceiverRetentionPlan plan;if(auto result=mesh.receiver_retention(words[1],plan);!result)return result;
+      const auto phase=plan.phase==lifecycle::MaintenancePhase::reviewed?"reviewed":plan.phase==lifecycle::MaintenancePhase::activated?"activated":"completed";
+      output="RECEIVER_RETENTION "+plan.request.id+' '+phase+" GENERATION "+number(plan.reviewed_generation)+" OBJECTS "+number(plan.objects.size())+
+        " BYTES "+number(plan.expected_bytes)+" ROOT "+plan.reviewed_root+"\n";return {};
+    }
+    if(words[0]=="receiver-retention-activate"||words[0]=="receiver-retention-reclaim"){
+      if(words.size()!=3)return fail(Code::invalid,"receiver-retention-activate|receiver-retention-reclaim PLAN OPERATION");
+      return words[0]=="receiver-retention-activate"?mesh.activate_receiver_retention(words[1],words[2]):mesh.reclaim_receiver_retention(words[1],words[2]);
+    }
     if(words[0]=="received"){
       std::uint64_t epoch=0;if(words.size()!=5||!integer(words[4],epoch))return fail(Code::invalid,"received PRINCIPAL SUBSCRIPTION SOURCE EPOCH");
       ReceiveReceipt receipt;if(auto status=mesh.received(words[1],words[2],{words[3],epoch},receipt);!status)return status;

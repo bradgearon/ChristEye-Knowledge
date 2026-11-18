@@ -15,6 +15,9 @@ release qualification (M6), and independent scientific evidence have separate
 gates. [CE-SW-39](CE-SW-39_continuous_native_operation.md) now supplies the
 continuous canonical host/mesh path, reviewed compaction and package/profile
 tooling. Long-duration release qualification remains open.
+The [CE-SW-40 continuation](CE-SW-40_operating_envelope_and_package_lifecycle.md)
+adds measured mixed-host operation, explicit receiver retention, conservative
+package activation/rollback and reduced derived-index work.
 
 ## Standing delivery preference
 
@@ -23,7 +26,38 @@ Deliver a substantial complete capability with implementation, adapters,
 runtime/CLI wiring, meaningful Windows/Linux tests and documentation. Keep
 related work in one changeset with reviewable internal commits.
 
-## Current integrated batch — CE-SW-39 continuous native operation
+## Current integrated batch — CE-SW-40 operating envelope and lifecycle
+
+`anaiero qualify mixed PROFILE SESSION NEW_OUTPUT` runs all five compiled engine
+families through the actual continuous host. It checks durable pause/retry/resume,
+bounded storage/control pressure, historical payload/receipt reads, declared
+quota rejection, exact orderly restart and full audit. Exact inputs and a report
+are retained. The short profile is executable CI evidence; the supplied 24-hour
+and seven-day profiles require their full elapsed durations before qualification.
+
+Local `receiver-retention-review`, `receiver-retention-status`,
+`receiver-retention-activate` and `receiver-retention-reclaim` commands expire
+explicit received history before deleting it. Whole remaining page members,
+additional overlapping receipts, artifacts and obsolete bootstrap checkpoints
+have bounded selection. Current cursor/projection/pin roots remain protective;
+old reads/retries report history expiry. Both receiver and sender maintenance
+resume missing-file byte accounting after an interrupted deletion.
+
+`anaiero host package-check`, `package-review`, `package-rollback-review`,
+`package-activate`, `package-status` and `check-selected` supply the
+[native package lifecycle](../../deployment/native/package-lifecycle.md).
+Canonical selection and retained host/manifest witnesses commit together.
+Rollback reviews the current store and preserves the accepted suffix. This
+matrix requires unchanged compiled engine identity and an explicit stopped
+supervisor switch; different runtime/engine implementations need migration.
+
+The derived index avoids filesystem checks for discarded transient nodes and
+coalesces source-tip updates within a canonical transaction. Formats, durability
+order and qualification budgets remain unchanged. The
+[completed Windows 100k failure](../../qualification/reports/2026-11-18-hosted-windows-100k/README.md)
+is preserved; new implementation measurements are separate evidence.
+
+## Previous integrated batch — CE-SW-39 continuous native operation
 
 `anaiero host` runs the canonical modular session continuously with monotonic
 wall pacing, bounded control/storage queues, cached status and native IPC/service

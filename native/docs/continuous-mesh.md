@@ -360,11 +360,12 @@ ACK owns only its bounded outstanding page. These are bounded operating rules,
 not an unlimited-throughput or hard filesystem-latency guarantee.
 
 Relay observations, receive receipts, projections, artifact receipts and
-bootstrap installation records are canonical retained evidence. Their latest
-records protect required payloads. This batch does not automatically expire
-remote relay payloads or historical identity records. Finite quota therefore
-stops admission unless the operator provides supported retention/capacity
-policy. Sender retention still respects its lifecycle subscriptions and pins.
+bootstrap installation records are canonical retained evidence. The explicit
+receiver retention commands below reclaim selected payloads while preserving
+required current roots. Historical identity/tombstone/operation records remain
+retained; finite quota still stops admission when those records or protected
+data fill the declared capacity. Sender retention separately respects its
+lifecycle subscriptions and pins.
 
 [Default canonical compaction](canonical-evidence.md) is supported and retains
 operation receipts. Built-in mesh operation requires receipt epoch **zero** and
@@ -374,6 +375,68 @@ until current policy is explicitly reauthorized. Renew peer authority and
 recreate grants with a new operation and generation bound to the current store
 incarnation; replaying an old grant operation cannot restore current authority.
 Rebootstrap subscription continuity where required.
+
+## Review and reclaim receiver history
+
+Quiesce the receiver before offline maintenance: stop its standalone subscriber,
+or drain and stop its host. Each `local` command acquires the store's native writer
+lock. The same administration verbs can use `admin ENDPOINT` on a paused host,
+but **every intervening canonical mutation invalidates a review**, including a
+new receive, pin or policy change. A stale plan needs a new plan ID and review;
+replaying its original review operation returns the original plan.
+
+```text
+anaiero mesh-live local RECEIVER_STORE receiver-retention-review expire-first-page sender SOURCE_UID 1 1 16 review-first-page
+anaiero mesh-live local RECEIVER_STORE receiver-retention-status expire-first-page
+anaiero mesh-live local RECEIVER_STORE receiver-retention-activate expire-first-page activate-first-page
+anaiero mesh-live local RECEIVER_STORE receiver-retention-reclaim expire-first-page reclaim-first-page
+```
+
+The interval above is an example; use the actual original delivery boundaries.
+The selected range contains at most 32 observations. Every still-retained member
+of its original pages must be included. Already-expired members outside the
+interval are allowed, so different overlapping page sizes can be retired in
+successive bounded operations. Review verifies original receipt provenance and
+records the exact store/root/generation, object list, candidate hash and logical
+byte count. Status reports `reviewed`, `activated` or `completed`.
+
+Use `FIRST=0 LAST=0` to select only exact received objects. Up to eight identities
+of each kind are permitted, and a plan contains at most 64 distinct objects:
+
+```text
+anaiero mesh-live local RECEIVER_STORE receiver-retention-review expire-objects sender SOURCE_UID 1 0 0 review-objects artifact:ARTIFACT_SHA bootstrap:OLD_OFFER_ID receipt:DELIVERY_RECEIPT_SHA
+```
+
+`artifact:` addresses a received artifact digest. `bootstrap:` addresses the
+original offer ID returned in the bootstrap exchange, not a new subscription
+generation. `receipt:` selects an additional full-page receipt by its returned
+`receipt_sha256`; overlapping subscriptions can retain independent copies even
+when they refer to the same observation identities. Explicit selection also
+works after those observation payloads were expired. This avoids a global scan
+over historical subscriptions. Receipt copies not selected remain retained.
+
+Current receive cursors and latest projected values stay protected. A bootstrap
+checkpoint cannot expire while the current receive cursor depends on it. Reader,
+backup, operator and other canonical roots continue to block expiry, even if a
+wall-clock lease elapsed. Some shared-root conflicts are detected at activation
+by the store's reference-count admission; a rejected activation deletes nothing.
+
+Activation commits tombstones and expiry before deleting any bytes. Reads and
+old delivery/artifact/bootstrap retries then return `history_expired`; the
+original accepted operation identities and source ownership remain retained.
+Expired blob digests cannot be silently reintroduced into this store by a new
+grant or subscription. Treat artifact/checkpoint expiry as a permanent retained
+identity decision; select only bytes that this store no longer needs.
+Reclaim deletes expired files and records their released quota bytes. Repeat
+the same reclaim operation after interruption, even if some files are already
+missing: physical absence alone does not prove the accounting commit finished.
+`committed_degraded` requires normal store recovery before further admission.
+
+Logical reclaimed payload bytes are not net filesystem savings. Canonical
+maintenance receipts and immutable identity fences still occupy space; reviewed
+canonical compaction can remove redundant historical versions afterward. This
+policy does not automatically delete retained identities or make finite storage
+unlimited. The default receipt epoch remains zero.
 
 | Result | Operator meaning |
 | --- | --- |

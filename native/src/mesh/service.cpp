@@ -50,6 +50,46 @@ Result decode_receive(const ev::StoredRecord& record,ReceiveReceipt& out){
     return fail(Code::corrupt,"invalid canonical mesh receive cursor");
   out.receipt_sha256=f[3];out.store_generation=record.generation;return {};
 }
+Bytes encode_retention_request(const ReceiverRetentionRequest& value){
+  return pack({"mesh-receiver-retention/1",value.id,value.principal,value.source.uid,number(value.source.epoch),
+    number(value.first_sequence),number(value.last_sequence),pack(value.artifacts),pack(value.bootstrap_ids),pack(value.delivery_receipts)});
+}
+bool valid_retention_request(const ReceiverRetentionRequest& value){
+  if(!valid_token(value.id,256)||!valid_token(value.principal,256)||!valid_token(value.source.uid,256)||!value.source.epoch||
+     value.artifacts.size()>8||value.bootstrap_ids.size()>8||value.delivery_receipts.size()>8)return false;
+  if(value.first_sequence||value.last_sequence){
+    if(!value.first_sequence||value.last_sequence<value.first_sequence||value.last_sequence-value.first_sequence>=32)return false;
+  }else if(value.artifacts.empty()&&value.bootstrap_ids.empty()&&value.delivery_receipts.empty())return false;
+  std::set<std::string> unique;
+  for(const auto& id:value.artifacts)if(!valid_digest(id)||!unique.insert(id).second)return false;
+  unique.clear();for(const auto& id:value.bootstrap_ids)if(!valid_token(id,256)||!unique.insert(id).second)return false;
+  unique.clear();for(const auto& id:value.delivery_receipts)if(!valid_digest(id)||!unique.insert(id).second)return false;
+  return true;
+}
+Bytes encode_retention_plan(const ReceiverRetentionPlan& value){
+  return pack({"mesh-receiver-retention-plan/1",encode_retention_request(value.request),number(static_cast<std::uint64_t>(value.phase)),
+    value.store_id,value.reviewed_root,value.candidate_sha256,number(value.reviewed_generation),number(value.expected_bytes),pack(value.objects)});
+}
+Result decode_retention_plan(std::string_view bytes,ReceiverRetentionPlan& out){
+  out={};std::vector<std::string> f,r;std::uint64_t phase=0;
+  if(!unpack(bytes,f,9,32768)||f.size()!=9||f[0]!="mesh-receiver-retention-plan/1"||
+     !unpack(f[1],r,10,16384)||r.size()!=10||r[0]!="mesh-receiver-retention/1"||
+     !integer(r[4],out.request.source.epoch)||!integer(r[5],out.request.first_sequence)||!integer(r[6],out.request.last_sequence)||
+     !unpack(r[7],out.request.artifacts,8,4096)||!unpack(r[8],out.request.bootstrap_ids,8,4096)||!unpack(r[9],out.request.delivery_receipts,8,4096)||
+     !integer(f[2],phase)||phase>2||!valid_digest(f[3])||!valid_digest(f[4])||!valid_digest(f[5])||
+     !integer(f[6],out.reviewed_generation)||!out.reviewed_generation||!integer(f[7],out.expected_bytes)||
+     !unpack(f[8],out.objects,64,8192)||out.objects.empty())return fail(Code::corrupt,"invalid receiver retention plan");
+  out.request.id=r[1];out.request.principal=r[2];out.request.source.uid=r[3];
+  if(!valid_retention_request(out.request))return fail(Code::corrupt,"invalid receiver retention scope");
+  std::set<Digest> unique;for(const auto& object:out.objects)if(!valid_digest(object)||!unique.insert(object).second)return fail(Code::corrupt,"invalid receiver retention objects");
+  out.phase=static_cast<lc::MaintenancePhase>(phase);out.store_id=f[3];out.reviewed_root=f[4];out.candidate_sha256=f[5];return {};
+}
+Result retention_retry(ev::ICommitStore& store,std::string_view id,std::string_view request,bool& duplicate){
+  duplicate=false;if(!valid_token(id,256))return fail(Code::invalid,"invalid retention operation identity");
+  ev::CommitReceipt previous;const auto found=store.lookup_operation(id,previous);
+  if(found){if(previous.request_digest!=request)return fail(Code::conflict,"receiver retention operation changed");duplicate=true;return {};}
+  return found.code==Code::not_found?Result{}:found;
+}
 // Carry transport expiry and exact mesh policy revisions through lifecycle's
 // own canonical transaction preparation to the actual storage admission clock.
 class AuthorizedStore final:public ev::ICommitStore {
@@ -190,6 +230,123 @@ struct Service::Impl {
       if(batch)guard(*batch,"mesh.receive.owner",sha256(source.uid),owner);
     }
     return {};
+  }
+  Result retention_candidate(const ReceiverRetentionRequest& request,ev::CommitBatch& batch,ReceiverRetentionPlan& plan) const {
+    if(!valid_retention_request(request))return fail(Code::invalid,"retention needs complete pages of at most 32 observations and at most eight artifacts/checkpoints each");
+    if(store.info().operation_epoch)return fail(Code::unsupported,"receiver retention requires retained operation receipts");
+    lc::Snapshot snapshot;if(auto result=lifecycle.snapshot(snapshot);!result)return result;
+    if(snapshot.quarantined)return fail(Code::unauthorized,"reauthorize a restored receiver before retention");
+    Grant granted;if(auto result=grant(request.principal,request.source,granted);!result)return result;
+    lc::SourceAuthority owner;if(auto result=lifecycle.source_authority(request.source.uid,owner);!result)return result;
+    if(owner.kind!=lc::SourceAuthorityKind::relay||owner.owner!=request.principal||owner.clock_domain!=granted.source.clock_domain)
+      return fail(Code::unauthorized,"retention scope is not owned by this authenticated relay");
+    batch={};batch.operation_id=operation("retention-candidate",encode_retention_request(request));
+    batch.request_digest=sha256(encode_retention_request(request));batch.commit_class=ev::CommitClass::maintenance;
+    std::set<Digest> objects,receipts;std::set<std::string> removed;
+    const auto remove=[&](const ev::StoredRecord& stored)->Result {
+      if(stored.record.tombstone)return fail(Code::history_expired,"receiver history was already explicitly expired");
+      if(!removed.insert(pack({stored.record.kind,stored.record.key})).second)return {};
+      guard(batch,stored.record.kind,stored.record.key,stored);
+      auto record_=stored.record;record_.references.clear();record_.tombstone=true;batch.records.push_back(std::move(record_));return {};
+    };
+    const auto cursor_protects=[&](std::string_view subscription,std::string_view digest)->Result {
+      ev::StoredRecord cursor;bool exists=false;
+      if(auto result=read(store,"mesh.receive",receive_key(request.principal,subscription,request.source),cursor,exists);!result)return result;
+      if(exists&&std::find(cursor.record.references.begin(),cursor.record.references.end(),digest)!=cursor.record.references.end())
+        return fail(Code::busy,"latest receive cursor protects this object; advance delivery or install a newer bootstrap first");
+      return {};
+    };
+    const auto remove_receipt=[&](const Digest& digest,bool complete_interval,std::uint64_t required_sequence)->Result {
+      Bytes receipt;std::vector<std::string> fields;std::uint64_t credential=0;Delivery page;
+      if(auto result=store.get_blob(digest,receipt);!result)return result;
+      Options bounds;bounds.maximum_page_observations=32;bounds.maximum_page_bytes=65536;
+      if(sha256(receipt)!=digest||!unpack(receipt,fields,5,131072)||fields.size()!=5||fields[0]!="mesh-relay-receipt/2"||
+         fields[1]!=request.principal||!integer(fields[2],credential)||!credential||!valid_digest(fields[3])||
+         !decode_delivery(fields[4],page,bounds)||page.source!=granted.source)
+        return fail(Code::corrupt,"receiver retention page provenance differs from its scope");
+      if(required_sequence&&(required_sequence<=page.from.sequence||required_sequence>page.to.sequence))
+        return fail(Code::corrupt,"receiver observation is absent from its relay receipt");
+      if(!receipts.insert(digest).second)return {};
+      for(const auto& delivered:page.observations){
+        ev::StoredRecord known;std::vector<std::string> claim;
+        if(auto result=store.latest("mesh.observation",received_observation_key(request.principal,request.source,delivered.claim.sequence),known);!result)return result;
+        const bool selected=delivered.claim.sequence>=request.first_sequence&&delivered.claim.sequence<=request.last_sequence;
+        if(complete_interval&&!selected&&!known.record.tombstone)
+          return fail(Code::invalid,"retention must select every still-retained observation in an original delivery page");
+        if((complete_interval&&selected&&known.record.tombstone)||!unpack(known.record.payload,claim,4,4096)||claim.size()!=4||claim[0]!="mesh-observation/2"||
+           claim[1]!=delivered.claim.payload_digest||claim[2]!=delivered.claim.receipt_digest)
+          return fail(Code::corrupt,"receiver page no longer matches its retained observation identities");
+      }
+      if(auto result=cursor_protects(page.subscription_id,digest);!result)return result;
+      const auto op=operation("receive",pack({request.principal,fields[4]}));ev::StoredRecord witness;
+      if(auto result=store.latest("mesh.delivery.receipt",op,witness);!result)return result;
+      if(witness.record.tombstone)return fail(Code::history_expired,"receiver delivery receipt has already expired");
+      if(witness.record.payload!=pack({"mesh-delivery-receipt/2",encode_cursor(page.to)})||witness.record.references!=std::vector<Digest>{digest})
+        return fail(Code::corrupt,"receiver page has no exact original delivery witness");
+      ev::CommitReceipt committed;if(auto result=store.lookup_operation(op,committed);!result)return result;
+      if(committed.request_digest!=sha256(pack({request.principal,fields[4]})))return fail(Code::corrupt,"receiver page operation identity differs");
+      if(auto result=remove(witness);!result)return result;
+      objects.insert(digest);return {};
+    };
+    if(request.first_sequence)for(auto sequence=request.first_sequence;;++sequence){
+      ev::StoredRecord observed;if(auto result=store.latest("mesh.observation",received_observation_key(request.principal,request.source,sequence),observed);!result)return result;
+      if(observed.record.tombstone)return fail(Code::history_expired,"requested observation has already expired");
+      std::vector<std::string> f;
+      if(!unpack(observed.record.payload,f,4,4096)||f.size()!=4||f[0]!="mesh-observation/2"||
+         !valid_digest(f[1])||!valid_digest(f[2])||!valid_digest(f[3])||observed.record.references!=std::vector<Digest>{f[1],f[3]})
+        return fail(Code::corrupt,"invalid receiver observation retention witness");
+      Bytes payload;if(auto result=store.get_blob(f[1],payload);!result)return result;
+      lc::SourceRef decoded;std::uint64_t ordinal=0;Observation observation;
+      if(sha256(payload)!=f[1]||!lc::decode_source_observation(payload,decoded,ordinal,observation)||decoded!=request.source||ordinal!=sequence)
+        return fail(Code::corrupt,"receiver retention observation differs from its identity");
+      ev::StoredRecord projected;bool exists=false;
+      if(auto result=read(store,"mesh.projection",sha256(pack({encode_scope(request.source),observation.metric})),projected,exists);!result)return result;
+      if(exists&&std::find(projected.record.references.begin(),projected.record.references.end(),f[1])!=projected.record.references.end())
+        return fail(Code::busy,"latest relay projection still protects the requested observation");
+      if(auto result=remove(observed);!result)return result;
+      objects.insert(f[1]);
+      if(auto result=remove_receipt(f[3],true,sequence);!result)return result;
+      if(sequence==request.last_sequence)break;
+    }
+    for(const auto& digest:request.delivery_receipts)if(auto result=remove_receipt(digest,false,0);!result)return result;
+    for(const auto& digest:request.artifacts){
+      ev::StoredRecord artifact;if(auto result=store.latest("mesh.artifact",grant_key(request.principal,request.source)+":"+digest,artifact);!result)return result;
+      if(artifact.record.tombstone)return fail(Code::history_expired,"receiver artifact has already expired");
+      std::vector<std::string> f;std::uint64_t credential=0;
+      if(!unpack(artifact.record.payload,f,4,4096)||f.size()!=4||f[0]!="mesh-artifact/2"||f[1]!=request.principal||
+         !integer(f[2],credential)||!credential||f[3]!=digest||artifact.record.references!=std::vector<Digest>{digest})
+        return fail(Code::corrupt,"artifact does not have an exact receiver ownership witness");
+      if(auto result=remove(artifact);!result)return result;
+      objects.insert(digest);
+    }
+    for(const auto& id:request.bootstrap_ids){
+      const auto op=operation("bootstrap-install",pack({request.principal,id}));ev::StoredRecord installed;
+      if(auto result=store.latest("mesh.bootstrap.installed",op,installed);!result)return result;
+      if(installed.record.tombstone)return fail(Code::history_expired,"receiver bootstrap has already expired");
+      std::vector<std::string> f;EngineIdentity context;std::uint64_t generation=0,lease=0;lc::Cursor tip;
+      if(!unpack(installed.record.payload,f,8,32768)||f.size()!=8||f[0]!="mesh-bootstrap-offer/2"||f[1]!=id||
+         !valid_token(f[2],256)||!integer(f[3],generation)||!generation||!integer(f[4],lease)||!decode_identity(f[5],context)||
+         context!=granted.source||!decode_cursor(f[6],tip)||!valid_digest(f[7])||installed.record.references!=std::vector<Digest>{f[7]})
+        return fail(Code::corrupt,"bootstrap installation does not match receiver retention scope");
+      if(auto result=cursor_protects(f[2],f[7]);!result)return result;
+      if(auto result=remove(installed);!result)return result;
+      objects.insert(f[7]);
+    }
+    if(objects.size()>64)return fail(Code::capacity,"receiver retention page exceeds the 64-object expiry bound");
+    plan={};plan.request=request;const auto info=store.info();plan.store_id=info.store_id;plan.reviewed_root=info.root_digest;
+    plan.reviewed_generation=info.generation+1;
+    if(!plan.reviewed_generation)return fail(Code::capacity,"receiver retention generation exhausted");
+    for(const auto& digest:objects){
+      ev::BlobInfo object;if(auto result=store.blob_info(digest,object);!result)return result;
+      if(object.expired_generation)return fail(Code::history_expired,"requested receiver object has already expired");
+      if(!object.present)return fail(Code::corrupt,"receiver retention object is missing");
+      Bytes bytes;if(auto result=store.get_blob(digest,bytes);!result)return result;
+      if(bytes.size()!=object.bytes||sha256(bytes)!=digest)return fail(Code::corrupt,"receiver retention object cannot be verified");
+      if(object.bytes>std::numeric_limits<std::uint64_t>::max()-plan.expected_bytes)return fail(Code::capacity,"receiver retention byte count overflow");
+      plan.expected_bytes+=object.bytes;
+    }
+    plan.objects.assign(objects.begin(),objects.end());batch.expire_blobs=plan.objects;
+    plan.candidate_sha256=ev::batch_digest(batch);return {};
   }
 };
 Service::Service(ev::ICommitStore& store,Options options):impl_(std::make_unique<Impl>(store,options)){}
@@ -360,6 +517,7 @@ Result Service::received(std::string_view principal,std::string_view id,const lc
 }
 Result Service::received_observation(std::string_view principal,const lc::SourceRef& source,std::uint64_t sequence,DeliveryItem& out) const {
   out={};ev::StoredRecord stored;if(auto result=impl_->store.latest("mesh.observation",received_observation_key(principal,source,sequence),stored);!result)return result;
+  if(stored.record.tombstone)return fail(Code::history_expired,"receiver observation was explicitly expired");
   std::vector<std::string> fields;
   if(!unpack(stored.record.payload,fields,4,4096)||fields.size()!=4||fields[0]!="mesh-observation/2"||
       !valid_digest(fields[1])||!valid_digest(fields[2])||!valid_digest(fields[3]))return fail(Code::corrupt,"invalid relay observation record");
@@ -378,6 +536,11 @@ Result Service::receive(const Session& session,const Delivery& input,std::uint64
   ev::CommitReceipt committed;const auto prior=impl_->store.lookup_operation(batch.operation_id,committed);
   if(prior){
     ev::StoredRecord witness;if(auto result=impl_->store.latest("mesh.delivery.receipt",batch.operation_id,witness);!result)return result;
+    if(witness.record.tombstone)return fail(Code::history_expired,"received page was explicitly expired; its operation identity remains retained");
+    for(const auto& item:page.observations){
+      ev::StoredRecord observed;if(auto result=impl_->store.latest("mesh.observation",received_observation_key(session.principal,scope(page.source),item.claim.sequence),observed);!result)return result;
+      if(observed.record.tombstone)return fail(Code::history_expired,"received page overlaps explicitly expired observation history");
+    }
     if(witness.record.references.size()!=1)return fail(Code::corrupt,"relay receipt witness is missing");
     Bytes receipt;if(auto result=impl_->store.get_blob(witness.record.references.front(),receipt);!result)return result;
     out={page.to,page.generation,committed.generation,witness.record.references.front(),true};return {};
@@ -485,7 +648,8 @@ Result Service::install_bootstrap(const Session& session,const BootstrapOffer& i
   if(prior){
     if(receipt.request_digest!=batch.request_digest)return fail(Code::conflict,"bootstrap operation identity was reused with different content");
     ev::StoredRecord installed;if(auto result=impl_->store.latest("mesh.bootstrap.installed",batch.operation_id,installed);!result)return result;
-    if(installed.record.tombstone||installed.record.payload!=offer_metadata(offer)||installed.record.references!=std::vector<Digest>{offer.checkpoint_sha256})
+    if(installed.record.tombstone)return fail(Code::history_expired,"receiver bootstrap installation was explicitly expired");
+    if(installed.record.payload!=offer_metadata(offer)||installed.record.references!=std::vector<Digest>{offer.checkpoint_sha256})
       return fail(Code::corrupt,"durable bootstrap installation differs from the requested retry");
     Bytes checkpoint;if(auto result=impl_->store.get_blob(offer.checkpoint_sha256,checkpoint);!result)return result;
     if(checkpoint!=offer.checkpoint)return fail(Code::corrupt,"durable bootstrap checkpoint bytes differ");
@@ -538,6 +702,67 @@ Result Service::cancel_bootstrap(std::string_view id,std::string operation_id){
   if(offered_present){guard(batch,"mesh.bootstrap.offer",std::string(id),offered);batch.records.push_back({"mesh.bootstrap.offer",std::string(id),offered.record.payload,{},true});}
   else record(batch,"mesh.bootstrap.cancelled",std::string(id),pack({"mesh-bootstrap-abandoned/2",std::string(id)}));
   ev::CommitReceipt receipt;return impl_->store.commit(batch,receipt);
+}
+
+Result Service::receiver_retention(std::string_view id,ReceiverRetentionPlan& out) const {
+  if(!valid_token(id,256))return fail(Code::invalid,"invalid receiver retention plan identifier");
+  ev::StoredRecord stored;if(auto result=impl_->store.latest("mesh.retention.plan",sha256(id),stored);!result)return result;
+  if(stored.record.tombstone)return fail(Code::corrupt,"receiver retention plan cannot be removed");
+  if(auto result=decode_retention_plan(stored.record.payload,out);!result)return result;
+  return out.request.id==id?Result{}:fail(Code::corrupt,"receiver retention plan key mismatch");
+}
+Result Service::review_receiver_retention(const ReceiverRetentionRequest& request,std::string id,ReceiverRetentionPlan& out){
+  out={};if(!valid_retention_request(request))return fail(Code::invalid,"invalid bounded receiver retention request");
+  const auto digest=sha256(pack({"mesh-receiver-retention-review/1",encode_retention_request(request)}));bool duplicate=false;
+  if(auto result=retention_retry(impl_->store,id,digest,duplicate);!result)return result;
+  if(duplicate)return receiver_retention(request.id,out);
+  ev::StoredRecord previous;bool exists=false;const auto key=sha256(request.id);
+  if(auto result=read(impl_->store,"mesh.retention.plan",key,previous,exists);!result)return result;
+  if(exists)return fail(Code::conflict,"receiver retention plan identifier already exists");
+  ev::CommitBatch candidate;ReceiverRetentionPlan plan;if(auto result=impl_->retention_candidate(request,candidate,plan);!result)return result;
+  ev::CommitBatch batch;batch.operation_id=std::move(id);batch.request_digest=digest;batch.commit_class=ev::CommitClass::maintenance;
+  batch.expected_generation=plan.reviewed_generation-1;guard(batch,"mesh.retention.plan",key,previous);
+  record(batch,"mesh.retention.plan",key,encode_retention_plan(plan));ev::CommitReceipt receipt;
+  const auto result=impl_->store.commit(batch,receipt);if(result.committed())out=std::move(plan);return result;
+}
+Result Service::activate_receiver_retention(std::string_view plan_id,std::string id){
+  if(!valid_token(plan_id,256))return fail(Code::invalid,"invalid receiver retention plan identifier");
+  const auto digest=sha256(pack({"mesh-receiver-retention-activate/1",std::string(plan_id)}));bool duplicate=false;
+  if(auto result=retention_retry(impl_->store,id,digest,duplicate);!result||duplicate)return result;
+  ReceiverRetentionPlan plan;if(auto result=receiver_retention(plan_id,plan);!result)return result;
+  if(plan.phase!=lc::MaintenancePhase::reviewed)return fail(Code::conflict,"receiver retention is no longer in review");
+  const auto info=impl_->store.info();
+  if(info.store_id!=plan.store_id||info.generation!=plan.reviewed_generation)return fail(Code::conflict,"store changed after receiver retention review; create a new plan");
+  ev::CommitBatch batch;ReceiverRetentionPlan rebuilt;
+  if(auto result=impl_->retention_candidate(plan.request,batch,rebuilt);!result)return result;
+  if(rebuilt.candidate_sha256!=plan.candidate_sha256||rebuilt.objects!=plan.objects||rebuilt.expected_bytes!=plan.expected_bytes)
+    return fail(Code::conflict,"receiver retention candidates differ from the reviewed plan");
+  ev::StoredRecord previous;const auto key=sha256(plan_id);if(auto result=impl_->store.latest("mesh.retention.plan",key,previous);!result)return result;
+  plan.phase=lc::MaintenancePhase::activated;batch.operation_id=std::move(id);batch.request_digest=digest;
+  batch.expected_generation=info.generation;guard(batch,"mesh.retention.plan",key,previous);
+  record(batch,"mesh.retention.plan",key,encode_retention_plan(plan));ev::CommitReceipt receipt;
+  return impl_->store.commit(batch,receipt);
+}
+Result Service::reclaim_receiver_retention(std::string_view plan_id,std::string id){
+  if(!valid_token(plan_id,256))return fail(Code::invalid,"invalid receiver retention plan identifier");
+  const auto digest=sha256(pack({"mesh-receiver-retention-reclaim/1",std::string(plan_id)}));bool duplicate=false;
+  if(auto result=retention_retry(impl_->store,id,digest,duplicate);!result||duplicate)return result;
+  ReceiverRetentionPlan plan;if(auto result=receiver_retention(plan_id,plan);!result)return result;
+  if(plan.phase==lc::MaintenancePhase::reviewed)return fail(Code::conflict,"activate receiver retention before deleting bytes");
+  if(plan.phase==lc::MaintenancePhase::completed)return fail(Code::completed,"receiver retention was already reclaimed");
+  if(impl_->store.info().store_id!=plan.store_id)return fail(Code::conflict,"receiver retention store identity changed");
+  for(const auto& digest_:plan.objects){
+    ev::BlobInfo object;if(auto result=impl_->store.blob_info(digest_,object);!result)return result;
+    if(!object.expired_generation)return fail(Code::corrupt,"receiver retention object lacks canonical expiry");
+    // Physical deletion precedes its canonical accounting commit. A crash can
+    // leave present=false while the quota still charges these bytes; replay
+    // reclamation even then so the store reconciles the missing-file case.
+    if(auto result=impl_->store.reclaim_expired_blob(digest_,impl_->store.generation());!result)return result;
+  }
+  ev::StoredRecord previous;const auto key=sha256(plan_id);if(auto result=impl_->store.latest("mesh.retention.plan",key,previous);!result)return result;
+  plan.phase=lc::MaintenancePhase::completed;ev::CommitBatch batch;batch.operation_id=std::move(id);batch.request_digest=digest;
+  batch.commit_class=ev::CommitClass::maintenance;guard(batch,"mesh.retention.plan",key,previous);
+  record(batch,"mesh.retention.plan",key,encode_retention_plan(plan));ev::CommitReceipt receipt;return impl_->store.commit(batch,receipt);
 }
 
 struct FairScheduler::Impl {

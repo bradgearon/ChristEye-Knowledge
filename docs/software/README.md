@@ -30,6 +30,7 @@ binding in CE-SW-38. The complete explanation and architecture are in
 
 | Integrated capability | Current specification |
 |---|---|
+| Reduced index work, mixed-host profiles, reviewed receiver retention and canonical package selection/rollback | [CE-SW-40](CE-SW-40_operating_envelope_and_package_lifecycle.md) |
 | Continuous canonical host/mesh, reviewed compaction and native package/profile tooling | [CE-SW-39](CE-SW-39_continuous_native_operation.md) |
 | Compiled SDK, canonical evidence, real shared VLM and lifecycle/retention | [CE-SW-38](CE-SW-38_compiled_runtime_and_lifecycle.md) |
 | Mixed native sessions, restart, operations and local control | [CE-SW-31](CE-SW-31_integrated_native_sessions.md) |
@@ -63,12 +64,14 @@ evidence transactions, verified indexes, complete lifecycle/retention rules,
 continuous mesh scheduling and native qualification gates. Its M1–M6 sequence
 is reflected in the development plan. [CE-SW-39](CE-SW-39_continuous_native_operation.md)
 implements the continuous canonical path, reviewed compaction and M6's native
-package/profile tooling. Sustained release qualification remains a distinct gate.
+package/profile tooling. [CE-SW-40](CE-SW-40_operating_envelope_and_package_lifecycle.md)
+adds receiver retention, conservative package activation/rollback and actual
+mixed-host qualification. Sustained release qualification remains a distinct gate.
 
 ## Historical specifications and increment records
 
 The status column below records each document's original increment. Later
-CE-SW-31–39 integrations supersede several original “pending” statements.
+CE-SW-31–40 integrations supersede several original “pending” statements.
 Use the current capability map above for present behavior; preserve these
 records for design history and the scientific boundaries of each increment.
 

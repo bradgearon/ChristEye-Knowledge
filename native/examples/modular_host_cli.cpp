@@ -1,5 +1,7 @@
 #include "anaiero/sdk/native_session.hpp"
 #include "anaiero/sdk/engines.hpp"
+#include "anaiero/sdk/engine_files.hpp"
+#include "deployment.hpp"
 #ifdef ANAIERO_HAS_CONTINUOUS_MESH
 #include "anaiero/sdk/native_mesh.hpp"
 #endif
@@ -19,6 +21,7 @@ namespace s=anaiero::sdk;
 namespace h=s::host;
 namespace ipc=anaiero::host;
 namespace fs=std::filesystem;
+namespace deployment=anaiero::deployment;
 namespace {
 struct Shutdown {
   h::NativeContinuousHost& host;
@@ -82,7 +85,8 @@ class Commands final:public ipc::ICommandService {
   ipc::Reply mesh_admin(std::string command){
     auto entry=std::make_shared<MeshAdministration::Entry>();
     std::istringstream parsed(command);std::string verb;parsed>>verb;
-    entry->mutation=verb=="peer"||verb=="grant"||verb=="cancel-bootstrap";
+    entry->mutation=verb=="peer"||verb=="grant"||verb=="cancel-bootstrap"||verb=="receiver-retention-review"||
+      verb=="receiver-retention-activate"||verb=="receiver-retention-reclaim";
     {
       std::lock_guard lock(administration_->mutex);
       while(administration_->entries.size()>=32){
@@ -178,7 +182,13 @@ void help() {
     "  anaiero host service ENDPOINT STORE PERIOD_MS [paused] [--mesh CONFIG]\n"
     "  anaiero host query ENDPOINT COMMAND [ARGUMENTS...]\n"
     "  anaiero host check STORE\n"
+    "  anaiero host check-selected STORE\n"
     "  anaiero host package-info\n"
+    "  anaiero host package-check PACKAGE\n"
+    "  anaiero host package-review STORE PACKAGE OPERATION PLAN_FILE\n"
+    "  anaiero host package-rollback-review STORE OPERATION PLAN_FILE\n"
+    "  anaiero host package-activate STORE PLAN_FILE\n"
+    "  anaiero host package-status STORE\n"
     "Commands: STATUS [engine-offset], PING, RUN, PAUSE, THROUGH absolute-cycle,\n"
     "  ENGINE_PAUSE|ENGINE_RESUME|ENGINE_CANCEL instance stable-operation-id,\n"
     "  RESULT ticket, STOP. Queue admission is not a durable acknowledgement.\n"
@@ -187,6 +197,73 @@ void help() {
 s::Result execute(int argc,char** argv) {
   if(argc<2||std::string_view(argv[1])=="help"||std::string_view(argv[1])=="--help") {help();return {};}
   const std::string_view mode=argv[1];
+  if(mode=="package-probe"&&argc==2){
+    char request[65]{};if(!std::cin.getline(request,sizeof(request))||std::string_view(request)!="ANAIERO-PACKAGE-PROBE/1")
+      return {s::Code::invalid,"invalid package probe"};
+    s::EngineModuleCatalog catalog;if(auto r=anaiero::engines::register_builtin_engines(catalog);!r)return r;
+    std::cout<<"ANAIERO-PACKAGE-PROBE/1 "<<catalog.describe().front().module_sha256<<std::endl;
+    // The probe owner terminates its bounded child after receiving the reply.
+    // Keeping the pipe open avoids an exit/last-read race on native Windows.
+    std::cin.getline(request,sizeof(request));return {};
+  }
+  if(mode=="package-check"&&argc==3){
+    deployment::VerifiedPackage package;if(auto r=deployment::verify_native_package(argv[2],{},package);!r)return r;
+    std::cout<<"{\"schema\":\"anaiero.package-verification/1\",\"verified\":true,\"manifest_sha256\":\""<<package.identity.manifest_sha256
+      <<"\",\"module_sha256\":\""<<package.identity.module_sha256<<"\",\"files\":"<<package.files<<",\"bytes\":"<<package.bytes<<"}\n";return {};
+  }
+  if(mode=="package-review"||mode=="package-rollback-review"||mode=="package-activate"||mode=="package-status"){
+    if((mode=="package-review"&&argc!=6)||(mode=="package-rollback-review"&&argc!=5)||(mode=="package-activate"&&argc!=4)||(mode=="package-status"&&argc!=3))
+      return {s::Code::invalid,"invalid package deployment arguments; use help"};
+    h::NativeSession session;if(auto r=session.open(argv[2]);!r)return r;
+    deployment::Service service(session.store());deployment::Selection selection;if(auto r=service.selection(selection);!r)return r;
+    const auto show_selection=[&]{
+      std::cout<<"{\"schema\":\"anaiero.deployment-status/1\",\"selected\":"<<(selection.revision?"true":"false")
+        <<",\"selection_revision\":"<<selection.revision<<",\"activation_generation\":"<<selection.generation
+        <<",\"store_generation\":"<<session.store().generation()<<",\"store_root\":\""<<session.store().info().root_digest
+        <<"\",\"current_package\":"<<deployment::json_string(selection.current.directory)
+        <<",\"previous_package\":"<<deployment::json_string(selection.previous.directory)
+        <<",\"selected_executable\":"<<deployment::json_string(selection.revision?deployment::selected_executable(selection.current):"")
+        <<",\"operation\":"<<deployment::json_string(selection.operation_id)<<"}\n";
+    };
+    if(mode=="package-status"){show_selection();return {};}
+    deployment::Plan plan;s::evidence::CommitReceipt receipt;
+    if(mode=="package-activate"){
+      if(auto r=deployment::read_native_plan(argv[3],plan);!r)return r;
+      const auto existing=service.reconcile(plan,receipt);
+      if(existing){
+        std::cout<<"{\"schema\":\"anaiero.deployment-activation/1\",\"committed\":true,\"duplicate\":true,\"generation\":"<<receipt.generation
+          <<",\"root_sha256\":\""<<receipt.root_digest<<"\",\"still_selected\":"<<(selection.plan_sha256==plan.plan_sha256?"true":"false")<<"}\n";return {};
+      }
+      if(existing.code!=s::Code::not_found)return existing;
+    }
+    if(session.runner().progress().cycle_pending)return {s::Code::busy,"finish the pending durable cycle before package review or activation"};
+    s::EngineModuleCatalog catalog;if(auto r=anaiero::engines::register_builtin_engines(catalog);!r)return r;
+    const auto module=catalog.describe().front().module_sha256;
+    for(const auto& scheduled:session.runner().definition().engines)
+      if(scheduled.identity.module_sha256!=module)return {s::Code::unsupported,"retained scheduled engine implementation differs; explicit migration is required"};
+    std::string candidate;
+    if(mode=="package-activate")candidate=plan.candidate.directory;
+    else if(mode=="package-review")candidate=argv[3];
+    else{
+      if(selection.previous.directory.empty())return {s::Code::not_found,"no previous package is retained for rollback"};
+      candidate=selection.previous.directory;
+    }
+    deployment::VerifiedPackage package;if(auto r=deployment::verify_native_package(candidate,module,package);!r)return r;
+    if(mode=="package-activate"){
+      const auto activated=service.activate(plan,package,receipt);if(!activated.committed())return activated;
+      std::cout<<"{\"schema\":\"anaiero.deployment-activation/1\",\"committed\":true,\"duplicate\":"<<(receipt.duplicate?"true":"false")
+        <<",\"generation\":"<<receipt.generation<<",\"root_sha256\":\""<<receipt.root_digest
+        <<"\",\"selected_executable\":"<<deployment::json_string(deployment::selected_executable(package.identity))<<"}\n";
+      return activated;
+    }
+    const auto operation=mode=="package-review"?argv[4]:argv[3];const auto target=mode=="package-review"?argv[5]:argv[4];
+    if(auto r=service.review(package.identity,operation,plan);!r)return r;
+    if(auto r=anaiero::engines::write_new_artifact(target,deployment::encode_plan(plan));!r)return r;
+    std::cout<<"{\"schema\":\"anaiero.deployment-review/1\",\"plan_sha256\":\""<<plan.plan_sha256
+      <<"\",\"source_generation\":"<<plan.generation<<",\"source_root\":\""<<plan.root_sha256
+      <<"\",\"candidate_package\":"<<deployment::json_string(candidate)<<",\"previous_package\":"<<deployment::json_string(selection.current.directory)
+      <<",\"plan_file\":"<<deployment::json_string(target)<<",\"store_rollback\":false}\n";return {};
+  }
   if(mode=="query"&&argc>=4) {
     std::string command=argv[3];for(int i=4;i<argc;++i) {command+=' ';command+=argv[i];}
     std::string response;
@@ -199,8 +276,12 @@ s::Result execute(int argc,char** argv) {
     std::cout<<"{\"schema\":\"anaiero.host-package/1\",\"module_sha256\":\""<<catalog.describe().front().module_sha256
       <<"\",\"store_format\":\"canonical-root\",\"native_ipc\":1,\"transparent_live_upgrade\":false}\n";return {};
   }
-  if(mode=="check"&&argc==3) {
+  if((mode=="check"||mode=="check-selected")&&argc==3) {
     h::NativeSession session;if(auto result=session.open(argv[2]);!result)return result;
+    if(mode=="check-selected"){
+      s::EngineModuleCatalog catalog;if(auto r=anaiero::engines::register_builtin_engines(catalog);!r)return r;
+      if(auto r=deployment::verify_selected_host(session.store(),executable(argv[0]),catalog.describe().front().module_sha256);!r)return r;
+    }
     std::cout<<"{\"schema\":\"anaiero.host-compatibility/1\",\"compatible\":true,\"generation\":"<<session.store().generation()
       <<",\"completed_cycles\":"<<session.runner().progress().completed_cycles
       <<",\"cycle_pending\":"<<(session.runner().progress().cycle_pending?"true":"false")<<"}\n";return {};
@@ -221,6 +302,8 @@ s::Result execute(int argc,char** argv) {
   if(!mesh_configuration.empty())return {s::Code::unsupported,"configure ANAIERO_ENABLE_MESH=ON to use an authenticated listener"};
 #endif
   h::NativeSession session;if(auto result=session.open(argv[3]);!result)return result;
+  s::EngineModuleCatalog catalog;if(auto r=anaiero::engines::register_builtin_engines(catalog);!r)return r;
+  if(auto r=deployment::verify_selected_host(session.store(),executable(argv[0]),catalog.describe().front().module_sha256);!r)return r;
   if(auto result=session.ensure_engines();!result)return result;
   if(auto result=session.retain_host_artifact(executable(argv[0]));!result)return result;
   h::Options options;options.period_ms=static_cast<std::uint32_t>(period);options.initially_running=!paused;

@@ -738,7 +738,10 @@ Result Service::execute_maintenance(std::string_view id,std::string operation) {
   for(const auto& object:plan.request.objects){ev::BlobInfo info;
     if(auto result=impl_->store.blob_info(object,info);!result)return result;
     if(!info.expired_generation)return bad("manifest object lacks canonical expiry");
-    if(info.present)if(auto result=impl_->store.reclaim_expired_blob(object,impl_->store.generation());!result)return result;
+    // Missing physical bytes can still have a pending canonical accounting
+    // commit after an interrupted reclaim. The adapter reconciles that case
+    // and is idempotent for objects whose reclamation is already durable.
+    if(auto result=impl_->store.reclaim_expired_blob(object,impl_->store.generation());!result)return result;
   }
   plan.phase=MaintenancePhase::completed;guard(batch,maintenance_kind,key,record);put(batch,maintenance_kind,key,encode(plan));
   return impl_->commit(batch);

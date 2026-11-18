@@ -13,7 +13,7 @@ authoritative declaration text, including defaults, macros, annotations and
 inline definitions. A syntax index is not a substitute for compiling against
 the installed SDK. Operational rules are in [modular-lifecycle.md](modular-lifecycle.md).
 
-**Public-header manifest SHA-256:** `f45ac33f728a1ffcd93cdd6a300a8aa9d74c0700af7aade1af1cc0dd9cca6671`
+**Public-header manifest SHA-256:** `0fde5c7322a8fed802395093d3fae02890cccb88561baadb6c345b8e2f1e4301`
 
 | Header | SHA-256 |
 |---|---|
@@ -26,7 +26,7 @@ the installed SDK. Operational rules are in [modular-lifecycle.md](modular-lifec
 | [experiments.hpp](../sdk/include/anaiero/sdk/experiments.hpp) | `de18d005d734e926c1593f3fed870d4bd01ec9901f2acf5ec4047e3754cd0cec` |
 | [host.hpp](../sdk/include/anaiero/sdk/host.hpp) | `12bd106e68ba30b15304a8a1df42fd0d1a97a3c4468f25213b610bcbd4a58df9` |
 | [lifecycle.hpp](../sdk/include/anaiero/sdk/lifecycle.hpp) | `e1d4830d7f014290b1ec74ca81e7c1f1e3a51da8aed92879c86a6ff6ca9b1540` |
-| [mesh.hpp](../sdk/include/anaiero/sdk/mesh.hpp) | `4ca93fcbdc24fa3ead79d60068750745f004faf4d4de53eafde672ccae957227` |
+| [mesh.hpp](../sdk/include/anaiero/sdk/mesh.hpp) | `7a999ffbdc51057887033ab6e300d444313e26ec6a196d260611e46897de1fac` |
 | [module_abi.h](../sdk/include/anaiero/sdk/module_abi.h) | `6a5c4c08a9da5873875ca3926d5b8dd9bf6d6cca2bc599856fa594bb31c2a868` |
 | [module_host.hpp](../sdk/include/anaiero/sdk/module_host.hpp) | `e17c5ead618314291511e00795f36adc0ebe7135e10f44dfe417be94c6b77f9e` |
 | [native_mesh.hpp](../sdk/include/anaiero/sdk/native_mesh.hpp) | `228351d320fc7002198f3821ca18d46922f5c33cbcf0db1bd0c47eccef351199` |
@@ -1128,6 +1128,8 @@ std::string_view phase_name(SubscriptionPhase) noexcept;
 | `anaiero::sdk::mesh::TransferCost` | struct |
 | `anaiero::sdk::mesh::ArtifactChunk` | struct |
 | `anaiero::sdk::mesh::BootstrapOffer` | struct |
+| `anaiero::sdk::mesh::ReceiverRetentionRequest` | struct |
+| `anaiero::sdk::mesh::ReceiverRetentionPlan` | struct |
 | `anaiero::sdk::mesh::encode_delivery` | function |
 | `anaiero::sdk::mesh::decode_delivery` | function |
 | `anaiero::sdk::mesh::encode_grant` | function |
@@ -1157,6 +1159,10 @@ std::string_view phase_name(SubscriptionPhase) noexcept;
 | `anaiero::sdk::mesh::Service::install_bootstrap` | method |
 | `anaiero::sdk::mesh::Service::accept_bootstrap` | method |
 | `anaiero::sdk::mesh::Service::cancel_bootstrap` | method |
+| `anaiero::sdk::mesh::Service::review_receiver_retention` | method |
+| `anaiero::sdk::mesh::Service::receiver_retention` | method |
+| `anaiero::sdk::mesh::Service::activate_receiver_retention` | method |
+| `anaiero::sdk::mesh::Service::reclaim_receiver_retention` | method |
 | `anaiero::sdk::mesh::ScheduleKey` | struct |
 | `anaiero::sdk::mesh::SchedulerOptions` | struct |
 | `anaiero::sdk::mesh::FairScheduler` | class |
@@ -1223,6 +1229,27 @@ struct BootstrapOffer {
   Digest checkpoint_sha256;
   Bytes checkpoint;
 };
+// Trusted local receiver retention is explicit and bounded. An observation
+// interval must contain complete received pages (at most 32 observations).
+// Artifact/checkpoint expiry never removes source authority or retry identities.
+struct ReceiverRetentionRequest {
+  std::string id,principal;
+  lifecycle::SourceRef source;
+  std::uint64_t first_sequence=0,last_sequence=0;
+  std::vector<Digest> artifacts;
+  std::vector<std::string> bootstrap_ids;
+  // Extra copies received under overlapping subscriptions are selected by
+  // their returned receipt digest, without an unbounded historical scan.
+  std::vector<Digest> delivery_receipts={};
+};
+struct ReceiverRetentionPlan {
+  ReceiverRetentionRequest request;
+  lifecycle::MaintenancePhase phase=lifecycle::MaintenancePhase::reviewed;
+  std::string store_id;
+  Digest reviewed_root,candidate_sha256;
+  std::uint64_t reviewed_generation=0,expected_bytes=0;
+  std::vector<Digest> objects;
+};
 Bytes encode_delivery(const Delivery&);
 Result decode_delivery(std::string_view,Delivery&,const Options& options={});
 Bytes encode_grant(const Grant&);
@@ -1279,6 +1306,15 @@ public:
   // Trusted local maintenance; releasing a live transfer must follow transport
   // cancellation. Expiry alone does not assert that a reader released its data.
   Result cancel_bootstrap(std::string_view offer_id,std::string operation_id);
+  // Review is a canonical immutable plan; activation rejects every intervening
+  // store mutation. Current cursors/projections, live pins and all other roots
+  // remain protective. Reclamation can resume after interruption; expired
+  // reads/retries return HISTORY_EXPIRED instead of recreating accepted data.
+  Result review_receiver_retention(const ReceiverRetentionRequest&,
+                                  std::string operation_id,ReceiverRetentionPlan&);
+  Result receiver_retention(std::string_view plan_id,ReceiverRetentionPlan&) const;
+  Result activate_receiver_retention(std::string_view plan_id,std::string operation_id);
+  Result reclaim_receiver_retention(std::string_view plan_id,std::string operation_id);
 };
 
 // Cost-aware deficit round robin. Each connection has one queued bounded unit;
@@ -1975,6 +2011,6 @@ masked with equal-length whitespace for parsing only; displayed source is unchan
 | `lifecycle.hpp` | 133 | `type_identifier: (missing syntax node)` |
 | `lifecycle.hpp` | 141 | `type_identifier: (missing syntax node)` |
 | `lifecycle.hpp` | 193 | `type_identifier: (missing syntax node)` |
-| `mesh.hpp` | 57 | `type_identifier: (missing syntax node)` |
-| `mesh.hpp` | 70 | `type_identifier: (missing syntax node)` |
-| `mesh.hpp` | 127 | `type_identifier: (missing syntax node)` |
+| `mesh.hpp` | 78 | `type_identifier: (missing syntax node)` |
+| `mesh.hpp` | 91 | `type_identifier: (missing syntax node)` |
+| `mesh.hpp` | 157 | `type_identifier: (missing syntax node)` |

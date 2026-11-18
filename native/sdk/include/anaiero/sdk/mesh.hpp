@@ -53,6 +53,27 @@ struct BootstrapOffer {
   Digest checkpoint_sha256;
   Bytes checkpoint;
 };
+// Trusted local receiver retention is explicit and bounded. An observation
+// interval must contain complete received pages (at most 32 observations).
+// Artifact/checkpoint expiry never removes source authority or retry identities.
+struct ReceiverRetentionRequest {
+  std::string id,principal;
+  lifecycle::SourceRef source;
+  std::uint64_t first_sequence=0,last_sequence=0;
+  std::vector<Digest> artifacts;
+  std::vector<std::string> bootstrap_ids;
+  // Extra copies received under overlapping subscriptions are selected by
+  // their returned receipt digest, without an unbounded historical scan.
+  std::vector<Digest> delivery_receipts={};
+};
+struct ReceiverRetentionPlan {
+  ReceiverRetentionRequest request;
+  lifecycle::MaintenancePhase phase=lifecycle::MaintenancePhase::reviewed;
+  std::string store_id;
+  Digest reviewed_root,candidate_sha256;
+  std::uint64_t reviewed_generation=0,expected_bytes=0;
+  std::vector<Digest> objects;
+};
 Bytes encode_delivery(const Delivery&);
 Result decode_delivery(std::string_view,Delivery&,const Options& options={});
 Bytes encode_grant(const Grant&);
@@ -109,6 +130,15 @@ public:
   // Trusted local maintenance; releasing a live transfer must follow transport
   // cancellation. Expiry alone does not assert that a reader released its data.
   Result cancel_bootstrap(std::string_view offer_id,std::string operation_id);
+  // Review is a canonical immutable plan; activation rejects every intervening
+  // store mutation. Current cursors/projections, live pins and all other roots
+  // remain protective. Reclamation can resume after interruption; expired
+  // reads/retries return HISTORY_EXPIRED instead of recreating accepted data.
+  Result review_receiver_retention(const ReceiverRetentionRequest&,
+                                  std::string operation_id,ReceiverRetentionPlan&);
+  Result receiver_retention(std::string_view plan_id,ReceiverRetentionPlan&) const;
+  Result activate_receiver_retention(std::string_view plan_id,std::string operation_id);
+  Result reclaim_receiver_retention(std::string_view plan_id,std::string operation_id);
 };
 
 // Cost-aware deficit round robin. Each connection has one queued bounded unit;

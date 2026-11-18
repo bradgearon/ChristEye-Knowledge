@@ -40,6 +40,12 @@ jobs:
             build/modular/anaiero-builtin-manifest*.txt
             build/modular/qualification-smoke/report.json
             build/modular/qualification-smoke/profile.cevqualification
+            build/modular/mixed-qualification/report.json
+            build/modular/mixed-qualification/profile.cevqualification
+            build/modular/mixed-qualification/session-input.cevsession
+            build/modular/mixed-qualification/session.definition
+            build/modular/mixed-qualification/failed-run/report.json
+            build/modular/mixed-qualification/failed-run/profile.cevqualification
             build/qualification-100k/report.json
             build/qualification-100k/profile.cevqualification
             build/modular/native-package-tests/native package/package-manifest.json

@@ -91,6 +91,16 @@ static void native_roundtrip(const fs::path& repository,const fs::path& root){
   require(mesh::install_native_bootstrap(*receiver.worker,pull,2,receipt));CHECK(receipt.duplicate); // Lost final acceptance reply reconciles.
   sender.through(3);const auto advanced=sender.source();pull.subscription.generation=2;pull.through_sequence=advanced.last_sequence;
   mesh::NativeSubscriber continued(*receiver.worker,pull);require(continued.start());require(continued.wait(20000));CHECK(continued.status().cursor.sequence==advanced.last_sequence);continued.stop();
+  // Local administration reaches the same canonical lane and reclaims only
+  // the explicitly reviewed received artifact. TLS exposes no such verb.
+  sdk::Bytes retention;
+  require(mesh::administer_native(*receiver.worker,"receiver-retention-review tls-artifact sender "+source.id.uid+' '+std::to_string(source.id.epoch)+" 0 0 review-tls-artifact artifact:"+artifact_digest,retention));
+  CHECK(retention.find("reviewed GENERATION")!=std::string::npos);
+  require(mesh::administer_native(*receiver.worker,"receiver-retention-status tls-artifact",retention));CHECK(retention.find("reviewed GENERATION")!=std::string::npos);
+  require(mesh::administer_native(*receiver.worker,"receiver-retention-activate tls-artifact activate-tls-artifact",retention));
+  require(mesh::administer_native(*receiver.worker,"receiver-retention-reclaim tls-artifact reclaim-tls-artifact",retention));
+  require(mesh::administer_native(*receiver.worker,"receiver-retention-status tls-artifact",retention));CHECK(retention.find("completed GENERATION")!=std::string::npos);
+  CHECK(mesh::fetch_native_artifact(*receiver.worker,pull,artifact_digest,receipt).code==sdk::Code::history_expired);
   pull.through_sequence=0;mesh::NativeSubscriber waiting(*receiver.worker,pull);require(waiting.start());
   const auto connected_until=std::chrono::steady_clock::now()+5s;while(waiting.status().connections==0&&std::chrono::steady_clock::now()<connected_until)std::this_thread::sleep_for(5ms);CHECK(waiting.status().connections==1);
   std::this_thread::sleep_for(100ms);const auto quiet_wakeups=server.status().owner_wakeups;

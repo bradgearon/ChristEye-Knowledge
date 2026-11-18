@@ -1,10 +1,12 @@
 # Native operating profiles
 
-These profiles qualify a **synthetic canonical evidence and lifecycle workload**.
-They measure the actual native store, indexed reads, recovery and lifecycle
-services. They do not run the five-engine application mix or authenticate a
-remote peer; those paths have separate native integration tests. Passing this
-profile does not establish a 24-hour daemon soak or a seven-day release gate.
+The `evidence-*` and `ci-smoke` profiles qualify a **synthetic canonical evidence
+and lifecycle workload**. They measure the actual native store, indexed reads,
+recovery and lifecycle services. They do not run the five-engine application mix
+or authenticate a remote peer. The separate [mixed host profiles](MIXED.md) run
+all five compiled engine families through the continuous host; authenticated
+transport has its own native integration tests. Passing a short profile does not
+establish a 24-hour daemon soak or a seven-day release gate.
 
 The executable has no Python or external numerical runtime dependency. Build
 and run from the repository root:
@@ -133,3 +135,13 @@ fairness/tail-latency under churn and lag, actual storage-pressure experiments,
 and supported installation/upgrade/uninstallation evidence. Reports from
 ephemeral CI runners provide functional and comparative operating evidence;
 they do not qualify an unspecified production deployment.
+
+## Mixed host profiles
+
+The separate [mixed native host guide](MIXED.md) covers `anaiero qualify mixed`
+and `ce_native_qualification mixed`. That path runs all five compiled engine
+families through the real continuous host, exercises bounded queue pressure and
+quota rejection, verifies exact orderly restart, and preserves pinned inputs and
+measured reports. The short CI profile is a functional operating check; its
+24-hour/seven-day profiles enforce actual measured duration and remain unachieved
+until complete reports are retained for a declared deployment.

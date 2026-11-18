@@ -128,4 +128,105 @@ static void restored_scope(const fs::path& root){
   grant.generation=2;require(receiver.service->configure_grant(grant,1,"explicit-current-grant"));require(receiver.service->authorize(current,source,false,100));
   receiver.reopen();require(receiver.service->authorize(current,source,false,100));
 }
-int main(int argc,char** argv){CHECK(argc==2);const fs::path root=argv[1];std::error_code error;fs::remove_all(root,error);CHECK(!error);fs::create_directories(root);durable_pages(root);authorization_boundaries(root);expired_history(root);restored_scope(root);fairness();std::cout<<"canonical mesh durable pages, relay evidence, exact ACK, bootstrap identity, ownership, queued revocation, restored scope, replay expiry and fair scheduling passed\n";}
+static void receiver_retention(const fs::path& root){
+  Fixture sender(root/"retention-sender"),receiver(root/"retention-receiver");auto state=seed(sender,6);
+  const auto sending=sender.enroll("receiver","receiver-cert"),receiving=receiver.enroll("sender","sender-cert");
+  const auto id=identity();const lc::SourceRef source{id.source_uid,id.epoch};const std::string artifact_bytes(262144,'a');const auto artifact=sdk::sha256(artifact_bytes);
+  require(sender.service->configure_grant({"receiver",id,1,true,false,true,{}},0,"retention-outbound"));
+  require(receiver.service->configure_grant({"sender",id,1,false,true,true,{artifact}},0,"retention-inbound"));
+  require(sender.service->subscribe(sending,{"sub","receiver",source,1,900,lc::SubscriptionPhase::active,{},{},false},100));
+  mesh::ReceiveReceipt receipt;mesh::Delivery first,last;mesh::TransferCost cost;
+  for(unsigned i=0;i<3;++i){mesh::Delivery page;require(sender.service->next(sending,"sub",1,100,page,cost));
+    require(receiver.service->receive(receiving,page,100,receipt));require(sender.service->acknowledge(sending,page,100));if(i==0)first=page;last=page;}
+  require(sender.service->subscribe(sending,{"overlap","receiver",source,1,900,lc::SubscriptionPhase::active,{},{},false},100));
+  mesh::Delivery overlapping;require(sender.service->next(sending,"overlap",1,100,overlapping,cost));
+  require(receiver.service->receive(receiving,overlapping,100,receipt));const auto overlapping_receipt=receipt.receipt_sha256;
+  require(sender.service->acknowledge(sending,overlapping,100));
+  mesh::ReceiverRetentionPlan plan;mesh::ReceiverRetentionRequest request{"prefix","sender",source,1,2,{},{}};
+  auto lagging=request;lagging.id="lagging-cursor";require(receiver.service->review_receiver_retention(lagging,"review-lagging",plan));
+  CHECK(receiver.service->activate_receiver_retention(lagging.id,"activate-lagging").code==sdk::Code::conflict);
+  for(unsigned i=0;i<2;++i){mesh::Delivery page;require(sender.service->next(sending,"overlap",1,100,page,cost));
+    require(receiver.service->receive(receiving,page,100,receipt));require(sender.service->acknowledge(sending,page,100));}
+  auto partial=request;partial.last_sequence=1;CHECK(receiver.service->review_receiver_retention(partial,"partial-page",plan).code==sdk::Code::invalid);
+  auto current=request;current.first_sequence=5;current.last_sequence=6;CHECK(receiver.service->review_receiver_retention(current,"latest-page",plan).code==sdk::Code::busy);
+  auto too_big=request;too_big.last_sequence=33;CHECK(receiver.service->review_receiver_retention(too_big,"large-page",plan).code==sdk::Code::invalid);
+  auto wrong=request;wrong.principal="different";CHECK(receiver.service->review_receiver_retention(wrong,"wrong-principal",plan).code==sdk::Code::unauthorized);
+  require(receiver.service->review_receiver_retention(request,"review-prefix",plan));CHECK(plan.objects.size()==3&&plan.expected_bytes>0);
+  const auto reviewed=plan.reviewed_root;require(receiver.service->review_receiver_retention(request,"review-prefix",plan));CHECK(plan.reviewed_root==reviewed);
+  CHECK(receiver.service->reclaim_receiver_retention(request.id,"early-reclaim").code==sdk::Code::conflict);
+  lc::Pin pin{"reader","operator",lc::PinKind::reader,1,0,{first.observations.front().claim.payload_digest}};
+  require(receiver.lifecycle->put_pin(pin,0,100,"protect-prefix"));
+  CHECK(receiver.service->activate_receiver_retention(request.id,"stale-activation").code==sdk::Code::conflict);
+  request.id="pinned-prefix";require(receiver.service->review_receiver_retention(request,"review-pinned",plan));
+  CHECK(receiver.service->activate_receiver_retention(request.id,"pinned-activation").code==sdk::Code::conflict);
+  mesh::DeliveryItem observed;require(receiver.service->received_observation("sender",source,1,observed));
+  require(receiver.lifecycle->release_pin(pin.id,1,"release-reader"));
+  CHECK(receiver.service->activate_receiver_retention(request.id,"pinned-activation").code==sdk::Code::conflict);
+  request.id="expire-prefix";require(receiver.service->review_receiver_retention(request,"review-expiry",plan));
+  const auto expired_objects=plan.objects;ev::set_native_store_fault(*receiver.store,ev::FaultPoint::after_root);
+  CHECK(receiver.service->activate_receiver_retention(request.id,"activate-expiry").committed());receiver.reopen();
+  require(receiver.service->activate_receiver_retention(request.id,"activate-expiry"));
+  CHECK(receiver.service->received_observation("sender",source,1,observed).code==sdk::Code::history_expired);
+  CHECK(receiver.service->receive(receiving,first,100,receipt).code==sdk::Code::history_expired);
+  require(receiver.service->receive(receiving,last,100,receipt));CHECK(receipt.duplicate&&receipt.cursor.sequence==6);
+  ev::set_native_store_fault(*receiver.store,ev::FaultPoint::after_root);
+  CHECK(receiver.service->reclaim_receiver_retention(request.id,"reclaim-expiry").committed());receiver.reopen();
+  require(receiver.service->reclaim_receiver_retention(request.id,"reclaim-expiry"));require(receiver.service->reclaim_receiver_retention(request.id,"reclaim-expiry"));
+  for(const auto& object:expired_objects){ev::BlobInfo info;require(receiver.store->blob_info(object,info));CHECK(info.expired_generation&&!info.present);}
+  require(receiver.service->receiver_retention(request.id,plan));CHECK(plan.phase==lc::MaintenancePhase::completed);
+  CHECK(receiver.service->receive(receiving,overlapping,100,receipt).code==sdk::Code::history_expired);
+  // A second subscription's independently retained copy is selected explicitly
+  // by its returned receipt digest; no unbounded scan discovers historical peers.
+  request={"overlap-receipt","sender",source,0,0,{},{},{overlapping_receipt}};
+  require(receiver.service->review_receiver_retention(request,"review-overlap",plan));CHECK(plan.objects.size()==1);
+  require(receiver.service->activate_receiver_retention(request.id,"activate-overlap"));
+  require(receiver.service->reclaim_receiver_retention(request.id,"reclaim-overlap"));
+  ev::BlobInfo overlapping_info;require(receiver.store->blob_info(overlapping_receipt,overlapping_info));CHECK(overlapping_info.expired_generation&&!overlapping_info.present);
+  // Artifact expiry keeps the accepted identity and rejects exact retransmission.
+  require(receiver.service->receive_artifact(receiving,source,artifact,artifact_bytes,100,receipt));
+  request={"expire-artifact","sender",source,0,0,{artifact},{}};
+  require(receiver.service->review_receiver_retention(request,"review-artifact",plan));require(receiver.service->activate_receiver_retention(request.id,"activate-artifact"));
+  const auto before_reclaim=receiver.store->info();ev::set_native_store_fault(*receiver.store,ev::FaultPoint::after_objects);
+  CHECK(!receiver.service->reclaim_receiver_retention(request.id,"reclaim-artifact").committed());receiver.reopen();
+  CHECK(receiver.store->generation()==before_reclaim.generation);
+  ev::BlobInfo interrupted;require(receiver.store->blob_info(artifact,interrupted));CHECK(!interrupted.present&&interrupted.expired_generation);
+  require(receiver.service->reclaim_receiver_retention(request.id,"reclaim-artifact"));
+  CHECK(receiver.store->info().physical_bytes+200000<before_reclaim.physical_bytes);
+  CHECK(receiver.service->receive_artifact(receiving,source,artifact,artifact_bytes,100,receipt).code==sdk::Code::history_expired);
+  // A checkpoint remains protected until its subscription receives a later page.
+  mesh::BootstrapOffer offer;require(sender.service->offer_bootstrap(sending,"boot-sub",1,source,900,100,offer));
+  require(receiver.service->install_bootstrap(receiving,offer,100,receipt));require(sender.service->accept_bootstrap(sending,offer,100));
+  request={"expire-checkpoint","sender",source,0,0,{}, {offer.id}};
+  CHECK(receiver.service->review_receiver_retention(request,"review-current-checkpoint",plan).code==sdk::Code::busy);
+  for(std::uint64_t i=7;i<=8;++i){auto prior=state;state.revision=i;state.tick=i;state.checkpoint.payload=std::to_string(i);const auto operation="step-"+std::to_string(i);
+    sender.commit({id,operation,sdk::sha256(operation),sdk::state_digest(prior),prior.revision,state,{{"test.observation/1","metric","count","unit",static_cast<std::int64_t>(i),i}},{}});}
+  mesh::Delivery suffix;require(sender.service->next(sending,"boot-sub",1,100,suffix,cost));require(receiver.service->receive(receiving,suffix,100,receipt));
+  require(receiver.service->review_receiver_retention(request,"review-old-checkpoint",plan));require(receiver.service->activate_receiver_retention(request.id,"activate-checkpoint"));
+  require(receiver.service->reclaim_receiver_retention(request.id,"reclaim-checkpoint"));
+  CHECK(receiver.service->install_bootstrap(receiving,offer,100,receipt).code==sdk::Code::history_expired);
+  require(receiver.service->received("sender","boot-sub",source,receipt));CHECK(receipt.cursor.sequence==8);
+  ev::AuditReport audit;require(receiver.store->audit(audit));require(receiver.store->repair_index());receiver.reopen();
+  require(receiver.store->audit(audit));CHECK(receiver.service->received_observation("sender",source,2,observed).code==sdk::Code::history_expired);
+  lc::SourceAuthority authority;require(receiver.lifecycle->source_authority(source.uid,authority));CHECK(authority.owner=="sender"&&authority.kind==lc::SourceAuthorityKind::relay);
+}
+static void overlapping_retention_pages(const fs::path& root){
+  Fixture sender(root/"retention-overlap-sender"),receiver(root/"retention-overlap-receiver");(void)seed(sender,4);
+  const auto session=receiver.enroll("sender","sender-cert");const auto id=identity();const lc::SourceRef source{id.source_uid,id.epoch};
+  mesh::Options options;options.maximum_page_observations=3;receiver.service=std::make_unique<mesh::Service>(*receiver.store,options);
+  require(receiver.service->configure_grant({"sender",id,1,false,true,true,{}},0,"grant"));
+  const auto deliver=[&](std::string subscription,std::uint64_t after,std::uint64_t through){
+    mesh::Delivery page;page.subscription_id=std::move(subscription);page.generation=1;page.source=id;
+    if(after){ev::ObservationClaim claim;require(sender.store->lookup_observation(source.uid,source.epoch,after,claim));page.from={after,claim.payload_digest};}
+    for(auto sequence=after+1;sequence<=through;++sequence){mesh::DeliveryItem item;require(sender.store->lookup_observation(source.uid,source.epoch,sequence,item.claim));require(sender.store->get_blob(item.claim.payload_digest,item.payload));page.observations.push_back(std::move(item));}
+    page.to={through,page.observations.back().claim.payload_digest};mesh::ReceiveReceipt receipt;require(receiver.service->receive(session,page,100,receipt));
+  };
+  deliver("two",0,2);deliver("three",0,3);deliver("two",2,4);deliver("three",3,4);
+  mesh::ReceiverRetentionPlan plan;mesh::ReceiverRetentionRequest request{"first","sender",source,1,2,{},{}};
+  require(receiver.service->review_receiver_retention(request,"review-first",plan));require(receiver.service->activate_receiver_retention(request.id,"activate-first"));require(receiver.service->reclaim_receiver_retention(request.id,"reclaim-first"));
+  request.id="remaining";request.first_sequence=3;request.last_sequence=3;
+  require(receiver.service->review_receiver_retention(request,"review-remaining",plan));CHECK(plan.objects.size()==2);
+  require(receiver.service->activate_receiver_retention(request.id,"activate-remaining"));require(receiver.service->reclaim_receiver_retention(request.id,"reclaim-remaining"));
+  for(std::uint64_t sequence=1;sequence<=3;++sequence){mesh::DeliveryItem item;CHECK(receiver.service->received_observation("sender",source,sequence,item).code==sdk::Code::history_expired);}
+  ev::AuditReport audit;require(receiver.store->audit(audit));
+}
+int main(int argc,char** argv){CHECK(argc==2);const fs::path root=argv[1];std::error_code error;fs::remove_all(root,error);CHECK(!error);fs::create_directories(root);durable_pages(root);authorization_boundaries(root);expired_history(root);restored_scope(root);receiver_retention(root);overlapping_retention_pages(root);fairness();std::cout<<"canonical mesh durable pages, relay evidence, exact ACK, bootstrap identity, ownership, queued revocation, restored scope, receiver retention/recovery, replay expiry and fair scheduling passed\n";}

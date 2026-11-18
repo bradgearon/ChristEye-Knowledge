@@ -1,7 +1,7 @@
 ---
 title: "CE-SW-37 — Modular Runtime, Durable Execution and Evidence Lifecycle"
 date: "2026-11-18"
-status: "Target architecture; M1–M4 implemented in CE-SW-38 within its declared profile; M5/M6 pending"
+status: "Target architecture; M1–M5 implemented within CE-SW-38–40 profiles; M6 sustained release evidence remains open"
 reviewed_native_commit: "c5a4e8a04616c76decab52d237de53a3f3b09f23"
 related: "CE-SW-09, CE-SW-12, CE-SW-19, CE-SW-27, CE-SW-31–36, ADR-001, ADR-002"
 ---
@@ -12,8 +12,11 @@ related: "CE-SW-09, CE-SW-12, CE-SW-19, CE-SW-27, CE-SW-31–36, ADR-001, ADR-00
 implements M1–M4. Its native sealed AVL index replaces the recommended SQLite
 adapter. Legacy evidence migration preserves old bytes without claiming live
 state conversion. Retention reclaims payloads under finite quotas and reserved
-maintenance headroom; canonical journal-prefix pruning remains disabled pending
-its authority-summary and restore proof. M5/M6 remain the next delivery gates.
+maintenance headroom. [CE-SW-39](CE-SW-39_continuous_native_operation.md) adds
+reviewed canonical-prefix compaction and the continuous canonical M5 host/mesh.
+[CE-SW-40](CE-SW-40_operating_envelope_and_package_lifecycle.md) adds receiver
+retention, package activation/rollback and actual mixed-host profiles. M6's
+sustained operating and deployment-device evidence remains an open gate.
 The design below preserves the broader target and its acceptance conditions.
 
 ## 1. Decision and scope

@@ -206,7 +206,12 @@ static void retention_and_bootstrap(const fs::path& root){
   ev::BlobInfo before;require(fixture.store->blob_info(payload,before));CHECK(before.present);
   pin.generation=2;pin.expires_unix_s=200;
   CHECK(fixture.service->put_pin(pin,1,102,"pin-expired-object").code==sdk::Code::history_expired);
+  const auto reclaim_generation=fixture.store->generation();
+  ev::set_native_store_fault(*fixture.store,ev::FaultPoint::after_transaction);
+  CHECK(!fixture.service->execute_maintenance(request.id,"prune-two").committed());fixture.reopen();
+  CHECK(fixture.store->generation()==reclaim_generation&&!fs::exists(fixture.path/"blobs"/payload));
   require(fixture.service->execute_maintenance(request.id,"prune-two"));
+  CHECK(fixture.store->generation()==reclaim_generation+2); // Reclaimed-byte accounting plus completed plan.
   ev::BlobInfo after;require(fixture.store->blob_info(payload,after));CHECK(!after.present);
   CHECK(!fs::exists(fixture.path/"blobs"/payload));
   ev::ObservationClaim claim;require(fixture.store->lookup_observation(id.source_uid,id.epoch,1,claim));CHECK(claim.payload_digest==payload);

@@ -2,9 +2,10 @@
 # production runtime. Profiles pin numeric gates before the workload begins.
 add_library(anaiero_qualification STATIC
   src/qualification/profile.cpp src/qualification/native_resources.cpp
-  src/qualification/runner.cpp)
+  src/qualification/runner.cpp src/qualification/mixed_profile.cpp
+  src/qualification/mixed_runner.cpp)
 anaiero_sdk_target(anaiero_qualification)
-target_link_libraries(anaiero_qualification PRIVATE anaiero_lifecycle anaiero_storage_native)
+target_link_libraries(anaiero_qualification PRIVATE anaiero_lifecycle anaiero_storage_native anaiero_native_session anaiero_engine_files)
 target_compile_definitions(anaiero_qualification PRIVATE ${anaiero_builtin_definitions})
 if(WIN32)
   target_link_libraries(anaiero_qualification PRIVATE psapi)
@@ -23,6 +24,13 @@ function(anaiero_attach_qualification_cli)
 endfunction()
 cmake_language(DEFER CALL anaiero_attach_qualification_cli)
 if(CE_WIND_BUILD_TESTS)
+  add_test(NAME anaiero_mixed_qualification COMMAND ${CMAKE_COMMAND}
+    -DANAIERO_QUALIFY=$<TARGET_FILE:ce_native_qualification>
+    -DANAIERO_PROFILE=${CMAKE_CURRENT_SOURCE_DIR}/../qualification/native/mixed-ci.cevqualification
+    -DANAIERO_SESSION=${CMAKE_CURRENT_SOURCE_DIR}/../examples/runtime/modular-native.cevsession
+    -DANAIERO_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/mixed-qualification
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/mixed_qualification_smoke.cmake)
+  set_tests_properties(anaiero_mixed_qualification PROPERTIES TIMEOUT 300 LABELS "qualification;mixed")
   add_test(NAME anaiero_qualification_profile COMMAND ${CMAKE_COMMAND}
     -DANAIERO_QUALIFY=$<TARGET_FILE:ce_native_qualification>
     -DANAIERO_PROFILE=${CMAKE_CURRENT_SOURCE_DIR}/../qualification/native/ci-smoke.cevqualification

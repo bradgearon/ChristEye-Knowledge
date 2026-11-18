@@ -21,6 +21,12 @@ They do not renumber M5/M6 or make a short native test equivalent to the planned
 24-hour and seven-day release runs. The numerical models remain within their
 existing declared simulation scope.
 
+**Continuation:** [CE-SW-40](CE-SW-40_operating_envelope_and_package_lifecycle.md)
+adds bounded receiver-history reclamation, canonical package activation/rollback,
+the actual mixed-host measurement path and reduced index work. The original
+limitations below describe this increment; use the continuation and current
+operator guides for their implemented disposition.
+
 ## 1. One canonical ownership boundary
 
 The continuous host owns the modular `SessionService` and `SessionRunner`.

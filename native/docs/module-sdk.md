@@ -25,6 +25,15 @@ native module and built-in engine providers are separate targets. Public SDK
 headers live under `anaiero/sdk/`; the old `anaiero/` and `christeye/` implementation
 trees are not installed as SDK headers.
 
+`anaiero_mesh_service` includes typed `ReceiverRetentionRequest` and
+`ReceiverRetentionPlan` records plus review/status/activate/reclaim operations.
+They use the same serialized store lane as delivery, preserve current roots and
+immutable ownership/retry identities, and expose explicit expired-history results.
+See the [receiver retention guide](continuous-mesh.md#review-and-reclaim-receiver-history)
+for bounded pages, overlapping receipts and interruption recovery. Native package
+selection is an operator service behind the host commands; it adds no operating
+system or package-parser dependency to these domain SDK contracts.
+
 The installed `share/anaiero/examples/independent-sdk` project builds a new engine
 without modifying or including Anaiero core sources. It exercises linked, native
 module and supervised process delivery. Its counter and deliberately failing
