@@ -63,6 +63,31 @@ def find_declarator(node):
     return None
 
 
+def field_names(node):
+    """Extract every declarator, not just the last variable in a comma group.
+
+    Skip initializer expressions so references to other members are not indexed as
+    declarations. Tree-sitter gives each variable its own init_declarator.
+    """
+    direct = {"field_identifier", "identifier"}
+    wrappers = {"init_declarator", "array_declarator", "pointer_declarator",
+                "reference_declarator", "parenthesized_declarator", "bitfield_clause"}
+    def visit(value):
+        if value.type in direct:
+            return [value]
+        if value.type == "init_declarator":
+            declarator = value.child_by_field_name("declarator")
+            return visit(declarator) if declarator else []
+        if value.type in wrappers:
+            return [item for c in value.named_children for item in visit(c)]
+        return []
+    found = []
+    for child in node.named_children:
+        if child.type in wrappers or child.type == "field_identifier":
+            found.extend(visit(child))
+    return found
+
+
 def source_comment(lines, at):
     words = []
     for line in reversed(lines[max(0, at - 7):at]):
@@ -217,10 +242,18 @@ class Extract:
                 return
             value = normalized(node_text(self.data, node))
             is_constant = bool(re.search(r"\b(?:constexpr|constinit)\b", value))
-            if (kind == "field_declaration" and owner) or (kind == "declaration" and is_constant):
+            if kind == "field_declaration" and owner:
+                names = [node_text(self.data, name) for name in field_names(node)]
+                if not names:
+                    m = re.search(r"([a-zA-Z_]\w*)\s*(?:[;={]|$)", value)
+                    names = [m.group(1)] if m else []
+                for name in dict.fromkeys(names):
+                    self.emit("constant" if is_constant else "field", name, scope,
+                              node, access, owner, signature=value)
+            elif kind == "declaration" and is_constant:
                 m = re.search(r"([a-zA-Z_]\w*)\s*(?:[;={]|$)", value)
                 if m:
-                    self.emit("constant" if is_constant else "field", m.group(1), scope,
+                    self.emit("constant", m.group(1), scope,
                               node, access, owner, signature=value)
             return
         if kind == "preproc_def":

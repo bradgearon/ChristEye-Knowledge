@@ -45,6 +45,11 @@ private:
         self.assertEqual([s["id"] for s in symbols(text)], [s["id"] for s in symbols(text + "\n\n")])
         self.assertTrue(all(s["line"] > 0 for s in symbols(text)))
 
+    def test_comma_separated_field_declarators(self):
+        entries = symbols("namespace a { struct Record { int source=0,epoch=0; }; }")
+        names = {s["name"] for s in entries if s["kind"] == "field"}
+        self.assertEqual({"source", "epoch"}, names)
+
     def test_source_layers_and_json_determinism(self):
         self.assertEqual(gen.layer_for("native/include/anaiero/contracts/engine.hpp"), "contracts")
         self.assertEqual(gen.layer_for("native/include/wind/packet.hpp"), "wind")
