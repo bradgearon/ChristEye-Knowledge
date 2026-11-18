@@ -9,6 +9,8 @@ status: "Complete candidate engineering specification; living parameters require
 
 # CE-A17 — Daily Care And Dispensing
 
+**v3.2 successor:** [Animon Care/SustiBus/ChemiBus design](../../v3.2/design/CE-A17_Animon_Care_Design.md) and [scientific companion](../../v3.2/companion/CE-A17_Animon_Care_Scientific_Companion.md); this older design is retained as a source edition.
+
 **Current design (revision 3.1)** · [Scientific companion](../companion/CE-A17_daily_care_and_dispensing_Companion.md) · [Controlled processes](../../../processes/README.md) · [Evidence register](../../../research/evidence/anaiero-biology-2026-11.md)
 
 > **Purpose:** task-independent SustiBus plan and qualified human/oem service. The existing v3 digital architecture is retained in the source-history appendix below. This revision specifies cellular roles, axons, learning, support, joining and growth/evidence decisions; it is not a claim that those biological mechanisms have been demonstrated.

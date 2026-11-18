@@ -1,0 +1,183 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Anaiero v3.2 study readiness packet — review only",
+  "description": "Pre-experimental scientific handoff; cannot authorize physical operations or serve as laboratory SOP.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "record_id",
+    "program",
+    "animon_spec_ref",
+    "module_ids",
+    "created_at",
+    "status",
+    "primary_question",
+    "alternate_explanations",
+    "preparation_ref",
+    "source_qualification_ref",
+    "approved_sop_ref",
+    "principal_investigator_ref",
+    "cell_care_lead_ref",
+    "independent_safety_review_ref",
+    "measurement_plan_ref",
+    "assay_validation_ref",
+    "experimental_unit",
+    "analysis_plan_ref",
+    "control_plan_refs",
+    "protected_root_refs",
+    "independent_care_ref",
+    "raw_data_provenance_ref",
+    "publication_review_ref",
+    "physical_execution_authorized"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "program": {
+      "const": "ChristEye Anaiero"
+    },
+    "animon_spec_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "module_ids": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "CE-A09",
+          "CE-A17",
+          "CE-A16",
+          "CE-A02"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "enum": [
+        "DRAFT",
+        "SCIENTIFIC_REVIEW_PENDING",
+        "INSTRUMENT_REVIEW_PENDING",
+        "REJECTED",
+        "UNRESOLVED"
+      ]
+    },
+    "primary_question": {
+      "type": "string",
+      "minLength": 8
+    },
+    "alternate_explanations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "preparation_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source_qualification_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "approved_sop_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "principal_investigator_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "cell_care_lead_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "independent_safety_review_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "measurement_plan_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "assay_validation_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "experimental_unit": {
+      "enum": [
+        "UNSELECTED",
+        "INDEPENDENT_PREPARATION",
+        "SOURCE_LINE",
+        "INDEPENDENT_DONOR",
+        "OTHER_LAB_REVIEWED"
+      ]
+    },
+    "analysis_plan_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "control_plan_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "protected_root_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "independent_care_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "raw_data_provenance_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "publication_review_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "physical_execution_authorized": {
+      "const": false
+    }
+  }
+}

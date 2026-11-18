@@ -12,5 +12,9 @@ This is a **curated engineering decision history**, not an export of every ChatG
 | Nov 15, 2026 | P01 source-planning, P02 simulated links | Cell-free validation before living hardware |
 | Nov 15, 2026 | P02B scientist/embedded hardware gap audit | Introduce supervisory digital twin, separate roles and P02C |
 | Nov 15, 2026 | Publication decision | WDS property under research reference license; patent kept private |
+| Nov 16, 2026 | Naming decision: **Animon** is the proposed individual developmental system; **ChristEye Anaiero** is the program/architecture | Publish [ANIMON/1](../ontology/ANIMON_V1.md); distinguish system identity, candidate living substrate and digital reference; align v3.2 dossiers while preserving historical wording |
+| Nov 16, 2026 | v3.2 science correction | Repair three schema/example mismatches and develop source-scoped [Core/Care research dossiers](../specifications/v3.2/README.md) before broader module rewrites |
+
+| Nov 16, 2026 | First four-module Animon dossier pilot completed | A09 Core, A17 Care, A16 Root/axon, and A02 retention are linked in [v3.2](../specifications/v3.2/README.md); scientific packet remains unapproved and no living Animon is claimed |
 
 **Attribution:** Program and terminology attributed to the project owner. All experimental success claims must be supported by actual independent records, not by this chronology. Latest project name: **ChristEye Anaiero**.

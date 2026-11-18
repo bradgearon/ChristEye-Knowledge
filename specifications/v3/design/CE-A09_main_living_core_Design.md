@@ -9,6 +9,8 @@ status: "Complete candidate engineering specification; living parameters require
 
 # CE-A09 — Main Living Core
 
+**v3.2 successor:** The individual target system is an **Animon**. See [Animon Core/Soil design](../../v3.2/design/CE-A09_Animon_Core_Design.md) and its [scientific companion](../../v3.2/companion/CE-A09_Animon_Core_Scientific_Companion.md). This v3.1 source remains intact for historical design provenance.
+
 **Current design (revision 3.1)** · [Scientific companion](../companion/CE-A09_main_living_core_Companion.md) · [Controlled processes](../../../processes/README.md) · [Evidence register](../../../research/evidence/anaiero-biology-2026-11.md)
 
 > **Purpose:** Soil is the living organoid as a whole; optional distinct spinal Root compartment. The existing v3 digital architecture is retained in the source-history appendix below. This revision specifies cellular roles, axons, learning, support, joining and growth/evidence decisions; it is not a claim that those biological mechanisms have been demonstrated.

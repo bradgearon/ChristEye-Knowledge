@@ -46,3 +46,52 @@ test('mobile navigation and no horizontal overflow',async ({page})=>{
  await expect(page.locator('.site-sidebar')).not.toHaveClass(/open/);
  await page.screenshot({path:'test-results/living-mobile.png',fullPage:false});
 });
+test('interest and privacy are visible, but signups remain disabled without Cloudflare configuration',async({page})=>{
+ await page.route('**/api/interest/config',r=>r.fulfill({
+   status:200,contentType:'application/json',
+   body:JSON.stringify({enabled:false,siteKey:null,privacyContact:null,consentVersion:'2026-11-15-v1'})
+ }));
+ await page.goto('./#/interest');
+ await expect(page.getByRole('heading',{level:1})).toContainText('Follow the work');
+ await expect(page.getByRole('status')).toContainText('Registration is being configured');
+ await expect(page.getByRole('textbox',{name:'Email address'})).toHaveCount(0);
+ await page.goto('./#/privacy');
+ await expect(page.getByRole('heading',{level:1})).toContainText('Privacy by design');
+ await expect(page.getByText('Information collected',{exact:true})).toBeVisible();
+});
+test('configured mock shows consent and submits through the protected API',async({page})=>{
+ await page.addInitScript(()=>{
+   const api={
+     render:(_node:HTMLElement,config:Record<string,unknown>)=>{
+       const cb=config.callback as (token:string)=>void;
+       setTimeout(()=>cb('test-turnstile-token'),0);
+       return 'test-widget';
+     },
+     remove:(_id:string)=>{},
+     reset:(_id:string)=>{},
+   };
+   Object.defineProperty(window,'turnstile',{configurable:true,value:api});
+ });
+ await page.route('**/api/interest/config',r=>r.fulfill({
+   status:200,contentType:'application/json',
+   body:JSON.stringify({enabled:true,siteKey:'test-site-key',privacyContact:'privacy@example.test',consentVersion:'2026-11-15-v1'})
+ }));
+ let seen=false;
+ await page.route('**/api/interest',async r=>{
+   if(r.request().url().endsWith('/config'))return r.continue();
+   const data=r.request().postDataJSON();
+   expect(data.interest).toBe('research');
+   expect(data.consent).toBe(true);
+   expect(data.consentVersion).toBe('2026-11-15-v1');
+   expect(data.turnstileToken).toBe('test-turnstile-token');
+   seen=true;
+   return r.fulfill({status:202,contentType:'application/json',body:JSON.stringify({ok:true,message:'Interest recorded.'})});
+ });
+ await page.goto('./#/interest');
+ await page.locator('#research-email').fill('tester@example.com');
+ await page.locator('#research-topic').selectOption('research');
+ await page.getByRole('checkbox').check();
+ await page.getByRole('button',{name:'Register interest'}).click();
+ await expect(page.getByRole('status')).toContainText('Interest recorded');
+ expect(seen).toBe(true);
+});

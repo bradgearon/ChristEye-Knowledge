@@ -11,6 +11,8 @@ status: "Mechanism-by-mechanism research companion; unexecuted where not separat
 
 **Revision 3.1** · [Engineering design](../design/CE-A02_long_term_storage_Design.md) · [Evidence ledger](../../../research/evidence/anaiero-biology-2026-11.md)
 
+**v3.2 scientific successor:** [Animon long-term retention scientific companion](../../v3.2/companion/CE-A02_Animon_Long_Term_Retention_Scientific_Companion.md) and [engineering design](../../v3.2/design/CE-A02_Animon_Long_Term_Retention_Design.md). The present biological mechanism remains a hypothesis, not an observed Animon Root.
+
 ## 1. Testable claim at the correct physical scale
 
 **Proposed ordinary substrate:** proposed spinal Root tissue distinct from verified digital CAS storage.

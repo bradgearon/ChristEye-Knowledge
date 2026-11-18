@@ -1,3 +1,26 @@
+## 2026-11-16 — v3.3 laboratory operational work orders and scientist execution controls
+
+- Added numbered WO-00 to WO-04 work orders for source/genomic QC, development/Soil observations, daily care/ChemiBus, spinal Root/axon evidence and delayed retention.
+- Published P01 source-specific 2D R1 physical counts (80k neurons/20k matched astrocytes per reference well) separately from later P06 3D Soil with unassigned counts.
+- Added 34 assignable work items, real source/shift/deviation forms, typed daily QC records, a read-only previous-day comparison engine and twelve automated QA cases.
+- Linked genuine operational steps into all four v3.2 engineering designs and four scientific companions. Physical material methods and safe operating thresholds still require a named qualified laboratory and approved SOP.
+
+## 2026-11-16 — v3.2 Animon axonal and long-term retention pilot
+
+- Completed the first **four engineering designs and four scientific companions**: A09 Animon Core/Soil, A17 independent Care, A16 spinal Root/axon mapping, and A02 long-term retention.
+- Added typed Root evidence graphs and a non-executing StudyReadinessPacket; all new fixtures are synthetic with no actual biology.
+- Explicitly separated real digital lexical retrieval/CrystalPack replay, defined digital Root metrics, and *untested* biological retention, axonal connectivity, physical memory carriers and acquired Animon capability.
+- Linked current and historical sources and added documentation/schema/relative-link tests, preserving negative-result and independent-care requirements.
+- No wet-lab recipe, physical patent file, or biological performance claim published.
+
+## 2026-11-16 — ANIMON/1 and v3.2 pilot dossiers
+
+- Adopted **Animon** as the provisional individual developmental system class; **ChristEye Anaiero** remains the scientific architecture and WDS research program.
+- Published a versioned Animon ontology and nonliving digital-reference identity schema. This does not assert a functioning living individual.
+- Reconciled the ChemiBus, physical Crystal and Crest birth examples with their canonical JSON schemas; added six synthetic, evidence-status-marked fixtures and CI validation.
+- Published distinct v3.2 engineering/scientific dossiers for **CE-A09 Animon Core/Soil** and **CE-A17 independent Animon Care**; preserved original v3.1 design/companion sources with forward links.
+- Qualified laboratory sources, care SOPs, living neurological outcomes, and portable physical memory remain unverified. Patent document excluded.
+
 ## 2026-11-15 — v3.1 rigorous biological and digital systems documentation
 
 - Reworked all **24 design files and 24 companions**, preserving their original full v3.0 texts within revised documents.

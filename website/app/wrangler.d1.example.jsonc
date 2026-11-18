@@ -1,0 +1,12 @@
+{
+  // OPTIONAL: add the d1_databases section to wrangler.jsonc only
+  // after creating the D1 resource. This example is not deployed.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "anaiero-interest",
+      "database_id": "REPLACE_WITH_YOUR_D1_UUID",
+      "migrations_dir": "migrations"
+    }
+  ]
+}

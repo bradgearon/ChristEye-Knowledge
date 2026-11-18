@@ -1,0 +1,64 @@
+name: Validate Anaiero Cloudflare Release
+on:
+  push:
+    branches:
+      - deploy/cloudflare-anaiero-io
+    paths:
+      - 'website/**'
+      - '.github/workflows/cloudflare-readiness.yml'
+      - 'specifications/**'
+      - 'processes/**'
+      - 'schemas/**'
+      - 'research/**'
+      - 'registries/**'
+  pull_request:
+    paths:
+      - 'website/**'
+      - '.github/workflows/cloudflare-readiness.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build-root-domain:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: website/app/package-lock.json
+      - name: Install locked React dependencies
+        working-directory: website/app
+        run: npm ci --no-audit --no-fund
+      - name: Validate source documents
+        working-directory: website/app
+        run: npm run test:content
+      - name: Build for anaiero.io root
+        working-directory: website/app
+        env:
+          ANAIERO_SITE_BASE: /
+        run: npm run build
+      - name: Verify root URLs, rights and content
+        working-directory: website/app
+        run: node scripts/verify-cloudflare-build.mjs
+      - name: S07 local release preflight (no Cloudflare credentials)
+        working-directory: website/app
+        run: node scripts/launch-preflight.mjs --offline
+      - name: Test static Worker entrypoint and disabled interest API
+        working-directory: website/app
+        run: node --test tests/cloudflare-worker.test.mjs
+      - name: Validate isolated development Worker settings and staged signup API
+        working-directory: website/app
+        run: node --test tests/cloudflare-staging-config.test.mjs
+      - name: Dry-run staging Worker packaging without credentials
+        working-directory: website/app
+        run: npx --yes wrangler@4 deploy --config wrangler.staging.jsonc --dry-run --outdir .wrangler-staging-dry-run
+      - name: Dry-run Wrangler packaging without Cloudflare credentials
+        working-directory: website/app
+        run: npx --yes wrangler@4 deploy --dry-run --outdir .wrangler-dry-run
+      - uses: actions/upload-artifact@v4
+        with:
+          name: anaiero-cloudflare-static-preview
+          path: website/app/dist
+          retention-days: 7

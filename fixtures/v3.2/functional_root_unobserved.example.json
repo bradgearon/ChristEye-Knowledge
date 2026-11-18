@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0.0",
+  "preparation_id": "PREP-NOT-CREATED-SYNTHETIC",
+  "source_lot_id": "LOT-UNASSIGNED-SYNTHETIC",
+  "record_id": "ROOT-TEST-DESIGN-001",
+  "created_at": "2026-11-16T00:00:00Z",
+  "evidence_status": "DESIGN",
+  "evidence_ref": null,
+  "root_id": "ROOT-NOT-ACQUIRED",
+  "task_id": "TASK-NOT-CONDUCTED",
+  "frozen_reader_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "immediate_score": null,
+  "delayed_score": null,
+  "delayed_horizon": null,
+  "training_delivery_refs": [],
+  "sealed_evaluation_ref": null,
+  "spinal_substrate_candidates": [],
+  "matched_control_refs": [],
+  "protected_task_deltas": {},
+  "interpretation": "UNRESOLVED"
+}

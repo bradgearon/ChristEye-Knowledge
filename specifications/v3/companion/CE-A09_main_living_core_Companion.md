@@ -9,6 +9,8 @@ status: "Mechanism-by-mechanism research companion; unexecuted where not separat
 
 # CE-A09 — Main Living Core · Scientific companion
 
+**v3.2 successor:** [Animon Core/Soil scientific companion](../../v3.2/companion/CE-A09_Animon_Core_Scientific_Companion.md), with [engineering design](../../v3.2/design/CE-A09_Animon_Core_Design.md). This v3.1 source is retained for reproducibility.
+
 **Revision 3.1** · [Engineering design](../design/CE-A09_main_living_core_Design.md) · [Evidence ledger](../../../research/evidence/anaiero-biology-2026-11.md)
 
 ## 1. Testable claim at the correct physical scale

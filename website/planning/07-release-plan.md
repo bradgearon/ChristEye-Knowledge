@@ -1,96 +1,93 @@
 ---
-title: "S01 Delivery Roadmap and Release Gates"
+title: "Anaiero.io Website Program S01–S08 — Current Release Roadmap"
 revision: "2026-11-15"
-rights: "© 2026 We Develop Software LLC"
-status: "Prioritized site program; only S01 actions are in this release"
+owner: "We Develop Software LLC"
+status: "Current implementation-aware roadmap: React/Vite + Cloudflare Workers"
 ---
 
-# The site is a scientific product, so release it with evidence gates
+# ChristEye Anaiero website phases — implementation-aware roadmap
 
-We are **not** rewriting the biological project phases P01–P08. This is a separate **website program S01–S08** that publishes and explains those sources. Every phase has a demonstrable artifact and exit checks; a date does not substitute for a finished test.
+**This roadmap describes the website, not the scientific P00–P08 program.** Historical S01 planning documents proposed Astro/Starlight and GitHub Pages. The actual application now uses **React 19, Vite, TypeScript, the source-driven Markdown importer, GitHub Actions and Cloudflare Workers Static Assets**. The source research and scientific designs remain under their existing project folders. The old Astro plan is preserved in [06-technical-architecture-s01-archived.md](06-technical-architecture-s01-archived.md) for provenance.
 
-## Delivery plan
+Every phase has an outcome and a proof gate. A passing simulated or software test is not evidence of living neural computation.
 
-| Website stage | Main output | Prerequisite | Measurable exit gate |
+## Current S01–S08 status
+
+| Phase | Goal | Evidence in repository | Current gate |
 |---|---|---|---|
-| **S01 Foundation and audit** | source inventory, IA, design tokens, evidence schema, demo registry, page storyboards, architecture, plan | current repo | exact source hashes, route uniqueness, no secret patent references/assets, prioritized backlog, review PR |
-| **S02 Website engine** | Astro/Starlight project in website/app, safe content importer, working preview | S01 | correctly renders CE-A02 design+companion, BIO-02, one JSON Schema and one study, valid deep links, no live site regression |
-| **S03 Full documentation ingestion** | all current modules, processes, phase documents, research and selected historical editions render natively | S02 | 24+24 current docs, 12 processes, source/route matrix and search coverage, 0 unresolved canonical routes |
-| **S04 System and growth atlas** | interactive layers for Lotus, Soil, Root, axon, buses, care, growth and Crystal; text fallbacks | S03 | each diagram has click-through sources, scientific status and keyboard equivalent; no fictional lab data |
-| **S05 Working StarChip studio** | digital replay, Lotus, WindBus, P02B lab and first specialist chip output gallery | S02/S04 | four digital labs have passing fixtures and source/seed links; speculative chips labeled previews |
-| **S06 Science and scholarship** | molecule atlas, evidence/experiment register, formal models, interpretation lens, care/love/power chapters | S03/S04 | every headline living claim has evidence state, source, scope and limitation; original source discoverable |
-| **S07 QA, site switch and launch** | responsive production site on GitHub Pages with permanent routes, tests and WDS rights | S02–S06 | accessibility, broken links, demo execution, claim review, rights disclosure, Pages deploy and rollback verified |
-| **S08 Maintenance and enrichment** | versioned updates, new StarChip outputs, research decisions and source citations | S07 | CI detects drift, pages updated with source revision, negative findings preserved |
+| **S01 — Content and design foundation** | Source audit, information architecture, page designs, scientific evidence classes and demo contracts | This planning directory, 352-source initial registry and design tokens | **Delivered as planning** |
+| **S02 — React website engine** | Working reader, React/Vite app, source importer, responsive navigation and stable builds | website/app, locked npm install, Vite and browser tests | **Software implemented; build checks required on changes** |
+| **S03 — Full technical library** | Designs, companions, processes, bibliography, JSON and historical research searchable in site | Build-time corpus output, manifest, technical-document reader and CI corpus checks | **Core importer present; full content and citation UX still improving** |
+| **S04 — Living system atlas** | Explore Soil, Crest, axons, spinal Roots, Lotus, Milk/Honey and multi-bus boundaries | Interactive portal architecture and existing BIO process specs | **Partially implemented** |
+| **S05 — StarChip laboratory** | Executable digital demonstrations, specialist output previews and reproducibility links | Portal studio and digital-only reference fixtures; chip manifests | **Partially implemented; complex creative chips not yet running** |
+| **S06 — Science, scholarship and journal** | Evidence/claims, molecular atlas, formal models, scholarly interpretation and posts | Research pages, diagrams, source corpus; posting workflow pending refinement | **Partially implemented** |
+| **S07 — Cloudflare launch and interest** | anaiero.io HTTPS, Worker static assets + /api, opt-in form, D1/Turnstile and privacy | wrangler.jsonc; Worker, migration, tests, launch preflight | **Code prepared; account deployment and D1/Turnstile activation not verified** |
+| **S08 — Ongoing operations** | Reproducible releases, research updates, StarChip demos, communications, maintenance | CI and documented roadmaps provide a starting framework | **Future operating program** |
 
-### S01 implementation scope
+The readiness state above is not a numerical percent. **Main's current CI** is the authoritative test status; a green build is distinct from Cloudflare deployment or actual data collection.
 
-S01 produces documents and machine records only. It does not claim that a fully navigable Astro site exists yet. The current Pages site stays intact, except for an optional link to this plan. [Audit](01-source-audit.md) · [Content registry](content-registry.json) · [IA](02-information-architecture.md) · [Design system](03-design-system.md) · [Editorial model](04-evidence-and-content-model.md) · [Demos](05-interactive-labs-and-starchips.md) · [Architecture](06-technical-architecture.md) · [Storyboards](08-first-page-storyboards.md).
+## S07 development staging — existing workers.dev site
 
-## Dependencies and highest-value vertical slice
+The WDS owner reports a live development site at **https://anaiero.bradgearon.workers.dev/**. Treat it as staging, not proof of the separate production custom domain. The dedicated [development Worker configuration](../app/wrangler.staging.jsonc) targets Worker **anaiero**, while [production](../app/wrangler.jsonc) targets **anaiero-io**.
 
-The first real publishable vertical slice in S02 should be **Long-Term Storage / Roots** (CE-A02). This one feature exercises all site requirements:
+The new launch preflight supports **--live --target=dev**; the manual GitHub live smoke workflow has a development/production selector. Cloudflare's workers.dev Browser Integrity Check may challenge automatic clients, so a script error must be compared with ordinary browser access before diagnosing site failure.
 
-1. Render a full 20-section engineering design from the canonical file.
-2. Render its scientific companion with real citations, source/date/scope.
-3. Cross-link the actual spinal Root and axon process (BIO-02).
-4. Render the corresponding Root and axon JSON Schemas.
-5. Display the digital content-addressed storage system as implemented; clearly separate physical Root and Crystal hypotheses.
-6. Show one deterministic digital Crystal replay fixture and its test receipt.
-7. Link the original full Markdown, WDS license and scientific claim audit.
-8. Verify page on mobile, keyboard-only, no JavaScript and search.
+An optional real staging opt-in requires an isolated D1 database named **anaiero-interest-dev**, staging-only Turnstile widget and a monitored WDS privacy contact. No staging D1 ID, secret or company address has been configured in this repository. See the [development runbook](../app/S07_DEV_STAGING.md).
 
-**Why A02?** It exercises engineering, neuroscience, data, learning, care, uncertainty, theory and one runnable example without requiring live equipment. If this is coherent and trustworthy, the remaining 23 modules can reuse its page template.
+## S07 — the active launch gate
 
-## Workstream ownership and review matrix
+| Gate | Required result | Proof | Current status |
+|---|---|---|---|
+| S07-01 Static artifact | Production assets at the domain root, no GitHub Pages base prefix | node scripts/launch-preflight.mjs --offline | Automated; run in PR CI |
+| S07-02 Source integrity | Indexed research readable; patent document and personal logs absent | content manifest, release flags and source tests | Automated; run in PR CI |
+| S07-03 Worker safety | /api/* is Worker-first; other assets static; no biological actuation | Wrangler dry run + Worker tests | Automated; run in PR CI |
+| S07-04 Live deployment | anaiero.io loads the intended site over valid HTTPS | domain-root smoke test | **Unverified until Cloudflare owner connects account** |
+| S07-05 Public API | GET /api/health = ok; config endpoint returns valid status | GitHub Actions manual smoke test | **Unverified until domain is live** |
+| S07-06 D1 initialization | Database anaiero-interest, DB binding, migration applied | Cloudflare D1 dashboard / authorized Wrangler CLI | **Not configured in repo** |
+| S07-07 Turnstile and consent | Site key, protected secret, hostname, action and privacy mailbox | Disabled-by-default API and negative tests; live form verification | **Must be configured in Cloudflare** |
+| S07-08 Live interest test | Explicit consent saved in private D1; status awaiting_confirmation, invalid token rejected | One owner-controlled form test and D1 record audit | **Not performed** |
+| S07-09 Newsletter | Confirmed email, unsubscribe, suppression and privacy retention | Separate approved mail-provider and legal operating workflow | **Not part of interest-only launch** |
+| S07-10 Rollback | Previous Worker version can be restored; GitHub Pages docs stay accessible | Cloudflare Versions/Deployments and recovery notes | **Operator release check needed** |
 
-| Workstream | Accountable role | What it must sign off |
-|---|---|---|
-| Site product/editorial | WDS project owner | story, rights, audience, accuracy and priorities |
-| Science/experimental | scientific director | source scope, study status, claims, mechanisms and negative alternatives |
-| Cell/care | cell-production lead | source, Milk/SustiBus, identity and non-actuation boundary |
-| Neuroscience | developmental neuroscience / electrophysiology lead | axon, spinal Root, true electrical observations and instrument provenance |
-| Build/CI | web/developer lead | source imports, schema renderer, links, secure static build and test receipts |
-| Interface/visual | UX/accessibility lead | figures, responsive reading and all-user navigation |
-| WDS licensing | rights holder and selected legal counsel | copyright/license and patent document exclusion |
+**Launch order:** static site first; interest collection second. No separate R2/static-storage purchase is needed. Dynamic request and database usage remain subject to Cloudflare's plan limits.
 
-These are review **functions**, not assertions that named human staff have approved any work yet.
+## How to verify
 
-## Requirements and explicit acceptance checks
+After building website/app:
 
-**SC-01 Source fidelity:** canonical file/commit and document ID shown; no silent paraphrase in full-source view.
+~~~bash
+node scripts/launch-preflight.mjs --offline
+~~~
 
-**SC-02 Scientific honesty:** all hero claims refer either to observed software behavior, specific external research or a labeled hypothesis. Live organoid learning is not falsely claimed.
+After an authorized Cloudflare deployment to the custom domain:
 
-**SC-03 Documentation parity:** 24 current designs and companions and 12 biological/software process specifications rendered fully, with stable direct source links.
+~~~bash
+node scripts/launch-preflight.mjs --live
+~~~
 
-**SC-04 Typing and versioning:** JSON Schema pages generated from original .schema.json, with version information and examples, not handwritten substitutes.
+After completing D1 + Turnstile + privacy configuration:
 
-**SC-05 Demonstration proof:** every active run has input, seed where applicable, actual code, deterministic expected output, status, version and reproducible test.
+~~~bash
+node scripts/launch-preflight.mjs --live --require-interest
+~~~
 
-**SC-06 Living safety:** no demo/browser control can issue a physical chemical or stimulation command; Milk support never depends on reward.
+These commands never submit an email or inspect private D1 records. The **final real signup acceptance** still requires an authorized owner test; a healthy API response alone does not prove D1 writes succeed.
 
-**SC-07 Disclosure:** patent document absent from artifacts and site output; WDS license visible; private raw conversations not auto-indexed.
+GitHub also provides a manual [live production smoke workflow](../../.github/workflows/cloudflare-live-smoke.yml). See [S07 launch runbook](../app/S07_LAUNCH_RUNBOOK.md).
 
-**SC-08 Site quality:** linked routes and sources resolve, images have alt text, responsive diagrams, readable equations, keyboard/screen-reader access and appropriate performance budget measured in CI.
+## Quality and disclosure requirements
 
-**SC-09 Historical integrity:** old versions remain accessible but marked superseded and default search prioritizes current v3.1.
+1. **Source integrity:** import the current original WDS designs/companions; keep historical editions explicitly labeled.
+2. **Scientific interpretation:** software, published external neuroscience, local experiment, design and hypothesis claims are separate.
+3. **Care safety:** no browser or Worker can feed, stimulate or grow tissue; sustaining care never follows task reward.
+4. **Privacy:** no personal emails in public source, logs or GET endpoints; clear consent; Turnstile verified server-side.
+5. **Rights:** WDS Public Research Reference License visible; confidential physical patent document excluded.
+6. **Accessibility:** mobile, keyboard, headings, diagrams, math and link audits pass before major public announcements.
+7. **Operations:** reproducible builds, Cloudflare rollback, explicit monitoring and named privacy contact.
+8. **No premature newsletter promise:** interest-only state is not a confirmed subscription.
 
-**SC-10 Rollback:** a failed site migration cannot make the old docs disappear; previous successful deployment and source remain available.
+## Next after S07
 
-## Proposed issue epics after S01
+**S08** focuses on scheduled journal updates, source-linked research publication, version-aware technical documentation, measured interest conversion, legitimate confirmed-email communications, and richer StarChip demos. The original *scientific* roadmap remains [docs/roadmap.md](../../docs/roadmap.md): physical boards and living experiments are research-gated, regardless of how complete the public website becomes.
 
-- SITE-EPIC-01: build pipeline and source transformation.
-- SITE-EPIC-02: foundational scientific UI and component kit.
-- SITE-EPIC-03: 180-document import and schema browser.
-- SITE-EPIC-04: living systems + process atlases.
-- SITE-EPIC-05: runnable digital labs and specialist StarChip gallery.
-- SITE-EPIC-06: scholarly/evidence views and citations.
-- SITE-EPIC-07: QA / GitHub Pages release and communications.
-
-Do not clutter the repo with 100 implementation issues before the first S02 vertical slice has proven content import and page design.
-
-## What can be told publicly when S01 is finished
-
-"ChristEye Anaiero's website redesign has a complete source-driven architecture plan, route inventory, design system and documented demo requirements." Do **not** say the redesigned site or biological platform is completed.
-
-**Next implementation step:** S02 Astro/Starlight scaffold + CE-A02 vertical slice. Preserve the current live website until it meets the publishing gate.
+© 2026 We Develop Software LLC · [WDS Research Reference License](../../LICENSE.md).

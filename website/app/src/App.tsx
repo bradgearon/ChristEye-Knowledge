@@ -2,6 +2,7 @@ import {useEffect,useState} from 'react';
 import {Link,NavLink,Routes,Route,useLocation,useNavigate} from 'react-router-dom';
 import {ArrowRight,ArrowUpRight,BookOpen,BrainCircuit,CheckCircle2,ChevronRight,CircuitBoard,Code2,Cpu,Database,Dna,ExternalLink,FileText,FlaskConical,Flower2,GitBranch,HeartHandshake,Layers3,Leaf,Menu,Microscope,Moon,Network,Play,Search,Shield,ShieldCheck,Sparkles,Sun,X,Zap} from 'lucide-react';
 import Atlas from './Atlas';
+import {InterestPage,PrivacyPage} from './Interest';
 import {DocReader,Library,SourceRedirect} from './Reader';
 import {InteractiveLab,Studio} from './Studio';
 import type {Manifest,ModuleProfile,Molecule} from './data';
@@ -15,7 +16,8 @@ const nav=[
  {to:'/build',label:'Build',icon:Code2},
  {to:'/studio',label:'StarChip Studio',icon:Cpu},
  {to:'/scholarship',label:'Scholarship',icon:BookOpen},
- {to:'/library',label:'Library',icon:Database}
+ {to:'/library',label:'Library',icon:Database},
+ {to:'/interest',label:'Follow Anaiero',icon:HeartHandshake}
 ];
 const keyConcepts=[
  {term:'Soil',meaning:'The entire proposed living organoid, not merely its surrounding extracellular matrix.',source:'processes/BIO-03-soil-organoid.md'},
@@ -67,7 +69,7 @@ function Homepage({manifest}:{manifest:Manifest}){
   <section className="feature-section"><div className="split-heading"><SectionHeader eyebrow="02 / CONNECTED SYSTEMS" title="Inside Anaiero's architecture" description="Select a component to examine the exact difference between digital implementation, biological hypothesis and external protection."/><Link className="quiet-link" to="/system">Open full atlas <ArrowUpRight size={16}/></Link></div><Atlas compact/></section>
   <section className="feature-section"><div className="split-heading"><SectionHeader eyebrow="03 / WORKING DIGITAL REFERENCE" title="Watch a decision form." description="The Lotus test makes its reasoning visible. It can stage digital education, but it cannot authorize biological care or stimulation."/><Link className="quiet-link" to="/studio">More labs <ArrowUpRight size={16}/></Link></div><InteractiveLab initial="lotus"/></section>
   <section className="feature-section"><SectionHeader eyebrow="04 / RESEARCH ETHOS" title="Care, love, and power—defined."/><div className="values-grid"><div><HeartHandshake size={25}/><h3>Care</h3><p>Measured physiological support and dependable stewardship, independent of whether a learner succeeds.</p></div><div><Sparkles size={25}/><h3>Love</h3><p>A commitment to dignity, compassionate design and non-manipulative feedback—not a claim of measured organoid feeling.</p></div><div><Zap size={25}/><h3>Power</h3><p>Real compute, data, electrical and metabolic budgets. Capabilities are bounded by measured resources.</p></div></div></section>
-  <section className="end-cta"><span className="eyebrow">ALL THE SCIENCE · ALL THE ENGINEERING</span><h2>Read every original document,<br/>not just an interpretation.</h2><p>{manifest.count} approved source records, with links back to their GitHub revisions and paired research.</p><Link className="btn btn-primary btn-large" to="/library">Enter the research library <ArrowRight size={17}/></Link></section>
+  <section className="end-cta"><span className="eyebrow">ALL THE SCIENCE · ALL THE ENGINEERING</span><h2>Read every original document,<br/>not just an interpretation.</h2><p>{manifest.count} approved source records, with links back to their GitHub revisions and paired research.</p><Link className="btn btn-primary btn-large" to="/library">Enter the research library <ArrowRight size={17}/></Link> <Link className="btn btn-outline btn-large" to="/interest">Register research interest <HeartHandshake size={17}/></Link></section>
   <ResearchBoundary/>
  </div>;
 }
@@ -166,7 +168,7 @@ function Shell({manifest}:{manifest:Manifest}){
   {menu&&<button className="mobile-scrim" aria-label="Close navigation" onClick={()=>setMenu(false)}/>}
   <div className="site-main">
    <header className="site-header"><div className="header-left"><button className="icon-button mobile-menu" aria-label="Open navigation" onClick={()=>setMenu(!menu)}><Menu size={20}/></button><span className="header-path">ANAIERO <ChevronRight size={13}/> {location.pathname==='/'?'RESEARCH PORTAL':location.pathname.split('/')[1].toUpperCase()}</span></div>
-    <div className="header-actions"><button className="header-search" onClick={()=>setSearch(true)}><Search size={17}/><span>Search research…</span><kbd>⌘ K</kbd></button><button className="icon-button" aria-label={light?'Dark theme':'Light theme'} onClick={()=>setLight(v=>!v)}>{light?<Moon size={18}/>:<Sun size={18}/>}</button><a className="header-github" href="https://github.com/bradgearon/ChristEye-Knowledge" target="_blank" rel="noreferrer"><GitBranch size={16}/> <span>Source</span> <ArrowUpRight size={13}/></a></div></header>
+    <div className="header-actions"><Link to="/interest" className="header-follow">Join interest list <ArrowUpRight size={13}/></Link><button className="header-search" onClick={()=>setSearch(true)}><Search size={17}/><span>Search research…</span><kbd>⌘ K</kbd></button><button className="icon-button" aria-label={light?'Dark theme':'Light theme'} onClick={()=>setLight(v=>!v)}>{light?<Moon size={18}/>:<Sun size={18}/>}</button><a className="header-github" href="https://github.com/bradgearon/ChristEye-Knowledge" target="_blank" rel="noreferrer"><GitBranch size={16}/> <span>Source</span> <ArrowUpRight size={13}/></a></div></header>
    <div className="main-content"><Routes>
     <Route path="/" element={<Homepage manifest={manifest}/>}/>
     <Route path="/system" element={<SystemPage manifest={manifest}/>}/>
@@ -179,9 +181,11 @@ function Shell({manifest}:{manifest:Manifest}){
     <Route path="/read/:id" element={<DocReader manifest={manifest}/>}/>
     <Route path="/read-source" element={<SourceRedirect manifest={manifest}/>}/>
     <Route path="/roadmap" element={<Roadmap manifest={manifest}/>}/>
+    <Route path="/interest" element={<InterestPage/>}/>
+    <Route path="/privacy" element={<PrivacyPage/>}/>
     <Route path="*" element={<div className="empty-state"><h1>Page not found</h1><p>The research may have moved.</p><button className="btn btn-primary" onClick={()=>navigate('/library')}>Browse the library</button></div>}/>
    </Routes></div>
-   <footer className="site-footer"><span>ChristEye Anaiero · WDS research property · Full technical source linked and versioned</span><span>Digital prototypes and scientific hypotheses are separately labeled.</span></footer>
+   <footer className="site-footer"><span>ChristEye Anaiero · WDS research property · Full technical source linked and versioned</span><span><Link to="/interest">Register interest</Link> · <Link to="/privacy">Privacy</Link> · Digital prototypes and hypotheses are separately labeled.</span></footer>
   </div>
   {search&&<SearchModal manifest={manifest} close={()=>setSearch(false)}/>}
  </div>;

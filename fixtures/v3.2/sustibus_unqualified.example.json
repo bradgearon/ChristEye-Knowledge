@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "preparation_id": "PREP-NOT-CREATED-SYNTHETIC",
+  "source_lot_id": "LOT-UNASSIGNED-SYNTHETIC",
+  "created_at": "2026-11-16T00:00:00Z",
+  "evidence_status": "DESIGN",
+  "evidence_ref": null,
+  "record_id": "SUSTI-EXAMPLE-001",
+  "care_plan_ref": "CARE-PLAN-UNASSIGNED",
+  "sop_ref": "SOP-NOT-QUALIFIED",
+  "qualified_operator_role": "CELL-CARE-LEAD-UNASSIGNED",
+  "independent_service_path_ref": null,
+  "environment_status": "UNQUALIFIED",
+  "service_due_at": null,
+  "last_verified_service_receipt": null,
+  "medium_lot_ref": null,
+  "sensor_freshness_ref": null,
+  "human_review_required": true,
+  "task_dependent_care": false
+}

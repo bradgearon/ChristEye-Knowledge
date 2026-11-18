@@ -28,21 +28,32 @@ Candidate culture-medium constituents in published references include water, sal
 
 ## ChemiBus measured data envelope
 
+**Canonical authority:** [ChemiBus schema](../schemas/biology/chemibus_observation.schema.json) and [machine-valid design example](../fixtures/v3.2/chemibus_unmeasured.example.json). This is explicitly **NOT_MEASURED**, not a physiological sample. Date and source fields are format-only placeholders; no preparation, patient or culture has been sampled.
+
+
 ~~~json
 {
-  "schema_version": "chemibus.v1",
-  "preparation_id": "example-preparation",
-  "sample_id": "example-sample",
-  "source_lot_id": "source-1",
-  "analyte": "lactate",
-  "chemical_form": "unresolved",
-  "observed_value": null,
+  "schema_version": "1.0.0",
+  "preparation_id": "PREP-NOT-CREATED-SYNTHETIC",
+  "source_lot_id": "LOT-UNASSIGNED-SYNTHETIC",
+  "record_id": "CHEMI-EXAMPLE-001",
+  "created_at": "2026-11-16T00:00:00Z",
+  "evidence_status": "DESIGN",
+  "evidence_ref": null,
+  "sample_id": "NO-SAMPLE-COLLECTED",
+  "analyte_identity": "lactate",
+  "molecular_form": null,
   "unit": "mmol/L",
-  "sample_location": "not-characterized",
-  "time_since_last_service": null,
-  "assay_and_calibration_ref": null,
-  "data_validity": "NOT_MEASURED",
-  "intervention_authority": "NONE"
+  "observed_value": null,
+  "quantitation_limit": null,
+  "sample_location": "UNRESOLVED",
+  "sample_time": "2026-11-16T00:00:00Z",
+  "assay_id": "ASSAY-UNSELECTED",
+  "calibration_ref": null,
+  "sample_recovery_ref": null,
+  "instrument_id": null,
+  "interpretation": "NOT_MEASURED",
+  "physical_actuation_allowed": false
 }
 ~~~
 
