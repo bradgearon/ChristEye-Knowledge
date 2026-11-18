@@ -1,6 +1,7 @@
 #include "sealed_index.hpp"
 #include <chrono>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <stdexcept>
 using namespace anaiero;
@@ -43,5 +44,24 @@ void publication_cuts(){
     storage::SealedIndex index(tmp.path/"nodes");index.finish_cleanup(original);index.audit(original);bool found=false;expect(index.get(original,key(0),found)=="original"&&found,"unpublished cleanup cannot remove prior coverage");index.begin();sdk::Digest replay=original;for(unsigned i=0;i<48;++i)replay=index.put(replay,key(i),"changed");expect(replay==unpublished,"replay reconciles already written cache nodes");index.publish_cleanup(replay);index.finish_cleanup(replay);index.audit(replay);expect(files(tmp.path/"nodes")==96,"replayed publication reclaims obsolete files exactly");
   }
 }
+void deferred_filesystem_admission(){
+  Temporary tmp("deferred-filesystem");
+  // An intentionally unusable directory proves that transient staging does
+  // not probe the filesystem. No node can be published through this path.
+  const auto blocked=tmp.path/"not-a-directory";
+  {std::ofstream output(blocked,std::ios::binary);output<<"preserve";}
+  storage::SealedIndex delayed(blocked);delayed.begin();sdk::Digest root;
+  for(unsigned i=0;i<32;++i)root=delayed.put(root,key(i),"temporary");
+  expect(delayed.stats.nodes_written==0&&delayed.stats.staged_nodes>32,"staging does no filesystem work before publication");
+  bool rejected=false;try{delayed.publish_cleanup(root);}catch(const storage::Failure&){rejected=true;}
+  expect(rejected,"invalid storage destination fails at actual publication");
+
+  storage::SealedIndex index(tmp.path/"nodes");index.begin();root=index.put({},key(0),"authentic");
+  {std::ofstream output(tmp.path/"nodes"/root,std::ios::binary);output<<"unrelated bytes";}
+  rejected=false;try{index.publish_cleanup(root);}catch(const storage::Failure& failure){rejected=failure.code==sdk::Code::corrupt;}
+  expect(rejected,"deferred CAS still rejects an altered existing reachable node");
+  std::ifstream input(tmp.path/"nodes"/root,std::ios::binary);const std::string preserved{std::istreambuf_iterator<char>(input),{}};
+  expect(preserved=="unrelated bytes","failed CAS never overwrites existing bytes");
 }
-int main(){try{spill_and_shared_nodes();byte_bound();publication_cuts();std::cout<<"bounded index staging, spill, shared-node cleanup and publication cuts passed\n";return 0;}catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}
+}
+int main(){try{spill_and_shared_nodes();byte_bound();publication_cuts();deferred_filesystem_admission();std::cout<<"bounded index staging, spill, shared-node cleanup, publication cuts and deferred filesystem admission passed\n";return 0;}catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}

@@ -81,6 +81,20 @@ void strict_and_generic_history(){
   auto conflict=batch("conflicting-sequence");conflict.observations={{"source",1,1,b.digest,r.digest}};CommitReceipt receipt;expect(store->commit(conflict,receipt).code==Code::conflict,"different strict observation rejected");conflict.operation_id="out-of-order";conflict.observations[0].sequence=3;expect(store->commit(conflict,receipt).code==Code::conflict,"sequence gap rejected");conflict.operation_id="in-order";conflict.observations[0].sequence=2;commit(*store,conflict);
   auto expired=batch("expire-history");expired.expire_blobs={a.digest};commit(*store,expired);Bytes bytes;expect(store->get_blob(a.digest,bytes).code==Code::history_expired,"declared history expiry");ObservationClaim c;require(store->lookup_observation("source",1,1,c),"expired payload retains observation identity");require(store->reclaim_expired_blob(a.digest,store->generation()),"physical historical reclaim");require(store->find_event(key,event,a.digest,"origin-one"),"retained generic occurrence after reclaim");AuditReport report;require(store->audit(report),"expired evidence audit");expect(report.expired_blobs==1,"audit distinguishes unavailable bytes");
 }
+void coalesced_source_tips(){
+  Temporary temp("batched-tips");auto store=open(temp.path);const auto payload=object("shared observation"),receipt=object("batched receipt");
+  auto first=batch("batched-source-claims");first.blobs={payload,receipt};
+  for(std::uint64_t sequence=1;sequence<=24;++sequence){first.observations.push_back({"source-a",1,sequence,payload.digest,receipt.digest});first.observations.push_back({"source-b",2,sequence,payload.digest,receipt.digest});}
+  set_native_store_fault(*store,FaultPoint::before_index);CommitReceipt committed;
+  expect(store->commit(first,committed).code==Code::committed_degraded,"batched tips are canonical before derived publication");
+  store.reset();store=open(temp.path);expect(store->info().index_ready,"restart replays every claim and the final tip of each source");
+  for(std::uint64_t sequence=1;sequence<=24;++sequence){ObservationClaim claim;require(store->lookup_observation("source-a",1,sequence,claim),"source-a batch claim");expect(claim.payload_digest==payload.digest&&claim.receipt_digest==receipt.digest,"coalescing tips preserves exact observation evidence");require(store->lookup_observation("source-b",2,sequence,claim),"source-b batch claim");}
+  auto next=batch("continue-batched-sources");next.observations={{"source-a",1,25,payload.digest,receipt.digest},{"source-b",2,25,payload.digest,receipt.digest}};commit(*store,next);
+  next.operation_id="skip-batched-source";next.request_digest=sha256(next.operation_id);next.observations.front().sequence=27;
+  expect(store->commit(next,committed).code==Code::conflict,"final coalesced tip still rejects a sequence gap");
+  require(store->repair_index(),"rebuild coalesced source tips");AuditReport report;require(store->audit(report),"audit coalesced source tips and all claims");
+  const auto duplicate=commit(*store,first);expect(duplicate.duplicate&&duplicate.generation==1,"original batched receipt remains exact after replay and rebuild");
+}
 void retention_and_fences(){
   Temporary temp("retention");auto store=open(temp.path);const auto child=object(std::string(1024U*1024U,'c'));const auto parent=object("root object",{child.digest});auto initial=batch("roots");initial.blobs={child,parent};initial.records={{"pin","current",parent.digest,{parent.digest},false}};commit(*store,initial);
   auto expiry=batch("expire-protected");expiry.expire_blobs={child.digest,parent.digest};CommitReceipt receipt;expect(store->commit(expiry,receipt).code==Code::conflict,"protected root rejects transitive expiry");
@@ -171,6 +185,6 @@ void maintenance_headroom(){
   const auto accounted=store->info().physical_bytes;const auto generation=store->generation();store.reset();options.maximum_bytes=accounted+1024;store=open(temp.path,options);expect(store->reclaim_expired_blob(empty.digest,generation).code==Code::capacity&&store->generation()==generation,"native reclaim has no hidden metadata-quota bypass");
 }
 int main(){
-  try{coverage_marker_paths();atomic_transitions();crash_matrix();strict_and_generic_history();retention_and_fences();index_scaling_and_rebuild();quota_and_corruption();async_backpressure();expiry_admission();maintenance_headroom();std::cout<<"canonical evidence: coverage compatibility, atomic transitions, crash cuts, indexed history, retention, corruption, bounded async, expiry admission and maintenance headroom passed\n";return 0;}
+  try{coverage_marker_paths();atomic_transitions();crash_matrix();strict_and_generic_history();coalesced_source_tips();retention_and_fences();index_scaling_and_rebuild();quota_and_corruption();async_backpressure();expiry_admission();maintenance_headroom();std::cout<<"canonical evidence: coverage compatibility, atomic transitions, crash cuts, indexed history, retention, corruption, bounded async, expiry admission and maintenance headroom passed\n";return 0;}
   catch(const std::exception& e){std::cerr<<"canonical evidence failure: "<<e.what()<<'\n';return 1;}
 }

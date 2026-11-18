@@ -94,10 +94,10 @@ Digest SealedIndex::save(Node n){
     if(previous.key!=n.key||previous.value!=n.value||previous.left!=n.left||previous.right!=n.right||previous.height!=n.height||previous.count!=n.count||previous.bytes!=n.bytes||previous.maximum_node_bytes!=n.maximum_node_bytes)throw Failure(Code::corrupt,"index cached CAS collision");
     return digest;
   }
-  const auto p=directory_/digest;
-  if(regular_exists(p)){if(read_file(p,32U*1024U*1024U)!=raw)throw Failure(Code::corrupt,"index CAS collision");cache(digest,n);return digest;}
   cache(digest,n);
   if(cache_.count(digest)!=0){pending_.insert(digest);++stats.staged_nodes;return digest;}
+  const auto p=directory_/digest;
+  if(regular_exists(p)){if(read_file(p,32U*1024U*1024U)!=raw)throw Failure(Code::corrupt,"index CAS collision");return digest;}
   // The same fixed cache budget includes read nodes and every staged path copy.
   // If it fills, spill this reconstructible node using the original write path.
   os::File file;if(!file.open(p,true)||!file.write_all(raw))throw Failure(Code::io_error,"index cache spill failed");file.close();++stats.nodes_written;++stats.staged_spills;return digest;
@@ -147,14 +147,20 @@ void SealedIndex::publish_cleanup(const Digest& root){
   // separate bounded 8 MiB memo, rather than seeking for every transient version.
   std::map<std::string,Digest> final_nodes;std::size_t memo_bytes=0;
   const auto current=[&](const Node& n){const auto found=final_nodes.find(n.key);if(found!=final_nodes.end())return found->second;const auto final=node_at(root,n.key);const auto bytes=n.key.size()+final.size()+128U;if(final_nodes.size()<8192&&bytes<=8U*1024U*1024U-memo_bytes){final_nodes.emplace(n.key,final);memo_bytes+=bytes;}return final;};
+  // Staging does not inspect the filesystem for every temporary path copy.
+  // An existing live node must have been loaded before it is replaced, so it
+  // is already in the non-evicting admission cache (or uses the spill path).
+  // Check an existing destination's exact bytes only if the staged node is
+  // reachable at publication. This also reconciles an interrupted publication.
   // No transient staged node reaches the filesystem. All reachable staged
   // nodes are written before directory flush and coverage publication; a crash
   // still repairs the cache from the already durable canonical transaction.
   for(const auto& digest:pending_){const auto& n=cache_.at(digest);if(current(n)!=digest){++stats.transient_nodes_elided;continue;}const auto raw=seal("ANAIERO-INDEX-NODE/2",{n.key,n.value,n.left,n.right,number(n.height),number(n.count),number(n.bytes),number(n.maximum_node_bytes)});const auto path=directory_/digest;if(regular_exists(path)){if(read_file(path,32U*1024U*1024U)!=raw)throw Failure(Code::corrupt,"staged index CAS collision");}else {os::File file;if(!file.open(path,true)||!file.write_all(raw))throw Failure(Code::io_error,"staged index cache write failed");file.close();++stats.nodes_written;}}
   std::vector<std::string> chunks{root},dead;
   for(const auto& d:obsolete_){
-    // Pending identities were absent when staged; noncurrent ones were never
-    // written. Current pending identities must remain, even after rotations.
+    // A staged identity was not written by this update. Any live predecessor
+    // was loaded before replacement and was therefore not staged a second
+    // time. Current pending identities must remain, even after rotations.
     if(pending_.count(d)!=0)continue;
     const auto n=load(d);if(current(n)!=d)dead.push_back(d);
     if(dead.size()==4096){chunks.push_back(pack(dead));dead.clear();}

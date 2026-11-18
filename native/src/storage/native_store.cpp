@@ -452,7 +452,13 @@ void NativeStore::apply_index(const Transaction& t){
   const auto put=[&](const std::string& k,const std::string& v){next=index_->put(next,k,v);};
   for(std::size_t slot=0;slot<t.records.size();++slot){const auto& r=t.records[slot];const auto locator=pack({"record/1",number(t.root.generation),number(slot),r.digest});put(record_key(r.record.kind,r.record.key),locator);put(history_key(r),locator);}
   for(const auto& b:t.blobs){put("b"+b.digest,encode_blob(b));put("v"+number(b.ordinal),b.digest);}
-  for(const auto& c:t.observations){const auto payload=pack({number(t.root.generation),encode_claim(c)});put(observation_key(c),payload);put("t"+observation_prefix(c.source_uid,c.epoch),payload);}
+  // Only the final source tip is visible in this transaction's covered root.
+  // Coalesce repeated updates before path copying; every strict claim retains
+  // its own indexed identity and canonical witness. The transaction's bounded
+  // observation count also bounds this temporary map.
+  std::map<std::string,std::string> tips;
+  for(const auto& c:t.observations){const auto payload=pack({number(t.root.generation),encode_claim(c)});put(observation_key(c),payload);tips["t"+observation_prefix(c.source_uid,c.epoch)]=payload;}
+  for(const auto& tip:tips)put(tip.first,tip.second);
   for(const auto& e:t.events){put("e"+event_tuple(e.event.key),encode_event(e));put(exact_event_key(e.event),encode_event(e));}
   for(const auto& ref:t.references)put("f"+ref.first,pack({number(t.root.generation),number(ref.second)}));
   put("p"+t.receipt.operation_id,encode_receipt(t.receipt));
