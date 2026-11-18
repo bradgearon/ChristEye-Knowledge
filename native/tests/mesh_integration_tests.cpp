@@ -13,10 +13,12 @@
 #include <filesystem>
 #include <fstream>
 #include <future>
+#include <iomanip>
 #include <iostream>
 #include <memory>
 #include <mutex>
 #include <span>
+#include <sstream>
 #include <string>
 #include <thread>
 #include <vector>
@@ -226,8 +228,9 @@ static void production_roundtrip(const fs::path& root,const mesh::test::Credenti
     // Revocation advanced generation 1 -> 2; rotation advances it to 3.
     rotated_policy.revision=4;rotated_policy.peers[1].generation=3;rotated_policy.peers[1].revoked=false;
     rotated_policy.peers[1].certificate_sha256=credentials.rotated_client_pin;
-    const auto policy_file=root/"rotated.cevpeers";write(policy_file,mesh::files::serialize_policy(rotated_policy));
-    CHECK(administer(*host,"IMPORT \""+policy_file.string()+"\" 3")=="OK imported\n");
+    const auto policy_file=root/"rotated policy.cevpeers";write(policy_file,mesh::files::serialize_policy(rotated_policy));
+    std::ostringstream import_command;import_command<<"IMPORT "<<std::quoted(policy_file.string())<<" 3";
+    CHECK(administer(*host,import_command.str())=="OK imported\n");
     tls::Connection old;CHECK(old.connect(client_context,host->endpoint(),credentials.server_pin,5000)==Code::ok);
     CHECK(old.read_frame(reply,5000)!=Code::ok);
     tls::Context rotated;CHECK(rotated.open(credentials.rotated_client,tls::Role::client)==Code::ok);

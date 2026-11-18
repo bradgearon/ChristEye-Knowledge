@@ -45,6 +45,8 @@ void help(){
     <<"ce_mesh serve CONFIG STATE LOCAL_ADMIN_ENDPOINT\nce_mesh serve-stdio CONFIG STATE\n"
     <<"ce_mesh query LOCAL_ADMIN_ENDPOINT COMMAND\n"
     <<"  local admin: STATE | TRACE | REVOKE PRINCIPAL REVISION | IMPORT \"FILE\" REVISION | RELOAD | STOP\n"
+    <<"  IMPORT paths: escape each backslash and double quote with a backslash.\n"
+    <<"  Windows forward-slash paths are also supported (for example, C:/mesh/policy.cevpeers).\n"
     <<"ce_mesh sync CONFIG STATE SUBSCRIPTION SOURCE:EPOCH:CLOCK:COLONY\n"
     <<"ce_mesh push CONFIG STATE SUBSCRIPTION SOURCE:EPOCH:CLOCK:COLONY\n"
     <<"ce_mesh fetch-artifact CONFIG STATE SHA256\n"

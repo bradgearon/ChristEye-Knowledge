@@ -272,6 +272,22 @@ existing principals as tombstones and increment each changed peer generation.
 | `ce_mesh sync CONFIG STATE SUBSCRIPTION SOURCE:EPOCH:CLOCK:COLONY` | Pull the configured server's authorized source stream |
 | `ce_mesh maintain CONFIG STATE` | Verify/maintain the offline mesh stores and advance eligible archives |
 
+For live `IMPORT`, the policy filename is a double-quoted command field. Prefix
+each literal backslash or double quote inside that field with a backslash.
+This command escaping is separate from the shell's quoting of the complete
+`query` argument. Windows forward-slash paths are also supported. For example,
+in PowerShell, replace the example endpoint, policy path and revision with
+your running server's values:
+
+```powershell
+& $meshBin query anaiero-mesh-demo 'IMPORT "C:/mesh policies/rotated policy.cevpeers" 3'
+```
+
+The equivalent quoted filename with escaped Windows separators is
+`"C:\\mesh policies\\rotated policy.cevpeers"`. The offline `import-policy`
+command takes its filename as a separate shell argument and does not use
+the `IMPORT` command field's escaping.
+
 `enroll` replaces the principal's complete grant set, so include its retained
 grants when adding an artifact or rotating a certificate. It does not silently
 merge a partial grant list. Read the current policy revision before an update;
