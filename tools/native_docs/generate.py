@@ -318,8 +318,12 @@ def generate(source, site, source_ref, check=False, strict=False):
     symbols, files, warnings = collect(source, load_annotations(site))
     counts = Counter(s["kind"] for s in symbols)
     print("Native index declaration kinds:", dict(sorted(counts.items())))
-    if strict and (len(symbols) < 4000 or len(files) < 150 or len(warnings) > 50):
-        raise ValueError(f"Native coverage gate: {len(symbols)} symbols, {len(files)} files, {len(warnings)} parser errors")
+    quality = json.loads((Path(__file__).parent / "quality.json").read_text(encoding="utf-8"))
+    unexpected_warnings = sorted(set(warnings) - set(quality["acceptedWarningHeaders"]))
+    if strict and (len(symbols) < quality["minimumSymbols"] or
+                   len(files) < quality["minimumHeaders"] or unexpected_warnings):
+        raise ValueError(f"Native documentation quality gate: {len(symbols)} symbols, {len(files)} headers, "
+                         f"unexpected parser warnings: {unexpected_warnings}")
     short = commit[:12]
     data_root = site / "data" / short
     compact_index = [{key:(s.get(key)[:150] if key == "description" and isinstance(s.get(key), str) else s.get(key)) for key in ("id","name","qualified","kind","layer","fileId","parentId","parent","line","description","access","signature")} for s in symbols]
