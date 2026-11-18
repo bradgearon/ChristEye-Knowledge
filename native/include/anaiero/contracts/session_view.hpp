@@ -17,6 +17,7 @@ struct EngineView {
   std::uint64_t coordinator_revision=0;
   std::uint8_t cadence=1;
   bool route_active=false,publication_pending=false;
+  std::string model_sha256,classification;
 };
 struct StorageView {
   bool known=false,sustained=false,writable=false;

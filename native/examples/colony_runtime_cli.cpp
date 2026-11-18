@@ -19,6 +19,7 @@ namespace durable=christeye::living::durable;
 inline const char* metric_name(rt::Metric metric) noexcept {
   switch(metric){
     case rt::Metric::membrane_voltage:return "membrane_voltage_microvolt";
+    case rt::Metric::environmental_concentration:return "concentration_micromolar";
     case rt::Metric::viability:return "viability";
     case rt::Metric::energy:return "energy";
     case rt::Metric::support:return "support";

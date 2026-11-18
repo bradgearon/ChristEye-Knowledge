@@ -1,6 +1,7 @@
 #pragma once
 #include "anaiero/contracts/session_view.hpp"
 #include "anaiero/contracts/operation.hpp"
+#include "anaiero/contracts/scientific_observable.hpp"
 #include <sstream>
 #include <string_view>
 namespace anaiero::session {
@@ -39,9 +40,16 @@ inline const char* summary_name(engine::SummarySemantic value)noexcept{
     case engine::SummarySemantic::model_energy_proxy:return "model_energy_proxy";
     case engine::SummarySemantic::learning_proxy:return "learning_proxy";
     case engine::SummarySemantic::normalized_activity:return "normalized_activity";
-    case engine::SummarySemantic::membrane_voltage_microvolt:return "membrane_voltage_microvolt";
+    case engine::SummarySemantic::membrane_voltage_microvolt:
+    case engine::SummarySemantic::concentration_micromolar:
+      return science::observable_for_summary(value)->summary_name.data();
     case engine::SummarySemantic::model_entities:return "model_entities";
   }return "unsupported";
+}
+inline std::string_view metric_unit(runtime::Metric metric)noexcept {
+  if(const auto* observable=science::observable_for_metric(metric))return observable->unit_name;
+  if(metric==runtime::Metric::viability||metric==runtime::Metric::connection)return "count";
+  return metric==runtime::Metric::digital_route_active?"boolean":"model_proxy";
 }
 inline std::string encode_experiment(const ExperimentView& view){
   std::ostringstream out;out<<"{\"schema\":\"anaiero.experiment/1\",\"id\":"<<json_string(view.id)
@@ -87,6 +95,7 @@ public:
         <<",\"coordinator_revision\":"<<engine.coordinator_revision<<",\"published_revision\":"<<engine.published.revision
         <<",\"published_tick\":"<<engine.published.tick<<",\"publication_pending\":"<<(engine.publication_pending?"true":"false")
         <<",\"route_active\":"<<(engine.route_active?"true":"false")<<",\"metric_schema\":"<<c.metric_schema
+        <<",\"model_sha256\":"<<json_string(engine.model_sha256)<<",\"classification\":"<<json_string(engine.classification)
         <<",\"clock_domain\":"<<c.clock_domain<<",\"tick_ns\":"<<c.tick_ns<<",\"time_kind\":\""<<(c.tick_ns?"simulated":"logical")
         <<"\",\"behavior\":"<<json_string(c.behavior_id)<<",\"summary_semantics\":[";
       for(std::size_t j=0;j<c.summaries.size();++j){if(j)out<<',';out<<json_string(summary_name(c.summaries[j]));}
@@ -100,9 +109,8 @@ public:
       out<<"{\"engine\":"<<m.colony<<",\"metric\":"<<static_cast<unsigned>(m.metric)<<",\"value\":"<<m.value
         <<",\"source\":"<<m.source<<",\"epoch\":"<<m.source_epoch<<",\"sequence\":"<<m.sequence
         <<",\"quality\":"<<static_cast<unsigned>(m.quality)<<",\"acquired\":"<<m.acquired_ns
-        <<",\"evidence_tag\":"<<m.evidence_tag<<",\"unit\":\""<<(m.metric==runtime::Metric::membrane_voltage?"microvolt":
-          (m.metric==runtime::Metric::viability||m.metric==runtime::Metric::connection?"count":
-          (m.metric==runtime::Metric::digital_route_active?"boolean":"model_proxy")))<<"\",\"scope\":\"engine_summary\"}";
+        <<",\"evidence_tag\":"<<m.evidence_tag<<",\"unit\":\""<<metric_unit(m.metric)
+        <<"\",\"scope\":\"engine_summary\"}";
     }
     out<<"],\"experiment\":{\"id\":"<<json_string(view.experiment_id)<<",\"state\":"<<json_string(view.experiment_state)
       <<",\"completed_trials\":"<<view.completed_trials<<",\"total_trials\":"<<view.total_trials<<"},\"storage\":{\"sustained\":"

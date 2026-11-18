@@ -2,6 +2,7 @@
 // One owner coordinates session decisions. All persistence/engine movement uses ports.
 #include "anaiero/contracts/native_session.hpp"
 #include "anaiero/contracts/session_experiment.hpp"
+#include "anaiero/contracts/scientific_observable.hpp"
 #include "anaiero/services/simulation_coordinator_service.hpp"
 #include "anaiero/services/async_observation_commit_service.hpp"
 #include "anaiero/services/engine_optimization_service.hpp"
@@ -137,7 +138,11 @@ class NativeSessionService final:public IDriver,public engine::ISnapshotPublishe
       o.evidence_tag=(o.evidence_tag<<4)|static_cast<std::uint64_t>(ch<='9'?ch-'0':ch-'a'+10);
     }
     if(cfg.kind==engine::Kind::scientific){
-      o.metric=runtime::Metric::membrane_voltage;o.value=static_cast<std::int32_t>(snap.energy);
+      const auto* observable=science::observable_for_summary(capabilities.summaries[2]);
+      // A scientific engine may publish only its declared supported observable.
+      // Invalid semantics fail normal observation admission, never become energy.
+      o.metric=observable?observable->metric:static_cast<runtime::Metric>(0);
+      o.value=static_cast<std::int32_t>(snap.energy);
     }else switch(p.metric_index){
       case 0:o.metric=runtime::Metric::viability;o.value=static_cast<std::int32_t>(snap.participants);break;
       case 1:o.metric=runtime::Metric::energy;o.value=static_cast<std::int32_t>(snap.energy);break;
@@ -252,6 +257,16 @@ public:
       record_.change.active||record_.target_cycles>record_.coordinator.completed_cycles||record_.experiment_pending);
     for(std::size_t i=0;i<config_.count;++i){
       const auto expected=contract(engines_[i]->describe());
+      if(config_.engines[i].kind==engine::Kind::scientific){
+        const auto* observable=science::observable_for_summary(expected.summaries[2]);
+        if(!observable||expected.input_schema!=observable->input_schema||
+           expected.metric_schema!=observable->metric_schema||
+           expected.summaries[0]!=engine::SummarySemantic::unsupported||
+           expected.summaries[1]!=engine::SummarySemantic::unsupported||
+           expected.summaries[3]!=engine::SummarySemantic::unsupported||
+           expected.isolated_fork||expected.evaluate_candidates||expected.apply_changes)
+          return fail("unsupported_scientific_observable");
+      }
       if(exists&&record_.schema>=2&&record_.contracts[i]!=expected)return fail("engine_contract_changed");
       record_.contracts[i]=expected;
     }
@@ -455,6 +470,7 @@ public:
     for(std::size_t i=0;i<config_.count;++i){
       auto& e=result.engines[i];current(i,e.working);const auto descriptor=engines_[i]->describe();
       e.kind=descriptor.kind;e.capabilities=descriptor.capabilities;e.source=descriptor.source;
+      e.model_sha256=descriptor.model_digest;e.classification=descriptor.classification;
       e.cadence=config_.engines[i].cadence;e.published=record_.evidence[i].published;
       e.coordinator_revision=record_.coordinator.engines[i].last.revision;
       e.route_active=record_.evidence[i].route.active;

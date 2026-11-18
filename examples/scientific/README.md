@@ -9,11 +9,12 @@ wakes a blocked exchange and kills the owned process. A timeout, crash,
 malformed response, or identity mismatch poisons that solver epoch; it cannot
 continue from an unknown numerical state.
 
-The mandatory provider is a native C++20 exact passive RC model. The optional
-provider uses NEURON **9.0.1** in a separate process. Neither provider supplies a
-measured cell readout, biological calibration, spike model, or viability score.
-The only published scientific summary is **modeled membrane voltage in
-microvolts**. The host preserves its distinct metric and physical timebase.
+The native C++20 providers implement an exact passive RC model and a well-mixed
+scalar environmental model. The optional voltage provider uses NEURON **9.0.1**
+in a separate process. The voltage examples below publish **modeled membrane
+voltage in microvolts**; environmental sessions publish **modeled concentration
+in micromolar**. The host preserves each metric, model identity and simulated
+timebase. These numerical examples do not supply biological calibration.
 
 ## Native example
 
@@ -128,3 +129,12 @@ process crashes, stderr flooding, and changed model files. The preexisting
 `science live` stdio CLI remains available with its original caller-owned
 transport contract; use supervised scientific sessions for owned process
 lifecycle and bounded I/O.
+## Native environmental model and calibration
+
+The native tools also provide a well-mixed scalar concentration model,
+source-qualified micromolar observations, mixed scientific sessions and frozen
+training/holdout evaluation. See the
+[CE-SW-36 operating guide](../../docs/software/CE-SW-36_environment_and_calibration.md)
+for complete Linux and native PowerShell commands, equations, provenance and
+limits. The supplied [calibration plan](calibration/reference.cevcalibration)
+uses synthetic numerical references; it does not establish biological calibration.

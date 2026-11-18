@@ -8,7 +8,7 @@ struct ModelFamily {
   bool native_executable_bundled;bool model_validated;
 };
 inline constexpr std::array<ModelFamily,6> kModelFamilies{{
-  {Provider::native_reference,"ANA-NATIVE","toy electrical + astrocyte feature dynamics",true,false},
+  {Provider::native_reference,"ANA-NATIVE","proxy features; passive voltage and scalar environment numerical models",true,false},
   {Provider::neuron,"NEURON","neuronal electrophysiology",false,false},
   {Provider::braincell,"BRAINCELL","NEURON-based nanoscale neurons/glia",false,false},
   {Provider::physicell,"PHYSICELL","multicellular agents and environments",false,false},

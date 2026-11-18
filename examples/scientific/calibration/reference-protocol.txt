@@ -1,0 +1,3 @@
+Anaiero environmental reference protocol 1: fixed-step inlet fraction 0..1000;
+sample each completed 100000000 ns step; concentration in micromolar;
+initial concentration 100 micromolar; no interpolation or proxy-unit conversion.

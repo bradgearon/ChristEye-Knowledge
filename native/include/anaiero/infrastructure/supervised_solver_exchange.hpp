@@ -1,6 +1,7 @@
 #pragma once
 // Strict process protocol. Any failed exchange poisons this solver epoch.
 #include "anaiero/contracts/supervised_solver.hpp"
+#include "anaiero/contracts/scientific_observable.hpp"
 #include "christeye/living/plan_hash.hpp"
 #include <array>
 #include <charconv>
@@ -35,7 +36,7 @@ public:
     if(initialized_||failed_||!digest(expected.model_sha256)||!digest(expected.behavior_sha256)||
        expected.provider.empty()||expected.provider.size()>64||!expected.epoch||!expected.step_ns||
        expected.step_ns>1000000000ULL||!expected.max_steps||expected.max_steps>1000000||
-       expected.unit!=Unit::microvolt||expected.checkpoint_schema>1||!timeout_||timeout_>60000)return fail();
+       !observable_for_unit(expected.unit)||expected.checkpoint_schema>1||!timeout_||timeout_>60000)return fail();
     for(char c:expected.provider)if(!((c>='a'&&c<='z')||(c>='0'&&c<='9')||c=='-'||c=='.'))return fail();
     identity_=expected;
     std::ostringstream request;request<<"HELLO 1 "<<expected.model_sha256<<' '<<expected.behavior_sha256<<' '

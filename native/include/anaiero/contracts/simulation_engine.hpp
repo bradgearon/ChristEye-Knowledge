@@ -14,8 +14,11 @@ enum class Status : std::uint8_t {ok,invalid,not_initialized,tick_conflict,
 enum class SummarySemantic : std::uint8_t {
   unsupported=0,live_cells,active_cell_links,configured_colony_links,
   model_energy_proxy,learning_proxy,normalized_activity,
-  membrane_voltage_microvolt,model_entities
+  membrane_voltage_microvolt,model_entities,concentration_micromolar
 };
+inline constexpr bool valid_summary_semantic(SummarySemantic value)noexcept {
+  return static_cast<unsigned>(value)<=static_cast<unsigned>(SummarySemantic::concentration_micromolar);
+}
 // Versioned interpretation of the small compatibility Snapshot. A zero tick_ns
 // declares logical time; a positive value declares simulated nanoseconds/tick.
 struct Capabilities {

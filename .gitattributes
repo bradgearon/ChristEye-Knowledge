@@ -42,3 +42,6 @@ examples/scientific/*.cevscitrace -text
 examples/scientific/*.cevmodel -text
 examples/experiments/*.cevexperiment -text
 tools/scientific/supervised_neuron_provider.py -text
+
+# CE-SW-36 sealed plans, raw provenance and reference-series hashes.
+examples/scientific/calibration/* -text

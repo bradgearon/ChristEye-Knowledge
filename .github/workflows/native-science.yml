@@ -1,0 +1,28 @@
+name: Anaiero Environment and Calibration
+on:
+  push:
+    paths: ['native/**', 'examples/scientific/**', '.gitattributes', '.github/workflows/native-science.yml']
+  pull_request:
+    paths: ['native/**', 'examples/scientific/**', '.gitattributes', '.github/workflows/native-science.yml']
+permissions:
+  contents: read
+jobs:
+  environment-calibration:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure native scientific capability
+        run: cmake -S native -B build/science -DANAIERO_CONTROLLER_ONLY=ON -DCE_WIND_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_DISABLE_FIND_PACKAGE_Python3=TRUE
+      - name: Build environmental provider, calibration and session tests
+        run: cmake --build build/science --config Release --parallel 2 --target ce_colony_runtime ce_scientific_config ce_scientific_solver_provider ce_environment_solver_provider ce_scientific_calibrate ce_environment_model_tests ce_environment_session_tests ce_scientific_calibration_tests
+      - name: Verify numerical model, held-out evidence and durable mixed sessions
+        run: ctest --test-dir build/science -C Release --output-on-failure -R "anaiero_(environment_|scientific_calibration)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: environment-calibration-${{ matrix.os }}
+          path: build/science/environment-cli/qualification.json
+          if-no-files-found: error

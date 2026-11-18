@@ -23,9 +23,9 @@ namespace fs=std::filesystem;
 struct Module {std::string_view name, backend, purpose, example;};
 constexpr std::array<Module,
 #ifdef ANAIERO_HAS_MESH
-16
+17
 #else
-15
+16
 #endif
 > modules{{
 #ifdef ANAIERO_HAS_MESH
@@ -44,6 +44,7 @@ constexpr std::array<Module,
   {"cells","ce_cell_behavior","Behavior atlas and synthetic cell development","anaiero cells execute examples/cells/crest-blood-neural.cevatlas ./digital-culture.cevcells examples/cells/reference-development.cevcellrun"},
   {"optimize","ce_optimization","Digital route analysis, trial scoring and feedback","anaiero optimize demo"},
   {"science","ce_science_lab","Coupled cell and scientific-model simulations","anaiero science compare examples/cells/crest-blood-neural.cevatlas"},
+  {"calibrate","ce_scientific_calibrate","Training-only environmental model selection and held-out fidelity","anaiero calibrate examples/scientific/calibration/reference.cevcalibration ./qualification.json"},
   {"kernel","ce_simulation_kernel","Reusable SW5/SIM3 simulation engine orchestration","anaiero kernel demo examples/cells/crest-blood-neural.cevatlas examples/connected-gardens.cev ./kernel-session"},
   {"sim","ce_living_sim_demo","SIM1 synthetic demonstration","anaiero sim"}
 }};
