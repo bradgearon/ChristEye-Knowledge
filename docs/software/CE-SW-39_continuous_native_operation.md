@@ -244,8 +244,8 @@ duplicate and symlink entries, including symlink ancestors. A quiescent-store
 compatibility check rejects an incompatible retained engine/module identity.
 
 ```text
-cmake -DANAIERO_BUILD_DIR=build/native -DANAIERO_PACKAGE_DIR=build/package -DANAIERO_CONFIG=Release -P native/cmake/BuildNativePackage.cmake
-cmake -DANAIERO_PACKAGE_DIR=build/package -DANAIERO_STORE_DIR=./session -P native/cmake/VerifyNativePackage.cmake
+cmake "-DANAIERO_BUILD_DIR=build/native" "-DANAIERO_PACKAGE_DIR=build/package" "-DANAIERO_CONFIG=Release" -P native/cmake/BuildNativePackage.cmake
+cmake "-DANAIERO_PACKAGE_DIR=build/package" "-DANAIERO_STORE_DIR=./session" -P native/cmake/VerifyNativePackage.cmake
 ```
 
 These commands provide a reproducible recipe and exact local inventory. They

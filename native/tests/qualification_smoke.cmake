@@ -1,4 +1,5 @@
-if(NOT DEFINED ANAIERO_QUALIFY OR NOT DEFINED ANAIERO_PROFILE OR NOT DEFINED ANAIERO_OUTPUT)
+if(NOT DEFINED ANAIERO_QUALIFY OR NOT DEFINED ANAIERO_PROFILE OR NOT DEFINED ANAIERO_OUTPUT OR
+   NOT DEFINED ANAIERO_BUILD_DIR OR NOT DEFINED ANAIERO_LAUNCHER)
   message(FATAL_ERROR "Qualification executable, profile and isolated output are required")
 endif()
 file(REMOVE_RECURSE "${ANAIERO_OUTPUT}")
@@ -34,5 +35,21 @@ execute_process(COMMAND "${ANAIERO_QUALIFY}" run "${ANAIERO_OUTPUT}/invalid-prof
   RESULT_VARIABLE invalid OUTPUT_QUIET ERROR_QUIET)
 if(invalid EQUAL 0 OR EXISTS "${ANAIERO_OUTPUT}/invalid-run")
   message(FATAL_ERROR "Duplicate profile budget was accepted or mutated output")
+endif()
+configure_file("${ANAIERO_PROFILE}" "${ANAIERO_OUTPUT}/profile with.space.cevqualification" COPYONLY)
+execute_process(COMMAND "${CMAKE_COMMAND}"
+  "-DANAIERO_BUILD_DIR=${ANAIERO_BUILD_DIR}"
+  "-DANAIERO_PROFILE=profile with.space.cevqualification"
+  "-DANAIERO_OUTPUT=launched with.space" "-DANAIERO_CONFIG=${ANAIERO_CONFIG}"
+  -P "${ANAIERO_LAUNCHER}" WORKING_DIRECTORY "${ANAIERO_OUTPUT}"
+  RESULT_VARIABLE launched OUTPUT_VARIABLE launched_output ERROR_VARIABLE launched_error TIMEOUT 150)
+if(NOT launched EQUAL 0)
+  message(FATAL_ERROR "Qualification launcher lost its exact relative/space/dot paths: ${launched_output}\n${launched_error}")
+endif()
+file(READ "${ANAIERO_OUTPUT}/launched with.space/report.json" launched_report)
+string(JSON launched_passed GET "${launched_report}" passed)
+string(JSON launched_identity GET "${launched_report}" profile_sha256)
+if(NOT launched_passed OR NOT launched_identity STREQUAL expected_identity)
+  message(FATAL_ERROR "Qualification launcher used a different profile or failed its workload")
 endif()
 message(STATUS "Qualification report and immutable profile verified: ${ANAIERO_OUTPUT}/report.json")

@@ -55,6 +55,12 @@ from component existence. Biological validity remains unestablished. These
 ratings do not assert M6 release qualification or replace exact Windows/Linux
 CI reports, measured operating profiles or hardware-specific evidence.
 
+The first completed [shared-sandbox 100,000-observation preflight](../../qualification/reports/2026-11-18-shared-sandbox-100k/README.md)
+passed its recovery, audit, memory, disk and indexed-read gates but failed the
+unchanged batch-commit p99 upper-bound budget (2.147 seconds against 2 seconds).
+That negative result remains recorded separately from hosted CI qualification;
+it reinforces the need to declare and measure each deployment's operating limits.
+
 ## Historical CE-SW-36 assessment
 
 **Overall: approximately 8/10 as a native engineering research platform.**

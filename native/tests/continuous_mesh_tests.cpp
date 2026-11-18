@@ -80,6 +80,10 @@ static void native_roundtrip(const fs::path& repository,const fs::path& root){
   lc::Subscription persisted;require(execute(*sender.worker,[&](ev::ICommitStore& store){lc::Service lifecycle(store);return lifecycle.subscription("fast",persisted);}));CHECK(persisted.acknowledged.sequence==source.last_sequence);
   CHECK(server.status().delivered_pages>=2&&server.status().acknowledged_pages>=1&&server.status().queued_work<=options.maximum_clients+options.maximum_handshakes);
   mesh::ReceiveReceipt receipt;require(mesh::fetch_native_artifact(*receiver.worker,pull,artifact_digest,receipt));
+  CHECK(receipt.cursor.sequence==0&&receipt.cursor.payload_sha256.empty()&&receipt.generation==0&&receipt.store_generation>0&&!receipt.duplicate);
+  const auto artifact_generation=receipt.store_generation;
+  require(mesh::fetch_native_artifact(*receiver.worker,pull,artifact_digest,receipt));
+  CHECK(receipt.cursor.sequence==0&&receipt.cursor.payload_sha256.empty()&&receipt.generation==0&&receipt.store_generation==artifact_generation&&receipt.duplicate);
   sdk::Bytes object;require(execute(*receiver.worker,[&](ev::ICommitStore& store){return store.get_blob(artifact_digest,object);}));CHECK(object==artifact);
   // New bootstrap generation installs an exact checkpoint plus cursor. It is
   // acknowledged as installation, never as delivery of missing observations.
@@ -110,6 +114,12 @@ static std::string admin(std::string_view endpoint,std::string_view command,bool
   CHECK(result.find("\"complete\":true")!=std::string::npos&&result.find("\"code\":\"ok\"")!=std::string::npos&&result.find(mutation?"\"durable\":true":"\"durable\":false")!=std::string::npos);return result;
 }
 static std::string hex(std::string_view value){static constexpr char digits[]="0123456789abcdef";std::string out;for(unsigned char c:value){out+=digits[c>>4];out+=digits[c&15];}return out;}
+static void startup_diagnostics(const std::string& executable){
+  anaiero::process::NativeChildProcess child;CHECK(child.start({executable,{"invalid-command"}})==anaiero::process::Code::ok);
+  const auto deadline=std::chrono::steady_clock::now()+5s;
+  do {child.collect_diagnostics();if(!child.diagnostics().empty())break;std::this_thread::sleep_for(5ms);}while(std::chrono::steady_clock::now()<deadline);
+  CHECK(child.diagnostics().find("unknown host command")!=std::string::npos);child.stop();
+}
 static void native_cli(const fs::path& repository,const fs::path& root,const std::string& executable){
   legacy::test::Credentials keys;CHECK(legacy::test::create_credentials(root/"cli-keys",keys));sdk::EngineIdentity source;
   {Fixture initialize(repository,root/"cli-sender","-cli-sender");source=initialize.identity;}
@@ -118,12 +128,17 @@ static void native_cli(const fs::path& repository,const fs::path& root,const std
 #ifdef _WIN32
   const std::string endpoint="anaiero-mesh-cli-"+std::to_string(GetCurrentProcessId());
 #else
-  const std::string endpoint=(root/"native-mesh.sock").string();
+  // Checkout/build paths can exceed the native Unix endpoint limit. Keep the
+  // control socket in its own short, private temporary directory.
+  std::string endpoint_directory=(fs::temp_directory_path()/"anaiero-mesh-XXXXXX").string();
+  CHECK(::mkdtemp(endpoint_directory.data()));
+  const std::string endpoint=(fs::path(endpoint_directory)/"control.sock").string();
+  CHECK(anaiero::host::valid_endpoint(endpoint,false));
 #endif
   anaiero::process::NativeChildProcess child;CHECK(child.start({executable,{"start",endpoint,(root/"cli-sender").string(),"10","paused","--mesh",config.string()}})==anaiero::process::Code::ok);
   std::string pong;const auto ready=std::chrono::steady_clock::now()+20s;
   while(!anaiero::host::NativeIpcClient::request(endpoint,"PING",pong,100)&&std::chrono::steady_clock::now()<ready)std::this_thread::sleep_for(10ms);
-  if(pong!="PONG\n")std::cerr<<"host child diagnostics: "<<child.diagnostics()<<'\n';
+  if(pong!="PONG\n"){child.collect_diagnostics();std::cerr<<"host child diagnostics: "<<child.diagnostics()<<'\n';}
   CHECK(pong=="PONG\n");
   const auto scope=admin(endpoint,"scope "+source.source_uid+" "+std::to_string(source.epoch),false);CHECK(scope.find(hex(sdk::encode_identity(source)))!=std::string::npos);
   const auto expiry=std::to_string(now()+3600);(void)admin(endpoint,"peer receiver "+keys.client_pin+" 1 0 "+expiry+" active cli-enroll");
@@ -143,6 +158,9 @@ static void native_cli(const fs::path& repository,const fs::path& root,const std
   std::unique_ptr<host::NativeSession> reopened;const auto stopped=std::chrono::steady_clock::now()+15s;sdk::Result open;
   do {reopened=std::make_unique<host::NativeSession>();open=reopened->open((root/"cli-sender").string());if(open)break;reopened.reset();std::this_thread::sleep_for(10ms);}while(std::chrono::steady_clock::now()<stopped);
   require(open);ev::AuditReport audit;require(reopened->store().audit(audit));CHECK(reopened->runner().progress().completed_cycles==2);child.stop();
+#ifndef _WIN32
+  fs::remove_all(endpoint_directory);
+#endif
 }
 int main(int argc,char** argv){
   CHECK(argc==5);const std::string mode=argv[4];CHECK(mode=="transport"||mode=="host-cli");
@@ -157,6 +175,6 @@ int main(int argc,char** argv){
   }
 #endif
   const fs::path root=argv[2];std::error_code error;fs::remove_all(root,error);CHECK(!error);fs::create_directories(root);
-  if(mode=="transport")native_roundtrip(argv[1],root);else native_cli(argv[1],root,argv[3]);
+  if(mode=="transport"){startup_diagnostics(argv[3]);native_roundtrip(argv[1],root);}else native_cli(argv[1],root,argv[3]);
   std::cout<<"continuous native mesh "<<mode<<": canonical shared-host integration passed\n";
 }

@@ -1,6 +1,7 @@
 #include "anaiero/sdk/native_mesh.hpp"
-#include "anaiero/infrastructure/native_ipc.hpp"
+// The TLS adapter selects Winsock 2 before IPC includes the Windows SDK.
 #include "anaiero/infrastructure/native_tls.hpp"
+#include "anaiero/infrastructure/native_ipc.hpp"
 #include <openssl/pem.h>
 #include <charconv>
 #include <condition_variable>

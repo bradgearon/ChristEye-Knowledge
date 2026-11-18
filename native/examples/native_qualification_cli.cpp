@@ -20,7 +20,9 @@ sdk::Result run(int argc,char** argv){
   if(argc!=4||std::string_view(argv[1])!="run")return {sdk::Code::invalid,"expected run PROFILE NEW_OUTPUT_DIRECTORY"};
   const fs::path profile_path=q::native_path(argv[2]),output=q::native_path(argv[3]);
   std::error_code error;const auto status=fs::symlink_status(profile_path,error);
-  if(error||!fs::is_regular_file(status)||fs::file_size(profile_path)>16384)return {sdk::Code::invalid,"qualification profile must be a regular text file within 16 KiB"};
+  if(error)return {sdk::Code::invalid,"cannot inspect qualification profile "+utf8(profile_path)+": "+error.message()};
+  if(!fs::is_regular_file(status)||fs::file_size(profile_path)>16384)
+    return {sdk::Code::invalid,"qualification profile must be a regular text file within 16 KiB: "+utf8(profile_path)};
   std::ifstream input(profile_path,std::ios::binary);std::string bytes{std::istreambuf_iterator<char>(input),{}};
   if(input.bad())return {sdk::Code::io_error,"cannot read qualification profile"};
   q::Profile profile;if(auto r=q::parse_profile(bytes,profile);!r)return r;

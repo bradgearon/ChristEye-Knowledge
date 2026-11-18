@@ -27,6 +27,9 @@ if(CE_WIND_BUILD_TESTS)
     -DANAIERO_QUALIFY=$<TARGET_FILE:ce_native_qualification>
     -DANAIERO_PROFILE=${CMAKE_CURRENT_SOURCE_DIR}/../qualification/native/ci-smoke.cevqualification
     -DANAIERO_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/qualification-smoke
+    -DANAIERO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+    -DANAIERO_LAUNCHER=${CMAKE_CURRENT_SOURCE_DIR}/cmake/RunNativeQualification.cmake
+    -DANAIERO_CONFIG=$<CONFIG>
     -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/qualification_smoke.cmake)
   set_tests_properties(anaiero_qualification_profile PROPERTIES TIMEOUT 180 LABELS "qualification")
   add_test(NAME anaiero_native_package COMMAND ${CMAKE_COMMAND}

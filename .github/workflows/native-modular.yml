@@ -29,7 +29,7 @@ jobs:
       - name: Build controller profile
         run: cmake --build build/controller --config Release --parallel 3
       - name: Measure 100000 observations and 100 epoch transitions against declared budgets
-        run: cmake -DANAIERO_BUILD_DIR=build/modular -DANAIERO_PROFILE=qualification/native/evidence-100k.cevqualification -DANAIERO_OUTPUT=build/qualification-100k -DANAIERO_CONFIG=Release -P native/cmake/RunNativeQualification.cmake
+        run: cmake "-DANAIERO_BUILD_DIR=build/modular" "-DANAIERO_PROFILE=qualification/native/evidence-100k.cevqualification" "-DANAIERO_OUTPUT=build/qualification-100k" "-DANAIERO_CONFIG=Release" -P native/cmake/RunNativeQualification.cmake
       - name: Preserve native verification logs and module manifests
         if: always()
         uses: actions/upload-artifact@v4

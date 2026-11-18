@@ -12,7 +12,7 @@ and run from the repository root:
 ```text
 cmake -S native -B build/native -DCMAKE_BUILD_TYPE=Release -DCE_WIND_BUILD_TESTS=ON
 cmake --build build/native --config Release --parallel 3
-cmake -DANAIERO_BUILD_DIR=build/native -DANAIERO_PROFILE=qualification/native/evidence-100k.cevqualification -DANAIERO_OUTPUT=build/evidence-100k -P native/cmake/RunNativeQualification.cmake
+cmake "-DANAIERO_BUILD_DIR=build/native" "-DANAIERO_PROFILE=qualification/native/evidence-100k.cevqualification" "-DANAIERO_OUTPUT=build/evidence-100k" -P native/cmake/RunNativeQualification.cmake
 ```
 
 `anaiero qualify run PROFILE NEW_OUTPUT_DIRECTORY` is the full distribution
@@ -23,6 +23,9 @@ The directory retains the exact profile bytes, the generated canonical store
 and `report.json`. A failed budget or correctness check returns a nonzero exit
 status and records the failure in the report when the native process remains
 able to publish it. An externally killed run is incomplete evidence.
+Quote the complete `-DNAME=value` argument when invoking the CMake launcher,
+including in PowerShell. The launcher reports its resolved executable, profile
+and output paths before starting the workload.
 
 ## Predeclared profiles
 
@@ -104,6 +107,12 @@ the report, exact profile, build manifest and native test logs. The package gate
 installs the distribution and rejects modified files, additional files and a
 different declared builtin identity. `native-mesh.yml` separately requires real
 native TLS and local IPC for authenticated shared-session integration.
+
+The [2026-11-18 shared-sandbox preflight](../reports/2026-11-18-shared-sandbox-100k/README.md)
+preserves a completed failed result: correctness, memory, disk and indexed-read
+gates passed, but the batch-commit p99 upper bound exceeded its unchanged
+2-second budget. It is pre-publication operating evidence, separate from the
+hosted reports for an exact reviewed commit.
 
 Qualification records must identify the exact commit/run and distinguish:
 

@@ -47,3 +47,8 @@ tools/scientific/supervised_neuron_provider.py -text
 
 # CE-SW-36 sealed plans, raw provenance and reference-series hashes.
 examples/scientific/calibration/* -text
+
+# Preserve exact qualification profile and recorded preflight evidence bytes.
+qualification/**/*.cevqualification -text
+qualification/reports/**/report.json -text
+qualification/reports/**/build-manifest.txt -text -whitespace

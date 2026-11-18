@@ -91,7 +91,8 @@ mesh_demo="$PWD/canonical-mesh-demo"
 mkdir -p "$mesh_demo"
 mesh_a_store="$mesh_demo/a-state"
 mesh_b_store="$mesh_demo/b-state"
-mesh_a_endpoint="$mesh_demo/a-control.sock"
+mesh_control_dir="$(mktemp -d /tmp/anaiero-mesh.XXXXXX)"
+mesh_a_endpoint="$mesh_control_dir/a.sock"
 mesh_server_config="$mesh_demo/a.mesh"
 mesh_client_config="$mesh_demo/b.mesh"
 
@@ -118,6 +119,12 @@ session, use its actual source UID and epoch. `session init` retains the model
 assets and attaches the engines, so this source context exists before the host
 starts. `mesh-live init` creates a canonical relay store with a persisted byte
 budget and mesh runtime marker; it refuses an existing nonempty directory.
+
+Linux IPC endpoint paths are limited to 100 bytes by the native adapter. The
+private temporary directory keeps this example within that bound even when
+the checkout or evidence-store path is long. Keep the directory for the host's
+lifetime; after stopping the host, remove its remaining socket lock file and
+the directory. Windows uses the short named-pipe endpoint above.
 
 In `peer` and `grant`, the two numbers after the certificate/context are
 `GENERATION EXPECTED_GENERATION`. Creation uses `1 0`; each policy change

@@ -442,12 +442,14 @@ Result Service::receive_artifact(const Session& session,const lc::SourceRef& sou
     if(previous.request_digest!=batch.request_digest)return fail(Code::conflict,"artifact operation changed");
     Bytes retained;if(auto result=impl_->store.get_blob(digest,retained);!result)return result;
     if(retained!=bytes)return fail(Code::corrupt,"retained artifact differs from exact retransmission");
-    out={{},0,previous.generation,std::string(digest),true};return {};
+    out.store_generation=previous.generation;out.receipt_sha256=digest;out.duplicate=true;return {};
   }
   if(found.code!=Code::not_found)return found;
   batch.blobs.push_back({std::string(digest),std::move(bytes),{}});
   record(batch,"mesh.artifact",grant_key(session.principal,source)+":"+std::string(digest),pack({"mesh-artifact/2",session.principal,number(session.credential_generation),std::string(digest)}),{std::string(digest)});
-  ev::CommitReceipt receipt;const auto result=impl_->store.commit(batch,receipt);if(result.committed())out={{},0,receipt.generation,std::string(digest),receipt.duplicate};return result;
+  ev::CommitReceipt receipt;const auto result=impl_->store.commit(batch,receipt);
+  if(result.committed()){out.store_generation=receipt.generation;out.receipt_sha256=digest;out.duplicate=receipt.duplicate;}
+  return result;
 }
 Result Service::offer_bootstrap(const Session& session,std::string id,std::uint64_t generation,const lc::SourceRef& source,
                                std::uint64_t lease,std::uint64_t now,BootstrapOffer& out){
