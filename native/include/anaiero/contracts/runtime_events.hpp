@@ -29,10 +29,12 @@ enum class Status : std::uint8_t {
 };
 inline constexpr bool health_metric(Metric m) noexcept {
   return m==Metric::viability || m==Metric::energy || m==Metric::support ||
-         m==Metric::stress || m==Metric::activity || m==Metric::acquisition_health || m==Metric::membrane_voltage;
+         m==Metric::stress || m==Metric::activity || m==Metric::acquisition_health ||
+         m==Metric::membrane_voltage || m==Metric::environmental_concentration;
 }
 inline constexpr bool valid_metric(Metric m) noexcept {
-  return static_cast<unsigned>(m)>=1 && static_cast<unsigned>(m)<=11;
+  return static_cast<unsigned>(m)>=1 &&
+    static_cast<unsigned>(m)<=static_cast<unsigned>(Metric::environmental_concentration);
 }
 inline constexpr bool valid_lane(Lane l) noexcept {return static_cast<unsigned>(l)<=4;}
 inline constexpr bool valid_origin(Origin o) noexcept {return o==Origin::simulated||o==Origin::external_unverified_readonly;}

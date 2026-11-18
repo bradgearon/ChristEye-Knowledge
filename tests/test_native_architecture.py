@@ -28,6 +28,8 @@ LEGACY_BRIDGES = {
     ("infrastructure/sim3_ingress.hpp", "christeye/living/colony_runner.hpp"),
     ("infrastructure/windstore_sink.hpp", "christeye/living/durable_registry.hpp"),
     ("infrastructure/passive_model_file.hpp", "christeye/living/durable_records.hpp"),
+    ("infrastructure/environment_model_file.hpp", "christeye/living/durable_records.hpp"),
+    ("infrastructure/scientific_calibration_files.hpp", "christeye/living/durable_records.hpp"),
     ("infrastructure/windbus_adapter.hpp", "christeye/wind/packet.hpp"),
     ("infrastructure/experiment_record_store.hpp", "christeye/living/durable_registry.hpp"),
     ("infrastructure/scientific_solver_configuration.hpp", "christeye/living/durable_records.hpp"),

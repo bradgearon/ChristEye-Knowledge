@@ -153,8 +153,7 @@ inline bool valid_record(const Record& r)noexcept {
     if(r.schema>=2){
       const auto& c=r.contracts[i];
       if(c.behavior.empty()||c.behavior.size()>96||!c.input_schema||!c.metric_schema||!c.clock_domain||!c.checkpoint_schema)return false;
-      for(const auto semantic:c.summaries)if(static_cast<unsigned>(semantic)>
-        static_cast<unsigned>(engine::SummarySemantic::model_entities))return false;
+      for(const auto semantic:c.summaries)if(!engine::valid_summary_semantic(semantic))return false;
     }
     if(!e.id||!e.source||!e.source_epoch||kind<1||kind>3||!e.cadence||e.cadence>64||
        !db::valid_digest(e.model_digest)||!valid_snapshot(e.last)||
@@ -337,7 +336,11 @@ inline bool decode_record(std::string_view wire,Record& output){
       auto& c=r.contracts[i];
       if(!(in>>std::quoted(c.behavior)>>c.input_schema>>c.metric_schema>>c.checkpoint_schema>>c.clock_domain>>c.tick_ns>>
            c.isolated_fork>>c.evaluate_candidates>>c.apply_changes>>c.restore))return false;
-      for(auto& semantic:c.summaries){unsigned n=0;if(!(in>>n)||n>8)return false;semantic=static_cast<engine::SummarySemantic>(n);}
+      for(auto& semantic:c.summaries){
+        unsigned n=0;
+        if(!(in>>n)||n>static_cast<unsigned>(engine::SummarySemantic::concentration_micromolar))return false;
+        semantic=static_cast<engine::SummarySemantic>(n);
+      }
     }
     if(!get_snapshot(in,e.last)||!get_inputs(in,e.cycle_inputs)||!(in>>v.next_sequence)||!v.next_sequence||
        !get_snapshot(in,v.published)||!(in>>route.active>>route.prior_existed>>route.prior_guidance>>route.change_id)||

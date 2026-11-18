@@ -1,0 +1,11 @@
+Anaiero environmental reference fixture, version 1.
+Origin: SYNTHETIC_REFERENCE. No physical measurements were collected.
+Fixed-volume scalar equation: dC/dt = (Cin-C)/tau - k*C.
+For a constant inlet on [t,t+h], C(t+h)=Ceq+(C(t)-Ceq)*exp(-(1/tau+k)*h),
+where Ceq=Cin/(1+k*tau). Each run starts independently from 100 micromolar.
+The table uses tau=1 second, k=0.25 per second, inlet_max=1000 micromolar,
+h=0.1 second, and rounding floor(C+0.5). The one-micromolar envelope is a
+numerical sample declaration, not measurement uncertainty or calibration.
+Training and holdout use different predeclared piecewise inlet schedules.
+The holdout is a second synthetic trajectory, not an independent biological
+experiment. Its purpose is to test software selection and frozen validation.

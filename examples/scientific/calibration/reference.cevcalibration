@@ -1,0 +1,12 @@
+CEVENVCALIBRATION/1
+name native-environment-reference
+training "training.cevreference" 723a4b96cf3786b52c71e12680703550aa6e6334747e05e232137b662fe86b2d
+holdout "holdout.cevreference" f5c9525661635866126c333673d3b3f7594d2b0b0f9918dbebded2b9350a83bd
+max_absolute_error_micromolar 2
+max_rmse_micromolar 1
+candidates 3
+candidate tau-0500ms "tau-0500ms.cevmodel" cee6cca774adf00cb8a046047a20459d7b8ed3d04662534c61390226a7de2529
+candidate tau-1000ms "tau-1000ms.cevmodel" 8344e78d165c58bbb066ecc2feb292162a6ee0e394752fa459803d416d06a87e
+candidate tau-2000ms "tau-2000ms.cevmodel" a6d48336d06316be672bfc465d91f290ea12a4208e3b10db6cca6de7007116f5
+end
+seal 24b61b2f04368b3b758f98435dca50a8542b7d82d5fe9f3c11716429714d918e

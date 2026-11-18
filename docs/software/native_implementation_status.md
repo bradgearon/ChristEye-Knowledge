@@ -10,7 +10,37 @@ Deliver a substantial complete capability with implementation, adapters,
 runtime/CLI wiring, meaningful Windows/Linux tests and documentation. Keep
 related work in one changeset with reviewable internal commits.
 
-## Current integrated batch — CE-SW-35 authenticated evidence mesh
+## Current integrated batch — CE-SW-36 environment and calibration
+
+The native controller now runs a second scientific quantity: a fixed-volume,
+well-mixed scalar concentration model with an explicit simulated nanosecond
+clock and micromolar output. Shared observable contracts preserve voltage
+semantics while adding concentration-specific schemas, metrics and views.
+Both scientific providers run beside SW5/SIM3 through the existing supervised
+process, checkpoint and durable publication paths. JSON views include each
+engine's model, behavior, source, epoch, clock and quantity unit.
+
+`ce_scientific_config environment` prepares a pinned native provider and session.
+`ce_scientific_calibrate` (or `anaiero calibrate` in the full build) loads sealed
+reference artifacts, chooses from bounded model candidates using training data
+only, freezes the selected model, and evaluates a separate declared held-out run.
+Reports retain declared measurement/reference provenance, raw errors and
+uncertainty separately, and require both training and holdout criteria to pass.
+They are published as complete new files without replacing existing reports.
+
+The included reference traces are synthetic numerical fixtures. External
+read-only data remain explicitly unverified even when their error thresholds
+pass. Scientific live optimization and application remain disabled. This is a
+generic scalar environment, not a calibrated biological or spatial model.
+
+See [CE-SW-36](CE-SW-36_environment_and_calibration.md) for equations, native
+Bash/PowerShell commands, bounds, evidence classifications and acceptance tests.
+The new native suite includes independent numerical comparison, a million-step
+equilibrium regression, exact process checkpoint continuation, four-engine
+mixed-session restart, interrupted evidence recovery, mesh codec preservation,
+frozen held-out selection and report/artifact tampering checks.
+
+## Previous integrated batch — CE-SW-35 authenticated evidence mesh
 
 The optional native mesh now provides OpenSSL 3 TLS 1.3 mutual certificate
 authentication, explicit certificate-pinned operator enrollment, source scopes,
@@ -91,19 +121,22 @@ numerical envelope, and 160 identical restored continuation samples.
   checkpoints; its existing model tick ceiling remains 10,000.
 - CEVPLAN references are validated provenance; general VLM plan execution is
   not substituted for the explicit engine input schedules.
-- Scientific sessions expose modeled passive voltage; biological calibration,
-  scientific experimental forks and an environmental model are not included.
+- Scientific sessions expose modeled passive voltage and generic scalar
+  concentration. Offline environmental parameter calibration is available;
+  biological calibration, scientific experimental forks, live application,
+  spatial environmental dynamics and inter-model scientific coupling remain
+  separate capabilities.
 - Core modules remain largely header-oriented. Recursive dependency checks and
   the controller build profile improve boundaries without claiming binary ABI
   isolation or a dynamically loaded plugin system.
 
 ## Next substantial capabilities
 
-1. **Broader scientific models and calibration:** first environmental provider,
-   more model-specific quantities, external measurement provenance and held-out
-   fidelity criteria before enabling scientific optimization.
-2. **Plan and policy expansion:** explicit typed adapters for additional learning
+1. **Plan and policy expansion:** explicit typed adapters for additional learning
    plan semantics and SIM3 changes, preserving each model's source and clock.
+2. **Scientific model qualification:** domain-specific quantities and environmental
+   dynamics, independently qualified external measurements, explicit coupling
+   contracts and isolated scientific trials before enabling live optimization.
 3. **Operational scale:** source retirement, archive lifecycle policy, distributed
    backpressure, longer mixed-workload measurements and compiled module seams.
 4. **Mesh expansion:** live subscription fan-out, direct provenance indexes,

@@ -1,0 +1,6 @@
+CEENVIRONMENT/1
+initial_micromolar 100
+inlet_max_micromolar 1000
+exchange_tau_ns 2000000000
+consumption_ppm_per_second 250000
+end

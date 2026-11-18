@@ -1,6 +1,7 @@
 #pragma once
 #include "anaiero/contracts/simulation_engine.hpp"
 #include "anaiero/contracts/supervised_solver.hpp"
+#include "anaiero/contracts/scientific_observable.hpp"
 #include "anaiero/contracts/service_extension.hpp"
 #include "christeye/living/plan_hash.hpp"
 #include <algorithm>
@@ -58,15 +59,20 @@ public:
   engine::Descriptor describe()const noexcept override{
     engine::Descriptor out{id_,source_,identity_.epoch,engine::Kind::scientific,identity_.model_sha256,
       "NUMERICAL_MODEL_UNCALIBRATED",identity_.checkpoint_schema!=0,identity_.checkpoint_schema!=0};
-    out.capabilities.input_schema=0xCE710001u;out.capabilities.metric_schema=0xCE710002u;
+    const auto* observable=observable_for_unit(identity_.unit);
+    if(observable){
+      out.capabilities.input_schema=observable->input_schema;
+      out.capabilities.metric_schema=observable->metric_schema;
+      out.capabilities.summaries[2]=observable->summary;
+    }
     out.capabilities.checkpoint_schema=identity_.checkpoint_schema;out.capabilities.clock_domain=source_;
     out.capabilities.tick_ns=identity_.step_ns;out.capabilities.behavior_id=identity_.behavior_sha256;
-    out.capabilities.summaries[2]=engine::SummarySemantic::membrane_voltage_microvolt;
     return out;
   }
   engine::Status initialize()noexcept override{
     if(initialized_)return solver_.failed()?engine::Status::not_initialized:engine::Status::ok;
-    if(!id_||!source_||!identity_.epoch||configured_input_<0||configured_input_>1000||!solver_.initialize(identity_))return engine::Status::not_initialized;
+    if(!id_||!source_||!identity_.epoch||!observable_for_unit(identity_.unit)||
+       configured_input_<0||configured_input_>1000||!solver_.initialize(identity_))return engine::Status::not_initialized;
     initialized_=true;return engine::Status::ok;
   }
   engine::Status latest(engine::Snapshot& out)const noexcept override{

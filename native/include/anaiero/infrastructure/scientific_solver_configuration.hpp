@@ -1,5 +1,6 @@
 #pragma once
 #include "anaiero/contracts/supervised_solver.hpp"
+#include "anaiero/contracts/scientific_observable.hpp"
 #include "christeye/living/durable_records.hpp"
 #include <filesystem>
 #include <iomanip>
@@ -22,7 +23,7 @@ inline bool read_solver_configuration(const std::filesystem::path& path,Scientif
      !(input>>tag>>next.expected.max_steps)||tag!="max_steps"||
      !(input>>tag>>next.timeout_ms)||tag!="timeout_ms"||
      !(input>>tag>>next.input_proxy)||tag!="input_proxy"||
-     !(input>>tag>>unit)||tag!="unit"||unit!=static_cast<unsigned>(Unit::microvolt)||
+     !(input>>tag>>unit)||tag!="unit"||!observable_for_unit(unit)||
      !(input>>tag>>next.expected.checkpoint_schema)||tag!="checkpoint_schema"||next.expected.checkpoint_schema>1)
     return fail("invalid solver configuration");
   if(!next.expected.step_ns||next.expected.step_ns>1000000000ULL||!next.expected.max_steps||next.expected.max_steps>1000000||
