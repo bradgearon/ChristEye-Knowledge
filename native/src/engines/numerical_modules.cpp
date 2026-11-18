@@ -67,13 +67,13 @@ public:
     if(identity_.model_sha256!=sha256(data.bundle.at("model"))||identity_.tick_ns!=data.step||
        !decode_checkpoint(state.checkpoint.payload,tick,value)||tick!=state.tick||tick>1000000)
       return corrupt("numerical checkpoint model, step or sequence mismatch");
-    science::PassiveMembraneService passive;science::EnvironmentCompartmentService environment;
+    science::PassiveMembraneService passive;science::EnvironmentCompartmentService environment_service;
     if(is_environment()){
-      if(!environment.initialize(data.environment,data.step)||!environment.restore({tick,value}))
+      if(!environment_service.initialize(data.environment,data.step)||!environment_service.restore({tick,value}))
         return corrupt("invalid environmental concentration checkpoint");
     }else if(!passive.initialize(data.passive,data.step)||!passive.restore({tick,value}))
       return corrupt("invalid passive membrane voltage checkpoint");
-    data_=std::move(data);state_=state;passive_=passive;environment_=environment;return {};
+    data_=std::move(data);state_=state;passive_=passive;environment_=environment_service;return {};
   }
   Result install(const EngineState& state)override{return restore(state);}
   Result prepare_step(const StepRequest& request,PreparedTransition& output)override{
