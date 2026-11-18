@@ -207,10 +207,20 @@ async function openSymbol(id, token) {
     html += '<div class="section"><h2>Members (' + members.length + ')</h2>';
     for (const [kind, items] of groups) {
       html += '<h3>' + safe(kind[0].toUpperCase()+kind.slice(1)) + '</h3>';
-      html += items.slice(0,180).map(m => '<div class="member"><div><a href="' + routeFor(m) +
-        '"><strong>' + safe(m.name) + '</strong></a><div class="sig">' + safe(m.signature || m.qualified) +
-        '</div></div><small>' + safe(m.access || "") + '</small></div>').join("");
-      if (items.length > 180) html += '<p class="summary">Additional member entries can be found with search.</p>';
+      const families = new Map();
+      for (const item of items) {
+        if (!families.has(item.name)) families.set(item.name, []);
+        families.get(item.name).push(item);
+      }
+      for (const [name, overloads] of Array.from(families).slice(0,180)) {
+        const rows = overloads.map(m => '<div class="member"><div><a href="' + routeFor(m) +
+          '"><strong>' + safe(m.name) + '</strong></a><div class="sig">' + safe(m.signature || m.qualified) +
+          '</div></div><small>' + safe(m.access || "") + '</small></div>').join("");
+        html += overloads.length > 1 ?
+          '<details class="overloads"><summary><strong>' + safe(name) + '</strong> · ' +
+          overloads.length + ' overloads</summary>' + rows + '</details>' : rows;
+      }
+      if (families.size > 180) html += '<p class="summary">Additional member families can be found with search.</p>';
     }
     html += '</div>';
   }
@@ -284,11 +294,36 @@ function renderVersions() {
       '<div class="version-row"><div><strong>' + safe(v.version) + '</strong><small>Commit ' +
       safe(v.commit) + '</small><small>' + count(v.symbols) + ' symbols, ' + count(v.headers) + ' headers, ' +
       count(v.warningCount) + ' syntax-warning headers</small></div><div><a href="' +
-      safe(versionLink(v.version,"#/overview")) + '">Open this version ↗</a></div></div>').join("") + '</div>' +
+      safe(versionLink(v.version,"#/overview")) + '">Open ↗</a>' +
+      (v.version === ui.version.version ? '' : '<button type="button" class="btn" data-compare-version="' +
+      safe(v.version) + '">Compare</button>') + '</div></div>').join("") +
+    '<div id="version-diff" aria-live="polite"></div></div>' +
     '<div class="section"><h2>Source identity</h2><p class="source-ref">' + safe(ui.version.sourceRepo) +
     ' · ' + safe(ui.version.sourceRef) + '</p><p><code>' + safe(ui.version.commit) + '</code></p>' +
     '<p><a target="_blank" rel="noopener noreferrer" href="' + safe(sourceURL("native/include",0)) +
     '">Browse source tree on GitHub ↗</a></p></div>';
+}
+async function compareVersion(previousSlug) {
+  const other = ui.versions.find(v => v.version === previousSlug);
+  const output = $("version-diff");
+  if (!other || !output) return;
+  output.innerHTML = '<p class="summary">Comparing source-pinned declaration inventories…</p>';
+  const source = await fetchJSON(other.index);
+  const existing = new Map(source.symbols.map(s => [s.id,s]));
+  const current = new Map(ui.symbols.map(s => [s.id,s]));
+  const added = ui.symbols.filter(s => !existing.has(s.id));
+  const removed = source.symbols.filter(s => !current.has(s.id));
+  const outputList = (items, available) => items.slice(0,75).map(s =>
+    '<div class="member">' + (available ? '<a href="' + routeFor(s) + '">' : '<span>') +
+    safe(s.qualified) + (available ? '</a>' : '</span>') +
+    '<small>' + safe(s.kind) + '</small></div>').join("") +
+    (items.length > 75 ? '<p class="summary">Showing first 75 entries.</p>' : '');
+  output.innerHTML = '<div class="section"><h2>Declaration diff: ' + safe(previousSlug) + ' → ' +
+    safe(ui.version.version) + '</h2><div class="pills">' + badge(added.length+" added/changed") +
+    badge(removed.length+" removed/changed") + '</div>' +
+    '<p class="summary">Identity-based syntactic comparison. Modified signatures may appear as one removal and one addition; this is not a source compatibility verdict.</p>' +
+    '<h3>New or changed in selected version</h3>' + outputList(added,true) +
+    '<h3>Absent from selected version</h3>' + outputList(removed,false) + '</div>';
 }
 async function readRoute() {
   let hash; try { hash = decodeURIComponent(location.hash || "#/overview"); } catch (_) { hash = "#/overview"; }
@@ -367,6 +402,13 @@ function bind() {
       try {await showSource(preview.dataset.showSource, Number(preview.dataset.line));}
       catch(err) {toast("Could not load source: " + err.message);}
       finally {preview.disabled=false;}
+    }
+    const compare = e.target.closest("[data-compare-version]");
+    if (compare) {
+      compare.disabled = true;
+      try {await compareVersion(compare.dataset.compareVersion);}
+      catch (err) {toast("Comparison unavailable: " + err.message);}
+      finally {compare.disabled = false;}
     }
     if (e.target.closest(".navlink")) document.body.classList.remove("menu-open");
   });
