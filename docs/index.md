@@ -21,6 +21,10 @@ The documentation is a **complete technical library**, not an index of promised 
 - [Biological cell/axon/Chemibus/Sustibus/change schemas](../schemas/biology/README.md)
 - [2026 research evidence register](../research/evidence/anaiero-biology-2026-11.md)
 
+## Native C++ API
+
+[Browse the Anaiero native developer reference](native-reference/) — classes, services, interfaces, and source-linked declarations.
+
 ## Start here
 
 | Track | Documents |
