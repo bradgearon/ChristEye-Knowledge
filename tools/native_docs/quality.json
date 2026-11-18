@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "source": "feature/anaiero-environment-calibration",
+  "baselineCommit": "c5a4e8a04616c76decab52d237de53a3f3b09f23",
+  "minimumSymbols": 5000,
+  "minimumHeaders": 170,
+  "acceptedWarningHeaders": [
+    "native/include/anaiero/infrastructure/native_host_lifecycle.hpp",
+    "native/include/anaiero/infrastructure/native_tls.hpp",
+    "native/include/anaiero/infrastructure/scientific_calibration_files.hpp",
+    "native/include/anaiero/services/coupled_simulation_service.hpp",
+    "native/include/anaiero/services/operation_service.hpp",
+    "native/include/anaiero/services/simulation_coordinator_service.hpp",
+    "native/include/christeye/living/durable_io.hpp",
+    "native/include/christeye/living/durable_registry.hpp",
+    "native/include/christeye/living/model_fidelity.hpp",
+    "native/include/christeye/living/segmented_store.hpp",
+    "native/include/christeye/living/wind_registry.hpp",
+    "native/include/christeye/wind/packet.hpp"
+  ],
+  "notes": "Existing Tree-sitter parse-error headers are explicitly accepted for this C++ source revision. Any additional error-bearing header or coverage regression requires reviewed baseline changes. Compiler build verification is separate."
+}
