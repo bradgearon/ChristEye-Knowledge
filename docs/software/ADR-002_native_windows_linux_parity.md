@@ -8,6 +8,19 @@ related: "CE-SW-20, ADR-001, CE-SW-11, CE-SW-18"
 
 # ADR-002: First-class native Windows and Linux runtime
 
+## Implementation note — 2026-11-17
+
+The original status and target table below record the architecture decision at
+its introduction. Native Windows/Linux local IPC, console/service lifecycle,
+owned solver processes, session recovery and optional TLS evidence replication
+are now integrated through CE-SW-31–36 and tested on both platforms. Building
+does not install an OS service. The proposed resource target and complete host
+API table are not measurements or a claim that every listed backend exists.
+Use the [implementation checkpoint](native_implementation_status.md),
+[deployment guide](../../deployment/native/README.md) and
+[development plan](native_development_plan.md) for actual behavior and the
+remaining operational qualification.
+
 Anaiero must be **one portable native C++20 controller** with equally supported **Windows and Linux** host implementations. Neither Linux nor Windows is a secondary host. Headless service operation does not require WSL, Docker, Cygwin, Python, Node, or a browser.
 
 The domain, application, simulation, queue, WindPacket, evidence contracts and projector use the same code and file/wire formats on both. The composition root selects host adapters. No platform-specific headers in portable models, contracts or services.

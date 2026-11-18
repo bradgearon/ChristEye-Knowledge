@@ -3,6 +3,11 @@
 This index records operational integration separately from component existence.
 Verify the current engineering branch and CI when continuing work.
 
+The [native readiness and development plan](native_development_plan.md) records
+the 2026-11-17 assessment, commit-pinned evidence, priority order and completion
+gates. This checkpoint describes implemented behavior; the plan describes
+future capabilities.
+
 ## Standing delivery preference
 
 The user requests roughly **5× the previous incremental scope per changeset**.
@@ -119,8 +124,10 @@ numerical envelope, and 160 identical restored continuation samples.
 - Session publication is recoverable per engine, not an atomic group snapshot.
 - SIM3 can evaluate candidates but cannot apply them live or restore arbitrary
   checkpoints; its existing model tick ceiling remains 10,000.
-- CEVPLAN references are validated provenance; general VLM plan execution is
-  not substituted for the explicit engine input schedules.
+- CEVPLAN already executes through its standalone CEVLM/2 interpreter. In
+  integrated reusable experiments, those references are validated provenance;
+  they do not replace the explicit engine input schedules or supply a durable
+  VLM-plan engine in a mixed session.
 - Scientific sessions expose modeled passive voltage and generic scalar
   concentration. Offline environmental parameter calibration is available;
   biological calibration, scientific experimental forks, live application,
@@ -132,16 +139,33 @@ numerical envelope, and 160 identical restored continuation samples.
 
 ## Next substantial capabilities
 
-1. **Plan and policy expansion:** explicit typed adapters for additional learning
-   plan semantics and SIM3 changes, preserving each model's source and clock.
-2. **Scientific model qualification:** domain-specific quantities and environmental
-   dynamics, independently qualified external measurements, explicit coupling
-   contracts and isolated scientific trials before enabling live optimization.
-3. **Operational scale:** source retirement, archive lifecycle policy, distributed
-   backpressure, longer mixed-workload measurements and compiled module seams.
-4. **Mesh expansion:** live subscription fan-out, direct provenance indexes,
-   broader source/schema scopes, original-author signatures and deployment key
-   management beyond explicit operator-pinned TLS enrollment.
+The detailed scope, dependencies and acceptance gates are maintained in the
+[development plan](native_development_plan.md#revised-delivery-order):
+
+1. **Replayable executable digital plans:** bind the existing CEVPLAN/CEVLM2
+   interpreter as a finite native-session workload, with retained artifacts,
+   durable mid-stage continuation, typed progress and isolated replay
+   qualification. Preserve actual VLM semantics; do not translate them into
+   SW5 proxy inputs.
+2. **Sustained evidence lifecycle:** direct historical/receipt indexes,
+   persisted source/epoch retirement, reference-aware archive policy,
+   capacity/lag views and measured Windows/Linux workloads. Complete this
+   before substantially expanding live mesh fan-out.
+3. **Recoverable SIM3 policy application:** configuration-plus-state
+   checkpoint identity, supported link/teaching changes, crash-safe apply and
+   measured outcomes with explicit reversal rules for links and one-shot
+   teaching. Keep apply disabled until these gates pass.
+4. **Qualified scientific programs:** typed physical-time inputs, isolated
+   provider trials, domain-specific quantity meaning and independently
+   reviewed external-reference extraction before scientific live optimization.
+5. **Continuous evidence mesh:** bounded live subscriptions, lag recovery,
+   broader declared scopes, original-author signatures where required and
+   deployment key lifecycle, building on the operational qualification above.
+
+Each item is a substantial capability batch with services, adapters, operator
+wiring, failure tests and both-platform evidence. The next batch's concrete
+example is the existing three-stage CEVPLAN running beside another engine,
+resuming mid-stage and matching the standalone executor's output and receipts.
 
 The Projector stays observational. Optimization stays independent. Native
 Windows and native Linux remain first-class, with all domain decisions in
