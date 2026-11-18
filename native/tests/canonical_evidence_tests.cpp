@@ -25,6 +25,40 @@ CommitBatch batch(const std::string& id){CommitBatch b;b.operation_id=id;b.reque
 Blob object(std::string bytes,std::vector<Digest> references={}){const auto digest=sha256(bytes);return {digest,std::move(bytes),std::move(references)};}
 CommitReceipt commit(ICommitStore& store,const CommitBatch& b){CommitReceipt r;require(store.commit(b,r),"commit "+b.operation_id);return r;}
 void overwrite(const fs::path& path,std::string_view bytes){std::ofstream out(path,std::ios::binary|std::ios::trunc);out.write(bytes.data(),static_cast<std::streamsize>(bytes.size()));expect(static_cast<bool>(out),"test overwrite");}
+std::string fixture_bytes(const fs::path& path){std::ifstream in(path,std::ios::binary);expect(static_cast<bool>(in),"open fixture bytes");return {std::istreambuf_iterator<char>(in),{}};}
+void coverage_marker_paths(){
+  Temporary temp("coverage-paths");auto store=open(temp.path);expect(store->info().index_ready&&store->info().writable,"fresh storage opens on case-insensitive filesystems");
+  auto b=batch("coverage-path-operation");const auto payload=object("preserved canonical payload");b.blobs={payload};b.records={{"coverage","state","preserved canonical record",{payload.digest},false}};const auto receipt=commit(*store,b);
+  const auto marker=temp.path/"INDEX-COVERAGE",legacy=temp.path/"INDEX";
+  expect(fs::is_regular_file(marker)&&fs::is_directory(temp.path/"index")&&!fs::equivalent(marker,temp.path/"index"),"coverage marker and index directory have distinct filesystem identities");
+  const auto original_root=fixture_bytes(temp.path/"ROOT"),original_tx=fixture_bytes(temp.path/"transactions"/"0000000000000001.txn"),coverage=fixture_bytes(marker);
+  store.reset();store=open(temp.path);expect(store->info().index_ready,"new coverage marker reopens");
+  std::error_code ec;const bool alias=fs::equivalent(legacy,temp.path/"index",ec);
+  if(ec||!alias){
+    // Only case-sensitive filesystems could contain the original two names.
+    store.reset();fs::rename(marker,legacy);store=open(temp.path);
+    expect(store->info().index_ready&&fs::is_regular_file(marker)&&!fs::exists(legacy),"validated legacy coverage is adopted without a historical rebuild");
+    expect(native_index_statistics(*store).nodes_read<8,"legacy marker adoption preserves bounded healthy startup");
+    CommitReceipt retried;require(store->lookup_operation(b.operation_id,retried),"legacy operation lookup");expect(retried.root_digest==receipt.root_digest,"legacy adoption preserves original receipts");
+    expect(fixture_bytes(temp.path/"ROOT")==original_root&&fixture_bytes(temp.path/"transactions"/"0000000000000001.txn")==original_tx&&fixture_bytes(temp.path/"blobs"/payload.digest)==payload.bytes,"legacy adoption does not rewrite canonical evidence");
+
+    store.reset();overwrite(legacy,coverage);overwrite(marker,"damaged current coverage");store=open(temp.path);
+    expect(!store->info().index_ready&&!store->info().writable,"damaged current coverage cannot fall back to a legacy marker");
+    expect(fixture_bytes(legacy)==coverage,"failed coverage loading preserves the older marker");require(store->repair_index(),"explicit repair of preferred marker");
+    store.reset();overwrite(legacy,"unowned old-name bytes");store=open(temp.path);
+    expect(store->info().index_ready&&fixture_bytes(legacy)=="unowned old-name bytes","preferred marker does not overwrite unrelated old-name bytes");
+    store.reset();fs::remove(marker);store=open(temp.path);
+    expect(!store->info().index_ready&&!fs::exists(marker)&&fixture_bytes(legacy)=="unowned old-name bytes","invalid legacy coverage is preserved and fails closed");
+    require(store->repair_index(),"rebuild with invalid legacy marker retained");expect(fixture_bytes(legacy)=="unowned old-name bytes","repair does not delete invalid legacy marker");
+  }
+  StoredRecord state;require(store->latest("coverage","state",state),"coverage record remains readable");expect(state.record.payload==b.records.front().payload,"marker compatibility preserves record bytes");AuditReport report;require(store->audit(report),"coverage compatibility audit");
+  store.reset();fs::remove(marker);fs::create_directory(marker);overwrite(marker/"keep","unowned directory contents");store=open(temp.path);
+  expect(!store->info().index_ready&&!store->info().writable,"nonregular current coverage fails closed");expect(store->repair_index().code==Code::corrupt&&fixture_bytes(marker/"keep")=="unowned directory contents","repair preserves nonregular coverage paths");
+#ifndef _WIN32
+  store.reset();fs::remove_all(marker);const auto sentinel=temp.path/"sentinel";overwrite(sentinel,"unowned symlink target");fs::create_symlink(sentinel,marker);store=open(temp.path);
+  expect(!store->info().index_ready&&store->repair_index().code==Code::corrupt&&fixture_bytes(sentinel)=="unowned symlink target","coverage symlink is rejected without changing its target");
+#endif
+}
 void atomic_transitions(){
   Temporary temp("atomic");auto store=open(temp.path);auto b=batch("transition-1");const auto config=object("configuration");const auto checkpoint=object("checkpoint");const auto observation=object("observation");const auto receipt=object("transition receipt");
   b.blobs={config,checkpoint,observation,receipt};b.records={{"engine","cell","state-1",{config.digest,checkpoint.digest},false},{"policy","source","revision-1",{},false},{"lifecycle","active","source-a/1",{},false}};b.guards={{"engine","cell",0,{}},{"policy","source",0,{}}};b.observations={{"source-a",1,1,observation.digest,receipt.digest}};
@@ -61,7 +95,7 @@ void index_scaling_and_rebuild(){
   store.reset();store=open(temp.path);expect(native_index_statistics(*store).nodes_read<8,"healthy restart does not enumerate history");reset_native_index_statistics(*store);StoredRecord r;require(store->latest("retired","10000",r),"historical indexed point");const auto point=native_index_statistics(*store);expect(point.nodes_read<24&&point.point_queries==1,"point lookup logarithmic bound");reset_native_index_statistics(*store);
   std::vector<StoredRecord> records;bool more=false;require(store->scan_latest("retired","10","10250",17,records,more),"bounded historical range");expect(records.size()==17&&more&&records.front().record.key=="10251","ordered indexed range");expect(native_index_statistics(*store).nodes_read<64,"range work follows output plus index depth");
   const auto head=store->info().index_root;store.reset();fs::path node;for(const auto& dir:fs::directory_iterator(temp.path/"index")){if(dir.is_directory()&&fs::exists(dir.path()/head))node=dir.path()/head;}expect(!node.empty(),"find test index head");overwrite(node,"corrupted root node");store=open(temp.path);expect(!store->info().index_ready&&!store->info().writable,"corrupt index fails closed");require(store->repair_index(),"canonical index rebuild");require(store->latest("retired","10000",r),"historical record restored from canonical history");AuditReport report;require(store->audit(report),"rebuilt index audit");expect(report.generations==8&&report.records==512,"full retained history audit");
-  store.reset();overwrite(temp.path/"INDEX","incomplete watermark");store=open(temp.path);expect(!store->info().index_ready,"corrupt watermark cannot claim absence");require(store->repair_index(),"rebuild corrupt coverage");require(store->latest("retired","10511",r),"latest history after coverage rebuild");
+  store.reset();overwrite(temp.path/"INDEX-COVERAGE","incomplete watermark");store=open(temp.path);expect(!store->info().index_ready,"corrupt watermark cannot claim absence");require(store->repair_index(),"rebuild corrupt coverage");require(store->latest("retired","10511",r),"latest history after coverage rebuild");
   // Corruption below a valid root must not masquerade as a negative lookup or
   // evade an explicit repair that happens to have a current coverage marker.
   fs::path child;std::string child_key;const auto current_head=store->info().index_root;
@@ -137,6 +171,6 @@ void maintenance_headroom(){
   const auto accounted=store->info().physical_bytes;const auto generation=store->generation();store.reset();options.maximum_bytes=accounted+1024;store=open(temp.path,options);expect(store->reclaim_expired_blob(empty.digest,generation).code==Code::capacity&&store->generation()==generation,"native reclaim has no hidden metadata-quota bypass");
 }
 int main(){
-  try{atomic_transitions();crash_matrix();strict_and_generic_history();retention_and_fences();index_scaling_and_rebuild();quota_and_corruption();async_backpressure();expiry_admission();maintenance_headroom();std::cout<<"canonical evidence: atomic transitions, crash cuts, indexed history, retention, corruption, bounded async, expiry admission and maintenance headroom passed\n";return 0;}
+  try{coverage_marker_paths();atomic_transitions();crash_matrix();strict_and_generic_history();retention_and_fences();index_scaling_and_rebuild();quota_and_corruption();async_backpressure();expiry_admission();maintenance_headroom();std::cout<<"canonical evidence: coverage compatibility, atomic transitions, crash cuts, indexed history, retention, corruption, bounded async, expiry admission and maintenance headroom passed\n";return 0;}
   catch(const std::exception& e){std::cerr<<"canonical evidence failure: "<<e.what()<<'\n';return 1;}
 }

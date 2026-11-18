@@ -516,8 +516,11 @@ s::Result admin(Application& app,const fs::path& file){
       else return invalid("maintenance requires archive or explicit expiry");
       if(request.disposition==life::HistoryAvailability::archived){
         if(!app.archive)return invalid("archive maintenance requires the configured archive directory argument");
+        const auto archive_native_path=[](std::string_view encoded_path){
+          return fs::path(std::u8string(reinterpret_cast<const char8_t*>(encoded_path.data()),encoded_path.size()));
+        };
         std::error_code path_error;
-        if(!fs::equivalent(fs::path(request.archive_directory),fs::path(app.archive->identifier()),path_error)||path_error)
+        if(!fs::equivalent(archive_native_path(request.archive_directory),archive_native_path(app.archive->identifier()),path_error)||path_error)
           return invalid("maintenance archive differs from the configured archive directory");
         request.archive_directory=app.archive->identifier();
       }

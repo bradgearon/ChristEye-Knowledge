@@ -13,6 +13,22 @@ using namespace sdk::evidence;
 namespace os=christeye::living::durable::os;
 namespace {
 constexpr std::size_t decode_limit=64U*1024U*1024U;
+constexpr auto index_coverage_name="INDEX-COVERAGE";
+bool legacy_index_exists(const fs::path& store){
+  const auto legacy=store/"INDEX";
+  std::error_code ec;const auto status=fs::symlink_status(legacy,ec);
+  if(ec==std::errc::no_such_file_or_directory)return false;
+  if(ec)throw Failure(Code::io_error,"cannot inspect legacy index coverage");
+  // On a case-insensitive filesystem INDEX names the existing index directory,
+  // not a legacy marker. Ignore only that verified alias; all other nonregular
+  // paths and symlinks retain the storage adapter's strict rejection policy.
+  if(fs::is_directory(status)){
+    const bool alias=fs::equivalent(legacy,store/"index",ec);
+    if(ec)throw Failure(Code::io_error,"cannot compare legacy index path");
+    if(alias)return false;
+  }
+  return regular_exists(legacy);
+}
 std::vector<std::string> fields(std::string_view bytes,std::size_t max=100000){
   std::vector<std::string> f;if(!unpack(bytes,f,max,decode_limit))throw Failure(Code::corrupt,"invalid canonical field list");return f;
 }
@@ -191,12 +207,14 @@ Transaction NativeStore::transaction(std::uint64_t generation){
   return t;
 }
 void NativeStore::save_index(){
-  write_file(path_/"INDEX",seal("ANAIERO-INDEX-COVERAGE/2",{root_.store,index_directory_,number(index_generation_),index_canonical_,index_root_}));
+  write_file(path_/index_coverage_name,seal("ANAIERO-INDEX-COVERAGE/2",{root_.store,index_directory_,number(index_generation_),index_canonical_,index_root_}));
 }
 void NativeStore::load_index(){
-  if(!regular_exists(path_/"INDEX")){index_generation_=0;index_root_.clear();index_canonical_.clear();index_directory_="nodes-a";}
+  const bool current=regular_exists(path_/index_coverage_name);
+  const bool legacy=!current&&legacy_index_exists(path_);
+  if(!current&&!legacy){index_generation_=0;index_root_.clear();index_canonical_.clear();index_directory_="nodes-a";}
   else {
-    const auto f=unseal(read_file(path_/"INDEX",16384),"ANAIERO-INDEX-COVERAGE/2",5);
+    const auto f=unseal(read_file(path_/(current?index_coverage_name:"INDEX"),16384),"ANAIERO-INDEX-COVERAGE/2",5);
     if(f.size()!=5||f[0]!=root_.store||(f[1]!="nodes-a"&&f[1]!="nodes-b"))throw Failure(Code::corrupt,"index store identity mismatch");
     index_directory_=f[1];index_generation_=parse_number(f[2]);index_canonical_=f[3];index_root_=f[4];
     if(index_generation_>root_.generation||(index_generation_==0&&(!index_root_.empty()||!index_canonical_.empty())))throw Failure(Code::corrupt,"index coverage ahead of canonical root");
@@ -204,6 +222,12 @@ void NativeStore::load_index(){
   }
   directory(path_/"index"/index_directory_);index_=std::make_unique<SealedIndex>(path_/"index"/index_directory_);
   (void)index_->load(index_root_);index_->finish_cleanup(index_root_);
+  if(legacy){
+    // Publish the validated derived marker durably before removing its old
+    // spelling. A crash leaves either the original or the preferred new marker;
+    // canonical ROOT/transactions and payloads are never renamed or rewritten.
+    save_index();remove_file(path_/"INDEX");
+  }
 }
 void NativeStore::recover_staging(){
   if(!regular_exists(path_/"STAGING"))return;
@@ -253,7 +277,7 @@ Result NativeStore::open(){
     directory(path_);directory(path_/"transactions");directory(path_/"blobs");directory(path_/"index");
     (void)regular_exists(path_/"WRITER");if(!writer_.open(path_/"WRITER")||!writer_.lock_exclusive())return {Code::busy,"canonical store already has a writer"};
     if(!regular_exists(path_/"ROOT")){
-      if(regular_exists(path_/"INDEX")||regular_exists(path_/"STAGING")||!fs::is_empty(path_/"transactions")||!fs::is_empty(path_/"blobs"))throw Failure(Code::corrupt,"canonical root missing from initialized storage");
+      if(regular_exists(path_/index_coverage_name)||legacy_index_exists(path_)||regular_exists(path_/"STAGING")||!fs::is_empty(path_/"transactions")||!fs::is_empty(path_/"blobs"))throw Failure(Code::corrupt,"canonical root missing from initialized storage");
       std::random_device random;root_.store=sha256(std::to_string(random())+std::to_string(std::chrono::steady_clock::now().time_since_epoch().count())+path_.string());write_file(path_/"ROOT",encode_root(root_));
     }else root_=decode_root(read_file(path_/"ROOT",16384));
     generation_.store(root_.generation);

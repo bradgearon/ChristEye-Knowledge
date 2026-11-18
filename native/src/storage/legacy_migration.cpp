@@ -130,12 +130,17 @@ Result migrate_legacy(std::string_view source_value,std::string_view destination
       std::string bytes;if(!registry.get(digest,bytes)||sha256(bytes)!=digest)throw Failure(Code::corrupt,"verified legacy CAS object unavailable");if(bytes.size()>options.maximum_blob_bytes)throw Failure(Code::capacity,"legacy object exceeds target blob capacity");
       const auto provenance=pack({"legacy-object/1",source_inventory.digest,digest,number(bytes.size())});auto object=operation("legacy-object/"+source_inventory.digest+'/'+digest,provenance);object.blobs={{digest,std::move(bytes),{}}};object.records={{"legacy.object",digest,provenance,{digest},false}};object.guards={{"legacy.object",digest,0,{}}};commit_batch(*target,object);
     }
-    EventWires wires(journal_paths(recovery,registry));Result event_result;std::uint64_t events=0;
-    const bool visited=registry.visit_events(0,[&](const legacy::Event& event){
-      try{const auto raw=wires.next(event);const auto provenance=pack({"legacy-event/1",source_inventory.digest,event.hash,sha256(raw),raw});auto imported_event=operation("legacy-event/"+source_inventory.digest+'/'+number(event.sequence),provenance);imported_event.records={{"legacy.event",number(event.sequence),provenance,{event.object_hash},false}};imported_event.guards={{"legacy.event",number(event.sequence),0,{}}};imported_event.events={{{event.kind,event.entity,event.clock,event.producer,event.source_tick},event.object_hash,event.origin}};commit_batch(*target,imported_event);++events;return true;}
-      catch(const Failure& e){event_result={e.code,e.what()};return false;}
-    });
-    require(event_result);if(!visited||events!=registry.capacity().total_events)throw Failure(Code::corrupt,"legacy history traversal did not cover the complete committed journal");
+    std::uint64_t events=0;
+    {
+      // Close the final wire reader before deleting its private recovery clone;
+      // Windows does not permit removing a file with this stream still open.
+      EventWires wires(journal_paths(recovery,registry));Result event_result;
+      const bool visited=registry.visit_events(0,[&](const legacy::Event& event){
+        try{const auto raw=wires.next(event);const auto provenance=pack({"legacy-event/1",source_inventory.digest,event.hash,sha256(raw),raw});auto imported_event=operation("legacy-event/"+source_inventory.digest+'/'+number(event.sequence),provenance);imported_event.records={{"legacy.event",number(event.sequence),provenance,{event.object_hash},false}};imported_event.guards={{"legacy.event",number(event.sequence),0,{}}};imported_event.events={{{event.kind,event.entity,event.clock,event.producer,event.source_tick},event.object_hash,event.origin}};commit_batch(*target,imported_event);++events;return true;}
+        catch(const Failure& e){event_result={e.code,e.what()};return false;}
+      });
+      require(event_result);if(!visited||events!=registry.capacity().total_events)throw Failure(Code::corrupt,"legacy history traversal did not cover the complete committed journal");
+    }
     const auto completion=pack({"legacy-migration/1",utf8(source),source_inventory.digest,number(source_inventory.files.size()),number(source_inventory.bytes),number(events),number(imported.size()),utf8(backup)});auto finish=operation("legacy-complete/"+source_inventory.digest,completion);finish.guards={{"migration","legacy",0,{}}};finish.records={{"migration","legacy",completion,{},false}};commit_batch(*target,finish);AuditReport audit;require(target->audit(audit));report_completed(*target,source_inventory,backup,report);
     if(inventory(source,options.maximum_bytes).digest!=source_inventory.digest)throw Failure(Code::conflict,"original legacy source changed despite quiescent writer lock");
     report.source_unchanged=true;write_file(stage/"store"/"LEGACY_MIGRATION",marker);target.reset();registry.close();

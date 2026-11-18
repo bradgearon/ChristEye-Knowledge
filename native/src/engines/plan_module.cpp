@@ -1,6 +1,7 @@
 #include "common.hpp"
 #include "christeye/living/learning_plan.hpp"
 #include <algorithm>
+#include <memory>
 #include <sstream>
 namespace anaiero::engines {
 namespace detail {
@@ -19,7 +20,9 @@ Result unpack_plan(const Envelope& configuration,PlanData& data){
   Bundle bundle;
   if(configuration.schema!=config_schema||!decode(configuration.payload,bundle)||
      !bundle.contains("plan")||!bundle.contains("base"))return invalid("invalid retained VLM plan bundle");
-  PlanData candidate;
+  // ProcessMachine owns bounded inline model storage. Keep staging on the heap
+  // so nested admission/recovery also fits native hosts with a 1 MiB stack.
+  auto retained=std::make_unique<PlanData>();auto& candidate=*retained;
   if(pl::Plan::parse(bundle.at("plan"),candidate.plan).error!=pl::Error::ok||
      process::ProcessMachine::deserialize(bundle.at("base"),candidate.base,false).error!=process::Error::ok)
     return invalid("invalid CEVPLAN/1 or CEVLM/2 input");
@@ -39,8 +42,8 @@ Result unpack_plan(const Envelope& configuration,PlanData& data){
     if(it==bundle.end())return invalid("missing retained VLM asset");
     candidate.assets.push_back({asset.relative_path,it->second});
   }
-  pl::Session check;
-  if(check.initialize(candidate.plan,candidate.base,candidate.assets)!=pl::Error::ok)
+  auto check=std::make_unique<pl::Session>();
+  if(check->initialize(candidate.plan,candidate.base,candidate.assets)!=pl::Error::ok)
     return invalid("VLM plan mappings, base identity or retained artifact verification failed");
   data=std::move(candidate);return {};
 }
@@ -81,13 +84,13 @@ class PlanEngine final:public IEngine,public ITrialCapability {
 public:
   explicit PlanEngine(EngineIdentity identity):identity_(std::move(identity)){}
   Result initialize(const Envelope& config,const EngineState* restored){
-    PlanData data;
-    if(auto r=unpack_plan(config,data);!r)return r;
+    auto data=std::make_unique<PlanData>();
+    if(auto r=unpack_plan(config,*data);!r)return r;
     if(identity_.model_sha256!=sha256(config.payload))return invalid("VLM bundle identity mismatch");
-    pl::Session initial;
-    if(initial.initialize(data.plan,data.base,data.assets)!=pl::Error::ok)return invalid("VLM plan initialization failed");
-    EngineState base;base.tick=data.base.tick();base.configuration=config;
-    base.checkpoint={std::string(checkpoint_schema),plan_checkpoint(initial)};
+    auto initial=std::make_unique<pl::Session>();
+    if(initial->initialize(data->plan,data->base,data->assets)!=pl::Error::ok)return invalid("VLM plan initialization failed");
+    EngineState base;base.tick=data->base.tick();base.configuration=config;
+    base.checkpoint={std::string(checkpoint_schema),plan_checkpoint(*initial)};
     return restore(restored?*restored:base);
   }
   const EngineIdentity& identity()const noexcept override{return identity_;}
@@ -95,9 +98,9 @@ public:
   ITrialCapability* trials()noexcept override{return this;}
   Result restore(const EngineState& state)override{
     if(identity_.model_sha256!=sha256(state.configuration.payload))return corrupt("VLM immutable program changed");
-    PlanData data;if(auto r=unpack_plan(state.configuration,data);!r)return r;
-    pl::Session verify;if(auto r=replay(data,state,verify);!r)return r;
-    data_=std::move(data);state_=state;return {};
+    auto data=std::make_unique<PlanData>();if(auto r=unpack_plan(state.configuration,*data);!r)return r;
+    auto verify=std::make_unique<pl::Session>();if(auto r=replay(*data,state,*verify);!r)return r;
+    data_=std::move(*data);state_=state;return {};
   }
   Result install(const EngineState& state)override{return restore(state);}
   Result fork(std::unique_ptr<IEngine>& output)const override{
@@ -109,14 +112,14 @@ public:
     if(auto r=guard(*this,request);!r)return r;
     if(request.input.schema!=input_schema||!request.input.payload.empty())
       return invalid("VLM input is its immutable program; step payload must be empty");
-    pl::Session staged;if(auto r=replay(data_,state_,staged);!r)return r;
-    if(staged.step()!=pl::Error::ok)return {Code::capacity,"VLM stage execution failed within admitted bounds"};
-    EngineState target=state_;target.tick=staged.machine().tick();
-    target.phase=staged.finished()?Phase::completed:Phase::running;
-    target.checkpoint.payload=plan_checkpoint(staged);
+    auto staged=std::make_unique<pl::Session>();if(auto r=replay(data_,state_,*staged);!r)return r;
+    if(staged->step()!=pl::Error::ok)return {Code::capacity,"VLM stage execution failed within admitted bounds"};
+    EngineState target=state_;target.tick=staged->machine().tick();
+    target.phase=staged->finished()?Phase::completed:Phase::running;
+    target.checkpoint.payload=plan_checkpoint(*staged);
     auto transition=prepared(*this,request,std::move(target));
-    const auto& event=staged.progress().back();
-    const auto done=std::count_if(staged.progress().begin(),staged.progress().end(),
+    const auto& event=staged->progress().back();
+    const auto done=std::count_if(staged->progress().begin(),staged->progress().end(),
       [](const auto& value){return value.completed;});
     transition.observations={{std::string(observation_schema),"completed_stages","program_stage_count","count",static_cast<std::int64_t>(done),event.tick},
       {std::string(observation_schema),"learning","model_learning_proxy","synthetic_proxy",event.learning_proxy,event.tick},
@@ -124,7 +127,7 @@ public:
       {std::string(observation_schema),"rna","model_rna_field","synthetic_proxy",event.rna_field_proxy,event.tick}};
     std::ostringstream receipt;pl::write_progress_json(receipt,event);
     transition.receipts.push_back({"CE.PLAN.PROGRESS/1",receipt.str()});
-    if(staged.finished())transition.receipts.push_back({"anaiero.plan-completed/1",
+    if(staged->finished())transition.receipts.push_back({"anaiero.plan-completed/1",
       "CEPLAN-COMPLETED/1\n"+data_.plan.hash()+"\n"+event.receipt_hash+"\n"});
     output=std::move(transition);return {};
   }
@@ -154,14 +157,14 @@ sdk::Result plan_configuration(std::string_view plan,std::string_view base,
     if(!bundle.emplace("asset/"+asset.relative_path,asset.bytes).second)
       return detail::invalid("duplicate retained VLM artifact");
   sdk::Envelope candidate{"anaiero.plan-bundle/1",detail::encode(bundle)};
-  detail::PlanData data;if(auto r=detail::unpack_plan(candidate,data);!r)return r;
+  auto data=std::make_unique<detail::PlanData>();if(auto r=detail::unpack_plan(candidate,*data);!r)return r;
   output=std::move(candidate);return {};
 }
 sdk::Result plan_output(const sdk::EngineState& state,std::string& image,std::string& receipts_ndjson){
-  detail::PlanData data;
-  if(auto r=detail::unpack_plan(state.configuration,data);!r)return r;
-  christeye::living::plans::Session session;
-  if(auto r=detail::replay(data,state,session);!r)return r;
-  image=session.machine().serialize(true);receipts_ndjson=detail::receipts(session);return {};
+  auto data=std::make_unique<detail::PlanData>();
+  if(auto r=detail::unpack_plan(state.configuration,*data);!r)return r;
+  auto session=std::make_unique<christeye::living::plans::Session>();
+  if(auto r=detail::replay(*data,state,*session);!r)return r;
+  image=session->machine().serialize(true);receipts_ndjson=detail::receipts(*session);return {};
 }
 }

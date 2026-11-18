@@ -10,6 +10,8 @@ namespace {
 namespace fs=std::filesystem;
 namespace os=christeye::living::durable::os;
 Result error(Code code,std::string message){return {code,std::move(message)};}
+std::string path_text(const fs::path& path){const auto bytes=path.generic_u8string();return {reinterpret_cast<const char*>(bytes.data()),bytes.size()};}
+fs::path native_path(std::string_view value){return fs::path(std::u8string(reinterpret_cast<const char8_t*>(value.data()),value.size()));}
 class NativeArchive final:public IArchiveStore {
   fs::path directory_;
   std::string identifier_;
@@ -32,7 +34,7 @@ class NativeArchive final:public IArchiveStore {
     return {};
   }
 public:
-  NativeArchive(fs::path directory,ArchiveOptions options):directory_(std::move(directory)),identifier_(directory_.string()),options_(options){}
+  NativeArchive(fs::path directory,ArchiveOptions options):directory_(std::move(directory)),options_(options){}
   Result open(){
     if(!options_.maximum_bytes||!options_.maximum_object_bytes||options_.maximum_object_bytes>options_.maximum_bytes)
       return error(Code::invalid,"archive quotas are invalid");
@@ -40,7 +42,7 @@ public:
     if(fs::is_symlink(directory_,ec))return error(Code::unauthorized,"archive root must not be a symlink");
     fs::create_directories(directory_,ec);if(ec)return error(Code::io_error,"cannot create archive directory");
     directory_=fs::weakly_canonical(directory_,ec);if(ec)return error(Code::io_error,"cannot resolve archive directory");
-    identifier_=directory_.string();
+    identifier_=path_text(directory_);
     if(fs::is_symlink(directory_/"writer.lock",ec))return error(Code::unauthorized,"archive writer lock must not be a symlink");
     if(!lock_.open(directory_/"writer.lock")||!lock_.lock_exclusive())return error(Code::busy,"archive already has a writer");
     for(fs::directory_iterator it(directory_,ec),end;!ec&&it!=end;it.increment(ec)){
@@ -96,7 +98,7 @@ Result open_native_archive(std::string_view directory,const ArchiveOptions& opti
   out.reset();
   try{
     if(directory.empty())return {Code::invalid,"archive directory is empty"};
-    auto archive=std::make_unique<NativeArchive>(fs::path(directory),options);
+    auto archive=std::make_unique<NativeArchive>(native_path(directory),options);
     const auto result=archive->open();if(result)out=std::move(archive);return result;
   }catch(const std::exception& exception){return {Code::io_error,exception.what()};}
 }

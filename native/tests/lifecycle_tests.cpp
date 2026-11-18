@@ -15,6 +15,7 @@ namespace fs=std::filesystem;
 static void require(const sdk::Result& result) {
   if(!result.ok()){std::cerr<<sdk::code_name(result.code)<<": "<<result.message<<'\n';std::abort();}
 }
+static std::string utf8(const fs::path& path){const auto bytes=path.generic_u8string();return {reinterpret_cast<const char*>(bytes.data()),bytes.size()};}
 static sdk::EngineIdentity identity(std::string source="source",std::uint64_t epoch=1){
   return {"engine-"+source,"test.engine/1",sdk::sha256("module"),sdk::sha256("model"),
     "test.behavior/1",std::move(source),"logical",epoch,0};
@@ -230,14 +231,20 @@ static void restored_authority(const fs::path& root){
 }
 
 static void archive_quota(const fs::path& root){
+  const auto directory=root/fs::path(u8"small-archive-\u00e9-\u7bb1");
   std::unique_ptr<lc::IArchiveStore> archive;
-  require(lc::open_native_archive((root/"small-archive").string(),{8,8},archive));
+  require(lc::open_native_archive(utf8(directory),{8,8},archive));
+  CHECK(fs::is_directory(directory));
+  const auto identifier=utf8(fs::weakly_canonical(directory));CHECK(archive->identifier()==identifier);
   require(archive->put(sdk::sha256("12345678"),"12345678"));
   require(archive->put(sdk::sha256("12345678"),"12345678"));
   CHECK(archive->put(sdk::sha256("x"),"x").code==sdk::Code::capacity);
   CHECK(archive->put(sdk::sha256("wrong"),"bytes").code==sdk::Code::invalid);
   std::unique_ptr<lc::IArchiveStore> competing;
-  CHECK(lc::open_native_archive((root/"small-archive").string(),{8,8},competing).code==sdk::Code::busy);
+  CHECK(lc::open_native_archive(utf8(directory),{8,8},competing).code==sdk::Code::busy);
+  archive.reset();require(lc::open_native_archive(identifier,{8,8},archive));
+  sdk::Bytes bytes;require(archive->get(sdk::sha256("12345678"),bytes));
+  CHECK(bytes=="12345678"&&archive->identifier()==identifier);
 }
 static std::map<std::string,sdk::Digest> file_digests(const fs::path& root){
   std::map<std::string,sdk::Digest> result;
@@ -256,6 +263,20 @@ static void native_restore(const fs::path& root){
   CHECK(lc::restore_quarantined_store(source.path.string(),destination.string(),"clone",report,options).code==sdk::Code::busy);
   CHECK(!fs::exists(destination));
   source.service.reset();source.store.reset();const auto before=file_digests(source.path);
+  const auto nested_parent=source.path/"new-parent"/"deeper";
+  CHECK(lc::restore_quarantined_store(utf8(source.path),utf8(nested_parent/"clone"),"nested",report,options).code==sdk::Code::invalid);
+  CHECK(!fs::exists(source.path/"new-parent"));
+  CHECK(lc::restore_quarantined_store(utf8(source.path),utf8(source.path),"same-source",report,options).code==sdk::Code::invalid);
+  CHECK(lc::restore_quarantined_store(utf8(source.path),utf8(source.path.parent_path()),"ancestor",report,options).code==sdk::Code::invalid);
+#ifdef _WIN32
+  const auto case_source=source.path.parent_path()/L"BACKUP-SOURCE";
+  if(fs::exists(case_source)&&fs::equivalent(case_source,source.path)){
+    CHECK(lc::restore_quarantined_store(utf8(source.path),utf8(case_source/"new-case-parent"/"clone"),"case-nested",report,options).code==sdk::Code::invalid);
+    CHECK(!fs::exists(source.path/"new-case-parent"));
+    CHECK(lc::restore_quarantined_store(utf8(source.path),utf8(case_source),"case-source",report,options).code==sdk::Code::invalid);
+  }
+#endif
+  CHECK(file_digests(source.path)==before);
   require(lc::restore_quarantined_store(source.path.string(),destination.string(),"clone",report,options));
   CHECK(report.published&&report.copied_files>0&&report.copied_bytes>0&&report.source_generation==source_generation);
   CHECK(report.source_root==source_root&&!report.incarnation.empty()&&fs::exists(destination));
@@ -263,8 +284,10 @@ static void native_restore(const fs::path& root){
   lc::RestoreReport duplicate;require(lc::restore_quarantined_store(source.path.string(),destination.string(),"clone",duplicate,options));
   CHECK(duplicate.published&&duplicate.incarnation==report.incarnation);
   lc::RestoreReport independent;
-  require(lc::restore_quarantined_store(source.path.string(),(root/"independent-copy").string(),"clone",independent,options));
+  const auto independent_destination=root/"new-destination-parent"/"independent-copy";
+  require(lc::restore_quarantined_store(utf8(source.path),utf8(independent_destination),"clone",independent,options));
   CHECK(independent.published&&independent.incarnation!=report.incarnation);
+  CHECK(fs::is_directory(independent_destination));
   {
     Fixture restored(destination);lc::Snapshot snapshot;require(restored.service->snapshot(snapshot));
     CHECK(snapshot.quarantined&&snapshot.incarnation==report.incarnation);

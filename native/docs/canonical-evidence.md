@@ -66,6 +66,19 @@ third-party runtime. `IEvidenceIndex` exposes typed indexed reads separately
 from canonical mutation and blob I/O. SQLite remains a possible future backend,
 not an implemented or required dependency of this increment.
 
+The derived coverage file is `INDEX-COVERAGE`, beside the `index/` node
+directory. These names remain distinct on case-insensitive filesystems.
+Existing case-sensitive stores with the former `INDEX` file are compatible:
+when the new marker is absent, opening validates the old marker against the
+canonical transaction and index, durably publishes `INDEX-COVERAGE`, then
+removes the validated old marker. Canonical roots, transactions and payloads
+are unchanged. If both files exist, the new marker takes precedence; corruption
+does not silently fall back to the old marker. Invalid old files are retained
+during an explicit rebuild. A nonregular `INDEX-COVERAGE` path blocks repair
+until the operator resolves that path conflict; it is never overwritten. The
+old spelling is ignored as a directory only when it is the filesystem alias of
+`index/`.
+
 Index keys cover operation receipts, current records, all record revisions,
 strict observation identities/source tips, generic exact/latest occurrences,
 blob ordinals and reference counts. Record entries contain bounded canonical
@@ -231,7 +244,8 @@ ctest --test-dir build-evidence -C Release -R "^anaiero_((evidence|migration)_te
 
 The suites cover whole-root state/evidence atomicity, five durability cuts,
 operation retries/conflicts, policy revocation fences, strict/generic history,
-protected graph expiry/reclamation, index root and child corruption, rebuild,
+protected graph expiry/reclamation, distinct index marker paths, legacy marker
+adoption and preservation, index root and child corruption, rebuild,
 indexed point/range work, quota rejection, single-writer locking, artifact
 tampering, queue/completion capacity, queued authorization expiry, admission
 time recording/rollback, finite maintenance headroom, legacy quiescence, exact wire preservation, archived

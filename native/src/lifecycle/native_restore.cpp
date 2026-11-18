@@ -90,8 +90,23 @@ void publish_no_replace(const fs::path& staged,const fs::path& destination){
 #endif
 }
 bool within(const fs::path& child,const fs::path& parent){
-  const auto relative=child.lexically_relative(parent);
-  return !relative.empty()&&!relative.is_absolute()&&*relative.begin()!="..";
+  std::error_code error;
+  const bool parent_exists=fs::exists(parent,error);
+  if(error)fail(Code::io_error,"cannot inspect restore tree boundary");
+  if(!parent_exists)return false;
+  // Compare existing ancestor identities, rather than spelling: Windows case
+  // aliases and other names for the same directory must obey the same fence.
+  for(auto current=child;!current.empty();){
+    const bool exists=fs::exists(current,error);
+    if(error)fail(Code::io_error,"cannot inspect restore ancestor");
+    if(exists){
+      const bool same=fs::equivalent(current,parent,error);
+      if(error)fail(Code::io_error,"cannot compare restore directory identities");
+      if(same)return true;
+    }
+    const auto next=current.parent_path();if(next==current)break;current=next;
+  }
+  return false;
 }
 struct Inventory {std::vector<fs::path> files,directories;std::uint64_t bytes=0,largest=0;};
 Inventory inventory(const fs::path& source,const RestoreOptions& options){
@@ -149,7 +164,10 @@ Result restore_quarantined_store(std::string_view source_text,std::string_view d
     source=fs::canonical(source,error);if(error)fail(Code::io_error,"cannot resolve restore source");
     if(!regular(source/"ROOT")||!regular(source/"WRITER"))fail(Code::not_found,"restore source has no canonical root/writer lock");
     destination=fs::absolute(destination,error).lexically_normal();if(error)fail(Code::io_error,"cannot resolve restore destination");
-    auto parent=destination.parent_path();fs::create_directories(parent,error);if(error)fail(Code::io_error,"cannot create restore destination parent");
+    auto parent=fs::weakly_canonical(destination.parent_path(),error);if(error)fail(Code::io_error,"cannot resolve prospective restore parent");
+    destination=parent/destination.filename();
+    if(within(destination,source)||within(source,destination))fail(Code::invalid,"restore source and destination must be separate trees");
+    fs::create_directories(parent,error);if(error)fail(Code::io_error,"cannot create restore destination parent");
     parent=fs::canonical(parent,error);if(error)fail(Code::io_error,"cannot resolve restore destination parent");
     destination=parent/destination.filename();
     if(within(destination,source)||within(source,destination))fail(Code::invalid,"restore source and destination must be separate trees");
