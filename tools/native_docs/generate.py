@@ -113,7 +113,7 @@ class Extract:
     def emit(self, kind, name, scope, node, access="public", owner=None, signature=None):
         if not name or name.startswith("<"):
             return
-        qualified = "::".join(scope + [name])
+        qualified = "::".join((*scope, name))
         if signature is None:
             signature = node_text(self.data, node).split("{", 1)[0]
         signature = normalized(signature.rstrip(";"))[:1800]
