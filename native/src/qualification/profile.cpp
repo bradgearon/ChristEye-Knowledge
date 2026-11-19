@@ -36,6 +36,62 @@ void resources(std::ostream& out,const Resources& value){
      <<",\"voluntary_context_switches\":"<<value.voluntary_context_switches
      <<",\"involuntary_context_switches\":"<<value.involuntary_context_switches<<'}';
 }
+void slow_commit_json(std::ostream& out,const CommitSample& sample,std::uint64_t limit_ns){
+  const auto& stages=sample.stages;
+  const auto& work=sample.index_work;
+  out<<"{\"operation_id\":\"qualification-batch-"<<sample.batch
+     <<"\",\"first_observation\":"<<sample.first_observation<<",\"last_observation\":"<<sample.last_observation
+     <<",\"expected_generation\":"<<sample.expected_generation<<",\"timing_generation\":"<<stages.generation
+     <<",\"elapsed_ns\":"<<sample.elapsed_ns<<",\"over_limit\":"<<(sample.elapsed_ns>limit_ns?"true":"false")
+     <<",\"result\":"<<json_quote(sdk::code_name(stages.result))
+     <<",\"stages_enabled\":"<<(stages.enabled?"true":"false")<<",\"committed\":"<<(stages.committed?"true":"false")
+     <<",\"duplicate\":"<<(stages.duplicate?"true":"false")
+     <<",\"stages_ns\":{\"lock_wait\":"<<stages.lock_wait_ns<<",\"validation\":"<<stages.validation_ns
+     <<",\"staging\":"<<stages.staging_ns<<",\"blobs\":"<<stages.blobs_ns
+     <<",\"transaction\":"<<stages.transaction_ns<<",\"root\":"<<stages.root_ns
+     <<",\"index\":"<<stages.index_ns<<",\"cleanup\":"<<stages.cleanup_ns<<",\"total\":"<<stages.total_ns
+     <<"},\"index_work\":{\"nodes_read\":"<<work.nodes_read<<",\"nodes_written\":"<<work.nodes_written
+     <<",\"staged_nodes\":"<<work.staged_nodes<<",\"spills\":"<<work.staged_spills
+     <<",\"admission_cache_nodes_reused\":"<<work.admission_cache_nodes_reused<<"},\"thread_cpu_ns\":";
+  if(sample.thread.cpu_available)out<<sample.thread.cpu_ns;else out<<"null";
+  out<<",\"thread_voluntary_switches\":";
+  if(sample.thread.switches_available)out<<sample.thread.voluntary_switches;else out<<"null";
+  out<<",\"thread_involuntary_switches\":";
+  if(sample.thread.switches_available)out<<sample.thread.involuntary_switches;else out<<"null";
+  out<<'}';
+}
+void slow_commits_json(std::ostream& out,const SlowestCommits& sample,const ThresholdCounter& threshold){
+  std::uint64_t retained_above=0;
+  for(std::size_t i=0;i<sample.size;++i){
+    if(sample.samples[i].elapsed_ns>threshold.limit_ns)++retained_above;
+  }
+  out<<"{\"selection\":\"longest elapsed throughput commits; ties by earliest batch ordinal\""
+     <<",\"capacity\":"<<SlowestCommits::maximum<<",\"observed\":"<<threshold.count
+     <<",\"retained\":"<<sample.size<<",\"omitted\":"<<(threshold.count-sample.size)
+     <<",\"above_limit\":"<<threshold.exceeded<<",\"above_limit_retained\":"<<retained_above
+     <<",\"above_limit_omitted\":"<<(threshold.exceeded-retained_above)<<",\"samples\":[";
+  for(std::size_t i=0;i<sample.size;++i){
+    if(i!=0)out<<',';
+    slow_commit_json(out,sample.samples[i],threshold.limit_ns);
+  }
+  out<<"]}";
+}
+
+}
+std::string_view layout_label(sdk::evidence::IndexLayout layout) noexcept{
+  return layout==sdk::evidence::IndexLayout::packed_pages?"packed-pages":"node-files";
+}
+void SlowestCommits::add(const CommitSample& sample) noexcept{
+  // Input arrives in increasing batch order. Equal durations retain the
+  // earliest batch. Work and memory are bounded independently of run length.
+  if(size==maximum&&sample.elapsed_ns<=samples[size-1].elapsed_ns)return;
+  std::size_t position=std::min(size,maximum-1);
+  while(position>0&&samples[position-1].elapsed_ns<sample.elapsed_ns){
+    samples[position]=samples[position-1];
+    --position;
+  }
+  samples[position]=sample;
+  size=std::min(size+1,maximum);
 }
 void Histogram::add(std::uint64_t ns)noexcept{
   const auto bucket=ns==0?0U:std::bit_width(ns-1);
@@ -137,6 +193,8 @@ std::string report_json(const Report& r){
      <<",\"wall_time_scope\":\"ingestion, queries, reopens, disk inventories, lifecycle churn and full audit\""
      <<",\"disk_scope\":\"regular-file allocation; excludes directory and filesystem journal metadata\""
      <<",\"percentile_method\":"<<json_quote(histogram_percentile_method)
+     <<",\"index_layout\":"<<json_quote(layout_label(r.requested_layout))
+     <<",\"index_backend\":"<<json_quote(r.index_backend)
      <<",\"latency_gate_method\":"<<json_quote(r.profile.latency_gate)
      <<",\"device_declaration_sha256\":"<<json_quote(r.device_sha256)
      <<",\"device_declaration\":"<<device_declaration_json(r.device)
@@ -168,7 +226,8 @@ std::string report_json(const Report& r){
     {"staging",&r.durability.staging},{"blobs",&r.durability.blobs},{"transaction",&r.durability.transaction},
     {"root",&r.durability.root},{"index",&r.durability.index},{"cleanup",&r.durability.cleanup},{"total",&r.durability.total}};
   for(const auto& [name,value]:stages){out<<','<<json_quote(name)<<':';histogram(out,*value);}
-  out<<"},\"resources_before\":";resources(out,r.before);
+  out<<"},\"slow_commits\":";slow_commits_json(out,r.slowest_commits,r.commit_threshold);
+  out<<",\"resources_before\":";resources(out,r.before);
   out<<",\"resources_after\":";resources(out,r.after);out<<",\"checkpoints\":[";
   bool comma=false;for(const auto& p:r.checkpoints){
     if(comma)out<<',';

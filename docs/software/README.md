@@ -32,6 +32,7 @@ binding in CE-SW-38. The complete explanation and architecture are in
 |---|---|
 | Reduced index work, mixed-host profiles, reviewed receiver retention and canonical package selection/rollback | [CE-SW-40](CE-SW-40_operating_envelope_and_package_lifecycle.md) |
 | Exact timing, scale/recovery campaigns, leased bootstrap and verified cross-build rollback | [CE-SW-41](CE-SW-41_runtime_lifecycle_and_qualification.md) |
+| Per-batch commit timing, packed indexes and measured layout conversion | [CE-SW-42](CE-SW-42_packed_index_and_latency_experiments.md) |
 | Continuous canonical host/mesh, reviewed compaction and native package/profile tooling | [CE-SW-39](CE-SW-39_continuous_native_operation.md) |
 | Compiled SDK, canonical evidence, real shared VLM and lifecycle/retention | [CE-SW-38](CE-SW-38_compiled_runtime_and_lifecycle.md) |
 | Mixed native sessions, restart, operations and local control | [CE-SW-31](CE-SW-31_integrated_native_sessions.md) |

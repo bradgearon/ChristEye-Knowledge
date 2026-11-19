@@ -49,6 +49,14 @@ conditions; physical power loss remains a separate gate. The [supported supervis
 now passes on systemd and SCM for the compatible release pair. No rating increase is implied by adding
 the runners or by passing a short integration test.
 
+### Packed-index implementation and qualification
+
+[CE-SW-42](CE-SW-42_packed_index_and_latency_experiments.md) implements the
+four storage items below. The [experiment record](../../qualification/reports/2026-11-19-packed-index/README.md)
+tracks achieved scale, exact failures, device scope and outstanding gates.
+The existing single-node layout remains the default. Promote a layout only
+after matched operating measurements and recovery coverage support that choice.
+
 ### Next storage decision after the frozen 10k run
 
 The [frozen run](../../qualification/reports/2026-11-18-runtime-lifecycle/synthetic-10k-frozen/report.json)

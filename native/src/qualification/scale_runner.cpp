@@ -46,7 +46,8 @@ sdk::EngineIdentity churn_identity(std::uint64_t ordinal){
 // Exercise the ordinary/maintenance boundary using real committed growth in a
 // separate small store. It is a quota control, not physical disk exhaustion.
 sdk::Result quota_control(const std::string& directory,ScaleReport& report){
-  ev::StoreOptions options;options.maximum_bytes=2U*1024U*1024U;options.maintenance_reserve_bytes=256U*1024U;
+  ev::StoreOptions options;options.index_layout=report.layout;
+  options.maximum_bytes=2U*1024U*1024U;options.maintenance_reserve_bytes=256U*1024U;
   std::unique_ptr<ev::ICommitStore> store;if(auto r=ev::open_native_store(directory,options,store);!r)return r;
   lc::Service lifecycle(*store);if(auto r=lifecycle.open();!r)return r;
   bool rejected=false;
@@ -229,13 +230,19 @@ sdk::Result checkpoint(const ScaleProfile& profile,const std::string& directory,
   {lc::Service lifecycle(*store,lifecycle_options());if(auto r=lifecycle.capacity(point.capacity);!r)return r;}
   const auto compacted=ev::execute_native_compaction(*store,plan,point.compaction);point.compaction_ns=elapsed(started);
   if(!compacted)return compacted;
+  if(options.measure_compaction_files){
+    if(!point.compaction.coexistence_measured)
+      return corrupt("compaction did not return the requested coexistence inventory");
+    if(point.compaction.coexistence_files>profile.evidence.maximum_files)
+      violation(report,"coexisting compaction files exceed the declared file budget");
+  }
   if(!point.compaction.activated||!point.compaction.cleanup_complete||store->generation()!=previous.generation||store->info().root_digest!=previous.root_digest)
     return corrupt("scale compaction changed terminal authority or left pending cleanup");
   if(auto r=measure_disk(directory,profile.evidence.maximum_files,point.after_disk);!r)return r;
   point.generation=previous.generation;point.root=previous.root_digest;
   store.reset();const auto reopening=Clock::now();if(auto r=ev::open_native_store(directory,options,store);!r)return r;
   point.reopen_ns=elapsed(reopening);point.reopen_nodes=ev::native_index_statistics(*store).nodes_read;
-  if(!store->info().index_ready||store->info().root_digest!=previous.root_digest||store->generation()!=previous.generation||
+  if(store->info().index_backend!=previous.index_backend||!store->info().index_ready||store->info().root_digest!=previous.root_digest||store->generation()!=previous.generation||
      store->info().store_id!=previous.store_id)return corrupt("post-compaction reopen changed canonical identity");
   point.restart_verified=true;
   ev::CommitReceipt duplicate;if(auto r=store->commit(first_batch,duplicate);!r)return r;
@@ -279,23 +286,27 @@ sdk::Result checkpoint(const ScaleProfile& profile,const std::string& directory,
 }
 }
 
-sdk::Result run_scale_profile(const ScaleProfile& profile,std::string_view directory,ScaleReport& report,std::function<void(std::uint64_t)> progress){
+sdk::Result run_scale_profile(const ScaleProfile& profile,std::string_view directory,ScaleReport& report,std::function<void(std::uint64_t)> progress,ev::IndexLayout layout){
+  report.layout=layout;
   report.profile=profile;report.started_utc=utc();const auto start=Clock::now();const auto& p=profile.evidence;
   report.commit_threshold.limit_ns=p.maximum_commit_p99_us*1000;report.lookup_threshold.limit_ns=p.maximum_lookup_p99_us*1000;
   const auto run=[&]()->sdk::Result{
     if(auto r=read_resources(report.before);!r)return r;
     if(auto r=read_environment(directory,report.environment);!r)return r;
-    // Payload files coexist with both index generations during compaction.
-    // Seven nodes per observation is a lower bound, not a reservation or a
-    // claim that the remaining lifecycle/receipt workload has no file cost.
-    report.minimum_file_nodes=p.observations*7+128;
+    // Each distinct payload has a file. The single-node layout also needs
+    // three rows per observation in each of two coexisting trees.
+    const auto files_per_observation=layout==ev::IndexLayout::packed_pages?1U:7U;
+    report.minimum_file_nodes=p.observations*files_per_observation+128U;
     if(auto r=measure_disk(directory,p.maximum_files,report.admission_disk);!r)return r;
     if(auto r=require_file_nodes(report.admission_disk,report.minimum_file_nodes);!r)return r;
     ev::StoreOptions options;options.maximum_bytes=p.maximum_store_bytes;
+    options.index_layout=layout;
+    options.measure_compaction_files=layout!=ev::IndexLayout::automatic;
     const auto path=utf8(native_path(directory)/"store");std::unique_ptr<ev::ICommitStore> store;
     if(auto r=ev::open_native_store(path,options,store);!r)return r;
     if(store->generation()!=0)return {sdk::Code::conflict,"scale qualification requires a fresh isolated store"};
     report.store_id=store->info().store_id;
+    report.index_backend=store->info().index_backend;
     Relay relay;if(auto r=start_relay(*store,relay);!r)return r;
     ev::CommitBatch first_batch;ev::CommitReceipt first_receipt;std::uint64_t revision=0;std::size_t next=0;
     while(report.observations<p.observations){

@@ -1,4 +1,5 @@
 #include "sealed_index.hpp"
+#include "packed_index.hpp"
 #include "anaiero/sdk/storage_tools.hpp"
 #include "christeye/living/durable_io.hpp"
 #include <atomic>
@@ -31,6 +32,41 @@ void require_file_capacity(const fs::path& path,std::uint64_t temporary,std::uin
 #else
   (void)path;(void)temporary;(void)reserve;
 #endif
+}
+bool valid_layout(IndexLayout layout){
+  return layout==IndexLayout::automatic||layout==IndexLayout::single_node||layout==IndexLayout::packed_pages;
+}
+std::string layout_name(IndexLayout layout){
+  return layout==IndexLayout::packed_pages?"native-packed-pages/1":"native-sealed-avl";
+}
+IndexLayout read_layout(std::string_view name){
+  if(name=="native-packed-pages/1")return IndexLayout::packed_pages;
+  if(name=="native-sealed-avl")return IndexLayout::single_node;
+  throw Failure(Code::corrupt,"unknown derived index layout");
+}
+std::vector<std::string> compaction_intent(const fs::path& path){
+  const auto raw=read_file(path,16384);std::vector<std::string> envelope;
+  if(!unpack(raw,envelope,3,16384)||envelope.size()!=3)throw Failure(Code::corrupt,"invalid compacted layout intent");
+  if(envelope[0]=="ANAIERO-COMPACTION-INTENT/1"){
+    auto fields=unseal(raw,envelope[0],7);
+    if(fields.size()!=7)throw Failure(Code::corrupt,"invalid compaction intent");
+    fields.emplace_back("native-sealed-avl");return fields;
+  }
+  auto fields=unseal(raw,"ANAIERO-COMPACTION-INTENT/2",8);
+  if(fields.size()!=8)throw Failure(Code::corrupt,"invalid compaction target intent");
+  (void)read_layout(fields[7]);return fields;
+}
+void measure_coexistence(const fs::path& store,const fs::path& old_index,const fs::path& new_index,CompactionReport& sample){
+  for(const auto& entry:fs::recursive_directory_iterator(store)){
+    const auto type=entry.symlink_status().type();
+    if(type==fs::file_type::directory)++sample.coexistence_directories;
+    else if(type==fs::file_type::regular){
+      ++sample.coexistence_files;
+      if(entry.path().parent_path()==old_index)++sample.coexistence_old_index_files;
+      if(entry.path().parent_path()==new_index)++sample.coexistence_new_index_files;
+    }else throw Failure(Code::corrupt,"unexpected entry in compaction file inventory");
+  }
+  sample.coexistence_measured=true;
 }
 using MonotonicClock=std::chrono::steady_clock;
 std::uint64_t nanoseconds(MonotonicClock::duration duration)noexcept{
@@ -258,6 +294,7 @@ private:
   std::atomic<FaultPoint> fault_{FaultPoint::none};
   std::unique_ptr<SealedIndex> index_;
   std::string index_directory_="nodes-a";
+  IndexLayout index_layout_=IndexLayout::single_node;
   Digest index_root_,index_canonical_;
   std::uint64_t index_generation_=0;
   std::uint64_t last_admitted_unix_s_=0;
@@ -271,7 +308,8 @@ private:
   bool operation(std::string_view,CommitReceipt&);
   std::uint64_t reference_count(const Digest&);
   Transaction transaction(std::uint64_t);
-  void apply_index(const Transaction&,bool preserve_admission=false);
+  Digest prepare_packed(const Transaction&);
+  void apply_index(const Transaction&,bool preserve_admission=false,const Digest* prepared=nullptr);
   void save_index();
   void load_index();
   void recover_staging();
@@ -283,7 +321,7 @@ private:
   std::vector<std::pair<std::string,std::string>> base_page(const BasePage&);
   bool base_value(std::string_view,std::string&);
   std::string derived_base_value(const BasePage&,std::size_t,const std::pair<std::string,std::string>&);
-  Digest build_base_index(SealedIndex&,const CanonicalBase&);
+  Digest build_base_index(SealedIndex&,const CanonicalBase&,bool compaction_build=false);
   void initialize_index_from_base();
   void cleanup_compaction();
   void fill_compaction_report(CompactionReport&,bool=false)const;
@@ -332,11 +370,12 @@ void NativeStore::initialize_index_from_base(){
   index_root_=build_base_index(*index_,base_);
   index_generation_=base_.anchor.generation;index_canonical_=base_.anchor.digest;
 }
-Digest NativeStore::build_base_index(SealedIndex& target,const CanonicalBase& base){
+Digest NativeStore::build_base_index(SealedIndex& target,const CanonicalBase& base,bool compaction_build){
   std::vector<std::uint64_t> ends;ends.reserve(base.pages.size());std::uint64_t rows=0;
   for(const auto& page:base.pages){rows+=page.rows;ends.push_back(rows);}
   std::size_t loaded=base.pages.size();std::vector<std::pair<std::string,std::string>> cached;
   return target.build_sorted(rows,[&](std::uint64_t ordinal){
+    if(compaction_build&&ordinal==rows/2)inject(FaultPoint::compaction_during_index_build);
     const auto index=static_cast<std::size_t>(std::upper_bound(ends.begin(),ends.end(),ordinal)-ends.begin());
     if(index>=base.pages.size())throw Failure(Code::corrupt,"bulk index lookup exceeded verified base");
     const auto& page=base.pages[index];if(index!=loaded){cached=base_page(page);loaded=index;}
@@ -350,8 +389,8 @@ void NativeStore::fill_compaction_report(CompactionReport& report,bool already)c
 void NativeStore::cleanup_compaction(){
   const auto marker=path_/"COMPACTION";
   if(!regular_exists(marker)){pending_reclamation_bytes_=0;return;}
-  const auto f=unseal(read_file(marker,16384),"ANAIERO-COMPACTION-INTENT/1",7);
-  if(f.size()!=7||f[0]!=root_.store||!valid_digest(f[1])||(!f[2].empty()&&!valid_digest(f[2]))||(!f[3].empty()&&!valid_digest(f[3])))throw Failure(Code::corrupt,"invalid compaction cleanup intent");
+  const auto f=compaction_intent(marker);
+  if(f[0]!=root_.store||!valid_digest(f[1])||(!f[2].empty()&&!valid_digest(f[2]))||(!f[3].empty()&&!valid_digest(f[3])))throw Failure(Code::corrupt,"invalid compaction cleanup intent");
   const auto through=parse_number(f[4]),first=parse_number(f[5]);pending_reclamation_bytes_=parse_number(f[6]);if(first==0||first>through+1)throw Failure(Code::corrupt,"invalid compaction cleanup range");
   const bool activated=!f[3].empty()&&root_.base==f[3];
   if(activated&&(base_.plan_digest!=f[1]||base_.anchor.generation!=through))throw Failure(Code::corrupt,"compaction cleanup authority mismatch");
@@ -392,21 +431,46 @@ void NativeStore::preview_compaction_locked(const CompactionOptions& options,Com
   if(!options.expected_root.empty()&&options.expected_root!=root_.digest)throw Failure(Code::conflict,"compaction root fence changed");
   if(options.expire_operation_receipts&&base_.operation_epoch==any_generation)throw Failure(Code::capacity,"operation epoch exhausted");
   plan={};plan.options=options;plan.options.expected_generation=root_.generation;plan.options.expected_root=root_.digest;plan.generation=root_.generation;plan.source_root=root_.digest;plan.source_base=root_.base;plan.next_operation_epoch=base_.operation_epoch+(options.expire_operation_receipts?1:0);plan.accounted_bytes_before=usage();plan.canonical_transactions_removed=root_.generation-base_.anchor.generation;
+  if(!valid_layout(options.target_index_layout))throw Failure(Code::invalid,"unknown target index layout");
+  const auto target_layout=options.target_index_layout==IndexLayout::automatic?index_layout_:options.target_index_layout;
   std::uint64_t row_bytes=0,index_bytes=0,largest_node=4096,rows=0;
-  compacted_rows(options.expire_operation_receipts,[&](const auto& row){++rows;const auto type=row.first.front();if(type=='r')++plan.retained_records;if(type=='b')++plan.retained_blobs;if(type=='p')++plan.retained_operations;const auto canonical=static_cast<std::uint64_t>(pack({row.first,row.second}).size()+128U);const auto indexed=static_cast<std::uint64_t>(row.first.size()+((type=='r'||type=='h')?256U:row.second.size())+512U);if(canonical>any_generation-row_bytes||indexed>any_generation-index_bytes)throw Failure(Code::capacity,"compaction size overflow");row_bytes+=canonical;index_bytes+=indexed;largest_node=std::max(largest_node,indexed);},plan.summarized_record_versions,plan.expired_observations);
+  std::uint64_t base_page_files=0,base_page_rows=0,base_page_wire=0;
+  compacted_rows(options.expire_operation_receipts,[&](const auto& row){++rows;const auto type=row.first.front();if(type=='r')++plan.retained_records;if(type=='b')++plan.retained_blobs;if(type=='p')++plan.retained_operations;const auto row_wire=static_cast<std::uint64_t>(pack({row.first,row.second}).size());
+    if(base_page_rows==0||base_page_rows==128||base_page_wire+row_wire>8U*1024U*1024U){
+      ++base_page_files;base_page_rows=0;base_page_wire=0;
+    }
+    ++base_page_rows;base_page_wire+=row_wire;
+    const auto canonical=row_wire+128U;const auto indexed=static_cast<std::uint64_t>(row.first.size()+((type=='r'||type=='h')?256U:row.second.size())+512U);if(canonical>any_generation-row_bytes||indexed>any_generation-index_bytes)throw Failure(Code::capacity,"compaction size overflow");row_bytes+=canonical;index_bytes+=indexed;largest_node=std::max(largest_node,indexed);},plan.summarized_record_versions,plan.expired_observations);
   std::uint64_t height=2;for(auto n=rows;n>1;n=(n+1)/2)++height;
   const auto workspace=std::min<std::uint64_t>(rows,128U)*(height+4U)*largest_node*4U+65536U;
   if(row_bytes>any_generation-index_bytes||row_bytes+index_bytes>any_generation-workspace)throw Failure(Code::capacity,"compaction working size overflow");
   plan.required_working_bytes=row_bytes+index_bytes+workspace;
   if(rows>(any_generation-32U)/2U)throw Failure(Code::capacity,"compaction file-node estimate exhausted");
-  if(working_files)*working_files=rows*2U+32U;
+  if(working_files){
+    *working_files=target_layout==IndexLayout::packed_pages
+      ?base_page_files+PackedIndex::bulk_file_bound(rows,index_bytes)+32U:rows*2U+32U;
+  }
   plan.plan_digest=sha256(pack({"ANAIERO-COMPACTION-PLAN/1",options.operation_id,root_.store,number(root_.generation),root_.digest,root_.base,index_root_,number(options.working_budget_bytes),options.expire_operation_receipts?"1":"0",number(plan.next_operation_epoch),number(plan.required_working_bytes),number(plan.retained_records),number(plan.retained_blobs),number(plan.retained_operations),number(plan.summarized_record_versions),number(plan.expired_observations)}));
+  if(options.target_index_layout!=IndexLayout::automatic||target_layout==IndexLayout::packed_pages)
+    plan.plan_digest=sha256(pack({"ANAIERO-COMPACTION-LAYOUT/1",plan.plan_digest,layout_name(target_layout)}));
 }
 Result NativeStore::preview_compaction(const CompactionOptions& options,CompactionPlan& plan){std::lock_guard lock(mutex_);try{const auto stable_options=options;preview_compaction_locked(stable_options,plan);return {};}catch(const Failure& e){if(e.code==Code::corrupt){ready_=false;writable_=false;}return {e.code,e.what()};}catch(const std::exception& e){return {Code::io_error,e.what()};}}
 Result NativeStore::execute_compaction(const CompactionPlan& supplied,CompactionReport& report){
   std::lock_guard lock(mutex_);bool activated=false,staged=false;report={};
+  CompactionReport sample;
+  const auto finish=[&]{
+    fill_compaction_report(report);
+    report.coexistence_measured=sample.coexistence_measured;
+    report.coexistence_files=sample.coexistence_files;report.coexistence_directories=sample.coexistence_directories;
+    report.coexistence_old_index_files=sample.coexistence_old_index_files;report.coexistence_new_index_files=sample.coexistence_new_index_files;
+  };
   try{
-    if(!root_.base.empty()&&base_.plan_digest==supplied.plan_digest){cleanup_compaction();fill_compaction_report(report,true);return {};}
+    if(!root_.base.empty()&&base_.plan_digest==supplied.plan_digest){
+      const auto target=supplied.options.target_index_layout;
+      if(!valid_layout(target)||(target!=IndexLayout::automatic&&target!=index_layout_))
+        throw Failure(Code::conflict,"completed compaction has a different target index layout");
+      cleanup_compaction();fill_compaction_report(report,true);return {};
+    }
     CompactionPlan plan;std::uint64_t working_files=0;preview_compaction_locked(supplied.options,plan,&working_files);
     if(!valid_digest(supplied.plan_digest)||plan.plan_digest!=supplied.plan_digest||plan.source_root!=supplied.source_root||plan.source_base!=supplied.source_base||plan.generation!=supplied.generation||plan.next_operation_epoch!=supplied.next_operation_epoch||plan.accounted_bytes_before!=supplied.accounted_bytes_before||plan.required_working_bytes!=supplied.required_working_bytes||plan.retained_records!=supplied.retained_records||plan.retained_blobs!=supplied.retained_blobs||plan.retained_operations!=supplied.retained_operations||plan.summarized_record_versions!=supplied.summarized_record_versions||plan.expired_observations!=supplied.expired_observations||plan.canonical_transactions_removed!=supplied.canonical_transactions_removed)throw Failure(Code::conflict,"compaction reviewed plan is stale or altered");
     AuditReport verified_history;audit_locked(verified_history);
@@ -419,7 +483,12 @@ Result NativeStore::execute_compaction(const CompactionPlan& supplied,Compaction
     directory(path_/"bases");directory(path_/"bases"/"pages");
     const auto old_index_bytes=index_->load(index_root_).bytes;
     const auto obsolete_bytes=root_.canonical_bytes-base_.anchor.canonical_bytes+base_.storage_bytes+old_index_bytes;
-    const auto intent=[&](const Digest& target){return seal("ANAIERO-COMPACTION-INTENT/1",{root_.store,plan.plan_digest,root_.base,target,number(root_.generation),number(base_.anchor.generation+1),number(obsolete_bytes)});};
+    const auto target_layout=plan.options.target_index_layout==IndexLayout::automatic?index_layout_:plan.options.target_index_layout;
+    const auto intent=[&](const Digest& destination){
+      std::vector<std::string> fields{root_.store,plan.plan_digest,root_.base,destination,number(root_.generation),number(base_.anchor.generation+1),number(obsolete_bytes)};
+      if(target_layout==IndexLayout::single_node)return seal("ANAIERO-COMPACTION-INTENT/1",fields);
+      fields.push_back(layout_name(target_layout));return seal("ANAIERO-COMPACTION-INTENT/2",fields);
+    };
     write_file(path_/"COMPACTION",intent({}));staged=true;
     CanonicalBase next;next.anchor=root_;next.anchor.base.clear();next.operation_id=plan.options.operation_id;next.plan_digest=plan.plan_digest;next.previous_base=root_.base;next.admitted=last_admitted_unix_s_;next.operation_epoch=plan.next_operation_epoch;next.before_bytes=used;next.removed_transaction_bytes=root_.canonical_bytes-base_.anchor.canonical_bytes;next.removed_index_bytes=old_index_bytes;
     std::vector<std::string> rows;std::string first,last;std::size_t bytes=0;
@@ -431,14 +500,16 @@ Result NativeStore::execute_compaction(const CompactionPlan& supplied,Compaction
     const auto old_directory=index_directory_;const std::string fresh=old_directory=="nodes-a"?"nodes-b":"nodes-a";const auto target=path_/"index"/fresh;
     if(fs::is_symlink(target))throw Failure(Code::corrupt,"compaction index directory symlink rejected");
     std::error_code ec;fs::remove_all(target,ec);if(ec)throw Failure(Code::io_error,"cannot clear compaction index staging");directory(target);
-    auto fresh_index=std::make_unique<SealedIndex>(target);Digest fresh_root;
-    fresh_root=build_base_index(*fresh_index,verified);
+    auto fresh_index=std::make_unique<SealedIndex>(target,target_layout);Digest fresh_root;
+    fresh_root=build_base_index(*fresh_index,verified,true);
+    inject(FaultPoint::compaction_after_index);
+    if(options_.measure_compaction_files)measure_coexistence(path_,index_->directory(),target,sample);
     if(verified.storage_bytes+fresh_index->load(fresh_root).bytes>plan.required_working_bytes)throw Failure(Code::capacity,"compaction exceeded admitted working bytes");
     write_file(path_/"COMPACTION",intent(digest));inject(FaultPoint::compaction_after_base);
     Root published=root_;published.base=digest;write_file(path_/"ROOT",encode_root(published));root_=published;base_=std::move(verified);base_pages_.clear();for(std::size_t i=0;i<base_.pages.size();++i)base_pages_.emplace(base_.pages[i].digest,i);pending_reclamation_bytes_=obsolete_bytes;activated=true;
-    index_directory_=fresh;index_=std::move(fresh_index);index_root_=fresh_root;index_generation_=root_.generation;index_canonical_=root_.digest;
-    inject(FaultPoint::compaction_after_root);save_index();cleanup_compaction();ready_=true;writable_=true;fill_compaction_report(report);return {};
-  }catch(const Failure& e){if(staged||e.code==Code::corrupt){ready_=false;writable_=false;}if(activated)fill_compaction_report(report);return {activated?Code::committed_degraded:e.code,e.what()};}catch(const std::exception& e){if(staged){ready_=false;writable_=false;}if(activated)fill_compaction_report(report);return {activated?Code::committed_degraded:Code::io_error,e.what()};}
+    index_directory_=fresh;index_layout_=target_layout;index_=std::move(fresh_index);index_root_=fresh_root;index_generation_=root_.generation;index_canonical_=root_.digest;
+    inject(FaultPoint::compaction_after_root);save_index();cleanup_compaction();ready_=true;writable_=true;finish();return {};
+  }catch(const Failure& e){if(staged||e.code==Code::corrupt){ready_=false;writable_=false;}if(activated)finish();return {activated?Code::committed_degraded:e.code,e.what()};}catch(const std::exception& e){if(staged){ready_=false;writable_=false;}if(activated)finish();return {activated?Code::committed_degraded:Code::io_error,e.what()};}
 }
 Result NativeStore::resume_compaction(CompactionReport& report){
   // Rebuilding also handles an interruption after ROOT publication but before
@@ -469,24 +540,39 @@ Transaction NativeStore::transaction(std::uint64_t generation){
   return t;
 }
 void NativeStore::save_index(){
-  write_file(path_/index_coverage_name,seal("ANAIERO-INDEX-COVERAGE/3",{root_.store,index_directory_,number(index_generation_),index_canonical_,index_root_,root_.base}));
+  std::vector<std::string> fields{root_.store,index_directory_,number(index_generation_),index_canonical_,index_root_,root_.base};
+  if(index_layout_==IndexLayout::packed_pages){
+    fields.push_back(layout_name(index_layout_));
+    write_file(path_/index_coverage_name,seal("ANAIERO-INDEX-COVERAGE/4",fields));
+  }else write_file(path_/index_coverage_name,seal("ANAIERO-INDEX-COVERAGE/3",fields));
 }
 void NativeStore::load_index(){
   const bool current=regular_exists(path_/index_coverage_name);
   const bool legacy=!current&&legacy_index_exists(path_);
-  if(!current&&!legacy){index_generation_=0;index_root_.clear();index_canonical_.clear();index_directory_="nodes-a";}
+  if(!current&&!legacy){
+    index_generation_=0;index_root_.clear();index_canonical_.clear();index_directory_="nodes-a";
+    index_layout_=options_.index_layout==IndexLayout::packed_pages?IndexLayout::packed_pages:IndexLayout::single_node;
+    // The original writer may have published its first canonical ROOT before
+    // creating any coverage marker. Replay that retained suffix on open.
+  }
   else {
     const auto raw=read_file(path_/(current?index_coverage_name:"INDEX"),16384);const auto envelope=fields(raw,3);
-    if(envelope.size()!=3||(envelope[0]!="ANAIERO-INDEX-COVERAGE/2"&&envelope[0]!="ANAIERO-INDEX-COVERAGE/3"))throw Failure(Code::corrupt,"unsupported index coverage version");
-    const auto f=unseal(raw,envelope[0],6);
-    if((f.size()!=5&&f.size()!=6)||f[0]!=root_.store||(f[1]!="nodes-a"&&f[1]!="nodes-b")||(f.size()==6?f[5]:Digest{})!=root_.base)throw Failure(Code::corrupt,"index store/base identity mismatch");
-    index_directory_=f[1];index_generation_=parse_number(f[2]);index_canonical_=f[3];index_root_=f[4];
+    if(envelope.size()!=3||(envelope[0]!="ANAIERO-INDEX-COVERAGE/2"&&envelope[0]!="ANAIERO-INDEX-COVERAGE/3"&&envelope[0]!="ANAIERO-INDEX-COVERAGE/4"))throw Failure(Code::corrupt,"unsupported index coverage version");
+    const auto f=unseal(raw,envelope[0],7);
+    const bool packed=envelope[0]=="ANAIERO-INDEX-COVERAGE/4";
+    const auto arity=packed?7U:(envelope[0]=="ANAIERO-INDEX-COVERAGE/3"?6U:5U);
+    if(f.size()!=arity||f[0]!=root_.store||(f[1]!="nodes-a"&&f[1]!="nodes-b")||
+       (packed&&f[6]!="native-packed-pages/1"))throw Failure(Code::corrupt,"invalid index store or layout");
+    index_directory_=f[1];index_layout_=packed?IndexLayout::packed_pages:IndexLayout::single_node;
+    if((arity>=6?f[5]:Digest{})!=root_.base)throw Failure(Code::corrupt,"index base identity mismatch");
+    index_generation_=parse_number(f[2]);index_canonical_=f[3];index_root_=f[4];
     if(index_generation_<base_.anchor.generation||index_generation_>root_.generation||(index_generation_==0&&(!index_root_.empty()||!index_canonical_.empty())))throw Failure(Code::corrupt,"index coverage ahead of canonical root");
     if(index_generation_!=0){const auto digest=index_generation_==base_.anchor.generation?base_.anchor.digest:transaction(index_generation_).root.digest;if(digest!=index_canonical_)throw Failure(Code::corrupt,"index coverage diverges from canonical history");}
   }
-  directory(path_/"index"/index_directory_);index_=std::make_unique<SealedIndex>(path_/"index"/index_directory_);
+  directory(path_/"index"/index_directory_);index_=std::make_unique<SealedIndex>(path_/"index"/index_directory_,index_layout_);
   if(index_generation_<base_.anchor.generation)throw Failure(Code::corrupt,"index is behind the canonical base");
   (void)index_->load(index_root_);index_->finish_cleanup(index_root_);
+  if(!current&&!legacy&&index_layout_==IndexLayout::packed_pages)save_index();
   if(legacy){
     // Publish the validated derived marker durably before removing its old
     // spelling. A crash leaves either the original or the preferred new marker;
@@ -510,11 +596,8 @@ void NativeStore::recover_staging(){
   }else if(generation!=root_.generation)throw Failure(Code::corrupt,"stale staging generation");
   remove_file(path_/"STAGING");
 }
-void NativeStore::apply_index(const Transaction& t,bool preserve_admission){
-  if(t.root.generation!=index_generation_+1||t.predecessor!=index_canonical_)throw Failure(Code::corrupt,"noncontiguous canonical/index transition");
-  if(preserve_admission)index_->begin_publication();else index_->begin();
-  auto next=index_root_;
-  const auto put=[&](const std::string& k,const std::string& v){next=index_->put(next,k,v);};
+template<class Put>
+void emit_index_updates(const Transaction& t,const Put& put){
   for(std::size_t slot=0;slot<t.records.size();++slot){const auto& r=t.records[slot];const auto locator=pack({"record/1",number(t.root.generation),number(slot),r.digest});put(record_key(r.record.kind,r.record.key),locator);put(history_key(r),locator);}
   for(const auto& b:t.blobs){put("b"+b.digest,encode_blob(b));put("v"+number(b.ordinal),b.digest);}
   // Only the final source tip is visible in this transaction's covered root.
@@ -527,6 +610,18 @@ void NativeStore::apply_index(const Transaction& t,bool preserve_admission){
   for(const auto& e:t.events){put("e"+event_tuple(e.event.key),encode_event(e));put(exact_event_key(e.event),encode_event(e));}
   for(const auto& ref:t.references)put("f"+ref.first,pack({number(t.root.generation),number(ref.second)}));
   put("p"+t.receipt.operation_id,encode_receipt(t.receipt));
+}
+Digest NativeStore::prepare_packed(const Transaction& t){
+  std::map<std::string,std::string> updates;
+  emit_index_updates(t,[&](const std::string& key,const std::string& data){updates[key]=data;});
+  return index_->prepare_packed(index_root_,updates);
+}
+void NativeStore::apply_index(const Transaction& t,bool preserve_admission,const Digest* prepared){
+  if(t.root.generation!=index_generation_+1||t.predecessor!=index_canonical_)throw Failure(Code::corrupt,"noncontiguous canonical/index transition");
+  if(preserve_admission)index_->begin_publication();else index_->begin();
+  auto next=index_root_;
+  if(index_->packed())next=prepared?*prepared:prepare_packed(t);
+  else emit_index_updates(t,[&](const std::string& key,const std::string& data){next=index_->put(next,key,data);});
   index_->publish_cleanup(next);
   index_root_=next;index_generation_=t.root.generation;index_canonical_=t.root.digest;
   save_index();index_->finish_cleanup(index_root_);
@@ -550,7 +645,7 @@ void NativeStore::verify_canonical_history(){
 }
 Result NativeStore::open(){
   try{
-    if(options_.maximum_bytes<65536||options_.maximum_batch_bytes==0||options_.maximum_batch_bytes>decode_limit/2||options_.maximum_blob_bytes==0||options_.maximum_records==0||options_.maximum_records>1024||options_.maximum_blobs==0||options_.maximum_blobs>1024||options_.maximum_references>4096||options_.maximum_index_updates==0||options_.maximum_index_updates>1024)return {Code::invalid,"invalid native storage limits"};
+    if(!valid_layout(options_.index_layout)||options_.maximum_bytes<65536||options_.maximum_batch_bytes==0||options_.maximum_batch_bytes>decode_limit/2||options_.maximum_blob_bytes==0||options_.maximum_records==0||options_.maximum_records>1024||options_.maximum_blobs==0||options_.maximum_blobs>1024||options_.maximum_references>4096||options_.maximum_index_updates==0||options_.maximum_index_updates>1024)return {Code::invalid,"invalid native storage limits"};
     directory(path_);directory(path_/"transactions");directory(path_/"blobs");directory(path_/"index");
     (void)regular_exists(path_/"WRITER");if(!writer_.open(path_/"WRITER")||!writer_.lock_exclusive())return {Code::busy,"canonical store already has a writer"};
     if(!regular_exists(path_/"ROOT")){
@@ -559,7 +654,7 @@ Result NativeStore::open(){
     }else root_=decode_root(read_file(path_/"ROOT",16384));
     generation_.store(root_.generation);load_base();last_admitted_unix_s_=base_.admitted;
     if(root_.generation>base_.anchor.generation){const auto t=transaction(root_.generation);if(!same_root_witness(t.root,root_))throw Failure(Code::corrupt,"canonical root/transaction mismatch");last_admitted_unix_s_=t.receipt.admitted_unix_s;}
-    if(regular_exists(path_/"COMPACTION")){const auto pending=unseal(read_file(path_/"COMPACTION",16384),"ANAIERO-COMPACTION-INTENT/1",7);if(pending.size()!=7)throw Failure(Code::corrupt,"invalid compaction intent");pending_reclamation_bytes_=parse_number(pending[6]);}
+    if(regular_exists(path_/"COMPACTION")){const auto pending=compaction_intent(path_/"COMPACTION");pending_reclamation_bytes_=parse_number(pending[6]);}
     recover_staging();
     try{load_index();replay_suffix();cleanup_compaction();cleanup_inactive_index();ready_=true;writable_=true;}
     catch(const Failure&){ready_=false;writable_=false;} // Authoritative data is retained for explicit repair.
@@ -572,7 +667,7 @@ std::uint64_t NativeStore::usage()const{
   return root_.canonical_bytes-base_.anchor.canonical_bytes+base_.storage_bytes+root_.blob_bytes+index_bytes+pending_reclamation_bytes_+16384;
 }
 StoreInfo NativeStore::info()const{
-  std::lock_guard lock(mutex_);StoreInfo i;i.store_id=root_.store;i.generation=root_.generation;i.index_generation=index_generation_;i.blob_count=root_.blobs;i.record_count=root_.records;i.physical_bytes=usage();i.maximum_bytes=options_.maximum_bytes;i.maximum_batch_bytes=options_.maximum_batch_bytes;i.maintenance_reserve_bytes=std::min(options_.maintenance_reserve_bytes,options_.maximum_bytes/8U);i.ordinary_limit_bytes=options_.maximum_bytes-i.maintenance_reserve_bytes;i.root_digest=root_.digest;i.index_root=index_root_;i.writable=writable_;i.index_ready=ready_;i.canonical_base_generation=base_.anchor.generation;i.canonical_base_digest=root_.base;i.operation_epoch=base_.operation_epoch;i.admitted_unix_s=last_admitted_unix_s_;i.pending_reclamation_bytes=pending_reclamation_bytes_;return i;
+  std::lock_guard lock(mutex_);StoreInfo i;i.index_backend=layout_name(index_layout_);i.store_id=root_.store;i.generation=root_.generation;i.index_generation=index_generation_;i.blob_count=root_.blobs;i.record_count=root_.records;i.physical_bytes=usage();i.maximum_bytes=options_.maximum_bytes;i.maximum_batch_bytes=options_.maximum_batch_bytes;i.maintenance_reserve_bytes=std::min(options_.maintenance_reserve_bytes,options_.maximum_bytes/8U);i.ordinary_limit_bytes=options_.maximum_bytes-i.maintenance_reserve_bytes;i.root_digest=root_.digest;i.index_root=index_root_;i.writable=writable_;i.index_ready=ready_;i.canonical_base_generation=base_.anchor.generation;i.canonical_base_digest=root_.base;i.operation_epoch=base_.operation_epoch;i.admitted_unix_s=last_admitted_unix_s_;i.pending_reclamation_bytes=pending_reclamation_bytes_;return i;
 }
 Result NativeStore::commit(const CommitBatch& batch,CommitReceipt& receipt){
   const auto waiting=options_.measure_commit_stages?MonotonicClock::now():MonotonicClock::time_point{};
@@ -691,7 +786,8 @@ Result NativeStore::commit_locked(const CommitBatch& batch,CommitReceipt& receip
     // Four nodes per level covers path copying plus double rotations. Heights
     // can rise by at most log2(number of additions)+1 within the bounded batch.
     std::uint64_t height_growth=1;for(auto n=mutations;n>1;n=(n+1U)/2U)++height_growth;
-    const auto reserve=static_cast<std::uint64_t>(request_bytes)*2U+static_cast<std::uint64_t>(raw.size())*2U+static_cast<std::uint64_t>(mutations)*(node_height+height_growth+2U)*largest_node*4U+32768U;
+    const auto canonical_reserve=static_cast<std::uint64_t>(request_bytes)*2U+static_cast<std::uint64_t>(raw.size())*2U+32768U;
+    const auto reserve=canonical_reserve+(index_->packed()?0U:static_cast<std::uint64_t>(mutations)*(node_height+height_growth+2U)*largest_node*4U);
     const auto reclaimed_bytes=reclaim.empty()?0:root_.blob_bytes-tx.root.blob_bytes;
     const auto accounted=usage();if(reclaimed_bytes>accounted)throw Failure(Code::corrupt,"reclamation exceeds accounted storage bytes");const auto used=accounted-reclaimed_bytes;
     const auto maintenance_reserve=std::min(options_.maintenance_reserve_bytes,options_.maximum_bytes/8U);
@@ -701,12 +797,21 @@ Result NativeStore::commit_locked(const CommitBatch& batch,CommitReceipt& receip
     if(space_error||space.available<options_.minimum_free_bytes||reserve>space.available-options_.minimum_free_bytes)throw Failure(Code::capacity,"filesystem admission headroom exhausted");
     const auto temporary_files=static_cast<std::uint64_t>(mutations)*(node_height+height_growth+2U)*4U+
       static_cast<std::uint64_t>(new_blobs.size())+16U;
-    require_file_capacity(path_,temporary_files,options_.minimum_free_file_nodes);
+    if(!index_->packed())require_file_capacity(path_,temporary_files,options_.minimum_free_file_nodes);
     const auto system_seconds=std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     const auto admitted=options_.admission_clock?options_.admission_clock->unix_seconds():(system_seconds<0?0:static_cast<std::uint64_t>(system_seconds));
     if(admitted<last_admitted_unix_s_)throw Failure(Code::expired,"trusted admission clock precedes the durable time floor");
     for(const auto& a:batch.authorizations)if(a.not_after_unix_s!=0&&admitted>=a.not_after_unix_s)throw Failure(Code::expired,"authorization expired before serialized commit admission");
     tx.receipt.admitted_unix_s=admitted;raw=encode_transaction(tx);tx.root.digest=sha256(raw);tx.receipt.root_digest=tx.root.digest;
+    Digest prepared;
+    if(index_->packed()){
+      measurement.phase(&CommitTimings::index_ns);
+      prepared=prepare_packed(tx);
+      const auto working=index_->packed_work_bytes();
+      if(working>budget-used-reserve||working>space.available-options_.minimum_free_bytes-reserve)
+        throw Failure(Code::capacity,"packed index publication requires additional working headroom");
+      require_file_capacity(path_,index_->packed_work_files()+static_cast<std::uint64_t>(new_blobs.size())+16U,options_.minimum_free_file_nodes);
+    }
     measurement.phase(&CommitTimings::staging_ns);
     std::vector<std::string> stage{root_.store,number(tx.root.generation),root_.digest};for(const auto* b:new_blobs)stage.push_back(b->digest);write_file(path_/"STAGING",seal("ANAIERO-STAGING/1",stage));staged=true;
     measurement.phase(&CommitTimings::blobs_ns);
@@ -718,7 +823,7 @@ Result NativeStore::commit_locked(const CommitBatch& batch,CommitReceipt& receip
     write_file(path_/"ROOT",encode_root(tx.root));root_=tx.root;generation_.store(root_.generation);last_admitted_unix_s_=admitted;receipt=tx.receipt;published=true;
     timings_.committed=true;timings_.generation=receipt.generation;
     inject(FaultPoint::after_root);inject(FaultPoint::before_index);
-    measurement.phase(&CommitTimings::index_ns);apply_index(tx,true);inject(FaultPoint::after_index);
+    measurement.phase(&CommitTimings::index_ns);apply_index(tx,true,index_->packed()?&prepared:nullptr);inject(FaultPoint::after_index);
     measurement.phase(&CommitTimings::cleanup_ns);
     remove_file(path_/"STAGING");return {};
   }catch(const Failure& e){if(staged){writable_=false;if(published)ready_=false;}if(e.code==Code::corrupt){ready_=false;writable_=false;}timings_.result=published?Code::committed_degraded:e.code;return {timings_.result,e.what()};}
@@ -775,7 +880,11 @@ Result NativeStore::repair_index(){
     const auto target=path_/"index"/fresh;
     if(fs::is_symlink(target))throw Failure(Code::corrupt,"rebuild directory symlink rejected");
     std::error_code ec;fs::remove_all(target,ec);if(ec)throw Failure(Code::io_error,"cannot clear inactive index generation");directory(target);
-    index_directory_=fresh;index_=std::make_unique<SealedIndex>(target);index_root_.clear();index_generation_=0;index_canonical_.clear();
+    if(regular_exists(path_/"COMPACTION")){
+      const auto intent=compaction_intent(path_/"COMPACTION");
+      if(!intent[3].empty()&&intent[3]==root_.base)index_layout_=read_layout(intent[7]);
+    }
+    index_directory_=fresh;index_=std::make_unique<SealedIndex>(target,index_layout_);index_root_.clear();index_generation_=0;index_canonical_.clear();
     // Coverage is advanced after each sealed transaction. A rebuild interrupted
     // after any published prefix resumes through the same canonical suffix.
     initialize_index_from_base();save_index();replay_suffix();cleanup_compaction();ready_=true;writable_=true;

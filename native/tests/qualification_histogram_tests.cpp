@@ -99,6 +99,29 @@ void unchanged_two_second_gate(){
          outlier_histogram.percentile_upper_ns(100)>budget_ns,
          "percentiles retain their selected ranks instead of becoming the maximum");
 }
+void slow_batch_attribution(){
+  using anaiero::qualification::CommitSample;
+  using anaiero::qualification::SlowestCommits;
+  SlowestCommits tail;
+  std::vector<std::pair<std::uint64_t,std::uint64_t>> oracle;
+  for(std::uint64_t batch=1;batch<=3*SlowestCommits::maximum;++batch){
+    CommitSample sample;
+    sample.batch=batch;
+    sample.elapsed_ns=(batch*7)%11;
+    sample.stages.index_ns=batch+100;
+    sample.thread.voluntary_switches=batch;
+    tail.add(sample);
+    oracle.emplace_back(sample.elapsed_ns,batch);
+  }
+  std::stable_sort(oracle.begin(),oracle.end(),[](const auto& left,const auto& right){return left.first>right.first;});
+  expect(tail.size==SlowestCommits::maximum,"bounded number of slow batches");
+  for(std::size_t i=0;i<tail.size;++i){
+    const auto& sample=tail.samples[i];
+    expect(sample.elapsed_ns==oracle[i].first&&sample.batch==oracle[i].second,"slowest batches and tie order");
+    expect(sample.stages.index_ns==sample.batch+100&&sample.thread.voluntary_switches==sample.batch,
+           "slow batch retains its own stage and scheduling measurements");
+  }
+}
 void exact_threshold_oracle(){
   for(std::size_t count=1;count<=301;++count){
     Samples values;for(std::size_t i=0;i<count;++i)values.push_back((i*17+count)%113);
@@ -130,7 +153,7 @@ void exact_threshold_oracle(){
 
 int main(){
   try{
-    edges_and_rounding();unchanged_two_second_gate();exact_threshold_oracle();
+    edges_and_rounding();unchanged_two_second_gate();exact_threshold_oracle();slow_batch_attribution();
     std::cout<<"bounded percentile oracle, integer edges, nearest-rank rounding and unchanged latency gate passed\n";
     return 0;
   }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}

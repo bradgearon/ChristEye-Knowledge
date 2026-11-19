@@ -1,0 +1,14 @@
+ANAIERODEVICE/1
+name=shared-linux-index-pilot
+device_class=shared
+machine=Linux 6.18.57 x86_64; host-visible memory rounded to MiB
+processor=Unknown P6 family
+memory_bytes=10451156992
+storage_device=unavailable on shared runner; not independently verified
+storage_firmware=unavailable on shared runner; not independently verified
+storage_controller=unavailable on shared runner; not independently verified
+filesystem=Linux-overlay
+mount_options=unavailable on shared runner; not independently verified
+durability=Native software publication and flush policy
+dependencies=Exact native build manifest retained
+concurrent_work=Shared Linux workspace. CPU, storage hardware and neighbors are uncontrolled. Cases run sequentially within their cohort.

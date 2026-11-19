@@ -160,3 +160,8 @@ The CI profile and negative work-budget control are short integration evidence.
 A million-observation qualification requires the completed `scale-1m` report
 on the declared platform/device. Profile availability alone is not that result.
 Retain failed reports and their exact inputs alongside passing runs.
+
+## Comparing the retained index layouts
+
+Use the [paired layout experiment](PACKED-INDEX.md) for an explicit layout,
+coexistence file counts, and matched Linux/Windows trials.

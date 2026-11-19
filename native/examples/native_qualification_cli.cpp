@@ -84,8 +84,23 @@ sdk::Result campaign(int argc,char** argv){
   std::string json;if(auto r=q::mixed_campaign_status(argv[4],json);!r)return r;
   std::cout<<json;return {};
 }
+using IndexLayout=sdk::evidence::IndexLayout;
+
+sdk::Result parse_layout_arguments(int& argc,char** argv,IndexLayout& layout){
+  if(argc<4)return {sdk::Code::invalid,"expected PROFILE NEW_OUTPUT_DIRECTORY"};
+  if(argc==4||argc==5)return {};
+  if(argc!=7||std::string_view(argv[5])!="--index-layout")
+    return {sdk::Code::invalid,"expected DEVICE_DECLARATION --index-layout node-files|packed-pages"};
+  const std::string_view value=argv[6];
+  if(value=="node-files")layout=IndexLayout::single_node;
+  else if(value=="packed-pages")layout=IndexLayout::packed_pages;
+  else return {sdk::Code::invalid,"unknown derived index layout"};
+  argc=5;
+  return {};
+}
 sdk::Result scale(int argc,char** argv){
-  if(argc!=4&&argc!=5)return {sdk::Code::invalid,"expected scale PROFILE NEW_OUTPUT_DIRECTORY [DEVICE_DECLARATION]"};
+  IndexLayout layout=IndexLayout::automatic;
+  if(auto r=parse_layout_arguments(argc,argv,layout);!r)return r;
   std::string bytes,device_bytes;if(auto r=read_text(q::native_path(argv[2]),bytes);!r)return r;
   q::ScaleProfile profile;if(auto r=q::parse_scale_profile(bytes,profile);!r)return r;
   q::DeviceDeclaration device;
@@ -101,15 +116,15 @@ sdk::Result scale(int argc,char** argv){
   }
   const auto result=q::run_scale_profile(profile,utf8(output),report,[next=std::uint64_t{1000}](std::uint64_t observations)mutable{
     if(observations>=next){std::cerr<<"scale committed_observations="<<observations<<'\n'<<std::flush;next=(observations/1000+1)*1000;}
-  });const auto json=q::scale_report_json(report);
+  },layout);const auto json=q::scale_report_json(report);
   if(auto r=anaiero::engines::write_new_artifact(utf8(output/"report.json"),json);!r)return r;
   std::cout<<json;return result;
 }
 sdk::Result run(int argc,char** argv){
   if(argc==2&&(std::string_view(argv[1])=="help"||std::string_view(argv[1])=="--help")){
-    std::cout<<"Usage: ce_native_qualification run PROFILE NEW_OUTPUT_DIRECTORY [DEVICE_DECLARATION]\n"
+    std::cout<<"Usage: ce_native_qualification run PROFILE NEW_OUTPUT_DIRECTORY [DEVICE_DECLARATION [--index-layout node-files|packed-pages]]\n"
       "       ce_native_qualification mixed PROFILE SESSION NEW_OUTPUT_DIRECTORY\n"
-      "       ce_native_qualification scale PROFILE NEW_OUTPUT_DIRECTORY [DEVICE_DECLARATION]\n"
+      "       ce_native_qualification scale PROFILE NEW_OUTPUT_DIRECTORY [DEVICE_DECLARATION [--index-layout node-files|packed-pages]]\n"
       "       ce_native_qualification campaign-create PROFILE SESSION NEW_DIRECTORY [DEVICE_DECLARATION]\n"
       "       ce_native_qualification campaign-resume DIRECTORY\n"
       "       ce_native_qualification campaign-status DIRECTORY\n"
@@ -121,7 +136,9 @@ sdk::Result run(int argc,char** argv){
   if(argc>=2&&std::string_view(argv[1])=="mixed")return mixed(argc,argv);
   if(argc>=2&&std::string_view(argv[1])=="scale")return scale(argc,argv);
   if(argc>=2&&(std::string_view(argv[1])=="campaign-create"||std::string_view(argv[1])=="campaign-resume"||std::string_view(argv[1])=="campaign-status"))return campaign(argc,argv);
-  if((argc!=4&&argc!=5)||std::string_view(argv[1])!="run")return {sdk::Code::invalid,"expected run PROFILE NEW_OUTPUT_DIRECTORY [DEVICE_DECLARATION]"};
+  if(argc<2||std::string_view(argv[1])!="run")return {sdk::Code::invalid,"expected run PROFILE NEW_OUTPUT_DIRECTORY"};
+  IndexLayout layout=IndexLayout::automatic;
+  if(auto r=parse_layout_arguments(argc,argv,layout);!r)return r;
   const fs::path profile_path=q::native_path(argv[2]),output=q::native_path(argv[3]);
   std::error_code error;const auto status=fs::symlink_status(profile_path,error);
   if(error)return {sdk::Code::invalid,"cannot inspect qualification profile "+utf8(profile_path)+": "+error.message()};
@@ -146,7 +163,7 @@ sdk::Result run(int argc,char** argv){
       std::cerr<<"qualification committed_observations="<<observations<<'\n'<<std::flush;
       next=(observations/1000+1)*1000;
     }
-  });const auto json=q::report_json(report);
+  },layout);const auto json=q::report_json(report);
   if(auto r=anaiero::engines::write_new_artifact(utf8(output/"report.json"),json);!r)return r;
   std::cout<<json;return result;
 }

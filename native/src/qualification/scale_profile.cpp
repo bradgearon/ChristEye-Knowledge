@@ -83,13 +83,17 @@ std::string scale_report_json(const ScaleReport& r){
      <<",\"percentile_method\":"<<quote(histogram_percentile_method)
      <<",\"acceptance_method\":"<<quote(threshold_method)
      <<",\"started_utc\":"<<quote(r.started_utc)<<",\"finished_utc\":"<<quote(r.finished_utc)
+     <<",\"index_layout\":"<<quote(layout_label(r.layout))<<",\"index_backend\":"<<quote(r.index_backend)
      <<",\"store_id\":"<<quote(r.store_id)<<",\"device_sha256\":"<<quote(r.device_sha256)
      <<",\"device\":"<<device_declaration_json(r.device)<<",\"environment\":{\"os\":"<<quote(r.environment.operating_system)
      <<",\"architecture\":"<<quote(r.environment.architecture)<<",\"filesystem\":"<<quote(r.environment.filesystem)
      <<",\"compiler\":"<<quote(r.environment.compiler)<<",\"build_identity\":"<<quote(r.environment.build_identity)
      <<",\"logical_processors\":"<<r.environment.logical_processors<<",\"storage_label\":"<<quote(r.profile.evidence.storage_label)<<'}'
      <<",\"admission\":{\"minimum_file_nodes\":"<<r.minimum_file_nodes
-     <<",\"scope\":\"lower bound for payloads plus old and replacement observation indexes; not a reservation\",\"disk\":"
+     <<",\"scope\":"<<quote(r.layout==sdk::evidence::IndexLayout::packed_pages
+       ?"one distinct payload file per observation plus reserve; packed pages and metadata require additional headroom"
+       :"distinct payload files plus old and replacement single-node indexes; minimum only")
+     <<",\"disk\":"
      <<disk_usage_json(r.admission_disk)<<'}'
      <<",\"workload\":{\"observations\":"<<r.observations<<",\"epochs\":"<<r.epochs
      <<",\"distinct_local_source_uids\":"<<(r.epochs?1+r.epochs/2:0)
@@ -135,6 +139,11 @@ std::string scale_report_json(const ScaleReport& r){
        <<",\"maintenance_remaining_bytes\":"<<p.capacity.maintenance_remaining_bytes
        <<",\"pending_reclamation_bytes\":"<<p.capacity.pending_reclamation_bytes<<'}'
        <<",\"compaction\":{\"activated\":"<<boolean(p.compaction.activated)<<",\"cleanup_complete\":"<<boolean(p.compaction.cleanup_complete)
+       <<",\"coexistence_measured\":"<<boolean(p.compaction.coexistence_measured)
+       <<",\"coexistence_files\":"<<p.compaction.coexistence_files
+       <<",\"coexistence_directories\":"<<p.compaction.coexistence_directories
+       <<",\"coexistence_old_index_files\":"<<p.compaction.coexistence_old_index_files
+       <<",\"coexistence_new_index_files\":"<<p.compaction.coexistence_new_index_files
        <<",\"accounted_bytes_before\":"<<p.compaction.accounted_bytes_before<<",\"accounted_bytes_after\":"<<p.compaction.accounted_bytes_after
        <<",\"removed_transaction_bytes\":"<<p.compaction.removed_transaction_bytes<<",\"removed_index_bytes\":"<<p.compaction.removed_index_bytes
        <<",\"summarized_record_versions\":"<<p.compaction.summarized_record_versions<<",\"expired_observations\":"<<p.compaction.expired_observations<<'}'

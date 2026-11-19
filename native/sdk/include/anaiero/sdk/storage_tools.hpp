@@ -24,6 +24,9 @@ struct CompactionOptions {
   // headroom. Pages and index work remain bounded while the history is scanned.
   std::uint64_t working_budget_bytes=256ULL*1024ULL*1024ULL;
   bool expire_operation_receipts=false;
+  // Automatic preserves the current layout. An explicit change is bound to
+  // the reviewed plan and built in the inactive index directory.
+  IndexLayout target_index_layout=IndexLayout::automatic;
 };
 struct CompactionPlan {
   CompactionOptions options;
@@ -41,6 +44,11 @@ struct CompactionReport {
   std::uint64_t removed_transaction_bytes=0,removed_index_bytes=0;
   std::uint64_t summarized_record_versions=0,expired_observations=0;
   bool activated=false,cleanup_complete=false,already_complete=false;
+  // Sampled after both complete indexes exist, before older files are removed.
+  // Directory count excludes the store root. Only reported by the measured run.
+  bool coexistence_measured=false;
+  std::uint64_t coexistence_files=0,coexistence_directories=0;
+  std::uint64_t coexistence_old_index_files=0,coexistence_new_index_files=0;
 };
 // A maintenance scan creates a deterministic plan. Execution revalidates the
 // exact root/index/base and recomputes the plan before publication. All latest

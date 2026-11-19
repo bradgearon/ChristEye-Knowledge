@@ -133,6 +133,7 @@ public:
   virtual ~IAdmissionClock()=default;
   virtual std::uint64_t unix_seconds() const noexcept=0;
 };
+enum class IndexLayout : std::uint32_t { automatic, single_node, packed_pages };
 struct StoreOptions {
   std::uint64_t maximum_bytes=1024ULL*1024ULL*1024ULL;
   std::uint64_t minimum_free_bytes=1024ULL*1024ULL;
@@ -151,10 +152,15 @@ struct StoreOptions {
   // in addition to the operation's bounded temporary-file estimate. Native
   // Windows filesystems do not expose an equivalent pool through this adapter.
   std::uint64_t minimum_free_file_nodes=128;
+  // Fresh stores use the single-node format by default. A healthy existing
+  // store always reopens its persisted layout.
+  IndexLayout index_layout=IndexLayout::automatic;
+  bool measure_compaction_files=false;
 };
 enum class FaultPoint : std::uint32_t {
   none,after_objects,after_transaction,after_root,before_index,after_index,
-  compaction_after_base,compaction_after_root,compaction_during_cleanup
+  compaction_after_base,compaction_after_root,compaction_during_cleanup,
+  compaction_during_index_build,compaction_after_index
 };
 // Typed indexed reads are independent of the canonical writer and blob I/O.
 // A missing/corrupt index cannot be interpreted as evidence of absence.

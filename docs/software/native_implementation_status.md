@@ -26,6 +26,13 @@ Deliver a substantial complete capability with implementation, adapters,
 runtime/CLI wiring, meaningful Windows/Linux tests and documentation. Keep
 related work in one changeset with reviewable internal commits.
 
+## Packed derived index and matched latency trials
+
+[CE-SW-42](CE-SW-42_packed_index_and_latency_experiments.md) adds writable
+packed pages, reviewed conversion, per-batch timing and paired qualification
+on the same device. See the [operating record](../../qualification/reports/2026-11-19-packed-index/README.md)
+for the observed scale and file counts.
+
 ## Current integrated batch — CE-SW-41
 
 [CE-SW-41](CE-SW-41_runtime_lifecycle_and_qualification.md) adds exact commit-latency decisions, bounded index

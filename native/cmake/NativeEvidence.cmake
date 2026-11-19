@@ -3,7 +3,7 @@
 add_library(anaiero_evidence STATIC src/evidence/evidence.cpp)
 anaiero_sdk_target(anaiero_evidence)
 target_link_libraries(anaiero_evidence PUBLIC anaiero_contracts PRIVATE Threads::Threads)
-add_library(anaiero_storage_native STATIC src/storage/sealed_index.cpp src/storage/native_store.cpp src/storage/legacy_migration.cpp)
+add_library(anaiero_storage_native STATIC src/storage/sealed_index.cpp src/storage/packed_index.cpp src/storage/native_store.cpp src/storage/legacy_migration.cpp)
 anaiero_sdk_target(anaiero_storage_native)
 target_include_directories(anaiero_storage_native PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(anaiero_storage_native PUBLIC anaiero_evidence)
@@ -38,4 +38,22 @@ if(CE_WIND_BUILD_TESTS)
   target_include_directories(anaiero_index_staging_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/storage)
   target_link_libraries(anaiero_index_staging_tests PRIVATE anaiero_storage_native)
   add_test(NAME anaiero_index_staging_tests COMMAND anaiero_index_staging_tests)
+endif()
+if(CE_WIND_BUILD_TESTS)
+  set(old_index_fixture "${CMAKE_CURRENT_BINARY_DIR}/packed-index-compatibility-input")
+  file(ARCHIVE_EXTRACT
+    INPUT "${CMAKE_CURRENT_SOURCE_DIR}/tests/fixtures/pre-packed-index-9e6a593.zip"
+    DESTINATION "${old_index_fixture}")
+  add_executable(anaiero_packed_recovery_tests tests/packed_index_recovery_tests.cpp)
+  anaiero_sdk_target(anaiero_packed_recovery_tests)
+  target_link_libraries(anaiero_packed_recovery_tests PRIVATE anaiero_storage_native)
+  add_test(NAME anaiero_packed_index_recovery
+    COMMAND anaiero_packed_recovery_tests "${old_index_fixture}")
+  add_test(NAME anaiero_packed_index_process_recovery COMMAND ${CMAKE_COMMAND}
+    "-DTEST_EXECUTABLE=$<TARGET_FILE:anaiero_packed_recovery_tests>"
+    "-DFIXTURE_SOURCE=${old_index_fixture}"
+    "-DBUILD_DIRECTORY=${CMAKE_CURRENT_BINARY_DIR}"
+    -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/packed_index_process_cut.cmake")
+  set_tests_properties(anaiero_packed_index_recovery anaiero_packed_index_process_recovery PROPERTIES
+    TIMEOUT 300 LABELS "recovery;storage")
 endif()

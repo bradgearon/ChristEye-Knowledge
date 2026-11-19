@@ -13,7 +13,7 @@ authoritative declaration text, including defaults, macros, annotations and
 inline definitions. A syntax index is not a substitute for compiling against
 the installed SDK. Operational rules are in [modular-lifecycle.md](modular-lifecycle.md).
 
-**Public-header manifest SHA-256:** `a557f5793af9aadd1eff89787aa26876455fbe52cf50632897bc9972de718780`
+**Public-header manifest SHA-256:** `5b82ef503a2e69d3e598de823190c9efd5829849fd7f2b29f060c587c402f098`
 
 | Header | SHA-256 |
 |---|---|
@@ -21,7 +21,7 @@ the installed SDK. Operational rules are in [modular-lifecycle.md](modular-lifec
 | [engine.hpp](../sdk/include/anaiero/sdk/engine.hpp) | `6c7f377106bea1d231d04423e9c302b8088808a0e0608f2361a78c16c217cf16` |
 | [engine_files.hpp](../sdk/include/anaiero/sdk/engine_files.hpp) | `c1a311a612733ded9d175472111ecdc4ad0e064ec59e91c68fac58dcf8b593cd` |
 | [engines.hpp](../sdk/include/anaiero/sdk/engines.hpp) | `2bf154a15f57beedb85a500ce8f7da6a878c9682d31fdaa52e60dbe6477ed0e4` |
-| [evidence.hpp](../sdk/include/anaiero/sdk/evidence.hpp) | `49191ad324dafa1f96b97bbc8e0757f01e63effea2ef657e9d6f0d8327d85957` |
+| [evidence.hpp](../sdk/include/anaiero/sdk/evidence.hpp) | `44cedf34e03fe3143e5e19c4d681c9197f7ff18256be7d0a4afd0296cb4f0722` |
 | [experiment_history.hpp](../sdk/include/anaiero/sdk/experiment_history.hpp) | `fab291fe81c41b4a1c9a52c621be741eff70b58cbc26cef3a5d28bb8c05917ca` |
 | [experiments.hpp](../sdk/include/anaiero/sdk/experiments.hpp) | `de18d005d734e926c1593f3fed870d4bd01ec9901f2acf5ec4047e3754cd0cec` |
 | [host.hpp](../sdk/include/anaiero/sdk/host.hpp) | `05bfbf7ccccf0b4d06168860d8a9af08b4240017ae3765e0faac60d909d7aa81` |
@@ -35,7 +35,7 @@ the installed SDK. Operational rules are in [modular-lifecycle.md](modular-lifec
 | [projection.hpp](../sdk/include/anaiero/sdk/projection.hpp) | `d8304748739cef4086277b2c80615d685d87c2ea5536bd1d0f5d2c1933fbe9ca` |
 | [runtime.hpp](../sdk/include/anaiero/sdk/runtime.hpp) | `5130027301e56991dbe3540c839b9f1929f462c5787a30ab061825f02a4744bf` |
 | [session_runner.hpp](../sdk/include/anaiero/sdk/session_runner.hpp) | `debc0606bc7a45ac80f5778b3281cdb857e5436973940bfd2eb0b634679093d8` |
-| [storage_tools.hpp](../sdk/include/anaiero/sdk/storage_tools.hpp) | `1afc85ef2c9533a1211a16df10042a652cf47575dc02241d5adb6ca011659ed8` |
+| [storage_tools.hpp](../sdk/include/anaiero/sdk/storage_tools.hpp) | `09ddd2bbb43645aba820d0e9001c2ac6cef43421c354fc57800e38a51761034e` |
 | [types.hpp](../sdk/include/anaiero/sdk/types.hpp) | `2d4d5d222c41e59ac3ff91dfbe7c388d68d2eb3bdacad77bb3eb8a6f71b202bb` |
 
 ## catalog.hpp
@@ -341,6 +341,7 @@ sdk::Result plan_output(const sdk::EngineState&,std::string& image,
 | `anaiero::sdk::evidence::IAdmissionClock` | class |
 | `anaiero::sdk::evidence::IAdmissionClock::~IAdmissionClock` | destructor |
 | `anaiero::sdk::evidence::IAdmissionClock::unix_seconds` | method |
+| `anaiero::sdk::evidence::IndexLayout` | enum |
 | `anaiero::sdk::evidence::StoreOptions` | struct |
 | `anaiero::sdk::evidence::FaultPoint` | enum |
 | `anaiero::sdk::evidence::IEvidenceIndex` | class |
@@ -520,6 +521,7 @@ public:
   virtual ~IAdmissionClock()=default;
   virtual std::uint64_t unix_seconds() const noexcept=0;
 };
+enum class IndexLayout : std::uint32_t { automatic, single_node, packed_pages };
 struct StoreOptions {
   std::uint64_t maximum_bytes=1024ULL*1024ULL*1024ULL;
   std::uint64_t minimum_free_bytes=1024ULL*1024ULL;
@@ -538,10 +540,15 @@ struct StoreOptions {
   // in addition to the operation's bounded temporary-file estimate. Native
   // Windows filesystems do not expose an equivalent pool through this adapter.
   std::uint64_t minimum_free_file_nodes=128;
+  // Fresh stores use the single-node format by default. A healthy existing
+  // store always reopens its persisted layout.
+  IndexLayout index_layout=IndexLayout::automatic;
+  bool measure_compaction_files=false;
 };
 enum class FaultPoint : std::uint32_t {
   none,after_objects,after_transaction,after_root,before_index,after_index,
-  compaction_after_base,compaction_after_root,compaction_during_cleanup
+  compaction_after_base,compaction_after_root,compaction_during_cleanup,
+  compaction_during_index_build,compaction_after_index
 };
 // Typed indexed reads are independent of the canonical writer and blob I/O.
 // A missing/corrupt index cannot be interpreted as evidence of absence.
@@ -2016,6 +2023,9 @@ struct CompactionOptions {
   // headroom. Pages and index work remain bounded while the history is scanned.
   std::uint64_t working_budget_bytes=256ULL*1024ULL*1024ULL;
   bool expire_operation_receipts=false;
+  // Automatic preserves the current layout. An explicit change is bound to
+  // the reviewed plan and built in the inactive index directory.
+  IndexLayout target_index_layout=IndexLayout::automatic;
 };
 struct CompactionPlan {
   CompactionOptions options;
@@ -2033,6 +2043,11 @@ struct CompactionReport {
   std::uint64_t removed_transaction_bytes=0,removed_index_bytes=0;
   std::uint64_t summarized_record_versions=0,expired_observations=0;
   bool activated=false,cleanup_complete=false,already_complete=false;
+  // Sampled after both complete indexes exist, before older files are removed.
+  // Directory count excludes the store root. Only reported by the measured run.
+  bool coexistence_measured=false;
+  std::uint64_t coexistence_files=0,coexistence_directories=0;
+  std::uint64_t coexistence_old_index_files=0,coexistence_new_index_files=0;
 };
 // A maintenance scan creates a deterministic plan. Execution revalidates the
 // exact root/index/base and recomputes the plan before publication. All latest
@@ -2131,8 +2146,8 @@ masked with equal-length whitespace for parsing only; displayed source is unchan
 | Header | Line | Parser note |
 |---|---|---|
 | `engine.hpp` | 73 | `type_identifier: (missing syntax node)` |
-| `evidence.hpp` | 174 | `type_identifier: (missing syntax node)` |
-| `evidence.hpp` | 174 | `type_identifier: (missing syntax node)` |
+| `evidence.hpp` | 180 | `type_identifier: (missing syntax node)` |
+| `evidence.hpp` | 180 | `type_identifier: (missing syntax node)` |
 | `host.hpp` | 77 | `type_identifier: (missing syntax node)` |
 | `lifecycle.hpp` | 160 | `type_identifier: (missing syntax node)` |
 | `lifecycle.hpp` | 168 | `type_identifier: (missing syntax node)` |

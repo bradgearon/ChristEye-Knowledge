@@ -152,6 +152,45 @@ headroom. Receipt-history expiry requires an explicit fenced namespace change
 and remains unsupported for existing built-in modular sessions. See
 [canonical evidence](canonical-evidence.md) for the compaction contract.
 
+### Change the derived index layout
+
+Stop other writers and run the following commands on the session store. A
+review describes the source and target layout, root, generation, temporary
+working bytes and the hash of the proposed compaction. Use a fresh path for
+each review artifact.
+
+```text
+ce_modular_session compact-review STORE select-packed packed.cecompact --index-layout packed-pages
+ce_modular_session compact STORE packed.cecompact
+ce_modular_session status STORE
+ce_modular_session audit STORE
+```
+
+`status` reports `index_layout` as `packed-pages` or `node-files`. The
+`index_backend` field identifies the versioned implementation. To return to
+one node per file, make another review against the current store, then execute it.
+
+```text
+ce_modular_session compact-review STORE return-to-node-files node-files.cecompact --index-layout node-files
+ce_modular_session compact STORE node-files.cecompact
+```
+
+Both layouts preserve the accepted history and its receipts. An intervening
+write makes a pending review stale. Retry an interrupted compaction with
+`compact-resume STORE`, then inspect the reported layout and cleanup status.
+A review with an explicit target uses a version-two artifact. Existing
+version-one reviews and reviews without a layout argument preserve the
+current layout. Healthy reopen and individual damaged-page repair use the
+layout recorded in the sealed coverage marker. If that entire marker is lost
+after completed cleanup, an SDK recovery client can set
+`StoreOptions.index_layout = IndexLayout::packed_pages` before opening the
+store and calling `repair_index()`. Automatic reconstruction on an ambiguous
+store falls back to the node-file layout and needs its disk headroom.
+
+The separate `expire-receipts` option rotates the operation
+epoch on stores whose clients support that operation. The session CLI retains
+its existing receipt namespace for live modular sessions.
+
 Ordinary writes leave the configured maintenance reserve. Drain/seal/retire,
 revocation, lease expiry/release, retention manifests and quarantine recovery use
 the maintenance commit class, so ordinary capacity exhaustion does not consume

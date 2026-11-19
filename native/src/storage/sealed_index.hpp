@@ -19,10 +19,16 @@ std::uint64_t parse_number(std::string_view);
 Bytes seal(std::string_view schema,const std::vector<std::string>&);
 std::vector<std::string> unseal(std::string_view,std::string_view schema,std::size_t max_fields=100000,std::size_t max_bytes=64U*1024U*1024U);
 
+class PackedIndex;
 class SealedIndex final {
 public:
   struct Node {std::string key,value;Digest left,right;std::uint64_t height=1,count=1,bytes=0,maximum_node_bytes=0;};
-  explicit SealedIndex(fs::path directory):directory_(std::move(directory)){}
+  explicit SealedIndex(fs::path directory,evidence::IndexLayout layout=evidence::IndexLayout::single_node);
+  ~SealedIndex();
+  bool packed() const noexcept { return static_cast<bool>(packed_); }
+  Digest prepare_packed(const Digest&,const std::map<std::string,std::string>&);
+  std::uint64_t packed_work_bytes() const;
+  std::uint64_t packed_work_files() const;
   std::string get(const Digest&,std::string_view,bool& found);
   void scan(const Digest&,std::string_view prefix,std::string_view after,std::size_t limit,
       std::vector<std::pair<std::string,std::string>>&,bool& more);
@@ -41,6 +47,7 @@ public:
   const fs::path& directory()const noexcept{return directory_;}
 private:
   fs::path directory_;
+  std::unique_ptr<PackedIndex> packed_;
   std::map<Digest,Node> cache_;
   std::set<Digest> obsolete_,pending_;
   bool caching_=false;

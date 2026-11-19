@@ -34,6 +34,42 @@ bool add(std::uint64_t& target,std::uint64_t value){
 std::uint64_t ticks(const FILETIME& value){return (static_cast<std::uint64_t>(value.dwHighDateTime)<<32)|value.dwLowDateTime;}
 #endif
 }
+ThreadActivity read_thread_activity() noexcept{
+  ThreadActivity sample;
+#ifdef _WIN32
+  FILETIME created{},exited{},kernel{},user{};
+  if(GetThreadTimes(GetCurrentThread(),&created,&exited,&kernel,&user)){
+    sample.cpu_ns=(ticks(kernel)+ticks(user))*100;
+    sample.cpu_available=true;
+  }
+#elif defined(RUSAGE_THREAD)
+  struct rusage usage{};
+  if(getrusage(RUSAGE_THREAD,&usage)==0){
+    const auto seconds=static_cast<std::uint64_t>(usage.ru_utime.tv_sec)+static_cast<std::uint64_t>(usage.ru_stime.tv_sec);
+    const auto micros=static_cast<std::uint64_t>(usage.ru_utime.tv_usec)+static_cast<std::uint64_t>(usage.ru_stime.tv_usec);
+    sample.cpu_ns=seconds*1000000000ULL+micros*1000ULL;
+    sample.voluntary_switches=static_cast<std::uint64_t>(usage.ru_nvcsw);
+    sample.involuntary_switches=static_cast<std::uint64_t>(usage.ru_nivcsw);
+    sample.cpu_available=true;
+    sample.switches_available=true;
+  }
+#endif
+  return sample;
+}
+ThreadActivity activity_delta(const ThreadActivity& before,const ThreadActivity& after) noexcept{
+  ThreadActivity result;
+  if(before.cpu_available&&after.cpu_available&&after.cpu_ns>=before.cpu_ns){
+    result.cpu_ns=after.cpu_ns-before.cpu_ns;
+    result.cpu_available=true;
+  }
+  if(before.switches_available&&after.switches_available&&after.voluntary_switches>=before.voluntary_switches&&
+     after.involuntary_switches>=before.involuntary_switches){
+    result.voluntary_switches=after.voluntary_switches-before.voluntary_switches;
+    result.involuntary_switches=after.involuntary_switches-before.involuntary_switches;
+    result.switches_available=true;
+  }
+  return result;
+}
 sdk::Result read_resources(Resources& output){
   Resources result;
 #ifdef _WIN32

@@ -33,7 +33,8 @@ struct ScaleReport {
   std::string profile_sha256,started_utc,finished_utc,store_id;
   Environment environment;
   DeviceDeclaration device;
-  std::string device_sha256;
+  std::string device_sha256,index_backend;
+  sdk::evidence::IndexLayout layout=sdk::evidence::IndexLayout::automatic;
   Resources before,after;
   DiskUsage admission_disk,final_disk;
   std::uint64_t minimum_file_nodes=0;
@@ -49,6 +50,7 @@ struct ScaleReport {
 };
 sdk::Result parse_scale_profile(std::string_view,ScaleProfile&);
 sdk::Result run_scale_profile(const ScaleProfile&,std::string_view directory,ScaleReport&,
-                             std::function<void(std::uint64_t)> progress={});
+                             std::function<void(std::uint64_t)> progress={},
+                             sdk::evidence::IndexLayout layout=sdk::evidence::IndexLayout::automatic);
 std::string scale_report_json(const ScaleReport&);
 }

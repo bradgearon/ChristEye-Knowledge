@@ -244,3 +244,8 @@ real TLS fixture, the isolated full-filesystem experiment and the dedicated
 elapsed-duration profiles. The [CE-SW-41 evidence record](../reports/2026-11-18-runtime-lifecycle/README.md)
 distinguishes development diagnostics from qualification of a particular
 checkout, machine or duration.
+
+## Derived index comparison
+
+Use the [paired layout experiment](PACKED-INDEX.md) for an explicit layout,
+coexistence file counts, and matched Linux/Windows trials.

@@ -1,4 +1,5 @@
 #include "sealed_index.hpp"
+#include "packed_index.hpp"
 #include "christeye/living/durable_io.hpp"
 #include <charconv>
 #include <fstream>
@@ -54,7 +55,15 @@ std::vector<std::string> unseal(std::string_view data,std::string_view schema,st
   if(!unpack(envelope[1],fields,max_fields,max_bytes))throw Failure(Code::corrupt,"invalid canonical storage fields");
   return fields;
 }
+SealedIndex::SealedIndex(fs::path directory,evidence::IndexLayout layout):directory_(std::move(directory)){
+  if(layout==evidence::IndexLayout::packed_pages)packed_=std::make_unique<PackedIndex>(directory_,stats);
+}
+SealedIndex::~SealedIndex()=default;
+Digest SealedIndex::prepare_packed(const Digest& root,const std::map<std::string,std::string>& changes){return packed_->prepare(root,changes);}
+std::uint64_t SealedIndex::packed_work_bytes() const{return packed_->work_bytes();}
+std::uint64_t SealedIndex::packed_work_files() const{return packed_->work_files();}
 SealedIndex::Node SealedIndex::load(const Digest& hash){
+  if(packed_)return packed_->metadata(hash);
   if(hash.empty())return Node{"","","","",0,0,0,0};
   if(!valid_digest(hash))throw Failure(Code::corrupt,"invalid index node identity");
   const auto cached=cache_.find(hash);if(cached!=cache_.end())return cached->second;
@@ -73,9 +82,10 @@ void SealedIndex::cache(const Digest& hash,const Node& n){
   const auto bytes=n.key.size()+n.value.size()+512U;
   if(caching_&&cache_.size()<8192&&cache_.count(hash)==0&&bytes<=maximum_cache_bytes-cache_bytes_){cache_.emplace(hash,n);cache_bytes_+=bytes;stats.cache_peak_nodes=std::max(stats.cache_peak_nodes,static_cast<std::uint64_t>(cache_.size()));stats.cache_peak_bytes=std::max(stats.cache_peak_bytes,static_cast<std::uint64_t>(cache_bytes_));}
 }
-void SealedIndex::discard_cache()noexcept{cache_.clear();cache_bytes_=0;caching_=false;obsolete_.clear();pending_.clear();}
-void SealedIndex::begin(){discard_cache();caching_=true;}
+void SealedIndex::discard_cache()noexcept{if(packed_)packed_->clear();cache_.clear();cache_bytes_=0;caching_=false;obsolete_.clear();pending_.clear();}
+void SealedIndex::begin(){if(packed_){packed_->begin();return;}discard_cache();caching_=true;}
 void SealedIndex::begin_publication(){
+  if(packed_)return;
   if(!pending_.empty()||!obsolete_.empty())throw Failure(Code::conflict,"publication admission cache already contains mutations");
   // Admission and publication are one serialized canonical transaction. Nodes
   // already verified against the same immutable index root remain usable.
@@ -85,6 +95,7 @@ void SealedIndex::begin_publication(){
 }
 std::uint64_t SealedIndex::height(const Digest& d){return load(d).height;}
 Digest SealedIndex::build_sorted(std::uint64_t rows,const std::function<std::pair<std::string,std::string>(std::uint64_t)>& row_at){
+  if(packed_)return packed_->build_sorted(rows,row_at);
   if(!fs::is_empty(directory_)||caching_)throw Failure(Code::conflict,"bulk index construction requires an empty unpublished directory");
   struct Subtree{Digest digest;std::uint64_t height=0,bytes=0,largest=0;};
   // Postorder fetches the median row only when both children are ready; the
@@ -157,8 +168,12 @@ Digest SealedIndex::insert(const Digest& root,const std::string& key,const std::
   retire(root);if(key<node.key)node.left=insert(node.left,key,value);else node.right=insert(node.right,key,value);
   return balance(std::move(node));
 }
-Digest SealedIndex::put(const Digest& root,std::string key,std::string value){return insert(root,key,value);}
+Digest SealedIndex::put(const Digest& root,std::string key,std::string value){
+  if(packed_)throw Failure(Code::unsupported,"packed updates require a complete staged batch");
+  return insert(root,key,value);
+}
 std::string SealedIndex::get(const Digest& root,std::string_view key,bool& found){
+  if(packed_)return packed_->get(root,key,found);
   ++stats.point_queries;auto cursor=root;std::size_t depth=0;found=false;
   while(!cursor.empty()){if(++depth>96)throw Failure(Code::corrupt,"index depth exceeded");const auto node=load(cursor);if(key==node.key){found=true;return node.value;}cursor=key<node.key?node.left:node.right;}return {};
 }
@@ -167,6 +182,7 @@ Digest SealedIndex::node_at(const Digest& root,std::string_view key){
   while(!cursor.empty()){if(++depth>96)throw Failure(Code::corrupt,"index depth exceeded");const auto n=load(cursor);if(key==n.key)return cursor;cursor=key<n.key?n.left:n.right;}return {};
 }
 void SealedIndex::scan(const Digest& root,std::string_view prefix,std::string_view after,std::size_t limit,std::vector<std::pair<std::string,std::string>>& out,bool& more){
+  if(packed_){packed_->scan(root,prefix,after,limit,out,more);return;}
   ++stats.range_queries;out.clear();more=false;std::vector<Node> stack;auto cursor=root;
   const std::string lower=std::string(after)>std::string(prefix)?std::string(after):std::string(prefix);
   while(!cursor.empty()){auto n=load(cursor);if(n.key>=lower){stack.push_back(n);cursor=n.left;}else cursor=n.right;if(stack.size()>96)throw Failure(Code::corrupt,"index range depth exceeded");}
@@ -178,6 +194,7 @@ void SealedIndex::scan(const Digest& root,std::string_view prefix,std::string_vi
   }
 }
 void SealedIndex::publish_cleanup(const Digest& root){
+  if(packed_){packed_->publish(root);return;}
   // Many path copies have the same key. Resolve each final key once within a
   // separate bounded 8 MiB memo, rather than seeking for every transient version.
   std::map<std::string,Digest> final_nodes;std::size_t memo_bytes=0;
@@ -208,6 +225,7 @@ void SealedIndex::publish_cleanup(const Digest& root){
 }
 
 void SealedIndex::finish_cleanup(const Digest& root){
+  if(packed_){packed_->finish(root);return;}
   const auto gc=directory_.parent_path()/"GC";
   if(!regular_exists(gc)){discard_cache();return;}
   const auto fields=unseal(read_file(gc,64U*1024U*1024U),"ANAIERO-INDEX-GC/2");
@@ -225,5 +243,5 @@ void SealedIndex::audit_node(const Digest& d,const std::string* low,const std::s
   if(n.bytes!=own+l.bytes+r.bytes||n.maximum_node_bytes!=std::max({own,l.maximum_node_bytes,r.maximum_node_bytes}))throw Failure(Code::corrupt,"index size aggregate violation");
   audit_node(n.left,low,&n.key,depth+1);audit_node(n.right,&n.key,high,depth+1);
 }
-void SealedIndex::audit(const Digest& root){discard_cache();audit_node(root,nullptr,nullptr,0);}
+void SealedIndex::audit(const Digest& root){if(packed_){packed_->audit(root);return;}discard_cache();audit_node(root,nullptr,nullptr,0);}
 }
