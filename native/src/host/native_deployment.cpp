@@ -196,9 +196,9 @@ Result verify_native_package(std::string_view requested,std::string_view module,
       process::NativeChildProcess child;const auto started=child.start({selected_executable(identity),{"package-probe"}});
       require(started==process::Code::ok,Code::unsupported,"candidate host cannot start on this native system");
       const std::string protocol=witness.empty()?"ANAIERO-PACKAGE-PROBE/1":"ANAIERO-PACKAGE-PROBE/2";
-      const auto expected=protocol+" "+identity.module_sha256+(witness.empty()?"":" "+witness.compatibility_id);
+      const auto expected_response=protocol+" "+identity.module_sha256+(witness.empty()?"":" "+witness.compatibility_id);
       std::string response;const auto exchanged=child.exchange(protocol,response,10000);child.stop();
-      require(exchanged==process::Code::ok&&response==expected,Code::unsupported,"candidate host does not attest exact build and compatibility identities");
+      require(exchanged==process::Code::ok&&response==expected_response,Code::unsupported,"candidate host does not attest exact build and compatibility identities");
     }
     out={std::move(identity),raw,std::move(host),static_cast<std::uint64_t>(manifest.files.size()),total,std::move(witness)};return {};
   }catch(const Failure& error){return {error.code,error.what()};}catch(const std::exception& error){return {Code::io_error,error.what()};}

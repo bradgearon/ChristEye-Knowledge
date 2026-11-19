@@ -147,8 +147,8 @@ Result Service::reconcile(const Plan& plan,ev::CommitReceipt& receipt){
   receipt.duplicate=true;return {};
 }
 Result Service::activate(const Plan& plan,const VerifiedPackage& package,ev::CommitReceipt& receipt){
-  const auto previous=reconcile(plan,receipt);if(previous)return previous;
-  if(previous.code!=Code::not_found)return previous;
+  const auto prior_receipt=reconcile(plan,receipt);if(prior_receipt)return prior_receipt;
+  if(prior_receipt.code!=Code::not_found)return prior_receipt;
   if(package.identity!=plan.candidate||sha256(package.manifest)!=plan.candidate.manifest_sha256||sha256(package.host)!=plan.candidate.host_sha256)
     return {Code::conflict,"verified package differs from the exact reviewed bytes"};
   if(store_.generation()!=plan.generation||store_.info().root_digest!=plan.root_sha256)

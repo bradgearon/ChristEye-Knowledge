@@ -46,6 +46,35 @@ work is the million-row device matrix, elapsed campaigns, and per-OS
 full-volume and supervisor evidence. No rating increase is implied by adding
 the runners or by passing a short integration test.
 
+### Next storage decision after the frozen 10k run
+
+The [frozen run](../../qualification/reports/2026-11-18-runtime-lifecycle/synthetic-10k-frozen/report.json)
+completed its audit and all 10,000 observations, but 4 of 159 commits exceeded
+two seconds when the predeclared gate allowed only one. Of 101.04 seconds
+inside commits, the derived index used 61.37 and blob publication used 33.14.
+Aggregate stage times cannot identify which stage caused an individual slow
+commit. The two million-row admissions also exposed a layout constraint that
+free bytes alone cannot solve.
+
+1. Replay the **same executable and profile** on a declared idle device and
+   under one prescribed background I/O load. Keep a bounded sample pairing
+   each slow batch with its stage times. Record free bytes/nodes, filesystem,
+   flush policy and scheduler/device observations. Preserve every result.
+2. Prototype packed pages for the **derived index only**. Keep canonical
+   state, receipts and existing ROOT semantics. Build the alternative from
+   the same retained inputs in a new directory, verify complete sorted
+   coverage and checksums, then switch only after the new index is durable.
+3. Compare the two layouts on the same volume in a predeclared alternating
+   order, then repeat on the second target platform. Measure exact exceedance
+   counts, lookup/reopen costs, resident memory, regular/directory allocation
+   and **peak live file nodes while both indexes coexist**. Never change a
+   threshold after observing the result.
+4. Require an interrupted build/switch/cleanup, damaged-page recovery, old-store
+   open, full audit and exact retry with pins/expiry before considering
+   promotion. Run 100k and 1m at their original budgets on volumes that meet
+   the relevant headroom checks. A capacity refusal is evidence for sizing,
+   never a successful scale run.
+
 ## Current assessment after the continuous-operation changes
 
 **Approximately 8.5/10 as a native engineering research platform**, as an

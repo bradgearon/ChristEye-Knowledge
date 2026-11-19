@@ -99,7 +99,7 @@ sdk::Result pressure(host::NativeContinuousHost& instance,MixedReport& report,Cl
       if(!gate->changed.wait_for(lock,std::chrono::seconds(15),[&]{return gate->released;}))
         return sdk::Result{sdk::Code::deadline,"mixed pressure controller did not release its bounded test gate"};
       return sdk::Result{};
-    },[first](sdk::Result r){first->finish(std::move(r));});!r)return r;
+    },[first](sdk::Result outcome){first->finish(std::move(outcome));});!r)return r;
   {
     std::unique_lock lock(gate->mutex);
     if(!gate->changed.wait_until(lock,deadline,[&]{return gate->entered;}))return {sdk::Code::deadline,"mixed storage pressure did not start"};
@@ -108,7 +108,7 @@ sdk::Result pressure(host::NativeContinuousHost& instance,MixedReport& report,Cl
       ev::CommitBatch batch;batch.operation_id="mixed-pressure-commit";batch.request_digest=sdk::sha256("mixed-pressure/1");
       batch.records.push_back({"qualification.mixed","pressure","committed",{},false});
       ev::CommitReceipt receipt;return store.commit(batch,receipt);
-    },[second](sdk::Result r){second->finish(std::move(r));});!r)return r;
+    },[second](sdk::Result outcome){second->finish(std::move(outcome));});!r)return r;
   if(instance.submit([](ev::ICommitStore&){return sdk::Result{};},[](sdk::Result){}).code!=sdk::Code::capacity)
     return {sdk::Code::corrupt,"mixed pressure did not enforce the bounded storage queue"};
   ++report.task_rejections;
@@ -137,7 +137,7 @@ sdk::Result pressure(host::NativeContinuousHost& instance,MixedReport& report,Cl
       if(auto result=store.lookup_operation("mixed-pressure-commit",receipt);!result)return result;
       return record.record.payload=="committed"&&record.generation==receipt.generation?sdk::Result{}:
         sdk::Result{sdk::Code::corrupt,"queued pressure commit and receipt do not match"};
-    },[verified](sdk::Result r){verified->finish(std::move(r));});!r)return r;
+    },[verified](sdk::Result outcome){verified->finish(std::move(outcome));});!r)return r;
   if(auto r=verified->wait(deadline);!r)return r;
   report.pressure_verified=true;return {};
 }
@@ -155,7 +155,7 @@ sdk::Result probe(host::NativeContinuousHost& instance,const sdk::EngineIdentity
          sdk::sha256(payload)!=claim.payload_digest||sdk::sha256(receipt)!=claim.receipt_digest)
         return sdk::Result{sdk::Code::corrupt,"mixed historical probe returned unverified evidence"};
       return sdk::Result{};
-    },[state](sdk::Result r){state->finish(std::move(r));});!r)return r;
+    },[state](sdk::Result outcome){state->finish(std::move(outcome));});!r)return r;
   if(auto r=state->wait(deadline);!r)return r;
   const auto ns=elapsed(started);report.probe.add(ns);report.probe_limit.add(ns);++report.probes;
   report.lookup_maximum_nodes=std::max(report.lookup_maximum_nodes,state->nodes);return {};
@@ -340,7 +340,7 @@ sdk::Result run_mixed_profile(const MixedProfile& profile,const sdk::SessionDefi
             const auto current=store.info();
             return current.root_digest==root&&current.generation==generation?sdk::Result{}:
               sdk::Result{sdk::Code::corrupt,"mixed repeated control changed the canonical root or generation"};
-          },[retry_barrier](sdk::Result r){retry_barrier->finish(std::move(r));});!r)return r;
+          },[retry_barrier](sdk::Result outcome){retry_barrier->finish(std::move(outcome));});!r)return r;
         if(auto r=retry_barrier->wait(deadline);!r)return r;
         const auto retried=snapshot(instance,report);
         const auto state_of=[&](const host::Status& value){

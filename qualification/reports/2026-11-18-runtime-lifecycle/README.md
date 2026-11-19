@@ -44,3 +44,5 @@ work; the device declaration does not assert an exclusive or physical device.
 | [Maintenance million](scale-1m-admission/README.md) | Refused before store creation. At least 7,000,128 file nodes required; 2,908,900 available. |
 
 Neither million-profile preflight executed a workload or qualified latency.
+
+[First Windows package build and correction](windows-package-build.md).
