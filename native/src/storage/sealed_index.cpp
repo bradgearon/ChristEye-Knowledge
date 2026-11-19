@@ -75,7 +75,42 @@ void SealedIndex::cache(const Digest& hash,const Node& n){
 }
 void SealedIndex::discard_cache()noexcept{cache_.clear();cache_bytes_=0;caching_=false;obsolete_.clear();pending_.clear();}
 void SealedIndex::begin(){discard_cache();caching_=true;}
+void SealedIndex::begin_publication(){
+  if(!pending_.empty()||!obsolete_.empty())throw Failure(Code::conflict,"publication admission cache already contains mutations");
+  // Admission and publication are one serialized canonical transaction. Nodes
+  // already verified against the same immutable index root remain usable.
+  // Keep ample staging headroom and retain the existing total cache bounds.
+  if(!caching_||cache_.size()>2048||cache_bytes_>8U*1024U*1024U){begin();return;}
+  stats.admission_cache_nodes_reused+=static_cast<std::uint64_t>(cache_.size());
+}
 std::uint64_t SealedIndex::height(const Digest& d){return load(d).height;}
+Digest SealedIndex::build_sorted(std::uint64_t rows,const std::function<std::pair<std::string,std::string>(std::uint64_t)>& row_at){
+  if(!fs::is_empty(directory_)||caching_)throw Failure(Code::conflict,"bulk index construction requires an empty unpublished directory");
+  struct Subtree{Digest digest;std::uint64_t height=0,bytes=0,largest=0;};
+  // Postorder fetches the median row only when both children are ready; the
+  // recursion retains only small child summaries, never O(depth) large values.
+  const auto build=[&](auto&& self,std::uint64_t first,std::uint64_t count)->Subtree{
+    if(count==0)return {};
+    const auto half=count/2;const auto left=self(self,first,half);
+    const auto right=self(self,first+half+1,count-half-1);
+    const auto [key,value]=row_at(first+half);if(key.empty())throw Failure(Code::corrupt,"bulk index row has an empty key");
+    const auto h=1+std::max(left.height,right.height);
+    auto fields=std::vector<std::string>{key,value,left.digest,right.digest,number(h),number(count),number(0),number(0)};
+    const auto own=static_cast<std::uint64_t>(pack({"ANAIERO-INDEX-NODE/2",pack(fields),std::string(64,'0')}).size());
+    if(left.bytes>std::numeric_limits<std::uint64_t>::max()-own||right.bytes>std::numeric_limits<std::uint64_t>::max()-own-left.bytes)
+      throw Failure(Code::capacity,"bulk index byte accounting overflow");
+    const auto bytes=own+left.bytes+right.bytes,largest=std::max({own,left.largest,right.largest});
+    fields[6]=number(bytes);fields[7]=number(largest);const auto raw=seal("ANAIERO-INDEX-NODE/2",fields);
+    if(raw.size()!=own)throw Failure(Code::corrupt,"bulk index node size calculation changed");
+    const auto digest=sha256(raw);const auto file_path=directory_/digest;
+    if(regular_exists(file_path))throw Failure(Code::corrupt,"duplicate row or digest in fresh bulk index");
+    os::File file;if(!file.open(file_path,true)||!file.write_all(raw))throw Failure(Code::io_error,"bulk index node write failed");
+    file.close();++stats.nodes_written;return {digest,h,bytes,largest};
+  };
+  const auto result=build(build,0,rows);
+  if(!os::sync_directory(directory_))throw Failure(Code::io_error,"bulk index directory flush failed");
+  audit(result.digest);return result.digest;
+}
 void SealedIndex::retire(const Digest& d){if(!d.empty())obsolete_.insert(d);}
 Digest SealedIndex::save(Node n){
   const auto l=load(n.left),r=load(n.right);

@@ -11,6 +11,10 @@ class NativeSession {
 public:
   NativeSession();
   ~NativeSession();
+  // Validates the canonical selected build and its exact retained source
+  // witnesses before enabling any old logical engine identity. No raw alias
+  // can be supplied by the caller. Call before freezing the native catalog.
+  static Result bind_catalog(evidence::ICommitStore&,EngineModuleCatalog&);
   Result open(std::string_view store_directory);
   Result ensure_engines();
   Result retain_host_artifact(std::string_view executable_path);

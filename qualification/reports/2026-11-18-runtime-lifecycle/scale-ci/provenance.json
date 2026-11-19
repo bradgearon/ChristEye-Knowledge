@@ -1,0 +1,22 @@
+{
+  "scope": "frozen-binary shared Linux CI evidence and safe rejected file-node preflight; no dedicated device, million-element workload, or hardware durability claim",
+  "base_commit": "d742d556b636cf21cdef34898fc30e5fff9c0729",
+  "branch": "feature/anaiero-continuous-native-operation",
+  "build_identity": "3c2eca366662c32986a445ba4f3bb38650b78f6e9344eb34e1c5483195710291",
+  "source_manifest_files_verified": 279,
+  "executable_sha256": "623d66da6e6881c0c6cbba65cc9de2ea6931c20fc2e460cf67c16d9d583dea99",
+  "raw_whole_manifest_sha256": "3c2eca366662c32986a445ba4f3bb38650b78f6e9344eb34e1c5483195710291",
+  "raw_compatibility_manifest_sha256": "d94e3f200c052c1076ec1f531ac9756f7ce460fab97950db7cd12a25ce0a0f90",
+  "device_sha256": "ed41fed4c27179c4026ba5621f92633b86903a4be40f7ac88c60f3bede9db77f",
+  "exit_code": 0,
+  "report_sha256": "3fafcd7e45d13f855e29f4c5b26ad0c0f9f7b57b180cfd8e3013784c5733d149",
+  "profile_sha256": "66c681bdf45dc05fa5188d12b4ac12fd1a90a8e1f5e43b9406a3fa91c6621c94",
+  "started_utc": "2026-11-19T03:20:48.105459+00:00",
+  "finished_utc": "2026-11-19T03:21:05.604797+00:00",
+  "schema": "anaiero.frozen-scale-evidence/1",
+  "command": "ce_native_qualification scale profile.cevqualification NEW_OUTPUT device.cevdevice",
+  "working_tree_scope": "Runtime source tree frozen before the candidate commit; published source can be checked against the exact per-file whole-build manifest.",
+  "store_created": true,
+  "stdout_matches_report": true,
+  "stdout_sha256": "3fafcd7e45d13f855e29f4c5b26ad0c0f9f7b57b180cfd8e3013784c5733d149"
+}

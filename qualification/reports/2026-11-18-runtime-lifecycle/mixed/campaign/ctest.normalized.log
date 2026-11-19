@@ -1,0 +1,26 @@
+Start testing: Nov 19 03:16 UTC
+----------------------------------------------------------
+27/45 Testing: anaiero_mixed_campaign
+27/45 Test: anaiero_mixed_campaign
+Command: "<build>/anaiero_mixed_campaign_tests" "<repository>/native/.." "<build>/mixed-campaign-tests"
+Directory: <build>
+"anaiero_mixed_campaign" start time: Nov 19 03:16 UTC
+Output:
+----------------------------------------------------------
+mixed campaign: exact pins, canonical targets, writer exclusion, immutable evidence, process cuts and conservative duration coverage passed
+<end of output>
+Test time = 138.43 sec
+----------------------------------------------------------
+Test Passed.
+"anaiero_mixed_campaign" end time: Nov 19 03:18 UTC
+"anaiero_mixed_campaign" time elapsed: 00:02:18
+----------------------------------------------------------
+
+End testing: Nov 19 03:18 UTC
+
+mixed = 138.43 sec*proc
+
+qualification = 138.43 sec*proc
+
+recovery = 138.43 sec*proc
+

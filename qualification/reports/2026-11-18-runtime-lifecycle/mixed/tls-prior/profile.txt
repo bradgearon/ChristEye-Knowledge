@@ -1,0 +1,6 @@
+ANAIERO-MIXED-MESH-QUALIFICATION/1
+cycles=32
+engine_families=5
+empty_source_epochs=8
+maximum_ack_p99_ns=60000000000
+maximum_samples_per_phase=1024

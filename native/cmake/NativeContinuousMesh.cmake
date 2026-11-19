@@ -41,6 +41,7 @@ if(ANAIERO_ENABLE_MESH AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/mesh/native_me
     add_executable(anaiero_continuous_mesh_tests tests/continuous_mesh_tests.cpp)
     anaiero_sdk_target(anaiero_continuous_mesh_tests)
     target_include_directories(anaiero_continuous_mesh_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+    target_compile_definitions(anaiero_continuous_mesh_tests PRIVATE ${anaiero_builtin_definitions})
     target_link_libraries(anaiero_continuous_mesh_tests PRIVATE anaiero_mesh_native anaiero_native_session anaiero_engine_files OpenSSL::SSL OpenSSL::Crypto)
     add_dependencies(anaiero_continuous_mesh_tests ce_modular_host)
     if(WIN32)
@@ -49,6 +50,9 @@ if(ANAIERO_ENABLE_MESH AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/mesh/native_me
     add_test(NAME anaiero_mesh_continuous COMMAND anaiero_continuous_mesh_tests
       ${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_BINARY_DIR}/continuous-mesh-tests $<TARGET_FILE:ce_modular_host> transport)
     set_tests_properties(anaiero_mesh_continuous PROPERTIES TIMEOUT 180)
+    add_test(NAME anaiero_mesh_mixed_campaign COMMAND anaiero_continuous_mesh_tests
+      ${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_BINARY_DIR}/mixed-mesh-tests $<TARGET_FILE:ce_modular_host> mixed)
+    set_tests_properties(anaiero_mesh_mixed_campaign PROPERTIES TIMEOUT 300 LABELS "qualification;mesh;mixed")
     add_test(NAME anaiero_mesh_host_cli COMMAND anaiero_continuous_mesh_tests
       ${CMAKE_CURRENT_SOURCE_DIR}/.. ${CMAKE_CURRENT_BINARY_DIR}/continuous-mesh-cli-tests $<TARGET_FILE:ce_modular_host> host-cli)
     set_tests_properties(anaiero_mesh_host_cli PROPERTIES TIMEOUT 180 SKIP_RETURN_CODE 77)

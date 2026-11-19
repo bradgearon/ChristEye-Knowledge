@@ -9,7 +9,7 @@ namespace {
 constexpr std::string_view active_kind="lifecycle.active",source_kind="lifecycle.source",
   fence_kind="lifecycle.fence",peer_kind="lifecycle.peer",subscription_kind="lifecycle.subscription",
   pin_kind="lifecycle.pin",maintenance_kind="lifecycle.maintenance",floor_kind="lifecycle.floor",
-  range_kind="lifecycle.range",object_kind="lifecycle.object";
+  range_kind="lifecycle.range",object_kind="lifecycle.object",continuation_kind="lifecycle.continuation";
 Result failure(Code code,std::string message){return {code,std::move(message)};}
 void guard(ev::CommitBatch& batch,std::string_view kind,std::string_view key,const ev::StoredRecord& previous) {
   batch.guards.push_back({std::string(kind),std::string(key),previous.revision,previous.digest});
@@ -40,6 +40,9 @@ std::vector<Digest> active_references(const Active& active) {
 }
 bool lease_valid(std::uint64_t until,std::uint64_t now,std::uint64_t maximum) {
   return until>now&&until-now<=maximum;
+}
+std::vector<Digest> continuation_references(const BootstrapContinuation& c){
+  std::vector<Digest> refs{c.checkpoint_sha256};if(c.tip.sequence)refs.push_back(c.tip.payload_sha256);return refs;
 }
 std::string range_key(const SourceRef& source,std::uint64_t end) {
   const auto digits=number(end);return source_key(source)+":"+std::string(20-digits.size(),'0')+digits;
@@ -152,6 +155,17 @@ struct Service::Impl {
         return failure(Code::busy,"an active subscription still needs the requested history");
       if(batch)guard(*batch,subscription_kind,sha256(id),stored);
     }
+    for(const auto& id:active.pins){
+      Pin pin;ev::StoredRecord stored;if(auto result=load(pin_kind,sha256(id),pin,stored);!result)return result;
+      if(pin.kind!=PinKind::bootstrap_continuation)continue;
+      BootstrapContinuation continuation;ev::StoredRecord captured;
+      if(auto result=load(continuation_kind,sha256(id),continuation,captured);!result)return result;
+      if(continuation.phase!=BootstrapContinuationPhase::pending)return bad("active continuation has a terminal outcome");
+      if(SourceRef{continuation.source.source_uid,continuation.source.epoch}==request.source&&request.expire_through&&
+         request.expire_through>=std::max<std::uint64_t>(1,continuation.tip.sequence))
+        return failure(Code::busy,"a pending bootstrap continuation retains this tip and every later observation");
+      if(batch)guard(*batch,continuation_kind,sha256(id),captured);
+    }
     return {};
   }
   Result ensure_unpinned(const Active& active,const MaintenanceRequest& request) const {
@@ -171,6 +185,36 @@ struct Service::Impl {
     if(!reader.done())return bad("invalid source object witness");
     return last_sequence<=request.expire_through?Result{}:failure(Code::conflict,"object extends beyond the requested expiry boundary");
   }
+  Result release_continuation(Active& active,ev::CommitBatch& batch,std::string_view id,BootstrapContinuationPhase phase) const {
+    BootstrapContinuation continuation;ev::StoredRecord captured;const auto key=sha256(id);
+    if(auto r=load(continuation_kind,key,continuation,captured);!r)return r;
+    if(continuation.id!=id)return bad("continuation identity mismatch");
+    if(continuation.phase!=BootstrapContinuationPhase::pending)return {};
+    Pin pin;ev::StoredRecord pinned;if(auto r=load(pin_kind,key,pin,pinned);!r)return r;
+    if(!contains(active.pins,id)||pin.kind!=PinKind::bootstrap_continuation||pin.owner!=continuation.principal||
+       pin.objects!=continuation_references(continuation)||pinned.record.references!=pin.objects)
+      return bad("continuation resource protection differs from its captured contract");
+    continuation.phase=phase;erase(active.pins,id);
+    guard(batch,pin_kind,key,pinned);put(batch,pin_kind,key,encode(pin),{},true);
+    guard(batch,continuation_kind,key,captured);put(batch,continuation_kind,key,encode(continuation));
+    if(!add(active.protected_revision)||!add(active.subscription_revision))return failure(Code::capacity,"continuation revision exhausted");
+    return {};
+  }
+  Result expire_continuations(Active& active,ev::CommitBatch& batch,std::uint64_t now,std::string_view invalidated_principal={}) const {
+    const auto ids=active.pins;
+    for(const auto& id:ids){
+      Pin pin;ev::StoredRecord pinned;if(auto r=load(pin_kind,sha256(id),pin,pinned);!r)return r;
+      if(pin.kind!=PinKind::bootstrap_continuation)continue;
+      BootstrapContinuation continuation;ev::StoredRecord captured;if(auto r=load(continuation_kind,sha256(id),continuation,captured);!r)return r;
+      Peer peer;ev::StoredRecord authority_record;const auto found=load(peer_kind,sha256(continuation.principal),peer,authority_record);
+      if(!found)return found;
+      if(continuation.principal!=invalidated_principal&&continuation.lease_until_unix_s>now&&
+         contains(active.peers,continuation.principal)&&peer.phase==PeerPhase::active&&peer.expires_unix_s>now&&
+         peer.generation==continuation.credential_generation)continue;
+      if(auto r=release_continuation(active,batch,id,BootstrapContinuationPhase::expired);!r)return r;
+    }
+    return {};
+  }
 };
 
 Service::Service(ev::ICommitStore& store,Options options,IArchiveStore* archive)
@@ -188,7 +232,8 @@ Result Service::open(){
   const auto& options=impl_->options;
   if(options.max_active_sources==0||options.max_metrics==0||options.max_active_peers==0||
      options.max_active_subscriptions==0||options.max_pins==0||options.max_pin_objects==0||
-     options.maximum_lease_seconds==0)return failure(Code::invalid,"lifecycle bounds must be nonzero");
+     options.maximum_lease_seconds==0||options.max_bootstrap_continuations==0||options.max_bootstrap_continuations>15)
+    return failure(Code::invalid,"lifecycle bounds must be nonzero and pending bootstrap capacity must not exceed fifteen");
   Active active;ev::StoredRecord record;if(auto result=impl_->active(active,record);!result)return result;
   for(const auto& expected:active.view.sources){Source actual;ev::StoredRecord stored;
     if(auto result=impl_->source(expected.id,actual,stored);!result)return result;
@@ -206,6 +251,14 @@ Result Service::open(){
     if(auto result=impl_->load(pin_kind,sha256(id),pin,stored);!result)return result;
     if(pin.id!=id||pin.objects.size()>impl_->options.max_pin_objects||!unique_digests(pin.objects)||
        stored.record.references!=pin.objects)return bad("invalid protected root directory entry");
+    if(pin.kind==PinKind::bootstrap_continuation){
+      BootstrapContinuation continuation;ev::StoredRecord captured;
+      if(auto r=impl_->load(continuation_kind,sha256(id),continuation,captured);!r)return r;
+      if(continuation.id!=id||continuation.phase!=BootstrapContinuationPhase::pending||pin.owner!=continuation.principal||
+         pin.objects!=continuation_references(continuation)||pin.expires_unix_s!=continuation.lease_until_unix_s)
+        return bad("active bootstrap continuation protection is inconsistent");
+      if(++active.view.pending_bootstraps>options.max_bootstrap_continuations)return bad("pending bootstrap directory exceeds configured capacity");
+    }
   }
   for(const auto& id:active.peers){Peer peer;ev::StoredRecord stored;
     if(auto result=impl_->load(peer_kind,sha256(id),peer,stored);!result)return result;
@@ -220,9 +273,30 @@ Result Service::open(){
   }
   return {};
 }
+Result Service::capacity(CapacityStatus& out) const {
+  const auto info=impl_->store.info();out={};
+  out.generation=info.generation;out.accounted_bytes=info.physical_bytes;
+  out.maximum_bytes=info.maximum_bytes;out.ordinary_limit_bytes=info.ordinary_limit_bytes;
+  out.maintenance_reserve_bytes=info.maintenance_reserve_bytes;
+  out.pending_reclamation_bytes=info.pending_reclamation_bytes;
+  out.writable=info.writable;out.index_ready=info.index_ready;
+  // Saturating subtraction keeps an unreadable index or already-exhausted
+  // restored store from advertising fictitious unsigned-wraparound capacity.
+  if(info.writable&&info.index_ready){
+    if(info.physical_bytes<info.ordinary_limit_bytes)
+      out.ordinary_remaining_bytes=info.ordinary_limit_bytes-info.physical_bytes;
+    if(info.physical_bytes<info.maximum_bytes)
+      out.maintenance_remaining_bytes=info.maximum_bytes-info.physical_bytes;
+  }
+  return {};
+}
 Result Service::snapshot(Snapshot& out) const {
   Active active;ev::StoredRecord record;const auto result=impl_->active(active,record);
-  if(result)out=std::move(active.view);
+  if(result){
+    for(const auto& id:active.pins){Pin pin;ev::StoredRecord stored;if(auto r=impl_->load(pin_kind,sha256(id),pin,stored);!r)return r;
+      if(pin.kind==PinKind::bootstrap_continuation)++active.view.pending_bootstraps;}
+    out=std::move(active.view);
+  }
   return result;
 }
 Result Service::source(const SourceRef& ref,Source& out) const {ev::StoredRecord record;return impl_->source(ref,out,record);}
@@ -424,6 +498,7 @@ Result Service::upsert_peer(const Peer& peer,std::uint64_t expected,std::uint64_
     if(auto result=impl_->read("lifecycle.bootstrap",sha256(id),bootstrap,found);!result)return result;
     if(found&&!bootstrap.record.tombstone){guard(batch,"lifecycle.bootstrap",sha256(id),bootstrap);put(batch,"lifecycle.bootstrap",sha256(id),{}, {},true);}
   }
+  if(auto result=impl_->expire_continuations(active,batch,now,peer.principal);!result)return result;
   if(!add(active.subscription_revision))return failure(Code::capacity,"subscription revision exhausted");
   guard(batch,peer_kind,sha256(peer.principal),old_record);put(batch,peer_kind,sha256(peer.principal),encode(peer));
   if(auto result=impl_->save_active(batch,active,previous);!result)return result;
@@ -546,6 +621,7 @@ Result Service::expire_subscriptions(std::uint64_t now,std::string operation) {
     ev::StoredRecord bootstrap;bool found=false;if(auto result=impl_->read("lifecycle.bootstrap",key,bootstrap,found);!result)return result;
     if(found&&!bootstrap.record.tombstone){guard(batch,"lifecycle.bootstrap",key,bootstrap);put(batch,"lifecycle.bootstrap",key,{}, {},true);}
   }
+  if(auto result=impl_->expire_continuations(active,batch,now);!result)return result;
   if(!add(active.subscription_revision))return failure(Code::capacity,"subscription revision exhausted");
   if(auto result=impl_->save_active(batch,active,previous);!result)return result;
   return impl_->commit(batch);
@@ -574,6 +650,7 @@ Result Service::expire_peer_leases(std::uint64_t now,std::string operation) {
     if(auto result=impl_->read("lifecycle.bootstrap",key,bootstrap,found);!result)return result;
     if(found&&!bootstrap.record.tombstone){guard(batch,"lifecycle.bootstrap",key,bootstrap);put(batch,"lifecycle.bootstrap",key,{}, {},true);}
   }
+  if(auto result=impl_->expire_continuations(active,batch,now);!result)return result;
   if(!add(active.subscription_revision)||!add(active.protected_revision))return failure(Code::capacity,"lifecycle revision exhausted");
   if(auto result=impl_->save_active(batch,active,previous);!result)return result;
   return impl_->commit(batch);
@@ -597,6 +674,7 @@ Result Service::put_pin(const Pin& pin,std::uint64_t expected,std::uint64_t now,
     if(!decode(record.record.payload,old))return bad("invalid retired pin");
   }
   if((record.revision?old.generation:0)!=expected)return failure(Code::conflict,"pin generation changed");
+  if(record.revision&&old.kind==PinKind::bootstrap_continuation)return failure(Code::invalid,"bootstrap protection identity cannot be reused as a generic pin");
   if(record.revision&&old.owner!=pin.owner)return failure(Code::unauthorized,"pin ownership is immutable");
   for(const auto& object:pin.objects){ev::BlobInfo info;if(auto result=impl_->store.blob_info(object,info);!result)return result;
     if(info.expired_generation)return failure(Code::history_expired,"cannot pin an expired object");
@@ -617,6 +695,7 @@ Result Service::release_pin(std::string_view id,std::uint64_t generation,std::st
   Active active;ev::StoredRecord previous;if(auto result=impl_->active(active,previous);!result)return result;
   Pin pin;ev::StoredRecord record;const auto key=sha256(id);if(auto result=impl_->load(pin_kind,key,pin,record);!result)return result;
   if(pin.generation!=generation)return failure(Code::conflict,"pin generation changed");
+  if(pin.kind==PinKind::bootstrap_continuation)return failure(Code::invalid,"release bootstrap protection through its atomic continuation cancellation");
   erase(active.pins,id);
   if(!add(active.protected_revision))return failure(Code::capacity,"protection revision exhausted");
   guard(batch,pin_kind,key,record);put(batch,pin_kind,key,encode(pin),{},true);
@@ -748,6 +827,136 @@ Result Service::execute_maintenance(std::string_view id,std::string operation) {
 }
 Result Service::replay_status(const SourceRef& ref,std::uint64_t after) const {return impl_->replay(ref,after);}
 
+Result Service::bootstrap_continuation(std::string_view id,BootstrapContinuation& out) const {
+  if(!valid_token(id,256))return failure(Code::invalid,"invalid bootstrap continuation identifier");
+  ev::StoredRecord stored;if(auto r=impl_->load(continuation_kind,sha256(id),out,stored);!r)return r;
+  return out.id==id?Result{}:bad("bootstrap continuation key differs from its identity");
+}
+Result Service::pending_bootstrap(std::string_view subscription,BootstrapContinuation& out) const {
+  Active active;ev::StoredRecord stored;if(auto r=impl_->active(active,stored);!r)return r;
+  for(const auto& id:active.pins){
+    Pin pin;ev::StoredRecord pinned;if(auto r=impl_->load(pin_kind,sha256(id),pin,pinned);!r)return r;
+    if(pin.kind!=PinKind::bootstrap_continuation)continue;
+    BootstrapContinuation captured;if(auto r=bootstrap_continuation(id,captured);!r)return r;
+    if(captured.subscription_id==subscription){out=std::move(captured);return {};}
+  }
+  return failure(Code::not_found,"no pending bootstrap for this subscription");
+}
+Result Service::stage_bootstrap_continuation(ev::CommitBatch& batch,const BootstrapContinuation& requested,std::uint64_t now){
+  BootstrapContinuation checked;if(!decode(encode(requested),checked)||requested.phase!=BootstrapContinuationPhase::pending||
+     !lease_valid(requested.lease_until_unix_s,now,impl_->options.maximum_lease_seconds))
+    return failure(Code::invalid,"invalid pending bootstrap identity, checkpoint or lease");
+  Active active;ev::StoredRecord previous;if(auto r=impl_->active(active,previous);!r)return r;
+  if(auto r=impl_->time(active,now);!r)return r;
+  const SourceRef ref{requested.source.source_uid,requested.source.epoch};
+  if(auto r=impl_->authority(active,requested.principal,now,&batch,source_key(ref),requested.lease_until_unix_s);!r)return r;
+  Peer peer;ev::StoredRecord peer_record;if(auto r=impl_->load(peer_kind,sha256(requested.principal),peer,peer_record);!r)return r;
+  if(peer.generation!=requested.credential_generation)return failure(Code::unauthorized,"bootstrap credential generation changed");
+  if(auto r=impl_->expire_continuations(active,batch,now);!r)return r;
+  std::size_t pending=0;
+  for(const auto& id:active.pins){Pin pin;ev::StoredRecord pinned;if(auto r=impl_->load(pin_kind,sha256(id),pin,pinned);!r)return r;
+    if(pin.kind!=PinKind::bootstrap_continuation)continue;
+    ++pending;BootstrapContinuation captured;ev::StoredRecord old;if(auto r=impl_->load(continuation_kind,sha256(id),captured,old);!r)return r;
+    if(captured.subscription_id==requested.subscription_id)return failure(Code::busy,"subscription already has a pending bootstrap continuation");
+  }
+  if(pending>=std::min<std::size_t>(15,impl_->options.max_bootstrap_continuations)||active.pins.size()>=impl_->options.max_pins)
+    return failure(Code::capacity,"pending bootstrap or protected-root capacity exhausted");
+  Source source;ev::StoredRecord source_record;if(auto r=impl_->source(ref,source,source_record);!r)return r;
+  if(source.identity!=requested.source||source.state_sha256!=requested.state_sha256||source.state_object_sha256!=requested.checkpoint_sha256||
+     Cursor{source.last_sequence,source.last_payload_sha256}!=requested.tip)
+    return failure(Code::conflict,"bootstrap capture does not match the exact current source");
+  Bytes bytes;if(auto r=impl_->store.get_blob(requested.checkpoint_sha256,bytes);!r)return r;
+  EngineIdentity decoded;EngineState state;
+  if(!decode_checkpoint(bytes,decoded,state)||decoded!=requested.source||checkpoint_digest(decoded,state)!=requested.checkpoint_sha256||
+     state_digest(state)!=requested.state_sha256||state.revision!=source.engine_revision||state.tick!=source.last_tick)
+    return bad("bootstrap capture checkpoint differs from its source state");
+  if(auto r=impl_->cursor(ref,requested.tip);!r)return r;
+  Subscription old;ev::StoredRecord subscription;const auto found=impl_->load(subscription_kind,sha256(requested.subscription_id),old,subscription);
+  if(!found&&found.code!=Code::not_found)return found;
+  if((found&&old.generation==std::numeric_limits<std::uint64_t>::max())||requested.generation!=(found?old.generation:0)+1||
+     (found&&(old.principal!=requested.principal||old.scope!=ref||old.acknowledged.sequence>requested.tip.sequence)))
+    return failure(Code::conflict,"bootstrap capture requires the next compatible subscription generation");
+  const auto key=sha256(requested.id);ev::StoredRecord pin_record,capture_record;bool exists=false;
+  if(auto r=impl_->read(pin_kind,key,pin_record,exists);!r)return r;
+  if(exists)return failure(Code::conflict,"bootstrap protection identity was already used");
+  if(auto r=impl_->read(continuation_kind,key,capture_record,exists);!r)return r;
+  if(exists)return failure(Code::conflict,"bootstrap continuation identity was already used");
+  const auto refs=continuation_references(requested);
+  if(refs.size()>impl_->options.max_pin_objects)return failure(Code::capacity,"bootstrap exceeds per-pin object capacity");
+  for(const auto& object:refs){ev::BlobInfo info;if(auto r=impl_->store.blob_info(object,info);!r)return r;
+    if(info.expired_generation||!info.present)return failure(Code::history_expired,"bootstrap captured resource is no longer retained");}
+  Pin pin{requested.id,requested.principal,PinKind::bootstrap_continuation,1,requested.lease_until_unix_s,refs};
+  guard(batch,pin_kind,key,pin_record);put(batch,pin_kind,key,encode(pin),refs);
+  guard(batch,continuation_kind,key,capture_record);put(batch,continuation_kind,key,encode(requested));
+  guard(batch,source_kind,source_key(ref),source_record);guard(batch,subscription_kind,sha256(requested.subscription_id),subscription);
+  active.pins.push_back(requested.id);
+  if(!add(active.protected_revision)||!add(active.subscription_revision))return failure(Code::capacity,"bootstrap protection revision exhausted");
+  return impl_->save_active(batch,active,previous);
+}
+Result Service::stage_cancel_bootstrap_continuation(ev::CommitBatch& batch,std::string_view id){
+  BootstrapContinuation captured;if(auto r=bootstrap_continuation(id,captured);!r)return r;
+  if(captured.phase!=BootstrapContinuationPhase::pending)return {};
+  Active active;ev::StoredRecord previous;if(auto r=impl_->active(active,previous);!r)return r;
+  if(auto r=impl_->release_continuation(active,batch,id,BootstrapContinuationPhase::cancelled);!r)return r;
+  return impl_->save_active(batch,active,previous);
+}
+Result Service::stage_revoke_bootstrap_scope(ev::CommitBatch& batch,std::string_view principal,const SourceRef& ref){
+  if(!valid_token(principal,256)||!valid_ref(ref))return failure(Code::invalid,"invalid bootstrap authority scope");
+  Active active;ev::StoredRecord previous;if(auto r=impl_->active(active,previous);!r)return r;
+  const auto ids=active.pins;bool changed=false;
+  for(const auto& id:ids){Pin pin;ev::StoredRecord pinned;if(auto r=impl_->load(pin_kind,sha256(id),pin,pinned);!r)return r;
+    if(pin.kind!=PinKind::bootstrap_continuation||pin.owner!=principal)continue;
+    BootstrapContinuation captured;if(auto r=bootstrap_continuation(id,captured);!r)return r;
+    if(SourceRef{captured.source.source_uid,captured.source.epoch}!=ref)continue;
+    if(auto r=impl_->release_continuation(active,batch,id,BootstrapContinuationPhase::expired);!r)return r;
+    changed=true;
+  }
+  if(changed)return impl_->save_active(batch,active,previous);
+  guard(batch,active_kind,"state",previous);return {};
+}
+Result Service::stage_accept_bootstrap_continuation(ev::CommitBatch& batch,std::string_view id,const Bootstrap& request,std::uint64_t now){
+  BootstrapContinuation captured;if(auto r=bootstrap_continuation(id,captured);!r)return r;
+  if(captured.phase!=BootstrapContinuationPhase::pending||captured.lease_until_unix_s<=now)
+    return failure(Code::expired,"bootstrap continuation is no longer pending within its lease");
+  EngineState state;if(auto r=decode_state(request.snapshot,state);!r)return r;
+  if(encode_state(state)!=request.snapshot||request.subscription_id!=captured.subscription_id||request.principal!=captured.principal||
+     request.generation!=captured.generation||request.lease_until_unix_s!=captured.lease_until_unix_s||
+     request.scope!=SourceRef{captured.source.source_uid,captured.source.epoch}||request.tip!=captured.tip||
+     request.snapshot_sha256!=captured.state_sha256||state_digest(state)!=captured.state_sha256||
+     checkpoint_digest(captured.source,state)!=captured.checkpoint_sha256)
+    return failure(Code::conflict,"bootstrap handoff differs from its captured checkpoint contract");
+  Active active;ev::StoredRecord previous;if(auto r=impl_->active(active,previous);!r)return r;
+  if(auto r=impl_->time(active,now);!r)return r;
+  if(auto r=impl_->authority(active,request.principal,now,&batch,source_key(request.scope),request.lease_until_unix_s);!r)return r;
+  Peer peer;ev::StoredRecord peer_record;if(auto r=impl_->load(peer_kind,sha256(request.principal),peer,peer_record);!r)return r;
+  if(peer.generation!=captured.credential_generation)return failure(Code::unauthorized,"bootstrap capture belongs to an invalidated credential generation");
+  Source source;ev::StoredRecord source_record;if(auto r=impl_->source(request.scope,source,source_record);!r)return r;
+  if(source.identity!=captured.source||source.engine_revision<state.revision||source.last_tick<state.tick||source.last_sequence<captured.tip.sequence)
+    return failure(Code::conflict,"source changed identity or regressed after bootstrap capture");
+  if(auto r=impl_->cursor(request.scope,request.tip);!r)return r;
+  if(auto r=impl_->replay(request.scope,request.tip.sequence);!r)return r;
+  Bytes checkpoint;if(auto r=impl_->store.get_blob(captured.checkpoint_sha256,checkpoint);!r)return r;
+  if(checkpoint!=encode_checkpoint(captured.source,state))return bad("captured bootstrap checkpoint bytes changed");
+  Subscription old;ev::StoredRecord subscription;const auto key=sha256(request.subscription_id);
+  const auto found=impl_->load(subscription_kind,key,old,subscription);if(!found&&found.code!=Code::not_found)return found;
+  if((found&&old.generation==std::numeric_limits<std::uint64_t>::max())||request.generation!=(found?old.generation:0)+1||
+     (found&&(old.principal!=request.principal||old.scope!=request.scope||old.acknowledged.sequence>request.tip.sequence)))
+    return failure(Code::conflict,"subscription changed or advanced beyond the captured bootstrap");
+  if(!contains(active.subscriptions,request.subscription_id)){
+    if(active.subscriptions.size()>=impl_->options.max_active_subscriptions)return failure(Code::capacity,"active subscription capacity exhausted at bootstrap handoff");
+    active.subscriptions.push_back(request.subscription_id);
+  }
+  if(auto r=impl_->release_continuation(active,batch,id,BootstrapContinuationPhase::accepted);!r)return r;
+  Subscription accepted{request.subscription_id,request.principal,request.scope,request.generation,request.lease_until_unix_s,
+    SubscriptionPhase::active,request.tip,{},false};
+  guard(batch,subscription_kind,key,subscription);put(batch,subscription_kind,key,encode(accepted));
+  ev::StoredRecord installed;bool exists=false;if(auto r=impl_->read("lifecycle.bootstrap",key,installed,exists);!r)return r;
+  guard(batch,"lifecycle.bootstrap",key,installed);put(batch,"lifecycle.bootstrap",key,
+    pack({"bootstrap/2",encode(accepted),captured.state_sha256,captured.checkpoint_sha256,number(now)}),{captured.checkpoint_sha256});
+  guard(batch,source_kind,source_key(request.scope),source_record);
+  return impl_->save_active(batch,active,previous);
+}
+
 Result Service::accept_bootstrap(const Bootstrap& request,std::uint64_t now,std::string operation) {
   if(!valid_token(request.subscription_id,256)||!valid_token(request.principal,256)||!valid_ref(request.scope)||
      !valid_cursor(request.tip)||!valid_digest(request.snapshot_sha256)||sha256(request.snapshot)!=request.snapshot_sha256)
@@ -856,6 +1065,7 @@ Result Service::reauthorize_restore(std::string_view witness,std::string operati
   // Global authority invalidation is atomic and bounded. Historical peer and
   // subscription records remain queryable but no longer grant any capability.
   active.view.sources.clear();active.view.metrics.clear();active.peers.clear();active.subscriptions.clear();
+  if(auto result=impl_->expire_continuations(active,batch,active.last_unix_s);!result)return result;
   active.quarantined=false;active.recovery_policy_sha256=std::string(witness);
   if(!add(active.subscription_revision)||!add(active.protected_revision))return failure(Code::capacity,"lifecycle revision exhausted");
   if(auto result=impl_->save_active(batch,active,previous);!result)return result;

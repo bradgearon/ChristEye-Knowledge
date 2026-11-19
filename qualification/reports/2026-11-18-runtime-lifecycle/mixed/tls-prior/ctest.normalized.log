@@ -1,0 +1,26 @@
+Start testing: Nov 19 03:07 UTC
+----------------------------------------------------------
+18/43 Testing: anaiero_mesh_mixed_campaign
+18/43 Test: anaiero_mesh_mixed_campaign
+Command: "<build>/anaiero_continuous_mesh_tests" "<repository>/native/.." "<build>/mixed-mesh-tests" "<build>/ce_modular_host" "mixed"
+Directory: <build>
+"anaiero_mesh_mixed_campaign" start time: Nov 19 03:07 UTC
+Output:
+----------------------------------------------------------
+expired: subscription cannot resume
+<end of output>
+Test time =  41.38 sec
+----------------------------------------------------------
+Test Failed.
+"anaiero_mesh_mixed_campaign" end time: Nov 19 03:08 UTC
+"anaiero_mesh_mixed_campaign" time elapsed: 00:00:41
+----------------------------------------------------------
+
+End testing: Nov 19 03:08 UTC
+
+mesh =  41.38 sec*proc
+
+mixed =  41.38 sec*proc
+
+qualification =  41.38 sec*proc
+

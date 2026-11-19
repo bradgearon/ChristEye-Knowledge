@@ -63,5 +63,38 @@ void deferred_filesystem_admission(){
   std::ifstream input(tmp.path/"nodes"/root,std::ios::binary);const std::string preserved{std::istreambuf_iterator<char>(input),{}};
   expect(preserved=="unrelated bytes","failed CAS never overwrites existing bytes");
 }
+void bulk_sorted_base(){
+  for(const auto count:{0U,1U,2U,3U,128U,257U}){
+    Temporary tmp("bulk-"+std::to_string(count));storage::SealedIndex index(tmp.path/"nodes");
+    const auto root=index.build_sorted(count,[](std::uint64_t i){return std::make_pair("ordered/"+storage::number(i),"value-"+std::to_string(i));});
+    expect(files(tmp.path/"nodes")==count&&index.stats.nodes_written==count&&index.stats.staged_spills==0,
+      "bulk build writes exactly one reachable file per ordered row");
+    storage::SealedIndex reader(tmp.path/"nodes");reader.audit(root);
+    for(unsigned i=0;i<count;++i){bool found=false;expect(reader.get(root,"ordered/"+storage::number(i),found)=="value-"+std::to_string(i)&&found,"median construction preserves exact value");}
+    if(count){bool rejected=false;try{index.build_sorted(0,{});}catch(const storage::Failure& e){rejected=e.code==sdk::Code::conflict;}
+      expect(rejected,"bulk build cannot replace an active index directory");}
+  }
+  Temporary invalid("invalid-bulk");storage::SealedIndex index(invalid.path/"nodes");bool rejected=false;
+  try{(void)index.build_sorted(5,[](std::uint64_t i){return std::make_pair(std::to_string(5-i),"outside ordering");});}
+  catch(const storage::Failure& e){rejected=e.code==sdk::Code::corrupt;}
+  expect(rejected,"unsorted source fails full audit before bulk root can be published");
 }
-int main(){try{spill_and_shared_nodes();byte_bound();publication_cuts();deferred_filesystem_admission();std::cout<<"bounded index staging, spill, shared-node cleanup, publication cuts and deferred filesystem admission passed\n";return 0;}catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}
+void admission_cache_reuse(){
+  Temporary tmp("admission-reuse");storage::SealedIndex index(tmp.path/"nodes");sdk::Digest root;
+  index.begin();for(unsigned i=0;i<96;++i)root=index.put(root,key(i),"original");
+  index.publish_cleanup(root);index.finish_cleanup(root);
+  index.begin();bool found=false;expect(index.get(root,key(48),found)=="original"&&found,"admission verifies an existing path");
+  const auto reads=index.stats.nodes_read;index.begin_publication();
+  expect(index.get(root,key(48),found)=="original"&&found&&index.stats.nodes_read==reads,
+    "publication reuses the already verified immutable admission path");
+  expect(index.stats.admission_cache_nodes_reused>0,"reused admission nodes are observable");
+  const auto next=index.put(root,key(48),"updated");
+  bool rejected=false;try{index.begin_publication();}catch(const storage::Failure& e){rejected=e.code==sdk::Code::conflict;}
+  expect(rejected,"a second admission handoff cannot discard pending publication changes");
+  index.publish_cleanup(next);index.finish_cleanup(next);index.audit(next);
+  storage::SealedIndex reopened(tmp.path/"nodes");reopened.audit(next);
+  for(unsigned i=0;i<96;++i)expect(reopened.get(next,key(i),found)==(i==48?"updated":"original")&&found,
+    "reused cache publication retains all values across fresh reader and audit");
+}
+}
+int main(){try{spill_and_shared_nodes();byte_bound();publication_cuts();deferred_filesystem_admission();admission_cache_reuse();bulk_sorted_base();std::cout<<"bounded index staging, spill, publication cuts, cache reuse and sorted bulk index verified\n";return 0;}catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}

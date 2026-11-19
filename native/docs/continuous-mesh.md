@@ -306,36 +306,56 @@ next subscription generation. It installs the original source checkpoint plus
 a durable relay cursor atomically; it does not invent received observations or
 acknowledge delivery of expired original events.
 
-First stop B's follower. Pause A, wait for the PAUSE ticket to complete and for
-`STATUS` to show no pending cycle. Keep the source quiescent through offer,
-installation and acceptance: a changed source tip/checkpoint makes the transfer
-conflict explicitly. For the existing `env-feed` generation `1`:
+First stop B's follower so the bootstrap command can acquire B's local store.
+A may continue producing throughout the transfer. Its offer captures the exact
+checkpoint and replay tip in one canonical commit. Later source observations
+remain available from that captured boundary. For an existing `env-feed`
+generation `1`:
 
 ```bash
-anaiero host query "$mesh_a_endpoint" PAUSE
-# Inspect RESULT for the returned ticket, then STATUS before continuing.
 anaiero mesh-live bootstrap "$mesh_b_store" "$mesh_client_config" node-b node-a "$mesh_a_pin" source-environment 1 env-feed 1 "$mesh_lease" next 2
 anaiero mesh-live follow "$mesh_b_store" "$mesh_client_config" node-b node-a "$mesh_a_pin" source-environment 1 env-feed 2 "$mesh_lease" through 0
 ```
 
-Resume A with `RUN` from another terminal after bootstrap acceptance. A completed
-bootstrap prints `BOOTSTRAP_INSTALLED RECEIPT_SHA GENERATION STORE_GENERATION`.
+A completed bootstrap prints `BOOTSTRAP_INSTALLED RECEIPT_SHA GENERATION STORE_GENERATION`.
 If the final acceptance reply was lost, repeat the identical bootstrap request;
 the receiver's durable installation is reconciled with the sender rather than
 advancing again. Installation alone is distinct from a completed network
 acceptance exchange.
 
-A bootstrap reader pin protects its checkpoint until acceptance or explicit
-release. After cancelling the relevant transport, trusted local maintenance
-can release a known abandoned offer with:
+Each pending offer consumes one of 15 continuation slots and one ordinary
+protected-root slot. Its typed pin holds the checkpoint and the captured tip's
+payload (when nonempty); the lifecycle service also prevents maintenance from
+expiring the replay suffix. An empty initial stream captures sequence zero and
+protects replay beginning with sequence one. Repeating the same offer request
+returns the original capture even if the producer has moved on.
+
+Acceptance rechecks the principal, credential generation, source identity,
+subscription generation, lease and retained history. It atomically installs
+the checkpoint/real subscription and releases the pending protection. A lost
+acceptance reply can be retried without resetting a subsequently acknowledged
+cursor. A competing subscription generation or exhausted active-subscription
+capacity rejects the handoff and leaves the pending protection intact.
+
+After cancelling the relevant transport, trusted local maintenance can release
+a known abandoned offer with:
 
 ```text
 anaiero mesh-live admin ENDPOINT cancel-bootstrap OFFER_ID OPERATION
 ```
 
-Lease expiry alone does not assert that a reader released its resources. The
-current CLI does not provide an offer-listing command; use a retained offer ID
-from SDK inspection rather than inventing one.
+An elapsed lease immediately blocks handoff. A committed peer/subscription
+expiry sweep releases the typed pin and slot. Credential rotation/revocation,
+scoped bootstrap/send withdrawal and restore reauthorization also invalidate
+pending contracts. Their compact outcome metadata remains queryable without
+retaining orphaned payloads. Ordinary reader pins still require explicit
+release. `lifecycle::Service::pending_bootstrap(subscription_id, ...)` finds an
+active offer; `bootstrap_continuation(offer_id, ...)` also reads terminal outcomes.
+
+Offers already prepared by older packages retain their original checkpoint-only
+pin and latest-tip acceptance contract. If their source advanced, cancel the
+old offer and issue a new one with a fresh lease; new captures use the live
+continuation contract. The wire format remains unchanged.
 
 ## Limits, retention and recovery
 
@@ -463,3 +483,20 @@ control are outside this protocol. Native integration tests exercise shared
 session commits, parallel handshakes, slow ACKs, ALPN rejection, artifact
 verification, bootstrap/retry, revocation and local IPC; sustained release
 soaks and device power-loss qualification remain separately declared gates.
+
+### Mixed-host ACK timing and disturbance qualification
+
+`NativeServerOptions::acknowledgement_observer` is an optional borrowed,
+thread-safe, nonblocking sink. One successful sample spans the start of the
+exact offered-page write through canonical acceptance of its matching ACK. It
+includes receiver commit and network waiting. Failed, expired, revoked and
+mismatched ACKs do not become successful latency samples. The observer cannot
+reenter the transport or store. No raw protocol bytes or credentials are exposed.
+
+The separate `anaiero_mesh_mixed_campaign` qualification runs five real sender
+engine families with slow/offline peers, replay, explicit subscription renewal
+after certificate rotation, revocation, receiver retention, canonical compaction
+and bounded empty-source churn. It reports local dispatch/queue/commit/projection
+and remote ACK distributions independently. See the [mixed qualification guide](../../qualification/native/MIXED.md#five-engine-tls-disturbance-qualification)
+for workload and evidence boundaries. A short passing campaign does not replace
+the elapsed operating profiles or filesystem-pressure qualification.

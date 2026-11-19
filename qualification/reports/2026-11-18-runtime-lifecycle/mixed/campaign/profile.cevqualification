@@ -1,0 +1,24 @@
+ANAIEROMIXEDQUALIFICATION/2
+name=native-mixed-campaign-ci
+storage_label=CI ephemeral filesystem; hardware unspecified
+cycles=32
+period_ms=2
+restart_after_cycle=16
+checkpoint_cycles=8
+blocked_lane_ms=25
+minimum_run_ms=0
+maximum_run_ms=180000
+maximum_store_bytes=536870912
+maximum_disk_bytes=1073741824
+maximum_files=200000
+maximum_resident_bytes=268435456
+maximum_status_p99_us=100000
+maximum_control_p99_us=5000000
+maximum_probe_p99_us=5000000
+maximum_reopen_us=20000000
+maximum_lookup_nodes=128
+maximum_dispatch_p99_us=5000000
+maximum_queue_p99_us=5000000
+maximum_step_commit_p99_us=5000000
+maximum_projection_p99_us=1000000
+required_device_class=any

@@ -4,7 +4,9 @@ The `evidence-*` and `ci-smoke` profiles qualify a **synthetic canonical evidenc
 and lifecycle workload**. They measure the actual native store, indexed reads,
 recovery and lifecycle services. They do not run the five-engine application mix
 or authenticate a remote peer. The separate [mixed host profiles](MIXED.md) run
-all five compiled engine families through the continuous host; authenticated
+all five compiled engine families through the continuous host. The
+[scale/lifecycle profiles](SCALE.md) combine throughput, returning and newly
+introduced source identities, receiver retention and canonical compaction; authenticated
 transport has its own native integration tests. Passing a short profile does not
 establish a 24-hour daemon soak or a seven-day release gate.
 
@@ -36,6 +38,13 @@ and output paths before starting the workload.
 | `ci-smoke.cevqualification` | 256 | 4 | 128, 256 | 128 MiB | 256 MiB | 256 MiB |
 | `evidence-100k.cevqualification` | 100,000 | 100 | 10,000, 100,000 | 2 GiB | 4 GiB | 512 MiB |
 | `evidence-1m.cevqualification` | 1,000,000 | 100 | 10,000, 100,000, 1,000,000 | 16 GiB | 32 GiB | 512 MiB |
+
+The new `evidence-10k-exact`, `evidence-100k-exact` and `evidence-1m-exact`
+profiles use `ANAIEROQUALIFICATION/2` and explicitly declare
+`latency_gate=exact-nearest-rank-threshold/1`. Their numeric latency limits are
+unchanged. Original version 1 profiles remain byte-for-byte unchanged and retain
+the original conservative histogram gate. Every new report identifies its
+selected gate and includes both exact threshold counts and the legacy bound.
 
 The file contains the complete numeric gates, including commit/lookup p99,
 reopen time, maximum files and index-node visits. The parser requires every
@@ -73,10 +82,16 @@ The JSON report includes:
 
 - Exact profile SHA-256 and compiled source/build identity; native OS/kernel,
   compiler, architecture, filesystem identifier and logical processor count.
-- Batch-commit latency and point-query latency using a fixed 65-bucket base-2
+- Exact counts above each inclusive latency limit, plus batch-commit latency
+  and point-query latency using a fixed 65-bucket base-2
   histogram. The p50/p95/p99 fields are **upper bounds**, not exact percentile
   interpolations. The selected bucket ceiling is capped by the exact observed
   maximum; minimum and maximum samples are exact monotonic durations.
+- Disjoint native commit-stage timings for lock waiting, validation, staging,
+  blob persistence, transaction persistence, canonical ROOT publication, derived
+  index publication and staging cleanup. Each fixed-memory histogram also
+  records a saturating duration sum with an explicit saturation flag. Timing is
+  opt-in on the native store and leaves canonical bytes/publication order intact.
 - Ingestion time for preparing/committing throughput batches. Total wall time
   additionally includes queries, reopens, inventories, lifecycle churn and
   full audit. The batch-commit histogram excludes lifecycle administration.
@@ -93,14 +108,19 @@ The JSON report includes:
   operating system's process high-water mark, including the harness.
 - Canonical accounted bytes, logical regular-file bytes, allocated regular-file
   bytes and file count at each checkpoint and after lifecycle churn. The
-  allocation inventory excludes directory, journal and filesystem metadata.
-  It is a sampled store inventory, not an instrumented peak during every write.
+  regular-file budget keeps its original scope. Directory counts and allocated
+  directory bytes are reported separately on Linux; Windows explicitly marks
+  directory allocation unavailable. Allocation-unit size, volume-wide free
+  bytes and free file-node counts where available expose additional pressure.
+  Filesystem journals and inode-table costs are not attributed to the store.
+  Inventories are sampled rather than instrumented peaks during every write.
 
-Allocation counts, device IOPS, CPU wakeups, host dispatch/projection latency
-and remote-ACK latency distributions are not measured by this executable.
-The continuous host and mesh expose bounded wake/page/byte/queue counters;
-their functional tests establish ordering and progress within their fixtures.
-They do not substitute for those missing deployment measurements.
+Process allocator counts and device IOPS remain unmeasured. Native commit-stage
+elapsed time identifies the expensive stage but does not by itself distinguish
+CPU work, filesystem delay and host scheduling. The mixed path separately
+measures host dispatch, queue wait, durable step commit and projection. Real TLS
+ACK timing belongs to the mesh disturbance campaign; synthetic throughput never
+claims a remote transport measurement.
 
 ### Percentile estimator
 
@@ -122,11 +142,49 @@ retain their original bucket-only estimates and original pass/fail decisions.
 They are not rewritten or retroactively reclassified; the corrected estimator
 requires fresh execution with its exact source/build identity recorded.
 
+## Exact threshold decisions and device declarations
+
+For `n` measured durations, an inclusive percentile limit at percentile `p`
+passes exactly when the number strictly above the limit is no greater than
+`n - ceil(n*p/100)`. At p99 this is `floor(n/100)`. A 100-sample run may have one
+sample above the limit; a 99-sample run may have none. Equality with the limit
+passes. Empty samples cannot qualify. This requires three fixed-width counters,
+not retained per-sample timing history. Independent sorted-sample oracle tests
+cover all percentiles, rounding boundaries, inclusive equality and overflow-safe
+rank calculation. The displayed logarithmic quantile remains an upper bound.
+
+Version 2 profiles require an exact retained `ANAIERODEVICE/1` declaration before
+output creation. It declares name, shared/dedicated class, machine, processor,
+host-visible physical memory, storage device/firmware/controller, filesystem,
+mount options, durability policy, dependencies and concurrent work. All fields
+are required; duplicates and unknown fields reject. A declaration is operator
+input and is not independent attestation of exclusivity or firmware.
+
+The CMake capture helper records visible OS/CPU/memory information and marks
+unavailable properties explicitly. Shared-runner defaults are diagnostic.
+Dedicated declarations require explicit values for every deployment-specific
+field. CMake reports physical memory in MiB; the helper records bytes at that
+resolution ([CMake documentation](https://cmake.org/cmake/help/v3.20/command/cmake_host_system_information.html)).
+
+```text
+cmake -DANAIERO_DEVICE_OUTPUT=build/device.cevdevice -DANAIERO_DEVICE_NAME=shared-preflight -P native/cmake/CaptureNativeDevice.cmake
+cmake "-DANAIERO_BUILD_DIR=build/native" "-DANAIERO_PROFILE=qualification/native/evidence-100k-exact.cevqualification" "-DANAIERO_DEVICE=build/device.cevdevice" "-DANAIERO_OUTPUT=build/exact-100k" -P native/cmake/RunNativeQualification.cmake
+```
+
+Capture or supply the declaration before execution. The command preserves its
+original bytes and SHA256 beside the profile. New `anaiero.native-qualification/2`
+reports include the exact decision and the historical upper-bound result side by
+side, plus stage timing and allocation detail. Passing an exact threshold does
+not rewrite a previously failed version 1 result. Selecting a different declared
+method is separate from improving storage performance.
+
 ## CI and release evidence
 
-`native-modular.yml` runs the smoke profile as a native CTest and runs the
-100,000-observation/100-epoch profile separately on Windows and Linux. It retains
-the report, exact profile, build manifest and native test logs. The package gate
+`native-modular.yml` tests both profile versions and runs the new exact-gate
+100,000-observation/100-epoch profile separately on Windows and Linux. It captures
+a shared-runner device declaration before execution and retains its exact bytes
+with the report, profile, build manifest and native test logs. This is a new
+versioned acceptance method; historical results remain unchanged. The package gate
 installs the distribution and rejects modified files, additional files and a
 different declared builtin identity. `native-mesh.yml` separately requires real
 native TLS and local IPC for authenticated shared-session integration.
@@ -166,3 +224,23 @@ quota rejection, verifies exact orderly restart, and preserves pinned inputs and
 measured reports. The short CI profile is a functional operating check; its
 24-hour/seven-day profiles enforce actual measured duration and remain unachieved
 until complete reports are retained for a declared deployment.
+
+## Provisioning for history and compaction
+
+The synthetic runner checks for at least `4 × observations + 128` available
+file nodes before opening its store: one distinct payload and at least three
+index rows per observation. The [maintenance profile](SCALE.md) checks
+`7 × observations + 128` because both the current index and its replacement
+can coexist during compaction. These are necessary lower bounds in these
+workloads, not sufficient volume sizes. Filesystem free bytes, configured
+store and work limits, directory allocation, retained history and other users
+of the volume still matter. Where the filesystem exposes no comparable free
+file-node count the report says so; byte gates remain active. A failed
+preflight retains inputs, the requirement, measured capacity and the reason;
+no observation or latency sample is attributed to that attempt.
+
+[Campaign operation](MIXED.md) covers durable create/resume/status, the
+real TLS fixture, the isolated full-filesystem experiment and the dedicated
+elapsed-duration profiles. The [CE-SW-41 evidence record](../reports/2026-11-18-runtime-lifecycle/README.md)
+distinguishes development diagnostics from qualification of a particular
+checkout, machine or duration.

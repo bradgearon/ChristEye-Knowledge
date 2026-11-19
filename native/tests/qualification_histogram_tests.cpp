@@ -10,6 +10,7 @@
 
 namespace {
 using anaiero::qualification::Histogram;
+using anaiero::qualification::ThresholdCounter;
 using Samples=std::vector<std::uint64_t>;
 void expect(bool value,const std::string& message){if(!value)throw std::runtime_error(message);}
 
@@ -98,11 +99,38 @@ void unchanged_two_second_gate(){
          outlier_histogram.percentile_upper_ns(100)>budget_ns,
          "percentiles retain their selected ranks instead of becoming the maximum");
 }
+void exact_threshold_oracle(){
+  for(std::size_t count=1;count<=301;++count){
+    Samples values;for(std::size_t i=0;i<count;++i)values.push_back((i*17+count)%113);
+    std::sort(values.begin(),values.end());
+    for(const auto limit:{0ULL,1ULL,50ULL,100ULL,112ULL,113ULL}){
+      ThresholdCounter counter{limit};for(const auto value:values)counter.add(value);
+      expect(counter.count==count,"threshold exact sample count");
+      expect(counter.exceeded==static_cast<std::uint64_t>(std::count_if(values.begin(),values.end(),[&](auto value){return value>limit;})),"threshold exact inclusive count");
+      for(unsigned percentile=1;percentile<=100;++percentile){
+        const auto rank=(count*percentile+99)/100;
+        expect(counter.passes(percentile)==(values[rank-1]<=limit),"exact threshold agrees with independently sorted nearest rank");
+      }
+    }
+  }
+  expect(!ThresholdCounter{1}.passes(99),"empty samples cannot qualify");
+  ThresholdCounter boundary{2000000000};Histogram coarse;
+  for(unsigned i=0;i<99;++i){boundary.add(1990000000);coarse.add(1990000000);}
+  boundary.add(3540000000);coarse.add(3540000000);
+  expect(boundary.passes(99)&&boundary.exceeded==1&&boundary.allowed_exceedances(99)==1,
+    "one outlier among one hundred is beyond the nearest-rank p99");
+  expect(coarse.percentile_upper_ns(99)>boundary.limit_ns,"exact counter distinguishes an ambiguous logarithmic bucket");
+  boundary.add(3540000000);expect(!boundary.passes(99),"two exceedances among101 fail unchanged2second limit");
+  expect(!boundary.passes(0)&&!boundary.passes(101),"invalid percentile cannot qualify");
+  const auto maximum=std::numeric_limits<std::uint64_t>::max();
+  ThresholdCounter large{maximum,maximum,0};expect(large.allowed_exceedances(99)==maximum/100&&large.passes(99),"rank math does not multiply large count by99");
+  Histogram sum;sum.add(maximum);sum.add(1);expect(sum.sum_saturated&&sum.sum_ns==maximum,"diagnostic sum saturates explicitly");
+}
 }
 
 int main(){
   try{
-    edges_and_rounding();unchanged_two_second_gate();
+    edges_and_rounding();unchanged_two_second_gate();exact_threshold_oracle();
     std::cout<<"bounded percentile oracle, integer edges, nearest-rank rounding and unchanged latency gate passed\n";
     return 0;
   }catch(const std::exception& error){std::cerr<<error.what()<<'\n';return 1;}

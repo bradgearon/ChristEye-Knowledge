@@ -174,7 +174,9 @@ struct NativeServer::Impl {
       // Successful authority completion is the handoff boundary. Later
       // revocation cannot retract bytes already handed to this transport.
       if(auto result=submit(index,session.principal,sub.scope.uid,{1,8},true,[&](evidence::ICommitStore& store){Service service(store,options.service);return service.authorize_delivery(session,page,now());});!result)return result;
-      const auto payload=encode_delivery(page);if(auto result=write(connection,payload,options.io_timeout_ms);!result)return result;
+      const auto payload=encode_delivery(page);
+      const auto ack_started=options.acknowledgement_observer?std::chrono::steady_clock::now():std::chrono::steady_clock::time_point{};
+      if(auto result=write(connection,payload,options.io_timeout_ms);!result)return result;
       {std::lock_guard lock(mutex);++view.delivered_pages;view.delivered_bytes+=payload.size();view.charged_read_bytes+=charged.bytes;}
       std::vector<std::string> ack;if(auto result=fields(connection,ack,options.io_timeout_ms);!result)return result;
       std::uint64_t ack_generation=0,ack_sequence=0;
@@ -182,6 +184,9 @@ struct NativeServer::Impl {
         lifecycle::Cursor{ack_sequence,ack[3]}!=page.to)return fail(Code::conflict,"ACK differs from exact offered page");
       const auto acknowledged=submit(index,session.principal,sub.scope.uid,{1,1},true,[&](evidence::ICommitStore& store){Service service(store,options.service);return service.acknowledge(session,page,now());});
       if(!acknowledged.committed())return acknowledged;
+      if(options.acknowledgement_observer)options.acknowledgement_observer->observe({
+        static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now()-ack_started).count()),
+        page.generation,page.to.sequence});
       {std::lock_guard lock(mutex);++view.acknowledged_pages;}
       if(auto result=write(connection,pack({"acknowledged",number(page.to.sequence),page.to.payload_sha256}),options.io_timeout_ms);!result)return result;
     }

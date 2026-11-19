@@ -1,0 +1,18 @@
+{
+  "scope": "dirty working-tree diagnostic only; not acceptance or dedicated-device qualification",
+  "purpose": "10k compaction working headroom, allocation and runtime feasibility before million profile",
+  "started_utc": "2026-11-19T02:57:25.539443+00:00",
+  "base_commit": "d742d556b636cf21cdef34898fc30e5fff9c0729",
+  "executable_sha256": "a3636a08a2491f88938e4b9da20d8b31dce485da5282130ae48718636426dd1a",
+  "manifest_sha256": "f73228abbcba5310d705560c9ef39359938ed2dae9e136615523c5c19ac94554",
+  "source_changes_since_configure": [
+    "cmake/NativeCompatibility.cmake",
+    "cmake/NativeContinuousMesh.cmake",
+    "src/qualification/mixed_campaign.cpp",
+    "src/qualification/mixed_profile.cpp",
+    "src/qualification/mixed_qualification.hpp"
+  ],
+  "concurrent_work": "parallel compilation and independent diagnostic work",
+  "exit_code": 0,
+  "finished_utc": "2026-11-19T03:00:46.102583+00:00"
+}

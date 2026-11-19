@@ -16,11 +16,29 @@ public:
   virtual ~IStoreTaskExecutor()=default;
   virtual Result submit(StoreTask,StoreTaskCompletion)=0;
 };
+enum class TimingKind : std::uint32_t {step_dispatch,step_queue_wait,step_commit_completion,step_projection};
+struct TimingObservation {
+  TimingKind kind=TimingKind::step_dispatch;
+  std::uint64_t cycle=0,elapsed_ns=0;
+  Code result=Code::ok;
+};
+// Borrowed, bounded observation port invoked only on the host owner. It must
+// return immediately, never reenter the host/store or perform blocking I/O.
+// Dispatch spans preparation/submission. Queue wait spans submission through
+// writer entry. Commit spans actual writer execution, without owner wake delay.
+// Projection spans successful completion adoption by SessionService::pump.
+// These do not measure synchronous cycle-boundary/control commits or TLS ACKs.
+class ITimingObserver {
+public:
+  virtual ~ITimingObserver()=default;
+  virtual void observe(const TimingObservation&) noexcept=0;
+};
 struct Options {
   // Wall monotonic pacing is independent of each engine's logical clock.
   std::uint32_t period_ms=100;
   std::size_t command_capacity=32,task_capacity=16;
   bool initially_running=true;
+  ITimingObserver* timing_observer=nullptr;
 };
 enum class CommandKind : std::uint32_t {run,pause,through,engine_pause,engine_resume,engine_cancel};
 struct Command {

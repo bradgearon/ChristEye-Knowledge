@@ -1,0 +1,14 @@
+ANAIERODEVICE/1
+name=anaiero-shared-development
+device_class=shared
+machine=Linux 6.18.57 x86_64; host-visible memory rounded to MiB
+processor=Unknown P6 family
+memory_bytes=10451156992
+storage_device=Container overlay on shared host; physical device unavailable
+storage_firmware=unavailable on shared runner; not independently verified
+storage_controller=unavailable on shared runner; not independently verified
+filesystem=Linux overlay; native statfs identifier in report
+mount_options=Shared workspace mount; backing filesystem options unavailable
+durability=Native ordered publication; no hardware failure experiment
+dependencies=GCC native C++20 and retained build manifest; system C and C++ runtime
+concurrent_work=Concurrent compilation and other qualification diagnostics; not exclusive

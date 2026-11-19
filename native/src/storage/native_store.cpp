@@ -8,6 +8,9 @@
 #include <set>
 #include <random>
 #include <utility>
+#ifndef _WIN32
+#include <sys/statvfs.h>
+#endif
 
 namespace anaiero::storage {
 using namespace sdk::evidence;
@@ -17,6 +20,42 @@ constexpr std::size_t decode_limit=64U*1024U*1024U;
 constexpr auto index_coverage_name="INDEX-COVERAGE";
 constexpr std::string_view operation_epoch_prefix="__epoch/";
 constexpr std::size_t operation_logical_offset=operation_epoch_prefix.size()+17U;
+void require_file_capacity(const fs::path& path,std::uint64_t temporary,std::uint64_t reserve){
+#ifndef _WIN32
+  struct statvfs status{};
+  if(statvfs(path.c_str(),&status)!=0)throw Failure(Code::io_error,"cannot measure filesystem file-node headroom");
+  const auto available=static_cast<std::uint64_t>(status.f_favail);
+  if(status.f_files!=0&&available!=any_generation&&
+     (available<reserve||temporary>available-reserve))
+    throw Failure(Code::capacity,"filesystem file-node admission headroom exhausted; free bytes do not imply free file entries");
+#else
+  (void)path;(void)temporary;(void)reserve;
+#endif
+}
+using MonotonicClock=std::chrono::steady_clock;
+std::uint64_t nanoseconds(MonotonicClock::duration duration)noexcept{
+  return static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(duration).count());
+}
+class CommitMeasurement {
+  CommitTimings& result_;
+  MonotonicClock::time_point started_{},phase_started_{};
+  std::uint64_t CommitTimings::* phase_=&CommitTimings::validation_ns;
+public:
+  CommitMeasurement(CommitTimings& result,bool enabled):result_(result){
+    result_={};result_.enabled=enabled;
+    if(enabled)started_=phase_started_=MonotonicClock::now();
+  }
+  void phase(std::uint64_t CommitTimings::* next)noexcept{
+    if(!result_.enabled)return;
+    const auto now=MonotonicClock::now();
+    result_.*phase_+=nanoseconds(now-phase_started_);phase_started_=now;phase_=next;
+  }
+  ~CommitMeasurement(){
+    if(!result_.enabled)return;
+    const auto now=MonotonicClock::now();
+    result_.*phase_+=nanoseconds(now-phase_started_);result_.total_ns=nanoseconds(now-started_);
+  }
+};
 bool legacy_index_exists(const fs::path& store){
   const auto legacy=store/"INDEX";
   std::error_code ec;const auto status=fs::symlink_status(legacy,ec);
@@ -204,9 +243,11 @@ public:
   void fault(FaultPoint value)noexcept{fault_.store(value);}
   IndexStatistics stats()const noexcept {std::lock_guard lock(mutex_);return index_?index_->stats:IndexStatistics{};}
   void reset_stats()noexcept{std::lock_guard lock(mutex_);if(index_)index_->stats={};}
+  CommitTimings timings()const noexcept{std::lock_guard lock(mutex_);return timings_;}
 private:
   fs::path path_;
   StoreOptions options_;
+  CommitTimings timings_;
   mutable std::mutex mutex_;
   os::File writer_;
   Root root_;
@@ -230,7 +271,7 @@ private:
   bool operation(std::string_view,CommitReceipt&);
   std::uint64_t reference_count(const Digest&);
   Transaction transaction(std::uint64_t);
-  void apply_index(const Transaction&);
+  void apply_index(const Transaction&,bool preserve_admission=false);
   void save_index();
   void load_index();
   void recover_staging();
@@ -242,11 +283,12 @@ private:
   std::vector<std::pair<std::string,std::string>> base_page(const BasePage&);
   bool base_value(std::string_view,std::string&);
   std::string derived_base_value(const BasePage&,std::size_t,const std::pair<std::string,std::string>&);
+  Digest build_base_index(SealedIndex&,const CanonicalBase&);
   void initialize_index_from_base();
   void cleanup_compaction();
   void fill_compaction_report(CompactionReport&,bool=false)const;
   void compacted_rows(bool,const std::function<void(const std::pair<std::string,std::string>&)>&,std::uint64_t&,std::uint64_t&);
-  void preview_compaction_locked(const CompactionOptions&,CompactionPlan&);
+  void preview_compaction_locked(const CompactionOptions&,CompactionPlan&,std::uint64_t* working_files=nullptr);
   void replay_suffix();
   void inject(FaultPoint point){if(fault_.load()==point){fault_.store(FaultPoint::none);throw Failure(Code::io_error,"injected canonical crash cut");}}
   Result commit_locked(const CommitBatch&,CommitReceipt&,std::string_view reclaim={});
@@ -287,8 +329,20 @@ bool NativeStore::base_value(std::string_view key,std::string& out){
 void NativeStore::initialize_index_from_base(){
   index_root_.clear();index_generation_=0;index_canonical_.clear();
   if(root_.base.empty())return;
-  for(const auto& page:base_.pages){const auto rows=base_page(page);index_->begin();auto next=index_root_;for(std::size_t slot=0;slot<rows.size();++slot)next=index_->put(next,rows[slot].first,derived_base_value(page,slot,rows[slot]));index_->publish_cleanup(next);index_root_=next;index_->finish_cleanup(index_root_);}
+  index_root_=build_base_index(*index_,base_);
   index_generation_=base_.anchor.generation;index_canonical_=base_.anchor.digest;
+}
+Digest NativeStore::build_base_index(SealedIndex& target,const CanonicalBase& base){
+  std::vector<std::uint64_t> ends;ends.reserve(base.pages.size());std::uint64_t rows=0;
+  for(const auto& page:base.pages){rows+=page.rows;ends.push_back(rows);}
+  std::size_t loaded=base.pages.size();std::vector<std::pair<std::string,std::string>> cached;
+  return target.build_sorted(rows,[&](std::uint64_t ordinal){
+    const auto index=static_cast<std::size_t>(std::upper_bound(ends.begin(),ends.end(),ordinal)-ends.begin());
+    if(index>=base.pages.size())throw Failure(Code::corrupt,"bulk index lookup exceeded verified base");
+    const auto& page=base.pages[index];if(index!=loaded){cached=base_page(page);loaded=index;}
+    const auto slot=static_cast<std::size_t>(ordinal-(index?ends[index-1]:0));const auto& row=cached.at(slot);
+    return std::make_pair(row.first,derived_base_value(page,slot,row));
+  });
 }
 void NativeStore::fill_compaction_report(CompactionReport& report,bool already)const{
   report={};report.plan_digest=base_.plan_digest;report.canonical_base_digest=root_.base;report.generation=base_.anchor.generation;report.operation_epoch=base_.operation_epoch;report.accounted_bytes_before=base_.before_bytes;report.accounted_bytes_after=usage();report.removed_transaction_bytes=base_.removed_transaction_bytes;report.removed_index_bytes=base_.removed_index_bytes;report.summarized_record_versions=base_.summarized_records;report.expired_observations=base_.expired_observations;report.activated=!root_.base.empty();report.cleanup_complete=pending_reclamation_bytes_==0;report.already_complete=already;
@@ -330,7 +384,7 @@ void NativeStore::compacted_rows(bool expire_operations,const std::function<void
   each("r",[&](const auto& row){emit({row.first,encode_record(indexed_record(row.second))});});
   for(const auto family:{"t","v","x"})each(family,emit);
 }
-void NativeStore::preview_compaction_locked(const CompactionOptions& options,CompactionPlan& plan){
+void NativeStore::preview_compaction_locked(const CompactionOptions& options,CompactionPlan& plan,std::uint64_t* working_files){
   require_ready();if(!writable_)throw Failure(Code::busy,"canonical admission is stopped");
   if(!text_key(options.operation_id,256)||options.operation_id.starts_with("__storage/")||options.working_budget_bytes==0)throw Failure(Code::invalid,"invalid compaction operation/budget");
   if(root_.generation==0)throw Failure(Code::invalid,"empty canonical history has no prefix to compact");
@@ -344,6 +398,8 @@ void NativeStore::preview_compaction_locked(const CompactionOptions& options,Com
   const auto workspace=std::min<std::uint64_t>(rows,128U)*(height+4U)*largest_node*4U+65536U;
   if(row_bytes>any_generation-index_bytes||row_bytes+index_bytes>any_generation-workspace)throw Failure(Code::capacity,"compaction working size overflow");
   plan.required_working_bytes=row_bytes+index_bytes+workspace;
+  if(rows>(any_generation-32U)/2U)throw Failure(Code::capacity,"compaction file-node estimate exhausted");
+  if(working_files)*working_files=rows*2U+32U;
   plan.plan_digest=sha256(pack({"ANAIERO-COMPACTION-PLAN/1",options.operation_id,root_.store,number(root_.generation),root_.digest,root_.base,index_root_,number(options.working_budget_bytes),options.expire_operation_receipts?"1":"0",number(plan.next_operation_epoch),number(plan.required_working_bytes),number(plan.retained_records),number(plan.retained_blobs),number(plan.retained_operations),number(plan.summarized_record_versions),number(plan.expired_observations)}));
 }
 Result NativeStore::preview_compaction(const CompactionOptions& options,CompactionPlan& plan){std::lock_guard lock(mutex_);try{const auto stable_options=options;preview_compaction_locked(stable_options,plan);return {};}catch(const Failure& e){if(e.code==Code::corrupt){ready_=false;writable_=false;}return {e.code,e.what()};}catch(const std::exception& e){return {Code::io_error,e.what()};}}
@@ -351,11 +407,15 @@ Result NativeStore::execute_compaction(const CompactionPlan& supplied,Compaction
   std::lock_guard lock(mutex_);bool activated=false,staged=false;report={};
   try{
     if(!root_.base.empty()&&base_.plan_digest==supplied.plan_digest){cleanup_compaction();fill_compaction_report(report,true);return {};}
-    CompactionPlan plan;preview_compaction_locked(supplied.options,plan);
+    CompactionPlan plan;std::uint64_t working_files=0;preview_compaction_locked(supplied.options,plan,&working_files);
     if(!valid_digest(supplied.plan_digest)||plan.plan_digest!=supplied.plan_digest||plan.source_root!=supplied.source_root||plan.source_base!=supplied.source_base||plan.generation!=supplied.generation||plan.next_operation_epoch!=supplied.next_operation_epoch||plan.accounted_bytes_before!=supplied.accounted_bytes_before||plan.required_working_bytes!=supplied.required_working_bytes||plan.retained_records!=supplied.retained_records||plan.retained_blobs!=supplied.retained_blobs||plan.retained_operations!=supplied.retained_operations||plan.summarized_record_versions!=supplied.summarized_record_versions||plan.expired_observations!=supplied.expired_observations||plan.canonical_transactions_removed!=supplied.canonical_transactions_removed)throw Failure(Code::conflict,"compaction reviewed plan is stale or altered");
     AuditReport verified_history;audit_locked(verified_history);
     const auto used=usage();if(plan.required_working_bytes>plan.options.working_budget_bytes||used>options_.maximum_bytes||plan.required_working_bytes>options_.maximum_bytes-used)throw Failure(Code::capacity,"compaction requires declared temporary and total quota headroom");
     std::error_code space_error;const auto space=fs::space(path_,space_error);if(space_error||space.available<options_.minimum_free_bytes||plan.required_working_bytes>space.available-options_.minimum_free_bytes)throw Failure(Code::capacity,"compaction filesystem working headroom exhausted");
+    // The old index remains live until its replacement is verified. Reserve
+    // one replacement node and up to one bounded page per retained row, plus
+    // manifest, intent and publication files. Bulk construction has no COW spill.
+    require_file_capacity(path_,working_files,options_.minimum_free_file_nodes);
     directory(path_/"bases");directory(path_/"bases"/"pages");
     const auto old_index_bytes=index_->load(index_root_).bytes;
     const auto obsolete_bytes=root_.canonical_bytes-base_.anchor.canonical_bytes+base_.storage_bytes+old_index_bytes;
@@ -372,8 +432,8 @@ Result NativeStore::execute_compaction(const CompactionPlan& supplied,Compaction
     if(fs::is_symlink(target))throw Failure(Code::corrupt,"compaction index directory symlink rejected");
     std::error_code ec;fs::remove_all(target,ec);if(ec)throw Failure(Code::io_error,"cannot clear compaction index staging");directory(target);
     auto fresh_index=std::make_unique<SealedIndex>(target);Digest fresh_root;
-    for(const auto& page:verified.pages){const auto page_rows=base_page(page);fresh_index->begin();auto candidate=fresh_root;for(std::size_t slot=0;slot<page_rows.size();++slot)candidate=fresh_index->put(candidate,page_rows[slot].first,derived_base_value(page,slot,page_rows[slot]));fresh_index->publish_cleanup(candidate);fresh_root=candidate;fresh_index->finish_cleanup(fresh_root);}
-    fresh_index->audit(fresh_root);if(verified.storage_bytes+fresh_index->load(fresh_root).bytes>plan.required_working_bytes)throw Failure(Code::capacity,"compaction exceeded admitted working bytes");
+    fresh_root=build_base_index(*fresh_index,verified);
+    if(verified.storage_bytes+fresh_index->load(fresh_root).bytes>plan.required_working_bytes)throw Failure(Code::capacity,"compaction exceeded admitted working bytes");
     write_file(path_/"COMPACTION",intent(digest));inject(FaultPoint::compaction_after_base);
     Root published=root_;published.base=digest;write_file(path_/"ROOT",encode_root(published));root_=published;base_=std::move(verified);base_pages_.clear();for(std::size_t i=0;i<base_.pages.size();++i)base_pages_.emplace(base_.pages[i].digest,i);pending_reclamation_bytes_=obsolete_bytes;activated=true;
     index_directory_=fresh;index_=std::move(fresh_index);index_root_=fresh_root;index_generation_=root_.generation;index_canonical_=root_.digest;
@@ -435,20 +495,25 @@ void NativeStore::load_index(){
   }
 }
 void NativeStore::recover_staging(){
+  // A writer can die before renaming its first STAGING temporary. Its name
+  // is fixed and owned by the native writer; it is never canonical authority.
+  remove_file(path_/"STAGING.tmp");
   if(!regular_exists(path_/"STAGING"))return;
   const auto f=unseal(read_file(path_/"STAGING",decode_limit),"ANAIERO-STAGING/1");
   if(f.size()<3||f[0]!=root_.store)throw Failure(Code::corrupt,"invalid staging owner");
   const auto generation=parse_number(f[1]);
   if(generation>root_.generation){
     if(generation!=root_.generation+1||f[2]!=root_.digest)throw Failure(Code::corrupt,"staging predecessor mismatch");
-    for(std::size_t i=3;i<f.size();++i){if(!valid_digest(f[i]))throw Failure(Code::corrupt,"bad staged blob identity");remove_file(path_/"blobs"/f[i]);}
-    remove_file(path_/"transactions"/(number(generation)+".txn"));
+    for(std::size_t i=3;i<f.size();++i){if(!valid_digest(f[i]))throw Failure(Code::corrupt,"bad staged blob identity");remove_file(path_/"blobs"/f[i]);remove_file(path_/"blobs"/(f[i]+".tmp"));}
+    remove_file(path_/"transactions"/(number(generation)+".txn"));remove_file(path_/"transactions"/(number(generation)+".txn.tmp"));
+    remove_file(path_/"ROOT.tmp");
   }else if(generation!=root_.generation)throw Failure(Code::corrupt,"stale staging generation");
   remove_file(path_/"STAGING");
 }
-void NativeStore::apply_index(const Transaction& t){
+void NativeStore::apply_index(const Transaction& t,bool preserve_admission){
   if(t.root.generation!=index_generation_+1||t.predecessor!=index_canonical_)throw Failure(Code::corrupt,"noncontiguous canonical/index transition");
-  index_->begin();auto next=index_root_;
+  if(preserve_admission)index_->begin_publication();else index_->begin();
+  auto next=index_root_;
   const auto put=[&](const std::string& k,const std::string& v){next=index_->put(next,k,v);};
   for(std::size_t slot=0;slot<t.records.size();++slot){const auto& r=t.records[slot];const auto locator=pack({"record/1",number(t.root.generation),number(slot),r.digest});put(record_key(r.record.kind,r.record.key),locator);put(history_key(r),locator);}
   for(const auto& b:t.blobs){put("b"+b.digest,encode_blob(b));put("v"+number(b.ordinal),b.digest);}
@@ -509,8 +574,16 @@ std::uint64_t NativeStore::usage()const{
 StoreInfo NativeStore::info()const{
   std::lock_guard lock(mutex_);StoreInfo i;i.store_id=root_.store;i.generation=root_.generation;i.index_generation=index_generation_;i.blob_count=root_.blobs;i.record_count=root_.records;i.physical_bytes=usage();i.maximum_bytes=options_.maximum_bytes;i.maximum_batch_bytes=options_.maximum_batch_bytes;i.maintenance_reserve_bytes=std::min(options_.maintenance_reserve_bytes,options_.maximum_bytes/8U);i.ordinary_limit_bytes=options_.maximum_bytes-i.maintenance_reserve_bytes;i.root_digest=root_.digest;i.index_root=index_root_;i.writable=writable_;i.index_ready=ready_;i.canonical_base_generation=base_.anchor.generation;i.canonical_base_digest=root_.base;i.operation_epoch=base_.operation_epoch;i.admitted_unix_s=last_admitted_unix_s_;i.pending_reclamation_bytes=pending_reclamation_bytes_;return i;
 }
-Result NativeStore::commit(const CommitBatch& batch,CommitReceipt& receipt){std::lock_guard lock(mutex_);return commit_locked(batch,receipt);}
+Result NativeStore::commit(const CommitBatch& batch,CommitReceipt& receipt){
+  const auto waiting=options_.measure_commit_stages?MonotonicClock::now():MonotonicClock::time_point{};
+  std::lock_guard lock(mutex_);
+  const auto acquired=options_.measure_commit_stages?MonotonicClock::now():MonotonicClock::time_point{};
+  const auto result=commit_locked(batch,receipt);
+  if(options_.measure_commit_stages){timings_.lock_wait_ns=nanoseconds(acquired-waiting);timings_.total_ns+=timings_.lock_wait_ns;}
+  return result;
+}
 Result NativeStore::commit_locked(const CommitBatch& batch,CommitReceipt& receipt,std::string_view reclaim){
+  CommitMeasurement measurement(timings_,options_.measure_commit_stages);
   bool published=false,staged=false;receipt={};
   try{
     require_ready();if(!writable_)throw Failure(Code::busy,"canonical admission is stopped");
@@ -542,7 +615,7 @@ Result NativeStore::commit_locked(const CommitBatch& batch,CommitReceipt& receip
     const auto semantic_digest=reclaim.empty()?batch_digest(batch):sha256(pack({"ANAIERO-RECLAIM/1",std::string(reclaim)}));
     if(operation(batch.operation_id,receipt)){
       if(receipt.request_digest!=batch.request_digest||receipt.batch_digest!=semantic_digest)throw Failure(Code::conflict,"operation ID was already committed with different content");
-      receipt.duplicate=true;return {};
+      receipt.duplicate=true;timings_.duplicate=true;timings_.committed=true;timings_.generation=receipt.generation;return {};
     }
     const auto request_epoch=operation_epoch(batch.operation_id);
     if(request_epoch<base_.operation_epoch)throw Failure(Code::history_expired,"unknown operation predates the explicit receipt-history epoch; do not relabel a retry");
@@ -626,20 +699,30 @@ Result NativeStore::commit_locked(const CommitBatch& batch,CommitReceipt& receip
     std::error_code space_error;const auto space=fs::space(path_,space_error);
     if(used>budget||reserve>budget-used)throw Failure(Code::capacity,batch.commit_class==CommitClass::maintenance?"finite maintenance headroom exhausted; absolute byte quota still applies":"ordinary byte budget preserves maintenance headroom; retain less or review capacity");
     if(space_error||space.available<options_.minimum_free_bytes||reserve>space.available-options_.minimum_free_bytes)throw Failure(Code::capacity,"filesystem admission headroom exhausted");
+    const auto temporary_files=static_cast<std::uint64_t>(mutations)*(node_height+height_growth+2U)*4U+
+      static_cast<std::uint64_t>(new_blobs.size())+16U;
+    require_file_capacity(path_,temporary_files,options_.minimum_free_file_nodes);
     const auto system_seconds=std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     const auto admitted=options_.admission_clock?options_.admission_clock->unix_seconds():(system_seconds<0?0:static_cast<std::uint64_t>(system_seconds));
     if(admitted<last_admitted_unix_s_)throw Failure(Code::expired,"trusted admission clock precedes the durable time floor");
     for(const auto& a:batch.authorizations)if(a.not_after_unix_s!=0&&admitted>=a.not_after_unix_s)throw Failure(Code::expired,"authorization expired before serialized commit admission");
     tx.receipt.admitted_unix_s=admitted;raw=encode_transaction(tx);tx.root.digest=sha256(raw);tx.receipt.root_digest=tx.root.digest;
+    measurement.phase(&CommitTimings::staging_ns);
     std::vector<std::string> stage{root_.store,number(tx.root.generation),root_.digest};for(const auto* b:new_blobs)stage.push_back(b->digest);write_file(path_/"STAGING",seal("ANAIERO-STAGING/1",stage));staged=true;
+    measurement.phase(&CommitTimings::blobs_ns);
     for(const auto* b:new_blobs)write_file(path_/"blobs"/b->digest,b->bytes);
     inject(FaultPoint::after_objects);
+    measurement.phase(&CommitTimings::transaction_ns);
     write_file(path_/"transactions"/(number(tx.root.generation)+".txn"),raw);inject(FaultPoint::after_transaction);
+    measurement.phase(&CommitTimings::root_ns);
     write_file(path_/"ROOT",encode_root(tx.root));root_=tx.root;generation_.store(root_.generation);last_admitted_unix_s_=admitted;receipt=tx.receipt;published=true;
-    inject(FaultPoint::after_root);inject(FaultPoint::before_index);apply_index(tx);inject(FaultPoint::after_index);
+    timings_.committed=true;timings_.generation=receipt.generation;
+    inject(FaultPoint::after_root);inject(FaultPoint::before_index);
+    measurement.phase(&CommitTimings::index_ns);apply_index(tx,true);inject(FaultPoint::after_index);
+    measurement.phase(&CommitTimings::cleanup_ns);
     remove_file(path_/"STAGING");return {};
-  }catch(const Failure& e){if(staged){writable_=false;if(published)ready_=false;}if(e.code==Code::corrupt){ready_=false;writable_=false;}return {published?Code::committed_degraded:e.code,e.what()};}
-  catch(const std::exception& e){if(staged){writable_=false;if(published)ready_=false;}return {published?Code::committed_degraded:Code::io_error,e.what()};}
+  }catch(const Failure& e){if(staged){writable_=false;if(published)ready_=false;}if(e.code==Code::corrupt){ready_=false;writable_=false;}timings_.result=published?Code::committed_degraded:e.code;return {timings_.result,e.what()};}
+  catch(const std::exception& e){if(staged){writable_=false;if(published)ready_=false;}timings_.result=published?Code::committed_degraded:Code::io_error;return {timings_.result,e.what()};}
 }
 
 Result NativeStore::lookup_operation(std::string_view id,CommitReceipt& out){return read([&]{if(!operation(id,out)){const auto epoch=operation_epoch(id);if(epoch<base_.operation_epoch)throw Failure(Code::history_expired,"operation receipt is below the explicit retry-history epoch");if(epoch>base_.operation_epoch)throw Failure(Code::conflict,"operation epoch has not been activated");throw Failure(Code::not_found,"operation receipt absent");}});}
@@ -810,6 +893,7 @@ Result open_native_store(std::string_view directory,const StoreOptions& options,
 void set_native_store_fault(ICommitStore& store,FaultPoint fault)noexcept{if(auto* native=dynamic_cast<storage::NativeStore*>(&store))native->fault(fault);}
 IndexStatistics native_index_statistics(const ICommitStore& store)noexcept{if(const auto* native=dynamic_cast<const storage::NativeStore*>(&store))return native->stats();return {};}
 void reset_native_index_statistics(ICommitStore& store)noexcept{if(auto* native=dynamic_cast<storage::NativeStore*>(&store))native->reset_stats();}
+CommitTimings native_commit_timings(const ICommitStore& store)noexcept{if(const auto* native=dynamic_cast<const storage::NativeStore*>(&store))return native->timings();return {};}
 Result preview_native_compaction(ICommitStore& store,const CompactionOptions& options,CompactionPlan& plan){if(auto* native=dynamic_cast<storage::NativeStore*>(&store))return native->preview_compaction(options,plan);return {Code::unsupported,"compaction requires the native canonical store"};}
 Result execute_native_compaction(ICommitStore& store,const CompactionPlan& plan,CompactionReport& report){if(auto* native=dynamic_cast<storage::NativeStore*>(&store))return native->execute_compaction(plan,report);return {Code::unsupported,"compaction requires the native canonical store"};}
 Result resume_native_compaction(ICommitStore& store,CompactionReport& report){if(auto* native=dynamic_cast<storage::NativeStore*>(&store))return native->resume_compaction(report);return {Code::unsupported,"compaction requires the native canonical store"};}

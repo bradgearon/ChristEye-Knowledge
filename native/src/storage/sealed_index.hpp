@@ -1,6 +1,7 @@
 #pragma once
 #include "anaiero/sdk/evidence.hpp"
 #include <filesystem>
+#include <functional>
 #include <map>
 #include <set>
 #include <stdexcept>
@@ -28,6 +29,10 @@ public:
   Digest put(const Digest&,std::string key,std::string value);
   Node load(const Digest&);
   void begin();
+  void begin_publication();
+  // Build a new, unpublished tree directly from a verified ordered base.
+  // The caller owns the fresh directory, verifies the result, then publishes.
+  Digest build_sorted(std::uint64_t rows,const std::function<std::pair<std::string,std::string>(std::uint64_t)>& row_at);
   void discard_cache() noexcept;
   void publish_cleanup(const Digest&);
   void finish_cleanup(const Digest&);

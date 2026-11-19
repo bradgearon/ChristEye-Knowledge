@@ -27,7 +27,7 @@ std::string utf8(const std::filesystem::path& path){const auto bytes=path.generi
 void violation(Report& report,const std::string& message){if(std::find(report.violations.begin(),report.violations.end(),message)==report.violations.end())report.violations.push_back(message);}
 sdk::Result checkpoint(const Profile& profile,const std::string& directory,const ev::StoreOptions& options,
                        std::unique_ptr<ev::ICommitStore>& store,Report& report){
-  Checkpoint point;point.observations=report.observations;
+  Checkpoint point;point.observations=report.observations;point.lookup_threshold.limit_ns=profile.maximum_lookup_p99_us*1000;
   const auto prior=store->info();point.store_generation=prior.generation;point.accounted_bytes=prior.physical_bytes;
   // Reopen is measured before queries, so a warm in-process index cannot conceal
   // a full historical startup scan. Disk cache state remains explicitly uncontrolled.
@@ -46,7 +46,7 @@ sdk::Result checkpoint(const Profile& profile,const std::string& directory,const
     const auto sequence=1+((i*104729+17)%report.observations);
     ev::ObservationClaim claim;ev::reset_native_index_statistics(*store);const auto started=Clock::now();
     if(auto r=store->lookup_observation("qualification-throughput",1,sequence,claim);!r)return r;
-    point.lookup.add(elapsed(started));
+    const auto duration=elapsed(started);point.lookup.add(duration);point.lookup_threshold.add(duration);
     point.lookup_maximum_nodes=std::max(point.lookup_maximum_nodes,ev::native_index_statistics(*store).nodes_read);
     if(claim.sequence!=sequence||claim.source_uid!="qualification-throughput")return {sdk::Code::corrupt,"qualification point query returned another observation"};
   }
@@ -58,7 +58,9 @@ sdk::Result checkpoint(const Profile& profile,const std::string& directory,const
   if(auto r=measure_disk(directory,profile.maximum_files,point.disk);!r)return r;
   if(point.resources.peak_resident_bytes>profile.maximum_resident_bytes)violation(report,"process peak resident bytes exceed declared budget");
   if(point.disk.logical_bytes>profile.maximum_disk_bytes||point.disk.allocated_bytes>profile.maximum_disk_bytes)violation(report,"measured store disk bytes exceed declared budget");
-  if(point.lookup.percentile_upper_ns(99)>profile.maximum_lookup_p99_us*1000)violation(report,"historical lookup p99 upper bound exceeds declared budget");
+  if(profile.latency_gate==threshold_method){
+    if(!point.lookup_threshold.passes(99))violation(report,"exact historical lookup p99 exceeds declared budget");
+  }else if(point.lookup.percentile_upper_ns(99)>profile.maximum_lookup_p99_us*1000)violation(report,"historical lookup p99 upper bound exceeds declared budget");
   if(point.lookup_maximum_nodes>profile.maximum_lookup_nodes)violation(report,"historical point lookup visits exceed declared budget");
   if(point.reopen_ns>profile.maximum_reopen_us*1000)violation(report,"healthy reopen duration exceeds declared budget");
   if(point.reopen_nodes>profile.maximum_lookup_nodes)violation(report,"healthy reopen visits exceed declared index budget");
@@ -114,11 +116,19 @@ sdk::Result churn(ev::ICommitStore& store,const Profile& profile,Report& report)
 }
 sdk::Result run_profile(const Profile& profile,std::string_view directory,Report& report,std::function<void(std::uint64_t)> progress){
   report.profile=profile;report.started_utc=utc();const auto started=Clock::now();
+  report.commit_threshold.limit_ns=profile.maximum_commit_p99_us*1000;
   const auto run=[&]()->sdk::Result{
+    if(profile.latency_gate==threshold_method&&(!sdk::valid_digest(report.device_sha256)||report.device.name.empty()))
+      return {sdk::Code::invalid,"exact-gate qualification requires a pinned device declaration"};
     if(auto r=read_resources(report.before);!r)return r;
     if(auto r=read_environment(directory,report.environment);!r)return r;
+    if(auto r=measure_disk(directory,profile.maximum_files,report.admission_disk);!r)return r;
+    // Each distinct synthetic payload retains one blob and at least three
+    // sealed index nodes (blob identity, ordinal and observation identity).
+    report.minimum_file_nodes=profile.observations*4U+128U;
+    if(auto r=require_file_nodes(report.admission_disk,report.minimum_file_nodes);!r)return r;
     const auto store_path=utf8(native_path(directory)/"store");
-    ev::StoreOptions options;options.maximum_bytes=profile.maximum_store_bytes;
+    ev::StoreOptions options;options.maximum_bytes=profile.maximum_store_bytes;options.measure_commit_stages=true;
     std::unique_ptr<ev::ICommitStore> store;if(auto r=ev::open_native_store(store_path,options,store);!r)return r;
     if(store->info().generation!=0)return {sdk::Code::conflict,"qualification requires a fresh isolated store"};
     report.store_id=store->info().store_id;
@@ -141,13 +151,20 @@ sdk::Result run_profile(const Profile& profile,std::string_view directory,Report
         batch.observations.push_back({"qualification-throughput",1,sequence,digest,receipt_digest});
       }
       ev::CommitReceipt receipt;ev::reset_native_index_statistics(*store);
-      const auto commit_start=Clock::now();const auto committed=store->commit(batch,receipt);report.commit.add(elapsed(commit_start));
+      const auto commit_start=Clock::now();const auto committed=store->commit(batch,receipt);
+      const auto duration=elapsed(commit_start);report.commit.add(duration);report.commit_threshold.add(duration);
+      const auto timing=ev::native_commit_timings(*store);
+      report.durability.lock_wait.add(timing.lock_wait_ns);report.durability.validation.add(timing.validation_ns);
+      report.durability.staging.add(timing.staging_ns);report.durability.blobs.add(timing.blobs_ns);
+      report.durability.transaction.add(timing.transaction_ns);report.durability.root.add(timing.root_ns);
+      report.durability.index.add(timing.index_ns);report.durability.cleanup.add(timing.cleanup_ns);report.durability.total.add(timing.total_ns);
       if(!committed)return committed;
       const auto work=ev::native_index_statistics(*store);
       report.write_index_reads+=work.nodes_read;report.write_index_nodes+=work.nodes_written;
       report.staged_index_nodes+=work.staged_nodes;report.transient_nodes_elided+=work.transient_nodes_elided;
       report.index_spills+=work.staged_spills;report.index_peak_nodes=std::max(report.index_peak_nodes,work.cache_peak_nodes);
       report.index_peak_bytes=std::max(report.index_peak_bytes,work.cache_peak_bytes);
+      report.admission_cache_nodes_reused+=work.admission_cache_nodes_reused;
       report.ingestion_ns+=elapsed(ingest_start);
       report.observations+=count;++revision;
       if(progress)progress(report.observations);
@@ -166,7 +183,9 @@ sdk::Result run_profile(const Profile& profile,std::string_view directory,Report
     report.audit_generations=audit.generations;report.audit_records=audit.records;
     report.audit_canonical_records=audit.canonical_records_read;report.audit_index_nodes=audit.index_nodes_read;
     report.audit_passed=audited.ok();if(!audited)return audited;
-    if(report.commit.percentile_upper_ns(99)>profile.maximum_commit_p99_us*1000)violation(report,"batch commit p99 upper bound exceeds declared budget");
+    if(profile.latency_gate==threshold_method){
+      if(!report.commit_threshold.passes(99))violation(report,"exact batch commit p99 exceeds declared budget");
+    }else if(report.commit.percentile_upper_ns(99)>profile.maximum_commit_p99_us*1000)violation(report,"batch commit p99 upper bound exceeds declared budget");
     if(auto r=measure_disk(store_path,profile.maximum_files,report.final_disk);!r)return r;
     report.final_generation=store->info().generation;report.final_accounted_bytes=store->info().physical_bytes;
     if(report.final_disk.logical_bytes>profile.maximum_disk_bytes||report.final_disk.allocated_bytes>profile.maximum_disk_bytes)violation(report,"final store disk bytes exceed declared budget");

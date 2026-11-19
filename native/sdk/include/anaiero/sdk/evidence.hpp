@@ -116,6 +116,17 @@ struct IndexStatistics {
   std::uint64_t nodes_read=0,nodes_written=0,point_queries=0,range_queries=0;
   std::uint64_t staged_nodes=0,staged_spills=0,transient_nodes_elided=0;
   std::uint64_t cache_peak_nodes=0,cache_peak_bytes=0;
+  std::uint64_t admission_cache_nodes_reused=0;
+};
+// Optional, bounded measurements of the most recent native commit attempt.
+// Stages are disjoint monotonic durations. They describe software publication,
+// not a device power-loss guarantee. Failed/retried attempts remain explicit.
+struct CommitTimings {
+  std::uint64_t lock_wait_ns=0,validation_ns=0,staging_ns=0,blobs_ns=0;
+  std::uint64_t transaction_ns=0,root_ns=0,index_ns=0,cleanup_ns=0,total_ns=0;
+  std::uint64_t generation=0;
+  bool enabled=false,committed=false,duplicate=false;
+  Code result=Code::ok;
 };
 class IAdmissionClock {
 public:
@@ -134,6 +145,12 @@ struct StoreOptions {
   // Ordinary admission leaves min(this, maximum_bytes/8) for explicit bounded
   // maintenance. Maintenance itself still obeys the absolute maximum_bytes.
   std::uint64_t maintenance_reserve_bytes=16U*1024U*1024U;
+  // No callbacks or per-commit allocation; false avoids reading the clock.
+  bool measure_commit_stages=false;
+  // POSIX filesystems with a finite reported file-node pool retain this reserve
+  // in addition to the operation's bounded temporary-file estimate. Native
+  // Windows filesystems do not expose an equivalent pool through this adapter.
+  std::uint64_t minimum_free_file_nodes=128;
 };
 enum class FaultPoint : std::uint32_t {
   none,after_objects,after_transaction,after_root,before_index,after_index,
@@ -174,10 +191,15 @@ Result open_native_store(std::string_view directory,const StoreOptions&,
 void set_native_store_fault(ICommitStore&,FaultPoint) noexcept;
 IndexStatistics native_index_statistics(const ICommitStore&) noexcept;
 void reset_native_index_statistics(ICommitStore&) noexcept;
+CommitTimings native_commit_timings(const ICommitStore&) noexcept;
 Digest record_digest(const Record&);
 Digest batch_digest(const CommitBatch&);
 
-struct CommitCompletion {std::uint64_t ticket=0;Result result;CommitReceipt receipt;};
+struct CommitCompletion {
+  std::uint64_t ticket=0;Result result;CommitReceipt receipt;
+  // Process-local steady-clock timestamps; never persisted as event time.
+  std::uint64_t started_monotonic_ns=0,completed_monotonic_ns=0;
+};
 class ICommitQueue {
 public:
   virtual ~ICommitQueue()=default;

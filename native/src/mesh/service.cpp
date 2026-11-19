@@ -384,8 +384,21 @@ Result Service::authorize_bootstrap(const Session& session,const BootstrapOffer&
   ev::StoredRecord stored;if(auto result=impl_->store.latest("mesh.bootstrap.offer",offer.id,stored);!result)return result;
   if(stored.record.tombstone||stored.record.payload!=offer_metadata(offer))return fail(Code::unauthorized,"bootstrap offer was released or changed");
   lc::Pin pin;if(auto result=impl_->lifecycle.pin(offer.id,pin);!result)return result;
-  if(pin.owner!=session.principal||pin.generation!=1||pin.kind!=lc::PinKind::reader||pin.objects!=std::vector<Digest>{offer.checkpoint_sha256})
-    return fail(Code::unauthorized,"bootstrap protection no longer matches its offer");
+  lc::BootstrapContinuation continuation;const auto captured=impl_->lifecycle.bootstrap_continuation(offer.id,continuation);
+  if(captured){
+    std::vector<Digest> objects{offer.checkpoint_sha256};if(offer.tip.sequence)objects.push_back(offer.tip.payload_sha256);
+    if(continuation.phase!=lc::BootstrapContinuationPhase::pending||continuation.principal!=session.principal||
+       continuation.credential_generation!=session.credential_generation||continuation.source!=offer.source||
+       continuation.subscription_id!=offer.subscription_id||continuation.generation!=offer.generation||
+       continuation.lease_until_unix_s!=offer.lease_until_unix_s||continuation.tip!=offer.tip||
+       continuation.checkpoint_sha256!=offer.checkpoint_sha256||pin.kind!=lc::PinKind::bootstrap_continuation||pin.objects!=objects)
+      return fail(Code::unauthorized,"bootstrap continuation no longer matches its captured offer");
+  }else{
+    if(captured.code!=Code::not_found)return captured;
+    if(pin.kind!=lc::PinKind::reader||pin.objects!=std::vector<Digest>{offer.checkpoint_sha256})
+      return fail(Code::unauthorized,"legacy bootstrap reader protection no longer matches its offer");
+  }
+  if(pin.owner!=session.principal||pin.generation!=1)return fail(Code::unauthorized,"bootstrap pin ownership differs");
   lc::Subscription subscription;const auto loaded=impl_->lifecycle.subscription(offer.subscription_id,subscription);
   if(!loaded&&loaded.code!=Code::not_found)return loaded;
   if(offer.generation!=(loaded?subscription.generation:0)+1||(loaded&&(subscription.scope!=scope(offer.source)||subscription.principal!=session.principal)))
@@ -451,8 +464,12 @@ Result Service::configure_grant(const Grant& requested,std::uint64_t expected,st
   guard(batch,"mesh.grant",key,old);record(batch,"mesh.grant",key,encode_grant(requested));
   ev::StoredRecord binding;bool bound=false;if(auto result=read(impl_->store,"mesh.grant.binding",key,binding,bound);!result)return result;
   guard(batch,"mesh.grant.binding",key,binding);record(batch,"mesh.grant.binding",key,binding_payload);
-  ev::StoredRecord active;if(auto result=impl_->store.latest("lifecycle.active","state",active);!result)return result;
-  guard(batch,"lifecycle.active","state",active);
+  if(found&&previous.send&&previous.bootstrap&&(!requested.send||!requested.bootstrap)){
+    if(auto result=impl_->lifecycle.stage_revoke_bootstrap_scope(batch,requested.principal,scope(requested.source));!result)return result;
+  }else{
+    ev::StoredRecord active;if(auto result=impl_->store.latest("lifecycle.active","state",active);!result)return result;
+    guard(batch,"lifecycle.active","state",active);
+  }
   ev::CommitReceipt committed;return impl_->store.commit(batch,committed);
 }
 Result Service::subscribe(const Session& session,const lc::Subscription& requested,std::uint64_t now){
@@ -621,23 +638,41 @@ Result Service::offer_bootstrap(const Session& session,std::string id,std::uint6
   lc::Subscription sub;const auto existing=impl_->lifecycle.subscription(id,sub);
   if(!existing&&existing.code!=Code::not_found)return existing;
   if(generation!=(existing?sub.generation:0)+1||(existing&&(sub.principal!=session.principal||sub.scope!=source)))return fail(Code::conflict,"bootstrap must advance the authorized subscription generation");
+  lc::BootstrapContinuation pending;const auto pending_result=impl_->lifecycle.pending_bootstrap(id,pending);
+  if(pending_result&&pending.lease_until_unix_s>now){
+    if(pending.principal!=session.principal||pending.credential_generation!=session.credential_generation||pending.generation!=generation||
+       pending.lease_until_unix_s!=lease||pending.source!=grant_.source)
+      return fail(Code::busy,"subscription already has a different pending bootstrap contract");
+    Bytes checkpoint;if(auto result=impl_->store.get_blob(pending.checkpoint_sha256,checkpoint);!result)return result;
+    out={pending.id,pending.subscription_id,pending.generation,pending.lease_until_unix_s,pending.source,pending.tip,pending.checkpoint_sha256,std::move(checkpoint)};
+    return authorize_bootstrap(session,out,now);
+  }
+  if(!pending_result&&pending_result.code!=Code::not_found)return pending_result;
   lc::Source current;if(auto result=impl_->lifecycle.source(source,current);!result)return result;
+  if(current.identity!=grant_.source)return fail(Code::unauthorized,"bootstrap source differs from the current grant context");
   Bytes checkpoint;if(auto result=impl_->store.get_blob(current.state_object_sha256,checkpoint);!result)return result;
   if(checkpoint.size()>impl_->options.maximum_artifact_bytes)return fail(Code::capacity,"bootstrap checkpoint exceeds declared profile");
   out={operation("bootstrap",pack({id,number(generation),current.state_object_sha256,number(lease)})),std::move(id),generation,lease,current.identity,
     {current.last_sequence,current.last_payload_sha256},current.state_object_sha256,std::move(checkpoint)};
   ev::CommitReceipt previous;const auto found=impl_->store.lookup_operation(operation("bootstrap-offer",encode_bootstrap(out)),previous);
   if(found){ev::StoredRecord retained;if(auto result=impl_->store.latest("mesh.bootstrap.offer",out.id,retained);!result)return result;
-    return !retained.record.tombstone&&retained.record.payload==offer_metadata(out)?Result{}:fail(Code::expired,"bootstrap offer was released");}
+    if(retained.record.tombstone||retained.record.payload!=offer_metadata(out))return fail(Code::expired,"bootstrap offer was released");
+    // An expired/revoked typed offer retains its metadata, but no resource
+    // ownership. An old operation receipt cannot revive that contract.
+    lc::BootstrapContinuation original;const auto captured=impl_->lifecycle.bootstrap_continuation(out.id,original);
+    if(captured&&original.phase!=lc::BootstrapContinuationPhase::pending)return fail(Code::expired,"bootstrap continuation has a terminal outcome");
+    if(!captured&&captured.code!=Code::not_found)return captured;
+    return authorize_bootstrap(session,out,now);}
   if(found.code!=Code::not_found)return found;
-  lc::Pin pin{out.id,session.principal,lc::PinKind::reader,1,lease,{out.checkpoint_sha256}};
   AuthorizedStore guarded(impl_->store,authority);lc::Service guarded_lifecycle(guarded);
-  const auto pinned=guarded_lifecycle.put_pin(pin,0,now,operation("bootstrap-pin",encode_bootstrap(out)));
-  if(!pinned.committed())return pinned;
   ev::CommitBatch batch;batch.operation_id=operation("bootstrap-offer",encode_bootstrap(out));batch.request_digest=sha256(encode_bootstrap(out));
-  if(auto result=impl_->authorized(session,source,true,now,grant_,&batch);!result)return result;
-  record(batch,"mesh.bootstrap.offer",out.id,offer_metadata(out),{out.checkpoint_sha256});
-  ev::CommitReceipt receipt;return impl_->store.commit(batch,receipt);
+  lc::BootstrapContinuation continuation{out.id,out.subscription_id,session.principal,out.source,out.generation,out.lease_until_unix_s,
+    session.credential_generation,out.tip,out.checkpoint_sha256,current.state_sha256,lc::BootstrapContinuationPhase::pending};
+  if(auto result=guarded_lifecycle.stage_bootstrap_continuation(batch,continuation,now);!result)return result;
+  // The typed continuation pin owns resources. This metadata remains as an
+  // outcome witness after expiry/revocation without keeping orphaned bytes live.
+  record(batch,"mesh.bootstrap.offer",out.id,offer_metadata(out));
+  ev::CommitReceipt receipt;return guarded.commit(batch,receipt);
 }
 Result Service::install_bootstrap(const Session& session,const BootstrapOffer& input,std::uint64_t now,ReceiveReceipt& out){
   out={};BootstrapOffer offer;if(auto result=decode_bootstrap(encode_bootstrap(input),offer,impl_->options.maximum_artifact_bytes+65536);!result)return result;
@@ -675,8 +710,26 @@ Result Service::accept_bootstrap(const Session& session,const BootstrapOffer& of
   ev::StoredRecord stored;if(auto result=impl_->store.latest("mesh.bootstrap.offer",offer.id,stored);!result)return result;
   if(stored.record.payload!=offer_metadata(offer))return fail(Code::conflict,"bootstrap acceptance differs from the pinned offer");
   EngineIdentity identity;EngineState state;if(auto result=decode_checkpoint(offer.checkpoint,identity,state);!result)return result;
+  if(identity!=offer.source||sha256(offer.checkpoint)!=offer.checkpoint_sha256)return fail(Code::conflict,"bootstrap checkpoint differs from its offered identity");
   lc::Bootstrap bootstrap{offer.subscription_id,session.principal,offer.generation,offer.lease_until_unix_s,scope(offer.source),offer.tip,state_digest(state),encode_state(state)};
   AuthorizedStore store(impl_->store,authority);lc::Service lifecycle(store);
+  lc::BootstrapContinuation continuation;const auto captured=lifecycle.bootstrap_continuation(offer.id,continuation);
+  if(captured){
+    if(continuation.principal!=session.principal||continuation.credential_generation!=session.credential_generation)
+      return fail(Code::unauthorized,"bootstrap handoff belongs to a different credential generation");
+    ev::CommitBatch batch;batch.operation_id=operation("bootstrap-accepted",offer.id);batch.request_digest=sha256(encode_bootstrap(offer));
+    batch.commit_class=ev::CommitClass::maintenance;
+    ev::CommitReceipt previous;const auto committed=store.lookup_operation(batch.operation_id,previous);
+    if(committed)return previous.request_digest==batch.request_digest?Result{}:fail(Code::conflict,"bootstrap acceptance retry changed its exact offer");
+    if(committed.code!=Code::not_found)return committed;
+    if(stored.record.tombstone)return fail(Code::expired,"bootstrap offer was already released");
+    if(auto result=lifecycle.stage_accept_bootstrap_continuation(batch,offer.id,bootstrap,now);!result)return result;
+    guard(batch,"mesh.bootstrap.offer",offer.id,stored);
+    batch.records.push_back({"mesh.bootstrap.offer",offer.id,stored.record.payload,{},true});
+    ev::CommitReceipt receipt;return store.commit(batch,receipt);
+  }
+  if(captured.code!=Code::not_found)return captured;
+  // Retained pre-continuation offers keep their original latest-tip contract.
   const auto installed=lifecycle.accept_bootstrap(bootstrap,now,operation("bootstrap-accepted",offer.id));
   if(!installed.committed())return installed;
   return cancel_bootstrap(offer.id,operation("bootstrap-release",offer.id));
@@ -688,6 +741,15 @@ Result Service::cancel_bootstrap(std::string_view id,std::string operation_id){
   if(found)return previous.request_digest==request?Result{}:fail(Code::conflict,"bootstrap release operation changed");
   if(found.code!=Code::not_found)return found;
   ev::StoredRecord offered;bool offered_present=false;if(auto result=read(impl_->store,"mesh.bootstrap.offer",id,offered,offered_present);!result)return result;
+  lc::BootstrapContinuation continuation;const auto captured=impl_->lifecycle.bootstrap_continuation(id,continuation);
+  if(captured){
+    ev::CommitBatch batch;batch.operation_id=std::move(operation_id);batch.request_digest=request;batch.commit_class=ev::CommitClass::maintenance;
+    if(auto result=impl_->lifecycle.stage_cancel_bootstrap_continuation(batch,id);!result)return result;
+    if(offered_present){guard(batch,"mesh.bootstrap.offer",std::string(id),offered);batch.records.push_back({"mesh.bootstrap.offer",std::string(id),offered.record.payload,{},true});}
+    else record(batch,"mesh.bootstrap.cancelled",std::string(id),pack({"mesh-bootstrap-abandoned/2",std::string(id)}));
+    ev::CommitReceipt receipt;return impl_->store.commit(batch,receipt);
+  }
+  if(captured.code!=Code::not_found)return captured;
   if(offered_present){
     std::vector<std::string> metadata;if(!unpack(offered.record.payload,metadata,8,32768)||metadata.size()!=8||metadata[0]!="mesh-bootstrap-offer/2"||metadata[1]!=id)
       return fail(Code::corrupt,"invalid bootstrap offer metadata");

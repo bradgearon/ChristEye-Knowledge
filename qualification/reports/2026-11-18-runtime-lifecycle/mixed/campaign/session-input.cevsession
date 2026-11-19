@@ -1,0 +1,8 @@
+ANAIEROSESSION/1
+name modular-reference
+engine cells sw5 source-cells 1 1 "../cells/crest-blood-neural.cevatlas" "two-neurons.cevcells" 75 0 64 1
+engine colonies sim3 source-colonies 1 2 "../connected-gardens.cev" "-" 0 0 0 0
+engine program vlm source-plan 1 1 "../vlm/bread-first.cevplan" "../vlm/plan-garden.avlm" "../.."
+engine voltage passive source-voltage 1 1 "../scientific/passive-membrane.cevmodel" 25000 500
+engine environment environment source-environment 1 1 "../scientific/well-mixed-environment.cevmodel" 100000000 500
+end

@@ -53,5 +53,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: mesh-test-logs-${{ matrix.os }}
-          path: build/mesh/Testing/Temporary/*.log
+          path: |
+            build/mesh/Testing/Temporary/*.log
+            build/mesh/mixed-mesh-tests/mixed-mesh-report.json
+            build/mesh/mixed-mesh-tests/profile.txt
+            build/mesh/mixed-mesh-tests/session-input.cevsession
+            build/mesh/mixed-mesh-tests/session.definition
+            build/mesh/anaiero-builtin-manifest*.txt
           if-no-files-found: ignore

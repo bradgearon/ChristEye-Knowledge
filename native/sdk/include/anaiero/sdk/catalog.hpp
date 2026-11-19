@@ -3,9 +3,15 @@
 #include <memory>
 
 namespace anaiero::sdk {
+namespace host {class NativeSession;}
 class EngineModuleCatalog {
   struct Impl;
   std::unique_ptr<Impl> impl_;
+  // Only NativeSession can install an alias after validating the canonical
+  // exact-source compatibility binding. General SDK consumers cannot bypass
+  // the retained implementation digest through catalog registration.
+  friend class host::NativeSession;
+  Result allow_retained_module(std::string_view retained,std::string_view executing);
 public:
   explicit EngineModuleCatalog(std::size_t capacity=32);
   ~EngineModuleCatalog();

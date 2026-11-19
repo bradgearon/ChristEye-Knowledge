@@ -19,7 +19,7 @@ string(JSON restarted GET "${report}" audit restart_identity_verified)
 string(JSON identity GET "${report}" profile_sha256)
 string(JSON percentile_method GET "${report}" percentile_method)
 file(SHA256 "${ANAIERO_PROFILE}" expected_identity)
-if(NOT schema STREQUAL "anaiero.native-qualification/1" OR NOT passed OR NOT audited OR
+if(NOT schema STREQUAL "anaiero.native-qualification/2" OR NOT passed OR NOT audited OR
    NOT restarted OR NOT observations EQUAL 256 OR NOT epochs EQUAL 4 OR NOT active EQUAL 1 OR
    NOT identity STREQUAL expected_identity OR
    NOT percentile_method STREQUAL "log2-ceiling-capped-by-observed-maximum/1")
@@ -30,6 +30,18 @@ foreach(percentile p50_upper_ns p95_upper_ns p99_upper_ns)
   string(JSON upper_ns GET "${report}" commit "${percentile}")
   if(upper_ns GREATER maximum_ns)
     message(FATAL_ERROR "Reported commit ${percentile} exceeds its exact observed maximum")
+  endif()
+endforeach()
+string(JSON commit_count GET "${report}" commit samples)
+string(JSON threshold_count GET "${report}" commit_threshold samples)
+string(JSON gate GET "${report}" latency_gate_method)
+if(NOT threshold_count EQUAL commit_count OR NOT gate STREQUAL percentile_method)
+  message(FATAL_ERROR "Version1 profile lost its historical acceptance rule or exact threshold sample count")
+endif()
+foreach(stage lock_wait validation staging blobs transaction root index cleanup total)
+  string(JSON stage_count GET "${report}" durability_stages "${stage}" samples)
+  if(NOT stage_count EQUAL commit_count)
+    message(FATAL_ERROR "Durability stage ${stage} has missing or extra attempts")
   endif()
 endforeach()
 execute_process(COMMAND "${ANAIERO_QUALIFY}" run "${ANAIERO_PROFILE}" "${ANAIERO_OUTPUT}"

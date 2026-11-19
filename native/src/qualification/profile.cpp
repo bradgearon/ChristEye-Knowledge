@@ -27,7 +27,8 @@ void histogram(std::ostream& out,const Histogram& value){
   out<<"{\"samples\":"<<value.count<<",\"minimum_ns\":"<<value.minimum_ns
      <<",\"maximum_ns\":"<<value.maximum_ns<<",\"p50_upper_ns\":"<<value.percentile_upper_ns(50)
      <<",\"p95_upper_ns\":"<<value.percentile_upper_ns(95)
-     <<",\"p99_upper_ns\":"<<value.percentile_upper_ns(99)<<'}';
+     <<",\"p99_upper_ns\":"<<value.percentile_upper_ns(99)<<",\"sum_ns\":"<<value.sum_ns
+     <<",\"sum_saturated\":"<<(value.sum_saturated?"true":"false")<<'}';
 }
 void resources(std::ostream& out,const Resources& value){
   out<<"{\"resident_bytes\":"<<value.resident_bytes<<",\"peak_resident_bytes\":"<<value.peak_resident_bytes
@@ -41,6 +42,23 @@ void Histogram::add(std::uint64_t ns)noexcept{
   ++buckets[static_cast<std::size_t>(bucket)];
   if(count==0||ns<minimum_ns)minimum_ns=ns;
   maximum_ns=std::max(maximum_ns,ns);++count;
+  if(ns>std::numeric_limits<std::uint64_t>::max()-sum_ns){sum_ns=std::numeric_limits<std::uint64_t>::max();sum_saturated=true;}
+  else sum_ns+=ns;
+}
+void ThresholdCounter::add(std::uint64_t ns)noexcept{++count;if(ns>limit_ns)++exceeded;}
+std::uint64_t ThresholdCounter::allowed_exceedances(unsigned percent)const noexcept{
+  if(percent==0||percent>100)return 0;
+  const auto rank=(count/100)*percent+((count%100)*percent+99)/100;
+  return count-rank;
+}
+bool ThresholdCounter::passes(unsigned percent)const noexcept{
+  return count!=0&&percent!=0&&percent<=100&&exceeded<=allowed_exceedances(percent);
+}
+std::string threshold_json(const ThresholdCounter& value,unsigned percent){
+  std::ostringstream out;out<<"{\"method\":"<<json_quote(threshold_method)<<",\"percentile\":"<<percent
+    <<",\"limit_ns\":"<<value.limit_ns<<",\"samples\":"<<value.count<<",\"samples_above_limit\":"<<value.exceeded
+    <<",\"allowed_above_limit\":"<<value.allowed_exceedances(percent)<<",\"passed\":"<<(value.passes(percent)?"true":"false")<<'}';
+  return out.str();
 }
 std::uint64_t Histogram::percentile_upper_ns(unsigned percent)const noexcept{
   if(count==0)return 0;
@@ -63,7 +81,8 @@ sdk::Result parse_profile(std::string_view bytes,Profile& output){
   std::istringstream input{std::string(bytes)};std::string line;
   if(!std::getline(input,line))return {sdk::Code::invalid,"missing qualification profile version"};
   if(!line.empty()&&line.back()=='\r')line.pop_back();
-  if(line!="ANAIEROQUALIFICATION/1")return {sdk::Code::invalid,"unsupported qualification profile version"};
+  const bool exact=line=="ANAIEROQUALIFICATION/2";
+  if(!exact&&line!="ANAIEROQUALIFICATION/1")return {sdk::Code::invalid,"unsupported qualification profile version"};
   std::map<std::string,std::string> fields;
   while(std::getline(input,line)){
     if(!line.empty()&&line.back()=='\r')line.pop_back();
@@ -79,7 +98,12 @@ sdk::Result parse_profile(std::string_view bytes,Profile& output){
     {"maximum_resident_bytes",&p.maximum_resident_bytes},{"maximum_disk_bytes",&p.maximum_disk_bytes},
     {"maximum_commit_p99_us",&p.maximum_commit_p99_us},{"maximum_lookup_p99_us",&p.maximum_lookup_p99_us},
     {"maximum_reopen_us",&p.maximum_reopen_us},{"maximum_lookup_nodes",&p.maximum_lookup_nodes}};
-  if(fields.size()!=numbers.size()+3)return {sdk::Code::invalid,"qualification profile requires all declared budgets and no unknown fields"};
+  if(fields.size()!=numbers.size()+(exact?4U:3U))return {sdk::Code::invalid,"qualification profile requires all declared budgets and no unknown fields"};
+  if(exact){
+    const auto gate=fields.find("latency_gate");
+    if(gate==fields.end()||gate->second!=threshold_method)return {sdk::Code::invalid,"version 2 requires the declared exact nearest-rank threshold gate"};
+    p.latency_gate=gate->second;
+  }
   for(const auto& [key,destination]:numbers){
     const auto found=fields.find(key);
     if(found==fields.end()||!integer(found->second,*destination)||*destination==0)
@@ -106,13 +130,17 @@ sdk::Result parse_profile(std::string_view bytes,Profile& output){
 }
 std::string report_json(const Report& r){
   std::ostringstream out;out.imbue(std::locale::classic());
-  out<<"{\"schema\":\"anaiero.native-qualification/1\",\"profile\":"<<json_quote(r.profile.name)
+  out<<"{\"schema\":\"anaiero.native-qualification/2\",\"profile\":"<<json_quote(r.profile.name)
      <<",\"profile_sha256\":"<<json_quote(r.profile_sha256)<<",\"scope\":\"synthetic canonical evidence and lifecycle\""
      <<",\"durability_level\":\"orderly close/reopen; this run does not exercise crash or power loss\""
      <<",\"commit_scope\":\"throughput-batch durability only; lifecycle commits are measured in total wall time\""
      <<",\"wall_time_scope\":\"ingestion, queries, reopens, disk inventories, lifecycle churn and full audit\""
      <<",\"disk_scope\":\"regular-file allocation; excludes directory and filesystem journal metadata\""
      <<",\"percentile_method\":"<<json_quote(histogram_percentile_method)
+     <<",\"latency_gate_method\":"<<json_quote(r.profile.latency_gate)
+     <<",\"device_declaration_sha256\":"<<json_quote(r.device_sha256)
+     <<",\"device_declaration\":"<<device_declaration_json(r.device)
+     <<",\"admission\":{\"minimum_free_file_nodes\":"<<r.minimum_file_nodes<<",\"filesystem\":"<<disk_usage_json(r.admission_disk)<<'}'
      <<",\"percentiles\":"<<json_quote(histogram_percentile_description)
      <<",\"started_utc\":"<<json_quote(r.started_utc)<<",\"finished_utc\":"<<json_quote(r.finished_utc)
      <<",\"passed\":"<<(r.passed?"true":"false")<<",\"store_id\":"<<json_quote(r.store_id)
@@ -130,21 +158,30 @@ std::string report_json(const Report& r){
      <<",\"maximum_reopen_us\":"<<r.profile.maximum_reopen_us<<",\"maximum_lookup_nodes\":"<<r.profile.maximum_lookup_nodes<<'}'
      <<",\"write_path\":{\"index_nodes_read\":"<<r.write_index_reads<<",\"index_nodes_written\":"<<r.write_index_nodes
      <<",\"staged_index_nodes\":"<<r.staged_index_nodes<<",\"transient_nodes_elided\":"<<r.transient_nodes_elided
-     <<",\"index_spills\":"<<r.index_spills<<",\"index_peak_cache_nodes\":"<<r.index_peak_nodes<<",\"index_peak_cache_bytes\":"<<r.index_peak_bytes<<'}'
-     <<",\"commit\":";histogram(out,r.commit);out<<",\"resources_before\":";resources(out,r.before);
+     <<",\"index_spills\":"<<r.index_spills<<",\"index_peak_cache_nodes\":"<<r.index_peak_nodes<<",\"index_peak_cache_bytes\":"<<r.index_peak_bytes
+     <<",\"admission_cache_nodes_reused\":"<<r.admission_cache_nodes_reused<<'}'
+     <<",\"commit\":";histogram(out,r.commit);
+  out<<",\"commit_threshold\":"<<threshold_json(r.commit_threshold,99)
+     <<",\"legacy_commit_upper_bound_passed\":"<<(r.commit.count!=0&&r.commit.percentile_upper_ns(99)<=r.profile.maximum_commit_p99_us*1000?"true":"false")
+     <<",\"durability_stages\":{\"scope\":\"disjoint durations of measured native throughput commit attempts; includes software and filesystem waits\"";
+  const std::pair<const char*,const Histogram*> stages[]={{"lock_wait",&r.durability.lock_wait},{"validation",&r.durability.validation},
+    {"staging",&r.durability.staging},{"blobs",&r.durability.blobs},{"transaction",&r.durability.transaction},
+    {"root",&r.durability.root},{"index",&r.durability.index},{"cleanup",&r.durability.cleanup},{"total",&r.durability.total}};
+  for(const auto& [name,value]:stages){out<<','<<json_quote(name)<<':';histogram(out,*value);}
+  out<<"},\"resources_before\":";resources(out,r.before);
   out<<",\"resources_after\":";resources(out,r.after);out<<",\"checkpoints\":[";
   bool comma=false;for(const auto& p:r.checkpoints){
     if(comma)out<<',';
     comma=true;
     out<<"{\"observations\":"<<p.observations<<",\"store_generation\":"<<p.store_generation<<",\"accounted_bytes\":"<<p.accounted_bytes
        <<",\"lookup_maximum_nodes\":"<<p.lookup_maximum_nodes<<",\"reopen_ns\":"<<p.reopen_ns<<",\"reopen_nodes\":"<<p.reopen_nodes<<",\"lookup\":";
-    histogram(out,p.lookup);out<<",\"resources\":";resources(out,p.resources);
-    out<<",\"disk\":{\"files\":"<<p.disk.files<<",\"logical_bytes\":"<<p.disk.logical_bytes<<",\"allocated_bytes\":"<<p.disk.allocated_bytes
-       <<",\"allocated_bytes_available\":"<<(p.disk.allocated_bytes_available?"true":"false")<<"}}";
+    histogram(out,p.lookup);out<<",\"lookup_threshold\":"<<threshold_json(p.lookup_threshold,99)<<",\"resources\":";resources(out,p.resources);
+    out<<",\"disk\":"<<disk_usage_json(p.disk)<<'}';
   }
   out<<"],\"final_store\":{\"generation\":"<<r.final_generation<<",\"accounted_bytes\":"<<r.final_accounted_bytes
      <<",\"files\":"<<r.final_disk.files<<",\"logical_bytes\":"<<r.final_disk.logical_bytes<<",\"allocated_bytes\":"<<r.final_disk.allocated_bytes
      <<",\"allocated_bytes_available\":"<<(r.final_disk.allocated_bytes_available?"true":"false")<<'}'
+     <<",\"final_allocation\":"<<disk_usage_json(r.final_disk)
      <<",\"audit\":{\"passed\":"<<(r.audit_passed?"true":"false")<<",\"duration_ns\":"<<r.audit_ns
      <<",\"generations\":"<<r.audit_generations<<",\"records\":"<<r.audit_records<<",\"canonical_records_read\":"<<r.audit_canonical_records
      <<",\"index_nodes_read\":"<<r.audit_index_nodes<<",\"restart_identity_verified\":"<<(r.restart_identity_verified?"true":"false")<<"},\"violations\":[";

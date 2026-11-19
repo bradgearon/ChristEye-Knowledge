@@ -46,9 +46,12 @@ public:
       std::pair<std::uint64_t,CommitBatch> request;
       {std::unique_lock lock(mutex);changed.wait(lock,[this]{return stopping||!pending.empty();});if(pending.empty()){if(stopping)return;continue;}request=std::move(pending.front());pending.pop_front();}
       CommitCompletion completion;completion.ticket=request.first;
+      const auto clock_ns=[] {return static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now().time_since_epoch()).count());};
+      completion.started_monotonic_ns=clock_ns();
       try{completion.result=store->commit(request.second,completion.receipt);}
       catch(const std::exception& e){completion.result={Code::io_error,e.what()};}
       catch(...){completion.result={Code::io_error,"unhandled storage worker exception"};}
+      completion.completed_monotonic_ns=clock_ns();
       std::function<void()> signal;
       {std::lock_guard lock(mutex);cached=store->info();completed.push_back(std::move(completion));signal=wakeup;}
       changed.notify_all();if(signal){try{signal();}catch(...){/* A wakeup cannot erase the retained completion. */}}

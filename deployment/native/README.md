@@ -58,7 +58,12 @@ The [reviewed package lifecycle](package-lifecycle.md) now supplies native
 `package-review`, `package-activate`, `package-rollback-review`, `package-status`
 and `check-selected` commands. Selection is an atomic canonical transition;
 rollback checks the previous compatible package against the current store and
-preserves accepted work. Use that workflow when changing supervisor packages.
+preserves accepted work. A reviewed compatibility-binding migration admits
+different exact builds only when their complete runtime/state contract witnesses
+match. The managed systemd/SCM helpers switch stopped registrations, recover
+interrupted switches and preserve canonical state on uninstall. Explicit
+package witness budgets, pins and reviewed reclamation bound retained payloads.
+Use the linked package guide for the exact native commands and supervisor steps.
 
 Build a complete native installation before packaging. The packaging recipe
 uses CMake and the installed native host; it does not require Python:
@@ -87,11 +92,12 @@ Install the candidate beside the current package. Stop the old host, review and
 activate its exact package plan, then use the selected executable in the
 supervisor command. Optional verification with
 `-DANAIERO_STORE_DIR=/absolute/state/modular` also checks retained-state
-compatibility. A compatible retained engine build is required;
-changing its implementation identity requires an explicit supported state
-migration or source retirement. No transparent hot upgrade is implied. The
-host retains and pins its executable independently from the session CLI's
-engine package, so both programs can use the same compiled engine identity.
+compatibility. Old precontract builds require unchanged compiled identity.
+New packages can migrate the exact build binding without changing logical
+engine identities or checkpoint bytes; a changed engine/storage/session
+implementation remains unsupported without a separately qualified semantic
+migration. Managed selection retains host/manifest/build witnesses in the
+canonical store. Unmanaged hosts retain their original independent pin.
 
 Preserve the previous package and a consistent recovery copy. After new
 canonical writes have been acknowledged, reverting an old backup would lose

@@ -4,6 +4,18 @@
 
 namespace anaiero::sdk::mesh {
 struct NativeCredentials {std::string certificate_file,private_key_file,authority_file;};
+struct AcknowledgementTiming {
+  std::uint64_t elapsed_ns=0,subscription_generation=0,to_sequence=0;
+};
+// Borrowed bounded observation port, called on authenticated client workers.
+// Calls can overlap; implementations must be thread safe, nonblocking and must
+// not reenter transport or canonical storage. Elapsed time spans offered-page
+// write through durable acceptance of its exact ACK, including receiver work.
+class IAcknowledgementObserver {
+public:
+  virtual ~IAcknowledgementObserver()=default;
+  virtual void observe(const AcknowledgementTiming&) noexcept=0;
+};
 struct NativeServerOptions {
   NativeCredentials credentials;
   std::string address="127.0.0.1";
@@ -11,6 +23,7 @@ struct NativeServerOptions {
   std::size_t maximum_clients=8,maximum_handshakes=4;
   std::uint32_t handshake_timeout_ms=5000,io_timeout_ms=5000;
   Options service;
+  IAcknowledgementObserver* acknowledgement_observer=nullptr;
 };
 struct NativeServerStatus {
   std::uint64_t accepted_connections=0,rejected_connections=0,delivered_pages=0,

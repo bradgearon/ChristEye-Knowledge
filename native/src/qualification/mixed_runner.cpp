@@ -1,4 +1,4 @@
-#include "mixed_qualification.hpp"
+#include "mixed_internal.hpp"
 #include "native_paths.hpp"
 #include "anaiero/sdk/engine_files.hpp"
 #include "anaiero/sdk/native_session.hpp"
@@ -13,10 +13,9 @@
 #include <sstream>
 
 namespace anaiero::qualification {
-namespace {
+namespace mixed_detail {
 namespace ev=sdk::evidence;
 namespace host=sdk::host;
-using Clock=std::chrono::steady_clock;
 std::uint64_t elapsed(Clock::time_point start){
   return static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now()-start).count());
 }
@@ -41,7 +40,8 @@ void observe(MixedReport& report,const host::Status& status){
   report.maximum_queued_tasks=std::max(report.maximum_queued_tasks,static_cast<std::uint64_t>(status.queued_tasks));
 }
 host::Status snapshot(host::NativeContinuousHost& instance,MixedReport& report){
-  const auto start=Clock::now();auto result=instance.snapshot();report.status.add(elapsed(start));observe(report,result);return result;
+  const auto start=Clock::now();auto result=instance.snapshot();const auto ns=elapsed(start);
+  report.status.add(ns);report.status_limit.add(ns);observe(report,result);return result;
 }
 sdk::Result wait_command(host::NativeContinuousHost& instance,std::uint64_t ticket,Clock::time_point deadline,bool durable){
   auto view=instance.snapshot();
@@ -61,7 +61,7 @@ sdk::Result command(host::NativeContinuousHost& instance,host::Command value,Mix
   const auto start=Clock::now();std::uint64_t ticket=0;
   if(auto r=instance.enqueue(std::move(value),ticket);!r)return r;
   const auto result=wait_command(instance,ticket,deadline,durable);
-  if(durable)report.control.add(elapsed(start));
+  if(durable){const auto ns=elapsed(start);report.control.add(ns);report.control_limit.add(ns);}
   return result;
 }
 sdk::Result through(host::NativeContinuousHost& instance,std::uint64_t target,MixedReport& report,Clock::time_point deadline){
@@ -157,7 +157,7 @@ sdk::Result probe(host::NativeContinuousHost& instance,const sdk::EngineIdentity
       return sdk::Result{};
     },[state](sdk::Result r){state->finish(std::move(r));});!r)return r;
   if(auto r=state->wait(deadline);!r)return r;
-  report.probe.add(elapsed(started));++report.probes;
+  const auto ns=elapsed(started);report.probe.add(ns);report.probe_limit.add(ns);++report.probes;
   report.lookup_maximum_nodes=std::max(report.lookup_maximum_nodes,state->nodes);return {};
 }
 sdk::Result inventory(std::string_view directory,const host::Status& status,MixedReport& report){
@@ -165,7 +165,9 @@ sdk::Result inventory(std::string_view directory,const host::Status& status,Mixe
   if(auto r=read_resources(resources);!r)return r;
   if(resources.peak_resident_bytes>report.profile.maximum_resident_bytes)violation(report,"mixed process peak resident bytes exceed declared budget");
   if(auto r=measure_disk(directory,report.profile.maximum_files,report.disk);!r)return r;
-  report.sampled_peak_disk_bytes=std::max({report.sampled_peak_disk_bytes,report.disk.logical_bytes,report.disk.allocated_bytes});
+  const auto allocated=report.disk.allocated_bytes+
+    (report.profile.version==2?report.disk.directory_allocated_bytes:0);
+  report.sampled_peak_disk_bytes=std::max({report.sampled_peak_disk_bytes,report.disk.logical_bytes,allocated});
   report.sampled_peak_files=std::max(report.sampled_peak_files,report.disk.files);
   report.final_generation=status.store.generation;report.final_accounted_bytes=status.store.physical_bytes;
   if(report.sampled_peak_disk_bytes>report.profile.maximum_disk_bytes)violation(report,"mixed sampled store disk bytes exceed declared budget");
@@ -193,13 +195,84 @@ std::map<std::string,sdk::Digest> state_digests(const sdk::SessionView& view){
   for(const auto& value:view.engines)result.emplace(value.identity.instance_id,sdk::state_digest(value.state));
   return result;
 }
+void configure_limits(MixedReport& report){
+  const auto& p=report.profile;
+  report.status_limit.limit_ns=p.maximum_status_p99_us*1000;
+  report.control_limit.limit_ns=p.maximum_control_p99_us*1000;
+  report.probe_limit.limit_ns=p.maximum_probe_p99_us*1000;
+  report.dispatch_limit.limit_ns=p.maximum_dispatch_p99_us*1000;
+  report.queue_limit.limit_ns=p.maximum_queue_p99_us*1000;
+  report.step_commit_limit.limit_ns=p.maximum_step_commit_p99_us*1000;
+  report.projection_limit.limit_ns=p.maximum_projection_p99_us*1000;
+}
+void TimingCollector::observe(const sdk::host::TimingObservation& value) noexcept {
+  if(value.result!=sdk::Code::ok)return;
+  switch(value.kind){
+    case sdk::host::TimingKind::step_dispatch:report_.dispatch.add(value.elapsed_ns);report_.dispatch_limit.add(value.elapsed_ns);break;
+    case sdk::host::TimingKind::step_queue_wait:report_.queue.add(value.elapsed_ns);report_.queue_limit.add(value.elapsed_ns);break;
+    case sdk::host::TimingKind::step_commit_completion:report_.step_commit.add(value.elapsed_ns);report_.step_commit_limit.add(value.elapsed_ns);break;
+    case sdk::host::TimingKind::step_projection:report_.projection.add(value.elapsed_ns);report_.projection_limit.add(value.elapsed_ns);break;
+  }
+}
+sdk::Result final_engines(const sdk::SessionDefinition& definition,const sdk::SessionView& final,MixedReport& report){
+  report.engines.clear();
+  for(const auto& scheduled:definition.engines){
+    const auto found=std::find_if(final.engines.begin(),final.engines.end(),[&](const auto& engine){return engine.identity==scheduled.identity;});
+    if(found==final.engines.end())return {sdk::Code::corrupt,"mixed final view lost an admitted engine"};
+    const auto& state=found->state;
+    if(scheduled.identity.type_id==engines::vlm_plan){
+      if(state.phase!=sdk::Phase::completed||state.tick==0||state.tick>report.profile.cycles)
+        return {sdk::Code::corrupt,"mixed finite VLM plan did not complete within the declared workload"};
+      report.finite_plan_completed=true;
+    }else{
+      const auto expected=scheduled.identity.type_id==engines::environment?report.profile.cycles-2:report.profile.cycles/scheduled.cadence;
+      if(state.tick!=expected||state.phase!=sdk::Phase::running)
+        return {sdk::Code::corrupt,"mixed engine clock did not match the completed cycle schedule: "+scheduled.identity.instance_id};
+    }
+    report.engines.push_back({scheduled.identity,sdk::sha256(sdk::encode_envelope(scheduled.configuration)),
+      sdk::sha256(sdk::encode_envelope(scheduled.input)),sdk::state_digest(state),scheduled.cadence,state.tick,state.revision,state.phase});
+  }
+  return {};
+}
+sdk::Result finalize(sdk::Result result,Clock::time_point started,MixedReport& report){
+  const auto& profile=report.profile;
+  report.wall_ns=elapsed(started);report.finished_utc=utc();
+  const auto resource_result=read_resources(report.after);
+  if(!result)violation(report,std::string(sdk::code_name(result.code))+": "+result.message);
+  if(!resource_result)violation(report,resource_result.message);
+  if(report.after.peak_resident_bytes>profile.maximum_resident_bytes)violation(report,"mixed process peak resident bytes exceed declared budget");
+  if(report.workload_ns<profile.minimum_run_ms*1000000)violation(report,"mixed active workload did not meet the declared minimum duration");
+  if(report.wall_ns>profile.maximum_run_ms*1000000)violation(report,"mixed total run duration exceeds declared budget");
+  if(profile.version==1){
+    if(report.status.percentile_upper_ns(99)>profile.maximum_status_p99_us*1000)violation(report,"mixed cached snapshot p99 upper bound exceeds declared budget");
+    if(report.control.percentile_upper_ns(99)>profile.maximum_control_p99_us*1000)violation(report,"mixed durable control p99 upper bound exceeds declared budget");
+    if(report.probe.percentile_upper_ns(99)>profile.maximum_probe_p99_us*1000)violation(report,"mixed queued historical probe p99 upper bound exceeds declared budget");
+  }else{
+    const std::pair<const ThresholdCounter*,const char*> gates[]={
+      {&report.status_limit,"snapshot"},{&report.control_limit,"control"},{&report.probe_limit,"probe"},
+      {&report.dispatch_limit,"dispatch"},{&report.queue_limit,"queue"},{&report.step_commit_limit,"step commit"},{&report.projection_limit,"projection"}};
+    for(const auto& [counter,name]:gates)if(!counter->passes(99))violation(report,std::string("mixed exact p99 threshold failed or has no samples: ")+name);
+  }
+  if(report.reopen_ns>profile.maximum_reopen_us*1000)violation(report,"mixed compatible reopen exceeds declared budget");
+  if(report.lookup_maximum_nodes>profile.maximum_lookup_nodes)violation(report,"mixed historical evidence probe exceeds declared index-work budget");
+  if(report.campaign_interruptions)violation(report,"campaign resumed after interruption; continuous qualification and complete timing coverage are not established");
+  report.passed=result.ok()&&resource_result.ok()&&report.violations.empty();
+  report.continuous_qualified=report.campaign&&report.campaign_complete&&report.passed&&report.campaign_attempt==1;
+  if(!result)return result;
+  if(!resource_result)return resource_result;
+  return report.passed?sdk::Result{}:sdk::Result{sdk::Code::capacity,"mixed qualification exceeded its predeclared operating budget or continuity gate"};
+}
 }
 sdk::Result run_mixed_profile(const MixedProfile& profile,const sdk::SessionDefinition& definition,
     std::string_view directory,MixedReport& report,std::function<void(std::uint64_t)> progress){
+  using namespace mixed_detail;
   report.profile=profile;report.started_utc=utc();const auto started=Clock::now();
+  configure_limits(report);TimingCollector timings(report);
   const auto deadline=started+std::chrono::milliseconds(profile.maximum_run_ms);
   const auto execute=[&]()->sdk::Result{
     if(auto r=validate_mixed_definition(definition,profile);!r)return r;
+    if(profile.required_device_class=="dedicated"&&report.device.device_class!="dedicated")
+      return {sdk::Code::invalid,"dedicated mixed profile requires campaign-create with a dedicated device declaration"};
     if(auto r=read_resources(report.before);!r)return r;
     if(auto r=read_environment(directory,report.environment);!r)return r;
     if(auto r=quota_probe(utf8(native_path(directory)/"quota-store"),report);!r)return r;
@@ -237,6 +310,7 @@ sdk::Result run_mixed_profile(const MixedProfile& profile,const sdk::SessionDefi
       }
       host::Options options;options.period_ms=static_cast<std::uint32_t>(profile.period_ms);
       options.command_capacity=1;options.task_capacity=2;options.initially_running=false;
+      options.timing_observer=&timings;
       host::NativeContinuousHost instance(session.runtime(),session.runner(),session.store(),options);
       if(auto r=instance.start();!r)return r;
       auto initial=snapshot(instance,report);
@@ -298,23 +372,7 @@ sdk::Result run_mixed_profile(const MixedProfile& profile,const sdk::SessionDefi
       report.owner_wakeups+=stopped.owner_wakeups;report.completed_tasks+=stopped.completed_tasks;
       if(segment==0){prior_store=session.store().info();prior_states=state_digests(session.runtime().view());}
       else{
-        const auto final=session.runtime().view();
-        for(const auto& scheduled:definition.engines){
-          const auto found=std::find_if(final.engines.begin(),final.engines.end(),[&](const auto& engine){return engine.identity==scheduled.identity;});
-          if(found==final.engines.end())return {sdk::Code::corrupt,"mixed final view lost an admitted engine"};
-          const auto& state=found->state;
-          if(scheduled.identity.type_id==engines::vlm_plan){
-            if(state.phase!=sdk::Phase::completed||state.tick==0||state.tick>profile.cycles)
-              return {sdk::Code::corrupt,"mixed finite VLM plan did not complete within the declared workload"};
-            report.finite_plan_completed=true;
-          }else{
-            const auto expected=scheduled.identity.type_id==engines::environment?profile.cycles-2:profile.cycles/scheduled.cadence;
-            if(state.tick!=expected||state.phase!=sdk::Phase::running)
-              return {sdk::Code::corrupt,"mixed engine clock did not match the completed cycle schedule: "+scheduled.identity.instance_id};
-          }
-          report.engines.push_back({scheduled.identity,sdk::sha256(sdk::encode_envelope(scheduled.configuration)),
-            sdk::sha256(sdk::encode_envelope(scheduled.input)),sdk::state_digest(state),scheduled.cadence,state.tick,state.revision,state.phase});
-        }
+        if(auto r=final_engines(definition,session.runtime().view(),report);!r)return r;
         report.workload_ns=elapsed(workload_started);
         const auto audit_started=Clock::now();ev::AuditReport audit;const auto audited=session.store().audit(audit);
         report.audit_ns=elapsed(audit_started);report.audit_passed=audited.ok();if(!audited)return audited;
@@ -326,21 +384,6 @@ sdk::Result run_mixed_profile(const MixedProfile& profile,const sdk::SessionDefi
   sdk::Result result;
   try{result=execute();}
   catch(const std::exception& error){result={sdk::Code::io_error,error.what()};}
-  report.wall_ns=elapsed(started);report.finished_utc=utc();
-  const auto resource_result=read_resources(report.after);
-  if(!result)violation(report,std::string(sdk::code_name(result.code))+": "+result.message);
-  if(!resource_result)violation(report,resource_result.message);
-  if(report.after.peak_resident_bytes>profile.maximum_resident_bytes)violation(report,"mixed process peak resident bytes exceed declared budget");
-  if(report.workload_ns<profile.minimum_run_ms*1000000)violation(report,"mixed active workload did not meet the declared minimum duration");
-  if(report.wall_ns>profile.maximum_run_ms*1000000)violation(report,"mixed total run duration exceeds declared budget");
-  if(report.status.percentile_upper_ns(99)>profile.maximum_status_p99_us*1000)violation(report,"mixed cached snapshot p99 upper bound exceeds declared budget");
-  if(report.control.percentile_upper_ns(99)>profile.maximum_control_p99_us*1000)violation(report,"mixed durable control p99 upper bound exceeds declared budget");
-  if(report.probe.percentile_upper_ns(99)>profile.maximum_probe_p99_us*1000)violation(report,"mixed queued historical probe p99 upper bound exceeds declared budget");
-  if(report.reopen_ns>profile.maximum_reopen_us*1000)violation(report,"mixed compatible reopen exceeds declared budget");
-  if(report.lookup_maximum_nodes>profile.maximum_lookup_nodes)violation(report,"mixed historical evidence probe exceeds declared index-work budget");
-  report.passed=result.ok()&&resource_result.ok()&&report.violations.empty();
-  if(!result)return result;
-  if(!resource_result)return resource_result;
-  return report.passed?sdk::Result{}:sdk::Result{sdk::Code::capacity,"mixed qualification exceeded its predeclared operating budget"};
+  return finalize(result,started,report);
 }
 }

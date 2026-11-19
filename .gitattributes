@@ -50,9 +50,14 @@ examples/scientific/calibration/* -text
 
 # Preserve exact qualification profile and recorded preflight evidence bytes.
 qualification/**/*.cevqualification -text
+qualification/**/*.cevdevice -text
 qualification/reports/**/*.cevqualification -text -whitespace
 qualification/reports/**/report.json -text
 qualification/reports/**/build-manifest*.txt -text -whitespace
 qualification/reports/**/session-input.cevsession -text
+qualification/reports/2026-11-18-runtime-lifecycle/** -text
+qualification/reports/**/ctest.normalized.log -text -whitespace
 qualification/reports/**/session.definition binary
 qualification/reports/**/artifact.zip binary
+qualification/reports/**/anaiero-*-manifest*.txt -text -whitespace
+qualification/reports/**/compatibility-manifest.txt -text -whitespace

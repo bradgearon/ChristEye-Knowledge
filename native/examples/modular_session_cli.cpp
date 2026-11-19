@@ -1,4 +1,5 @@
 // Composition and operator presentation for the compiled modular runtime.
+#include "anaiero/sdk/native_session.hpp"
 #include "anaiero/sdk/engine_files.hpp"
 #include "anaiero/sdk/evidence.hpp"
 #include "anaiero/sdk/experiments.hpp"
@@ -139,7 +140,6 @@ struct Application {
   s::Result open(std::string_view directory,bool create,std::string_view archive_path={},
                   std::uint64_t maximum_bytes=0){
     if(auto r=e::register_builtin_engines(catalog);!r)return r;
-    if(auto r=catalog.freeze();!r)return r;
     const fs::path directory_path(directory);
     if(!create&&!canonical_root_exists(directory_path))return {s::Code::not_found,"canonical store ROOT does not exist"};
     if(create&&!canonical_root_exists(directory_path)){
@@ -163,6 +163,8 @@ struct Application {
       if(auto r=ev::open_native_store(directory,options,store);!r)return r;
       if(store->info().store_id!=store_id)return {s::Code::conflict,"store identity changed while reopening its byte policy"};
     }
+    if(auto r=s::host::NativeSession::bind_catalog(*store,catalog);!r)return r;
+    if(auto r=catalog.freeze();!r)return r;
     if(!policy_exists&&create){
       ev::CommitBatch batch;batch.operation_id="session-storage-policy";
       const auto payload=s::pack({"store-budget/1",std::to_string(options.maximum_bytes)});
@@ -277,6 +279,8 @@ struct Application {
   }
   s::Result status(){
     const auto info=store->info();
+    life::CapacityStatus capacity;
+    if(auto r=lifecycle->capacity(capacity);!r)return r;
     life::Snapshot snapshot;
     const auto life_result=lifecycle->snapshot(snapshot);
     if(!life_result)return life_result;
@@ -288,12 +292,18 @@ struct Application {
       <<",\"index_backend\":"<<json(info.index_backend)<<",\"accounted_bytes\":"<<info.physical_bytes
       <<",\"quota_basis\":\"accounted_serialized_bytes\",\"maintenance_reserve_bytes\":"<<info.maintenance_reserve_bytes
       <<",\"ordinary_limit_bytes\":"<<info.ordinary_limit_bytes
+      <<",\"ordinary_remaining_bytes\":"<<capacity.ordinary_remaining_bytes
+      <<",\"maintenance_remaining_bytes\":"<<capacity.maintenance_remaining_bytes
+      <<",\"writable\":"<<(capacity.writable?"true":"false")<<",\"index_ready\":"<<(capacity.index_ready?"true":"false")
+      <<",\"retained_identity_policy\":\"preserve-authority-source-tombstone-and-exact-retry-identities\""
       <<",\"canonical_base_generation\":"<<info.canonical_base_generation<<",\"canonical_base_sha256\":"<<json(info.canonical_base_digest)
       <<",\"operation_epoch\":"<<info.operation_epoch<<",\"pending_reclamation_bytes\":"<<info.pending_reclamation_bytes
       <<",\"maximum_bytes\":"<<info.maximum_bytes<<",\"completed_cycles\":"<<progress.completed_cycles
       <<",\"cycle_pending\":"<<(progress.cycle_pending?"true":"false")
       <<",\"quarantined\":"<<(snapshot.quarantined?"true":"false")<<",\"incarnation\":"<<json(snapshot.incarnation)
       <<",\"lifetime_observations\":"<<snapshot.lifetime_observations<<",\"active_sources\":"<<snapshot.sources.size()
+      <<",\"active_peers\":"<<snapshot.active_peers<<",\"active_subscriptions\":"<<snapshot.active_subscriptions
+      <<",\"pins\":"<<snapshot.pins<<",\"pending_bootstraps\":"<<snapshot.pending_bootstraps
       <<",\"engines\":[";
     bool first=true;
     for(const auto& engine:runtime->view().engines){

@@ -1,0 +1,17 @@
+{
+  "scope": "Development diagnostic; concurrent builds; not exact-commit operating qualification",
+  "base_commit": "d742d556b636cf21cdef34898fc30e5fff9c0729",
+  "executable_sha256": "ee8724d635524392e82cdd0caeba0c7d83fb42361bc9d733940de3397ac676da",
+  "manifest_sha256": "6a5f5dcf46a06c9009cf351b0d6157a7085bf4d811e40379bc0202fdf3b334a0",
+  "working_source_mismatches": [
+    "cmake/NativeHost.cmake",
+    "examples/modular_host_cli.cpp",
+    "sdk/include/anaiero/sdk/native_mesh.hpp",
+    "src/host/deployment.cpp",
+    "src/host/native_deployment.cpp",
+    "src/mesh/native_mesh.cpp",
+    "src/qualification/scale_profile.cpp",
+    "src/qualification/scale_qualification.hpp",
+    "src/qualification/scale_runner.cpp"
+  ]
+}

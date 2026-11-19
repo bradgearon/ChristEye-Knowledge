@@ -1,6 +1,7 @@
 #include "anaiero/sdk/native_session.hpp"
 #include "anaiero/sdk/engine_files.hpp"
 #include <atomic>
+#include <array>
 #include <chrono>
 #include <condition_variable>
 #include <cstdlib>
@@ -9,6 +10,7 @@
 #include <iostream>
 #include <mutex>
 #include <source_location>
+#include <thread>
 #ifdef _WIN32
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -47,9 +49,23 @@ template<class Predicate>h::Status await_status(h::NativeContinuousHost& host,Pr
   while(!predicate(status)&&std::chrono::steady_clock::now()<deadline)status=host.snapshot(status.revision,1000);
   CHECK(predicate(status));return status;
 }
+struct TimingObserver final:h::ITimingObserver {
+  std::array<std::uint64_t,4> counts{},total_ns{};
+  std::thread::id owner;
+  bool valid=true;
+  void observe(const h::TimingObservation& value) noexcept override {
+    const auto current=std::this_thread::get_id();
+    if(owner==std::thread::id{})owner=current;
+    valid=valid&&owner==current&&value.cycle>=1&&value.cycle<=3&&value.result==s::Code::ok;
+    const auto index=static_cast<std::size_t>(value.kind);
+    if(index>=counts.size()){valid=false;return;}
+    ++counts[index];total_ns[index]+=value.elapsed_ns;
+  }
+};
 void continuous(const fs::path& directory) {
   h::NativeSession session;require(session.open(directory.string()));require(session.ensure_engines());
   h::Options options;options.initially_running=false;options.period_ms=1;options.command_capacity=2;options.task_capacity=2;
+  TimingObserver timings;options.timing_observer=&timings;
   h::NativeContinuousHost host(session.runtime(),session.runner(),session.store(),options);
   std::mutex watermark_mutex;std::vector<std::uint64_t> watermarks;
   host.set_commit_wakeup([&](std::uint64_t value){std::lock_guard lock(watermark_mutex);watermarks.push_back(value);});
@@ -97,6 +113,8 @@ void continuous(const fs::path& directory) {
   CHECK(first_future.wait_for(5s)==std::future_status::ready);
   CHECK(second_future.wait_for(5s)==std::future_status::ready);
   host.shutdown();const auto stopped=host.snapshot();CHECK(stopped.stopped&&!stopped.cycle_pending&&stopped.completed_tasks==2);
+  CHECK(timings.valid&&timings.owner!=std::this_thread::get_id());
+  for(std::size_t i=0;i<timings.counts.size();++i)CHECK(timings.counts[i]==3&&timings.total_ns[i]>0);
   ev::StoredRecord retained;require(session.store().latest("host.test","two",retained));
   CHECK(retained.record.payload=="committed");
   for(std::size_t i=1;i<watermarks.size();++i)CHECK(watermarks[i]>watermarks[i-1]);

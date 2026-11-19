@@ -1,5 +1,6 @@
 #include "qualification.hpp"
 #include "mixed_qualification.hpp"
+#include "scale_qualification.hpp"
 #include "native_paths.hpp"
 #include "anaiero/sdk/engine_files.hpp"
 #include <filesystem>
@@ -54,17 +55,73 @@ sdk::Result mixed(int argc,char** argv){
   if(auto r=anaiero::engines::write_new_artifact(utf8(output/"report.json"),json);!r)return r;
   std::cout<<json;return result;
 }
+sdk::Result campaign(int argc,char** argv){
+  const std::string_view command=argv[1];
+  if(command=="campaign-status"){
+    if(argc!=3)return {sdk::Code::invalid,"expected campaign-status DIRECTORY"};
+    std::string json;if(auto r=q::mixed_campaign_status(argv[2],json);!r)return r;
+    std::cout<<json;return {};
+  }
+  if(command=="campaign-resume"){
+    if(argc!=3)return {sdk::Code::invalid,"expected campaign-resume DIRECTORY"};
+    q::MixedReport report;const auto result=q::run_mixed_campaign(argv[2],report,{},[](std::uint64_t cycles){
+      std::cerr<<"campaign completed_cycles="<<cycles<<'\n'<<std::flush;
+    });std::cout<<q::mixed_report_json(report);return result;
+  }
+  if(argc!=5&&argc!=6)return {sdk::Code::invalid,"expected campaign-create PROFILE SESSION NEW_DIRECTORY [DEVICE_DECLARATION]"};
+  std::string profile_bytes,session_bytes;
+  if(auto r=read_text(q::native_path(argv[2]),profile_bytes);!r)return r;
+  if(auto r=read_text(q::native_path(argv[3]),session_bytes);!r)return r;
+  q::MixedProfile profile;if(auto r=q::parse_mixed_profile(profile_bytes,profile);!r)return r;
+  sdk::EngineModuleCatalog catalog;if(auto r=anaiero::engines::register_builtin_engines(catalog);!r)return r;
+  if(auto r=catalog.freeze();!r)return r;
+  sdk::SessionDefinition definition;if(auto r=anaiero::engines::read_session_definition(argv[3],catalog,definition);!r)return r;
+  if(auto r=q::validate_mixed_definition(definition,profile);!r)return r;
+  std::string reread;if(auto r=read_text(q::native_path(argv[3]),reread);!r)return r;
+  if(reread!=session_bytes)return {sdk::Code::conflict,"session text changed during campaign admission"};
+  std::string device_bytes;if(argc==6){if(auto r=read_text(q::native_path(argv[5]),device_bytes);!r)return r;}
+  if(auto r=q::create_mixed_campaign(profile_bytes,session_bytes,definition,argv[4],device_bytes);!r)return r;
+  std::string json;if(auto r=q::mixed_campaign_status(argv[4],json);!r)return r;
+  std::cout<<json;return {};
+}
+sdk::Result scale(int argc,char** argv){
+  if(argc!=4&&argc!=5)return {sdk::Code::invalid,"expected scale PROFILE NEW_OUTPUT_DIRECTORY [DEVICE_DECLARATION]"};
+  std::string bytes,device_bytes;if(auto r=read_text(q::native_path(argv[2]),bytes);!r)return r;
+  q::ScaleProfile profile;if(auto r=q::parse_scale_profile(bytes,profile);!r)return r;
+  q::DeviceDeclaration device;
+  if(argc==5){if(auto r=read_text(q::native_path(argv[4]),device_bytes);!r)return r;
+    if(auto r=q::parse_device_declaration(device_bytes,device);!r)return r;}
+  const auto output=q::native_path(argv[3]);std::error_code error;
+  if(!fs::create_directory(output,error)||error)return {sdk::Code::conflict,"scale output exists or cannot be created"};
+  if(auto r=anaiero::engines::write_new_artifact(utf8(output/"profile.cevqualification"),bytes);!r)return r;
+  q::ScaleReport report;report.profile_sha256=sdk::sha256(bytes);
+  if(!device_bytes.empty()){
+    if(auto r=anaiero::engines::write_new_artifact(utf8(output/"device.cevdevice"),device_bytes);!r)return r;
+    report.device=std::move(device);report.device_sha256=sdk::sha256(device_bytes);
+  }
+  const auto result=q::run_scale_profile(profile,utf8(output),report,[next=std::uint64_t{1000}](std::uint64_t observations)mutable{
+    if(observations>=next){std::cerr<<"scale committed_observations="<<observations<<'\n'<<std::flush;next=(observations/1000+1)*1000;}
+  });const auto json=q::scale_report_json(report);
+  if(auto r=anaiero::engines::write_new_artifact(utf8(output/"report.json"),json);!r)return r;
+  std::cout<<json;return result;
+}
 sdk::Result run(int argc,char** argv){
   if(argc==2&&(std::string_view(argv[1])=="help"||std::string_view(argv[1])=="--help")){
-    std::cout<<"Usage: ce_native_qualification run PROFILE NEW_OUTPUT_DIRECTORY\n"
+    std::cout<<"Usage: ce_native_qualification run PROFILE NEW_OUTPUT_DIRECTORY [DEVICE_DECLARATION]\n"
       "       ce_native_qualification mixed PROFILE SESSION NEW_OUTPUT_DIRECTORY\n"
+      "       ce_native_qualification scale PROFILE NEW_OUTPUT_DIRECTORY [DEVICE_DECLARATION]\n"
+      "       ce_native_qualification campaign-create PROFILE SESSION NEW_DIRECTORY [DEVICE_DECLARATION]\n"
+      "       ce_native_qualification campaign-resume DIRECTORY\n"
+      "       ce_native_qualification campaign-status DIRECTORY\n"
       "run measures synthetic evidence/lifecycle; mixed executes five engine families\n"
       "through the continuous host. Both retain exact inputs, store and report.json.\n"
       "Existing output\n"
       "directories are never reused or deleted. Budget failure returns nonzero.\n";return {};
   }
   if(argc>=2&&std::string_view(argv[1])=="mixed")return mixed(argc,argv);
-  if(argc!=4||std::string_view(argv[1])!="run")return {sdk::Code::invalid,"expected run PROFILE NEW_OUTPUT_DIRECTORY"};
+  if(argc>=2&&std::string_view(argv[1])=="scale")return scale(argc,argv);
+  if(argc>=2&&(std::string_view(argv[1])=="campaign-create"||std::string_view(argv[1])=="campaign-resume"||std::string_view(argv[1])=="campaign-status"))return campaign(argc,argv);
+  if((argc!=4&&argc!=5)||std::string_view(argv[1])!="run")return {sdk::Code::invalid,"expected run PROFILE NEW_OUTPUT_DIRECTORY [DEVICE_DECLARATION]"};
   const fs::path profile_path=q::native_path(argv[2]),output=q::native_path(argv[3]);
   std::error_code error;const auto status=fs::symlink_status(profile_path,error);
   if(error)return {sdk::Code::invalid,"cannot inspect qualification profile "+utf8(profile_path)+": "+error.message()};
@@ -72,9 +129,18 @@ sdk::Result run(int argc,char** argv){
     return {sdk::Code::invalid,"qualification profile must be a regular text file within 16 KiB: "+utf8(profile_path)};
   std::string bytes;if(auto r=read_text(profile_path,bytes);!r)return r;
   q::Profile profile;if(auto r=q::parse_profile(bytes,profile);!r)return r;
+  std::string device_bytes;q::DeviceDeclaration device;
+  if(argc==5){
+    if(auto r=read_text(q::native_path(argv[4]),device_bytes);!r)return r;
+    if(auto r=q::parse_device_declaration(device_bytes,device);!r)return r;
+  }else if(profile.latency_gate==q::threshold_method)return {sdk::Code::invalid,"version 2 qualification requires a device declaration"};
   if(!fs::create_directory(output,error)||error)return {sdk::Code::conflict,"qualification output directory already exists or cannot be created"};
   if(auto r=anaiero::engines::write_new_artifact(utf8(output/"profile.cevqualification"),bytes);!r)return r;
   q::Report report;report.profile_sha256=sdk::sha256(bytes);
+  if(!device_bytes.empty()){
+    if(auto r=anaiero::engines::write_new_artifact(utf8(output/"device.cevdevice"),device_bytes);!r)return r;
+    report.device=std::move(device);report.device_sha256=sdk::sha256(device_bytes);
+  }
   const auto result=q::run_profile(profile,utf8(output),report,[next=std::uint64_t{1000}](std::uint64_t observations)mutable{
     if(observations>=next){
       std::cerr<<"qualification committed_observations="<<observations<<'\n'<<std::flush;

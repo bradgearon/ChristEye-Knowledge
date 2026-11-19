@@ -6,15 +6,27 @@ the same commit/root/receipt and exclusive writer rules as session work. It
 does not replace, copy, truncate or restore the store. Keep complete package
 directories beside one another and stop the host before reviewing a change.
 
-The supported package envelope is deliberately precise: the candidate must
-run on the current native platform and declare the **same compiled engine
-identity** as the retained session. This supports moving a verified installation
-to another release directory, replacing its deployment/documentation assets,
-and returning to a previously selected compatible installation. It does not
-make an incompatible engine implementation into a state-compatible upgrade.
-The current conservative builtin identity covers more than engine sources;
-changing host/runtime/storage source can also change that identity and require
-an explicit supported migration before adoption by an existing session.
+The candidate must run on the same native platform. Packages with the same
+compiled identity can be relocated as before. **Different exact build IDs
+require a reviewed compatibility-binding migration.** Both packages must
+carry source witnesses and their versioned compatibility digests must match.
+This admits a real host presentation update or qualification-only change;
+it does not admit a changed engine, runtime/storage codec, lifecycle rule,
+toolchain or unsupported state schema. Old precontract packages remain
+same-build-only: a version label or matching schema name is insufficient.
+
+The whole-build manifest and exact executable digest remain evidence of what
+ran. A separate witness covers the native production implementation, engine
+dependencies, state-bearing session/mesh/host CLI, build recipes and declared
+compiler/configuration/platform settings. The validated, compiled release
+display literal and qualification sources are outside that state contract;
+the C++ adapter consuming that literal is itself pinned.
+Resolved native sources and local headers are hashed; unknown/nonliteral
+project includes fail configuration. Platform system headers/toolchain and
+linked dependencies still need a declared deployment environment. A native
+probe attests both digests; raw build manifests are retained byte-for-byte,
+including Windows line endings. Only the identity comparison normalizes CRLF
+to LF as specified by the build manifest.
 
 ## Build and inspect a candidate
 
@@ -77,7 +89,20 @@ silence the conflict. The selected manifest, host executable and canonical
 receipt are retained in the same atomic transition. Existing package records
 keep their artifact roots even after a later package is selected. This consumes
 the finite store quota and intentionally cannot silently delete rollback
-evidence to make a new installation fit.
+evidence to make a new installation fit. The bounded package policy and its
+explicit retirement procedure are described below.
+
+For a cross-build transition the review also binds the exact origin and target
+source witnesses. The service checks all scheduled identities (including
+unmaterialized engines) and retained lifecycle source identities (including
+retired sources), rejecting a pending durable cycle or an unwitnessed origin.
+Admission is bounded to 4,096 retained source records and 16 exact build
+identities in this version. The binding, its protected source blobs and the
+new package selection publish in one canonical transaction. A retry never
+partially rewrites checkpoints. Engine state, source identity, prior observation
+keys and operation IDs remain unchanged. Both the native session CLI and the
+continuous host validate the binding before constructing a retained engine.
+An installer cannot supply an arbitrary alias to the public engine catalog.
 
 Use the `selected_executable` returned by activation/status in the stopped
 supervisor's command, preserving its endpoint, store, period and mesh arguments.
@@ -85,7 +110,8 @@ Run that binary's `check-selected STORE`, then start it. For systemd, change the
 unit's `ExecStart`, reload the unit and start it. For Windows SCM, update the
 stopped service's executable command using its existing service account and
 settings, then start it. These commands do not modify supervisor registrations
-or credentials. They do not provide transparent live binary replacement.
+or credentials. The supervisor helpers below perform this stopped switch when
+explicitly invoked. They do not provide transparent live binary replacement.
 
 Once selection exists, both `start` and `service` reject a host from another
 package path or a package whose inventory changed. This makes an unchanged
@@ -141,8 +167,84 @@ supervisor command to the newly selected executable and check/start it as above.
 The retained host bytes and inventory support audit/export; they do not replace
 all files in a complete installed directory or the operating system/OpenSSL
 dependencies. Keep both installation directories. Removing a service registration
-does not remove canonical evidence. There is no automatic package/uninstall
-garbage collector in this version.
+does not remove canonical evidence. Package retirement is explicit; no
+uninstall action silently removes evidence or the actual release directories.
+
+### Supervised installation, reconciliation and removal
+
+Use `manage-modular-service.sh` for a managed Linux **system** unit or
+`manage-package-service.ps1` for Windows SCM. The older example user unit and
+basic Windows installation script remain available for unmanaged installations.
+Both new helpers support `Render` without changing registration. For example:
+
+```sh
+sudo bash manage-modular-service.sh Install --name AnaieroModular --user anaiero \
+  --controller /opt/anaiero/a/bin/ce_modular_host --state /var/lib/anaiero/session --period 100
+sudo bash manage-modular-service.sh Start --name AnaieroModular
+sudo bash manage-modular-service.sh Stop --name AnaieroModular
+# Review the stopped store using package-review, then apply the immutable plan:
+sudo bash manage-modular-service.sh Switch --name AnaieroModular --plan /var/lib/anaiero/reviews/update.plan
+sudo bash manage-modular-service.sh Start --name AnaieroModular
+```
+
+```powershell
+$account = Get-Credential
+.\manage-package-service.ps1 Install -Name AnaieroModular -Credential $account -Executable 'C:\Anaiero\a\bin\ce_modular_host.exe' -StateDirectory 'C:\Anaiero\state'
+.\manage-package-service.ps1 Start -Name AnaieroModular
+.\manage-package-service.ps1 Stop -Name AnaieroModular
+.\manage-package-service.ps1 Switch -Name AnaieroModular -Plan 'C:\Anaiero\reviews\update.plan'
+.\manage-package-service.ps1 Start -Name AnaieroModular
+```
+
+Install verifies a previously selected package and registers it stopped;
+select the initial package with the native review/activate commands **before**
+running Install. Supply an existing service account with package read access,
+store write access and the platform's service permissions. Settings retain the
+endpoint, period, state, mesh configuration and account. Switch changes only
+the selected executable. If activation committed but supervisor reconfiguration
+did not finish, keep the service stopped and run `Reconcile`. The helper reads
+canonical selection, runs the selected binary's `check-selected` and reconciles
+the registered command. `Start` rejects stale registration. If the previously
+configured executable is damaged, pass an intact compatible `--controller` or
+`-Executable`. `Remove` stops/drains and removes the managed registration and
+its helper settings, preserving canonical state and both installation trees.
+
+The native `run-through STORE ABSOLUTE_CYCLE` command is a bounded operational
+check for a stopped session. It runs the real host scheduler with the selected
+binary and accepts at most 1,024 additional cycles. It intentionally writes
+session work; use `check-selected` for a read-only check.
+
+### Bound retained package witnesses
+
+`package-retention-status STORE` shows the retained manifest identities,
+count policy, byte policy, and unique bytes rooted by package and active binding
+witnesses. The default is 16 packages and 128 MiB. Configure 2–256 packages
+and 64 KiB–8 GiB with `package-retention-policy STORE COUNT BYTES OPERATION`.
+The canonical store quota, per-blob and batch limits still apply. Setting a
+budget below current usage rejects; new activation rejects before exceeding
+the declared budget. Limits cover retained witness objects, not total store
+allocation, external installation directories, or permanent compact identity
+and operation records. The latter still consume finite store quota.
+
+```text
+ce_modular_host package-pin STORE MANIFEST_SHA256 on OPERATION
+ce_modular_host package-pin STORE MANIFEST_SHA256 off ANOTHER_OPERATION
+ce_modular_host package-retention-review STORE OPERATION PLAN_FILE SUPERSEDED_MANIFEST_SHA256
+ce_modular_host package-retention-activate STORE PLAN_FILE
+ce_modular_host package-retention-reclaim STORE OPERATION
+```
+
+Review selects 1–8 exact superseded manifest identities. It binds the store
+root/generation and exact object/byte set. Current, immediate previous and
+operator-pinned packages reject. Shared host/build bytes and active binding
+proofs stay protected; other canonical references can also reject unsafe
+expiry. Activation tombstones the package witness and expires only eligible
+objects. Repeat the original operation to reconcile an interrupted unlink or
+pending byte accounting. Old activation receipts remain idempotent even after
+retirement, while attempting a new activation of an explicitly retired package
+identity returns history expiry. Automatic filesystem deletion of release
+directories is outside this command. Pre-existing unmanaged host pins remain
+independent protected roots; a managed host does not create another such pin.
 
 ## Compatibility and evidence matrix
 
@@ -151,7 +253,9 @@ garbage collector in this version.
 | Same engine identity, exact native package in another directory | Reviewed selection; new host path becomes authoritative |
 | Changed installed non-code assets with a freshly generated valid manifest and same compiled identity | Reviewed selection; old manifest and host remain retained |
 | Current-compatible previous package after additional accepted cycles | Rollback selects it against the current store; all cycles remain |
-| Different compiled engine identity or native OS | Admission rejects; an explicit supported migration is required |
+| Different exact build, matching complete state-contract witness, both implementing binding/1 | Reviewed atomic binding migration; retained logical engine identities and state remain unchanged |
+| Changed engine, storage/session codec, lifecycle semantics, compiler/platform contract or native OS | Reject; no semantic conversion or arbitrary ABI downgrade is claimed |
+| Earlier package without binding/1 witness | Same-build selection only; no cross-build bridge inferred |
 | Busy host, pending durable cycle, changed review root or tampered installation | Admission rejects; no selection acknowledgement |
 | Old activation retried after a newer selection | Original receipt returned; newer selection remains unchanged |
 | Replacing the entire store with an old external backup | Outside this workflow; no external nonrollbackable witness is claimed |
@@ -163,5 +267,14 @@ selection transition. They also check stale/tampered plans, protected rollback
 artifacts, incompatible identity and an old retry after rollback. Installed
 package tests execute the native commands, reject changed bytes after review,
 switch executable admission and preserve two accepted cycles through rollback.
+The compatibility suite also tests exact source proofs, actual changed
+engine/compiler/storage/session witnesses, retired and scheduled sources, five
+binding publication cuts, byte/count admission, protected pins and interrupted
+reclaim. `native/tests/native_package_upgrade_tests.cmake` builds two actual
+native packages from the same snapshot with one host display change. It checks
+distinct executable/build hashes, identical compatibility witness, actual
+post-upgrade work, reverse binding and audit. The separate isolated hosted
+`native_supervisor_lifecycle.cmake` fixture exercises SCM/systemd; a completed
+runner report is required to claim measured platform execution.
 These are software publication and functional native tests, not an achieved
 long-duration deployment or physical power-loss qualification.

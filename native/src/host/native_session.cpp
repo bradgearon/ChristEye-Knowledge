@@ -1,5 +1,6 @@
 #include "anaiero/sdk/native_session.hpp"
 #include "anaiero/sdk/engine_files.hpp"
+#include "compatibility.hpp"
 #include <charconv>
 #include <chrono>
 #include <filesystem>
@@ -72,13 +73,18 @@ struct NativeSession::Impl {
 };
 NativeSession::NativeSession():impl_(std::make_unique<Impl>()){}
 NativeSession::~NativeSession()=default;
+Result NativeSession::bind_catalog(ev::ICommitStore& store,EngineModuleCatalog& catalog){
+  const auto executing=deployment::compiled_witness();std::vector<Digest> aliases;
+  if(auto result=deployment::authorize_binding(store,executing,aliases);!result)return result;
+  for(const auto& alias:aliases)if(auto result=catalog.allow_retained_module(alias,executing.build_id);!result)return result;
+  return {};
+}
 Result NativeSession::open(std::string_view directory) {
   auto& p=*impl_;
   if(p.store)return {Code::conflict,"native session is already open"};
   const auto path=utf8_path(directory);
   if(!root_exists(path))return {Code::not_found,"canonical store ROOT does not exist; initialize the session first"};
   if(auto result=anaiero::engines::register_builtin_engines(p.catalog);!result)return result;
-  if(auto result=p.catalog.freeze();!result)return result;
   ev::StoreOptions options;
   if(auto result=ev::open_native_store(directory,options,p.store);!result)return result;
   const auto identity=p.store->info().store_id;
@@ -92,6 +98,8 @@ Result NativeSession::open(std::string_view directory) {
     if(auto result=ev::open_native_store(directory,options,p.store);!result)return result;
     if(p.store->info().store_id!=identity)return {Code::conflict,"store identity changed while reopening capacity"};
   }
+  if(auto result=bind_catalog(*p.store,p.catalog);!result)return result;
+  if(auto result=p.catalog.freeze();!result)return result;
   ev::StoredRecord definition;
   if(auto result=p.store->latest("session-definition","main",definition);!result)return result;
   if(definition.record.tombstone)return {Code::expired,"session definition is retired"};
@@ -125,6 +133,11 @@ Result NativeSession::ensure_engines() {
 Result NativeSession::retain_host_artifact(std::string_view path) {
   auto& p=*impl_;
   if(!p.store)return {Code::busy,"native session is not open"};
+  // Managed selection retains this exact host already. Avoid an independent
+  // permanent module pin which would defeat reviewed package reclamation.
+  ev::StoredRecord selection;const auto managed=p.store->latest("operator.deployment","selection",selection);
+  if(managed&&!selection.record.tombstone)return {};
+  if(!managed&&managed.code!=Code::not_found)return managed;
   std::error_code error;const auto file=utf8_path(path);
   if(!fs::is_regular_file(fs::symlink_status(file,error))||error)return {Code::invalid,"host executable is not a regular file"};
   const auto size=fs::file_size(file,error);

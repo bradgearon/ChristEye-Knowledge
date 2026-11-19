@@ -147,10 +147,21 @@ inline bool decode(std::string_view bytes,Subscription& v) {
 inline Bytes encode(const Pin& v) {return pack({"pin/1",v.id,v.owner,number(static_cast<std::uint64_t>(v.kind)),
   number(v.generation),number(v.expires_unix_s),pack(v.objects)});}
 inline bool decode(std::string_view bytes,Pin& v) {
-  Reader r(bytes,"pin/1");v.id=r.text();v.owner=r.text();v.kind=r.enumeration<PinKind>(6);
+  Reader r(bytes,"pin/1");v.id=r.text();v.owner=r.text();v.kind=r.enumeration<PinKind>(7);
   v.generation=r.value();v.expires_unix_s=r.value();r.valid=unpack(r.text(),v.objects,1024).ok()&&r.valid;
   return r.done()&&valid_token(v.id,256)&&valid_token(v.owner,256)&&v.generation>0&&
     std::all_of(v.objects.begin(),v.objects.end(),[](const auto& x){return valid_digest(x);});
+}
+inline Bytes encode(const BootstrapContinuation& v){return pack({"bootstrap-continuation/1",v.id,v.subscription_id,v.principal,
+  encode_identity(v.source),number(v.generation),number(v.lease_until_unix_s),number(v.credential_generation),
+  encode(v.tip),v.checkpoint_sha256,v.state_sha256,number(static_cast<std::uint64_t>(v.phase))});}
+inline bool decode(std::string_view bytes,BootstrapContinuation& v){
+  Reader r(bytes,"bootstrap-continuation/1");v.id=r.text();v.subscription_id=r.text();v.principal=r.text();
+  r.valid=decode_identity(r.text(),v.source).ok()&&r.valid;v.generation=r.value();v.lease_until_unix_s=r.value();
+  v.credential_generation=r.value();r.valid=decode(r.text(),v.tip)&&r.valid;v.checkpoint_sha256=r.text();v.state_sha256=r.text();
+  v.phase=r.enumeration<BootstrapContinuationPhase>(3);
+  return r.done()&&valid_token(v.id,256)&&valid_token(v.subscription_id,256)&&valid_token(v.principal,256)&&
+    v.generation>0&&v.credential_generation>0&&valid_digest(v.checkpoint_sha256)&&valid_digest(v.state_sha256);
 }
 inline Bytes encode(const MaintenanceRequest& v) {return pack({"maintenance-request/1",v.id,encode(v.source),
   number(v.expire_through),number(v.now_unix_s),number(static_cast<std::uint64_t>(v.disposition)),

@@ -1,4 +1,5 @@
 #include "deployment.hpp"
+#include "package_retention.hpp"
 #include "../sdk/sha256_impl.hpp"
 #include "anaiero/infrastructure/native_child_process.hpp"
 #include <algorithm>
@@ -174,20 +175,63 @@ Result verify_native_package(std::string_view requested,std::string_view module,
     const auto host_entry=std::find_if(manifest.files.begin(),manifest.files.end(),[&](const Entry& entry){return entry.path==host_name;});
     require(host_entry!=manifest.files.end()&&host_entry->digest==identity.host_sha256&&host_entry->bytes==host.size(),
       Code::conflict,"retained host bytes differ from the exact inventory");
+    Witness witness;
+    const auto compatibility_entry=std::find_if(manifest.files.begin(),manifest.files.end(),[](const Entry& entry){return entry.path=="share/anaiero/anaiero-compatibility-manifest.txt";});
+    if(compatibility_entry!=manifest.files.end()){
+      const auto verified_text=[&](std::string_view name){
+        const auto entry=std::find_if(manifest.files.begin(),manifest.files.end(),[&](const Entry& value){return value.path==name;});
+        require(entry!=manifest.files.end(),Code::corrupt,"package compatibility witness is absent from exact inventory");
+        auto bytes=read(root/path(name),1024U*1024U);
+        require(bytes.size()==entry->bytes&&sha256(bytes)==entry->digest,Code::conflict,"package source witness changed during verification");return bytes;
+      };
+      witness.build_id=identity.module_sha256;
+      witness.build_manifest=verified_text("share/anaiero/anaiero-builtin-manifest.txt");
+      witness.compatibility_manifest=verified_text("share/anaiero/anaiero-compatibility-manifest.txt");
+      const auto checked=validate_witness(witness);require(checked.ok(),checked.code,checked.message);
+    }
     // Re-read the manifest after the inventory walk; a local writer cannot
     // swap the reviewed manifest without invalidating this admission.
     require(read(root/"package-manifest.json",4U*1024U*1024U)==raw,Code::conflict,"package manifest changed during verification");
     if(probe){
       process::NativeChildProcess child;const auto started=child.start({selected_executable(identity),{"package-probe"}});
       require(started==process::Code::ok,Code::unsupported,"candidate host cannot start on this native system");
-      std::string response;const auto exchanged=child.exchange("ANAIERO-PACKAGE-PROBE/1",response,10000);child.stop();
-      require(exchanged==process::Code::ok&&response=="ANAIERO-PACKAGE-PROBE/1 "+identity.module_sha256,Code::unsupported,"candidate host does not attest the reviewed compiled identity/probe protocol");
+      const std::string protocol=witness.empty()?"ANAIERO-PACKAGE-PROBE/1":"ANAIERO-PACKAGE-PROBE/2";
+      const auto expected=protocol+" "+identity.module_sha256+(witness.empty()?"":" "+witness.compatibility_id);
+      std::string response;const auto exchanged=child.exchange(protocol,response,10000);child.stop();
+      require(exchanged==process::Code::ok&&response==expected,Code::unsupported,"candidate host does not attest exact build and compatibility identities");
     }
-    out={std::move(identity),raw,std::move(host),static_cast<std::uint64_t>(manifest.files.size()),total};return {};
+    out={std::move(identity),raw,std::move(host),static_cast<std::uint64_t>(manifest.files.size()),total,std::move(witness)};return {};
   }catch(const Failure& error){return {error.code,error.what()};}catch(const std::exception& error){return {Code::io_error,error.what()};}
 }
 Result read_native_plan(std::string_view requested,Plan& out){
   try{return decode_plan(read(path(requested),128U*1024U),out);}catch(const Failure& error){return {error.code,error.what()};}catch(const std::exception& error){return {Code::io_error,error.what()};}
+}
+Result read_package_retention(std::string_view requested,PackageRetentionPlan& out){
+  try{return decode_package_retention(read(path(requested),32768),out);}catch(const Failure& error){return {error.code,error.what()};}catch(const std::exception& error){return {Code::io_error,error.what()};}
+}
+Result open_deployment_store(std::string_view requested,std::unique_ptr<evidence::ICommitStore>& store){
+  try{
+    const auto root=path(requested);
+    if(!fs::is_regular_file(fs::symlink_status(root/"ROOT")))return {Code::not_found,"initialize the canonical store before deployment"};
+    evidence::StoreOptions options;Digest identity;
+    for(unsigned attempt=0;attempt<4;++attempt){
+      store.reset();if(auto r=evidence::open_native_store(requested,options,store);!r)return r;
+      if(identity.empty())identity=store->info().store_id;
+      else if(identity!=store->info().store_id)return {Code::conflict,"store identity changed while reading capacity policy"};
+      evidence::StoredRecord policy;const auto found=store->latest("operator.policy","capacity",policy);
+      if(found.code==Code::not_found)return {};
+      if(!found)return found;
+      std::vector<std::string> fields;std::uint64_t maximum=0;
+      if(policy.record.tombstone||!unpack(policy.record.payload,fields,2,1024)||fields.size()!=2||fields[0]!="store-budget/1")
+        return {Code::corrupt,"invalid deployment capacity policy"};
+      const auto parsed=std::from_chars(fields[1].data(),fields[1].data()+fields[1].size(),maximum);
+      if(parsed.ec!=std::errc{}||parsed.ptr!=fields[1].data()+fields[1].size()||std::to_string(maximum)!=fields[1]||maximum<65536)
+        return {Code::corrupt,"invalid deployment capacity bound"};
+      if(maximum==options.maximum_bytes)return {};
+      options.maximum_bytes=maximum;
+    }
+    return {Code::busy,"deployment capacity policy repeatedly changed"};
+  }catch(const std::exception& error){return {Code::io_error,error.what()};}
 }
 Result verify_selected_host(evidence::ICommitStore& store,std::string_view executable,std::string_view module){
   Service service(store);Selection selected;if(auto r=service.selection(selected);!r)return r;if(!selected.revision)return {};

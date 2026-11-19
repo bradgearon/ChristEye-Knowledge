@@ -23,6 +23,7 @@ std::string quote(std::string_view text){
 }
 void histogram(std::ostream& out,const Histogram& value){
   out<<"{\"samples\":"<<value.count<<",\"minimum_ns\":"<<value.minimum_ns<<",\"maximum_ns\":"<<value.maximum_ns
+     <<",\"sum_ns\":"<<value.sum_ns<<",\"sum_saturated\":"<<(value.sum_saturated?"true":"false")
      <<",\"p50_upper_ns\":"<<value.percentile_upper_ns(50)<<",\"p95_upper_ns\":"<<value.percentile_upper_ns(95)
      <<",\"p99_upper_ns\":"<<value.percentile_upper_ns(99)<<'}';
 }
@@ -32,13 +33,19 @@ void resources(std::ostream& out,const Resources& value){
      <<",\"voluntary_context_switches\":"<<value.voluntary_context_switches
      <<",\"involuntary_context_switches\":"<<value.involuntary_context_switches<<'}';
 }
+void threshold(std::ostream& out,const ThresholdCounter& value){
+  out<<"{\"limit_ns\":"<<value.limit_ns<<",\"samples\":"<<value.count<<",\"exceeded\":"<<value.exceeded
+     <<",\"allowed_exceedances_p99\":"<<value.allowed_exceedances(99)
+     <<",\"p99_passed\":"<<(value.passes(99)?"true":"false")<<'}';
+}
 }
 sdk::Result parse_mixed_profile(std::string_view bytes,MixedProfile& output){
   if(bytes.size()>16384||bytes.find('\0')!=std::string_view::npos)return {sdk::Code::invalid,"mixed profile exceeds text bounds"};
   std::istringstream input{std::string(bytes)};std::string line;
   if(!std::getline(input,line))return {sdk::Code::invalid,"missing mixed profile version"};
   if(!line.empty()&&line.back()=='\r')line.pop_back();
-  if(line!="ANAIEROMIXEDQUALIFICATION/1")return {sdk::Code::invalid,"unsupported mixed profile version"};
+  if(line!="ANAIEROMIXEDQUALIFICATION/1"&&line!="ANAIEROMIXEDQUALIFICATION/2")return {sdk::Code::invalid,"unsupported mixed profile version"};
+  const bool exact=line=="ANAIEROMIXEDQUALIFICATION/2";
   std::map<std::string,std::string> fields;
   while(std::getline(input,line)){
     if(!line.empty()&&line.back()=='\r')line.pop_back();
@@ -47,8 +54,8 @@ sdk::Result parse_mixed_profile(std::string_view bytes,MixedProfile& output){
     if(at==std::string::npos||at==0||at+1==line.size()||!fields.emplace(line.substr(0,at),line.substr(at+1)).second)
       return {sdk::Code::invalid,"mixed profile contains malformed or duplicate fields"};
   }
-  MixedProfile p;
-  const std::map<std::string,std::uint64_t*> numbers={
+  MixedProfile p;p.version=exact?2U:1U;
+  std::map<std::string,std::uint64_t*> numbers={
     {"cycles",&p.cycles},{"period_ms",&p.period_ms},{"restart_after_cycle",&p.restart_after_cycle},
     {"checkpoint_cycles",&p.checkpoint_cycles},{"blocked_lane_ms",&p.blocked_lane_ms},
     {"minimum_run_ms",&p.minimum_run_ms},{"maximum_run_ms",&p.maximum_run_ms},
@@ -57,7 +64,18 @@ sdk::Result parse_mixed_profile(std::string_view bytes,MixedProfile& output){
     {"maximum_status_p99_us",&p.maximum_status_p99_us},{"maximum_control_p99_us",&p.maximum_control_p99_us},
     {"maximum_probe_p99_us",&p.maximum_probe_p99_us},{"maximum_reopen_us",&p.maximum_reopen_us},
     {"maximum_lookup_nodes",&p.maximum_lookup_nodes}};
-  if(fields.size()!=numbers.size()+2)return {sdk::Code::invalid,"mixed profile requires all fields and rejects unknown fields"};
+  if(exact){
+    numbers.emplace("maximum_dispatch_p99_us",&p.maximum_dispatch_p99_us);
+    numbers.emplace("maximum_queue_p99_us",&p.maximum_queue_p99_us);
+    numbers.emplace("maximum_step_commit_p99_us",&p.maximum_step_commit_p99_us);
+    numbers.emplace("maximum_projection_p99_us",&p.maximum_projection_p99_us);
+  }
+  if(fields.size()!=numbers.size()+(exact?3U:2U))return {sdk::Code::invalid,"mixed profile requires all fields and rejects unknown fields"};
+  if(exact){
+    const auto required=fields.find("required_device_class");
+    if(required==fields.end()||(required->second!="any"&&required->second!="dedicated"))return {sdk::Code::invalid,"invalid mixed required_device_class"};
+    p.required_device_class=required->second;
+  }
   for(const auto& [key,destination]:numbers){
     const auto found=fields.find(key);
     if(found==fields.end()||!integer(found->second,*destination)||(*destination==0&&key!="minimum_run_ms"))
@@ -72,7 +90,9 @@ sdk::Result parse_mixed_profile(std::string_view bytes,MixedProfile& output){
      p.minimum_run_ms>p.maximum_run_ms||p.period_ms*p.cycles>p.maximum_run_ms||p.maximum_store_bytes<1048576||
      p.maximum_store_bytes>(1ULL<<44)||p.maximum_disk_bytes<p.maximum_store_bytes||p.maximum_files>100000000||
      p.maximum_resident_bytes<1048576||p.maximum_status_p99_us>1000000000||p.maximum_control_p99_us>1000000000||
-     p.maximum_probe_p99_us>1000000000||p.maximum_reopen_us>1000000000||p.maximum_lookup_nodes>4096)
+     p.maximum_probe_p99_us>1000000000||p.maximum_reopen_us>1000000000||p.maximum_lookup_nodes>4096||
+     p.maximum_dispatch_p99_us>1000000000||p.maximum_queue_p99_us>1000000000||
+     p.maximum_step_commit_p99_us>1000000000||p.maximum_projection_p99_us>1000000000)
     return {sdk::Code::invalid,"mixed profile exceeds supported horizon or resource bounds"};
   output=std::move(p);return {};
 }
@@ -93,18 +113,29 @@ sdk::Result validate_mixed_definition(const sdk::SessionDefinition& definition,c
   return {};
 }
 std::string mixed_report_json(const MixedReport& r){
+  if(!r.retained_report_json.empty())return r.retained_report_json;
   std::ostringstream out;out.imbue(std::locale::classic());
-  out<<"{\"schema\":\"anaiero.mixed-qualification/1\",\"profile\":"<<quote(r.profile.name)
+  out<<"{\"schema\":"<<quote(r.profile.version==1?"anaiero.mixed-qualification/1":"anaiero.mixed-qualification/2")<<",\"profile\":"<<quote(r.profile.name)
      <<",\"profile_sha256\":"<<quote(r.profile_sha256)<<",\"session_text_sha256\":"<<quote(r.session_text_sha256)
      <<",\"session_definition_sha256\":"<<quote(r.session_definition_sha256)
+     <<",\"device_sha256\":"<<quote(r.device_sha256)<<",\"device\":"<<device_declaration_json(r.device)
+     <<",\"required_device_class\":"<<quote(r.profile.required_device_class)
      <<",\"scope\":\"five compiled engines through NativeSession and NativeContinuousHost; no IPC or TLS transport\""
-     <<",\"durability_level\":\"orderly host shutdown and store reopen; no process crash or power loss\""
-     <<",\"latency_scope\":\"cached snapshot call, durable engine-control completion, and queued historical probe completion\""
-     <<",\"disk_scope\":\"sampled regular-file allocation in the session store; excludes filesystem metadata\""
+     <<",\"durability_level\":"<<quote(r.campaign?"canonical campaign resume and orderly session recovery; physical power loss not qualified":"orderly host shutdown and store reopen; no process crash or power loss")
+     <<",\"latency_scope\":\"cached snapshot, durable control, queued probe, step dispatch, queue wait, actual writer commit, completion adoption/projection; no TLS ACK\""
+     <<",\"acceptance_method\":"<<quote(r.profile.version==1?"conservative-percentile-bound/1":"exact-nearest-rank-threshold/1")
+     <<",\"host_timing_method\":\"owner-dispatch-writer-completion-projection/1\""
+     <<",\"disk_scope\":\"sampled session-store regular files; directory allocation reported separately and included in /2 disk gate; excludes inode tables, journals and auxiliary campaign files\""
+     <<",\"final_store_scope\":"<<quote(r.campaign?"session store before final canonical campaign report checkpoint":"session store after workload and audit")
      <<",\"percentile_method\":"<<quote(histogram_percentile_method)
      <<",\"percentiles\":"<<quote(histogram_percentile_description)
      <<",\"started_utc\":"<<quote(r.started_utc)<<",\"finished_utc\":"<<quote(r.finished_utc)
      <<",\"passed\":"<<(r.passed?"true":"false")<<",\"store_id\":"<<quote(r.store_id)
+     <<",\"campaign\":{\"enabled\":"<<(r.campaign?"true":"false")<<",\"attempt\":"<<r.campaign_attempt
+     <<",\"interruptions\":"<<r.campaign_interruptions<<",\"completed\":"<<(r.campaign_complete?"true":"false")
+     <<",\"continuous_qualified\":"<<(r.continuous_qualified?"true":"false")<<",\"recovered_cycles\":"<<r.recovered_cycles
+     <<",\"active_ns_lower_bound\":"<<r.active_ns_lower_bound
+     <<",\"latency_coverage\":\"current attempt only; interrupted/uncheckpointed intervals are never reconstructed\"}"
      <<",\"environment\":{\"os\":"<<quote(r.environment.operating_system)<<",\"architecture\":"<<quote(r.environment.architecture)
      <<",\"filesystem\":"<<quote(r.environment.filesystem)<<",\"storage_label\":"<<quote(r.profile.storage_label)
      <<",\"compiler\":"<<quote(r.environment.compiler)<<",\"build_identity\":"<<quote(r.environment.build_identity)
@@ -120,14 +151,24 @@ std::string mixed_report_json(const MixedReport& r){
      <<",\"maximum_files\":"<<r.profile.maximum_files<<",\"maximum_resident_bytes\":"<<r.profile.maximum_resident_bytes
      <<",\"maximum_status_p99_us\":"<<r.profile.maximum_status_p99_us<<",\"maximum_control_p99_us\":"<<r.profile.maximum_control_p99_us
      <<",\"maximum_probe_p99_us\":"<<r.profile.maximum_probe_p99_us<<",\"maximum_reopen_us\":"<<r.profile.maximum_reopen_us
+     <<",\"maximum_dispatch_p99_us\":"<<r.profile.maximum_dispatch_p99_us<<",\"maximum_queue_p99_us\":"<<r.profile.maximum_queue_p99_us
+     <<",\"maximum_step_commit_p99_us\":"<<r.profile.maximum_step_commit_p99_us<<",\"maximum_projection_p99_us\":"<<r.profile.maximum_projection_p99_us
      <<",\"maximum_lookup_nodes\":"<<r.profile.maximum_lookup_nodes<<'}'
      <<",\"snapshot_latency\":";histogram(out,r.status);out<<",\"control_latency\":";histogram(out,r.control);
-  out<<",\"probe_latency\":";histogram(out,r.probe);out<<",\"resources_before\":";resources(out,r.before);
+  out<<",\"probe_latency\":";histogram(out,r.probe);
+  out<<",\"dispatch_latency\":";histogram(out,r.dispatch);out<<",\"queue_latency\":";histogram(out,r.queue);
+  out<<",\"step_commit_latency\":";histogram(out,r.step_commit);out<<",\"projection_latency\":";histogram(out,r.projection);
+  out<<",\"thresholds\":{\"snapshot\":";threshold(out,r.status_limit);out<<",\"control\":";threshold(out,r.control_limit);
+  out<<",\"probe\":";threshold(out,r.probe_limit);out<<",\"dispatch\":";threshold(out,r.dispatch_limit);
+  out<<",\"queue\":";threshold(out,r.queue_limit);out<<",\"step_commit\":";threshold(out,r.step_commit_limit);
+  out<<",\"projection\":";threshold(out,r.projection_limit);out<<'}';
+  out<<",\"resources_before\":";resources(out,r.before);
   out<<",\"resources_after\":";resources(out,r.after);
   out<<",\"final_store\":{\"generation\":"<<r.final_generation<<",\"accounted_bytes\":"<<r.final_accounted_bytes
      <<",\"files\":"<<r.disk.files<<",\"logical_bytes\":"<<r.disk.logical_bytes<<",\"allocated_bytes\":"<<r.disk.allocated_bytes
      <<",\"allocated_bytes_available\":"<<(r.disk.allocated_bytes_available?"true":"false")
      <<",\"sampled_peak_disk_bytes\":"<<r.sampled_peak_disk_bytes<<",\"sampled_peak_files\":"<<r.sampled_peak_files<<'}'
+     <<",\"disk_inventory\":"<<disk_usage_json(r.disk)
      <<",\"checks\":{\"queue_pressure_verified\":"<<(r.pressure_verified?"true":"false")
      <<",\"exact_control_retry_verified\":"<<(r.control_retry_verified?"true":"false")
      <<",\"quota_rejection_verified\":"<<(r.quota_rejection_verified?"true":"false")

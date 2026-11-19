@@ -2,12 +2,15 @@
 #include "anaiero/sdk/engines.hpp"
 #include "anaiero/sdk/engine_files.hpp"
 #include "deployment.hpp"
+#include "package_retention.hpp"
+#include "release_notice.hpp"
 #ifdef ANAIERO_HAS_CONTINUOUS_MESH
 #include "anaiero/sdk/native_mesh.hpp"
 #endif
 #include "anaiero/infrastructure/native_host_lifecycle.hpp"
 #include <algorithm>
 #include <charconv>
+#include <chrono>
 #include <cstring>
 #include <filesystem>
 #include <deque>
@@ -177,18 +180,26 @@ public:
   }
 };
 void help() {
-  std::cout<<"Anaiero canonical native host\n"
+  std::cout<<deployment::release_notice()<<'\n'<<
     "  anaiero host start ENDPOINT STORE PERIOD_MS [paused] [--mesh CONFIG]\n"
     "  anaiero host service ENDPOINT STORE PERIOD_MS [paused] [--mesh CONFIG]\n"
     "  anaiero host query ENDPOINT COMMAND [ARGUMENTS...]\n"
     "  anaiero host check STORE\n"
     "  anaiero host check-selected STORE\n"
+    "  anaiero host run-through STORE ABSOLUTE_CYCLE\n"
     "  anaiero host package-info\n"
     "  anaiero host package-check PACKAGE\n"
     "  anaiero host package-review STORE PACKAGE OPERATION PLAN_FILE\n"
     "  anaiero host package-rollback-review STORE OPERATION PLAN_FILE\n"
     "  anaiero host package-activate STORE PLAN_FILE\n"
     "  anaiero host package-status STORE\n"
+    "  anaiero host package-selected STORE\n"
+    "  anaiero host package-retention-status STORE\n"
+    "  anaiero host package-retention-policy STORE MAX_PACKAGES MAX_BYTES OPERATION\n"
+    "  anaiero host package-pin STORE MANIFEST_SHA256 on|off OPERATION\n"
+    "  anaiero host package-retention-review STORE OPERATION PLAN_FILE MANIFEST_SHA256...\n"
+    "  anaiero host package-retention-activate STORE PLAN_FILE\n"
+    "  anaiero host package-retention-reclaim STORE OPERATION\n"
     "Commands: STATUS [engine-offset], PING, RUN, PAUSE, THROUGH absolute-cycle,\n"
     "  ENGINE_PAUSE|ENGINE_RESUME|ENGINE_CANCEL instance stable-operation-id,\n"
     "  RESULT ticket, STOP. Queue admission is not a durable acknowledgement.\n"
@@ -198,10 +209,12 @@ s::Result execute(int argc,char** argv) {
   if(argc<2||std::string_view(argv[1])=="help"||std::string_view(argv[1])=="--help") {help();return {};}
   const std::string_view mode=argv[1];
   if(mode=="package-probe"&&argc==2){
-    char request[65]{};if(!std::cin.getline(request,sizeof(request))||std::string_view(request)!="ANAIERO-PACKAGE-PROBE/1")
+    char request[65]{};if(!std::cin.getline(request,sizeof(request))||(std::string_view(request)!="ANAIERO-PACKAGE-PROBE/1"&&std::string_view(request)!="ANAIERO-PACKAGE-PROBE/2"))
       return {s::Code::invalid,"invalid package probe"};
     s::EngineModuleCatalog catalog;if(auto r=anaiero::engines::register_builtin_engines(catalog);!r)return r;
-    std::cout<<"ANAIERO-PACKAGE-PROBE/1 "<<catalog.describe().front().module_sha256<<std::endl;
+    std::cout<<request<<" "<<catalog.describe().front().module_sha256;
+    if(std::string_view(request)=="ANAIERO-PACKAGE-PROBE/2")std::cout<<" "<<deployment::compiled_witness().compatibility_id;
+    std::cout<<std::endl;
     // The probe owner terminates its bounded child after receiving the reply.
     // Keeping the pipe open avoids an exit/last-read race on native Windows.
     std::cin.getline(request,sizeof(request));return {};
@@ -211,17 +224,59 @@ s::Result execute(int argc,char** argv) {
     std::cout<<"{\"schema\":\"anaiero.package-verification/1\",\"verified\":true,\"manifest_sha256\":\""<<package.identity.manifest_sha256
       <<"\",\"module_sha256\":\""<<package.identity.module_sha256<<"\",\"files\":"<<package.files<<",\"bytes\":"<<package.bytes<<"}\n";return {};
   }
+  if(mode=="package-selected"&&argc==3){
+    std::unique_ptr<s::evidence::ICommitStore> store;if(auto r=deployment::open_deployment_store(argv[2],store);!r)return r;
+    deployment::Selection selection;deployment::Service service(*store);if(auto r=service.selection(selection);!r)return r;
+    if(!selection.revision)return {s::Code::not_found,"select an exact package before installing a supervisor"};
+    const auto selected=deployment::selected_executable(selection.current);
+    if(selected.find_first_of("\r\n")!=selected.npos)return {s::Code::unsupported,"line-oriented supervisor output cannot represent this path"};
+    std::cout<<selected<<'\n';return {};
+  }
+  if(mode.starts_with("package-retention-")||mode=="package-pin"){
+    if(argc<3)return {s::Code::invalid,"package maintenance requires a store"};
+    std::unique_ptr<s::evidence::ICommitStore> store;if(auto r=deployment::open_deployment_store(argv[2],store);!r)return r;
+    s::evidence::CommitReceipt receipt;
+    if(mode=="package-retention-status"&&argc==3){
+      deployment::PackageUsage usage;if(auto r=deployment::package_usage(*store,usage);!r)return r;
+      std::cout<<"{\"schema\":\"anaiero.package-retention-status/1\",\"retained_bytes\":"<<usage.retained_bytes
+        <<",\"maximum_bytes\":"<<usage.policy.maximum_bytes<<",\"maximum_packages\":"<<usage.policy.maximum_packages<<",\"packages\":[";
+      for(std::size_t i=0;i<usage.policy.packages.size();++i){if(i)std::cout<<',';std::cout<<deployment::json_string(usage.policy.packages[i]);}
+      std::cout<<"]}\n";return {};
+    }
+    if(mode=="package-retention-policy"&&argc==6){
+      std::uint64_t count=0,bytes=0;if(!number(argv[3],count)||!number(argv[4],bytes))return {s::Code::invalid,"invalid package retention limits"};
+      if(auto r=deployment::package_policy(*store,count,bytes,argv[5],receipt);!r.committed())return r;
+    }else if(mode=="package-pin"&&argc==6&&(std::string_view(argv[4])=="on"||std::string_view(argv[4])=="off")){
+      if(auto r=deployment::package_pin(*store,argv[3],std::string_view(argv[4])=="on",argv[5],receipt);!r.committed())return r;
+    }else if(mode=="package-retention-review"&&argc>=6&&argc<=13){
+      std::vector<s::Digest> packages;for(int i=5;i<argc;++i)packages.emplace_back(argv[i]);
+      deployment::PackageRetentionPlan plan;if(auto r=deployment::package_retention_review(*store,std::move(packages),argv[3],plan);!r)return r;
+      if(auto r=anaiero::engines::write_new_artifact(argv[4],deployment::encode_package_retention(plan));!r)return r;
+      std::cout<<"{\"schema\":\"anaiero.package-retention-review/1\",\"plan_sha256\":\""<<plan.plan_sha256<<"\",\"packages\":"<<plan.packages.size()
+        <<",\"objects\":"<<plan.objects.size()<<",\"bytes\":"<<plan.bytes<<",\"plan_file\":"<<deployment::json_string(argv[4])<<"}\n";return {};
+    }else if(mode=="package-retention-activate"&&argc==4){
+      deployment::PackageRetentionPlan plan;if(auto r=deployment::read_package_retention(argv[3],plan);!r)return r;
+      if(auto r=deployment::package_retention_activate(*store,plan,receipt);!r.committed())return r;
+    }else if(mode=="package-retention-reclaim"&&argc==4){
+      std::uint64_t remaining=0;if(auto r=deployment::package_retention_reclaim(*store,argv[3],remaining);!r)return r;
+      std::cout<<"{\"schema\":\"anaiero.package-retention-reclaim/1\",\"complete\":true,\"remaining_objects\":"<<remaining<<"}\n";return {};
+    }else return {s::Code::invalid,"invalid package maintenance arguments; use help"};
+    std::cout<<"{\"schema\":\"anaiero.package-maintenance/1\",\"committed\":true,\"generation\":"<<receipt.generation
+      <<",\"root_sha256\":\""<<receipt.root_digest<<"\",\"duplicate\":"<<(receipt.duplicate?"true":"false")<<"}\n";return {};
+  }
   if(mode=="package-review"||mode=="package-rollback-review"||mode=="package-activate"||mode=="package-status"){
     if((mode=="package-review"&&argc!=6)||(mode=="package-rollback-review"&&argc!=5)||(mode=="package-activate"&&argc!=4)||(mode=="package-status"&&argc!=3))
       return {s::Code::invalid,"invalid package deployment arguments; use help"};
-    h::NativeSession session;if(auto r=session.open(argv[2]);!r)return r;
-    deployment::Service service(session.store());deployment::Selection selection;if(auto r=service.selection(selection);!r)return r;
+    std::unique_ptr<s::evidence::ICommitStore> store;if(auto r=deployment::open_deployment_store(argv[2],store);!r)return r;
+    deployment::Service service(*store);deployment::Selection selection;if(auto r=service.selection(selection);!r)return r;
     const auto show_selection=[&]{
       std::cout<<"{\"schema\":\"anaiero.deployment-status/1\",\"selected\":"<<(selection.revision?"true":"false")
         <<",\"selection_revision\":"<<selection.revision<<",\"activation_generation\":"<<selection.generation
-        <<",\"store_generation\":"<<session.store().generation()<<",\"store_root\":\""<<session.store().info().root_digest
+        <<",\"store_generation\":"<<store->generation()<<",\"store_root\":\""<<store->info().root_digest
         <<"\",\"current_package\":"<<deployment::json_string(selection.current.directory)
         <<",\"previous_package\":"<<deployment::json_string(selection.previous.directory)
+        <<",\"current_manifest_sha256\":"<<deployment::json_string(selection.current.manifest_sha256)
+        <<",\"previous_manifest_sha256\":"<<deployment::json_string(selection.previous.manifest_sha256)
         <<",\"selected_executable\":"<<deployment::json_string(selection.revision?deployment::selected_executable(selection.current):"")
         <<",\"operation\":"<<deployment::json_string(selection.operation_id)<<"}\n";
     };
@@ -236,11 +291,17 @@ s::Result execute(int argc,char** argv) {
       }
       if(existing.code!=s::Code::not_found)return existing;
     }
-    if(session.runner().progress().cycle_pending)return {s::Code::busy,"finish the pending durable cycle before package review or activation"};
-    s::EngineModuleCatalog catalog;if(auto r=anaiero::engines::register_builtin_engines(catalog);!r)return r;
-    const auto module=catalog.describe().front().module_sha256;
-    for(const auto& scheduled:session.runner().definition().engines)
-      if(scheduled.identity.module_sha256!=module)return {s::Code::unsupported,"retained scheduled engine implementation differs; explicit migration is required"};
+    std::vector<s::Digest> modules;if(auto r=deployment::session_modules(*store,modules,true);!r)return r;
+    if(selection.revision){
+      deployment::Binding binding;const auto bound=deployment::load_binding(*store,binding);
+      if(!bound&&bound.code!=s::Code::not_found)return bound;
+      if(bound&&binding.target_build!=selection.current.module_sha256)return {s::Code::conflict,"selected package differs from compatibility binding"};
+      for(const auto& module:modules){
+        if(module==selection.current.module_sha256)continue;
+        const bool authorized=bound&&std::any_of(binding.origins.begin(),binding.origins.end(),[&](const auto& origin){return origin.build_id==module;});
+        if(!authorized)return {s::Code::unsupported,"retained scheduled or retired engine lacks an exact reviewed binding"};
+      }
+    }
     std::string candidate;
     if(mode=="package-activate")candidate=plan.candidate.directory;
     else if(mode=="package-review")candidate=argv[3];
@@ -248,7 +309,11 @@ s::Result execute(int argc,char** argv) {
       if(selection.previous.directory.empty())return {s::Code::not_found,"no previous package is retained for rollback"};
       candidate=selection.previous.directory;
     }
-    deployment::VerifiedPackage package;if(auto r=deployment::verify_native_package(candidate,module,package);!r)return r;
+    deployment::VerifiedPackage package;if(auto r=deployment::verify_native_package(candidate,{},package);!r)return r;
+    if(!selection.revision){
+      for(const auto& module:modules)if(module!=package.identity.module_sha256)
+        return {s::Code::unsupported,"first selection must match every retained engine build; select its original package first"};
+    }
     if(mode=="package-activate"){
       const auto activated=service.activate(plan,package,receipt);if(!activated.committed())return activated;
       std::cout<<"{\"schema\":\"anaiero.deployment-activation/1\",\"committed\":true,\"duplicate\":"<<(receipt.duplicate?"true":"false")
@@ -257,12 +322,12 @@ s::Result execute(int argc,char** argv) {
       return activated;
     }
     const auto operation=mode=="package-review"?argv[4]:argv[3];const auto target=mode=="package-review"?argv[5]:argv[4];
-    if(auto r=service.review(package.identity,operation,plan);!r)return r;
+    if(auto r=service.review(package,operation,plan);!r)return r;
     if(auto r=anaiero::engines::write_new_artifact(target,deployment::encode_plan(plan));!r)return r;
     std::cout<<"{\"schema\":\"anaiero.deployment-review/1\",\"plan_sha256\":\""<<plan.plan_sha256
       <<"\",\"source_generation\":"<<plan.generation<<",\"source_root\":\""<<plan.root_sha256
       <<"\",\"candidate_package\":"<<deployment::json_string(candidate)<<",\"previous_package\":"<<deployment::json_string(selection.current.directory)
-      <<",\"plan_file\":"<<deployment::json_string(target)<<",\"store_rollback\":false}\n";return {};
+      <<",\"plan_file\":"<<deployment::json_string(target)<<",\"compatibility_binding_migration\":"<<(plan.compatibility_binding.empty()?"false":"true")<<",\"store_rollback\":false}\n";return {};
   }
   if(mode=="query"&&argc>=4) {
     std::string command=argv[3];for(int i=4;i<argc;++i) {command+=' ';command+=argv[i];}
@@ -274,7 +339,30 @@ s::Result execute(int argc,char** argv) {
   if(mode=="package-info"&&argc==2) {
     s::EngineModuleCatalog catalog;if(auto result=anaiero::engines::register_builtin_engines(catalog);!result)return result;
     std::cout<<"{\"schema\":\"anaiero.host-package/1\",\"module_sha256\":\""<<catalog.describe().front().module_sha256
-      <<"\",\"store_format\":\"canonical-root\",\"native_ipc\":1,\"transparent_live_upgrade\":false}\n";return {};
+      <<"\",\"compatibility_sha256\":\""<<deployment::compiled_witness().compatibility_id<<"\",\"store_format\":\"canonical-root\",\"native_ipc\":1,\"transparent_live_upgrade\":false}\n";return {};
+  }
+  if(mode=="run-through"&&argc==4){
+    std::uint64_t target=0;if(!number(argv[3],target))return {s::Code::invalid,"invalid absolute cycle"};
+    h::NativeSession session;if(auto r=session.open(argv[2]);!r)return r;
+    const auto initial=session.runner().progress().completed_cycles;
+    if(target<initial||target-initial>1024)return {s::Code::capacity,"run-through admits at most 1024 additional cycles"};
+    if(auto r=deployment::verify_selected_host(session.store(),executable(argv[0]),deployment::compiled_witness().build_id);!r)return r;
+    if(auto r=session.ensure_engines();!r)return r;
+    h::Options options;options.period_ms=1;options.initially_running=false;
+    h::NativeContinuousHost worker(session.runtime(),session.runner(),session.store(),options);
+    if(auto r=worker.start();!r)return r;
+    h::Command command;command.kind=h::CommandKind::through;command.through_cycle=target;std::uint64_t ticket=0;
+    if(auto r=worker.enqueue(command,ticket);!r)return r;
+    const auto deadline=std::chrono::steady_clock::now()+std::chrono::minutes(5);std::uint64_t revision=0;
+    for(;;){
+      const auto status=worker.snapshot(revision,100);revision=status.revision;
+      if(!status.result)return status.result;
+      h::CommandResult result;if(auto r=worker.command_result(ticket,result);!r)return r;
+      if(result.complete&&!result.result)return result.result;
+      if(status.completed_cycles>=target&&!status.cycle_pending)break;
+      if(std::chrono::steady_clock::now()>=deadline)return {s::Code::deadline,"bounded run-through elapsed limit; accepted work remains durable"};
+    }
+    worker.shutdown();std::cout<<h::encode_status(worker.snapshot());return {};
   }
   if((mode=="check"||mode=="check-selected")&&argc==3) {
     h::NativeSession session;if(auto result=session.open(argv[2]);!result)return result;
@@ -286,13 +374,18 @@ s::Result execute(int argc,char** argv) {
       <<",\"completed_cycles\":"<<session.runner().progress().completed_cycles
       <<",\"cycle_pending\":"<<(session.runner().progress().cycle_pending?"true":"false")<<"}\n";return {};
   }
-  if((mode!="start"&&mode!="service")||argc<5||argc>8)return {s::Code::invalid,"unknown host command or argument count; use help"};
+  if((mode!="start"&&mode!="service")||argc<5||argc>10)return {s::Code::invalid,"unknown host command or argument count; use help"};
   std::uint64_t period=0;
   if(!number(argv[4],period)||period==0||period>3600000)return {s::Code::invalid,"period must be 1..3600000 ms"};
-  bool paused=false;std::string mesh_configuration;
+  bool paused=false;std::string mesh_configuration,service_name="AnaieroModular";
   for(int argument=5;argument<argc;++argument){
     if(std::string_view(argv[argument])=="paused"&&!paused)paused=true;
     else if(std::string_view(argv[argument])=="--mesh"&&mesh_configuration.empty()&&argument+1<argc)mesh_configuration=argv[++argument];
+    else if(std::string_view(argv[argument])=="--service-name"&&mode=="service"&&argument+1<argc){
+      service_name=argv[++argument];
+      if(service_name.empty()||service_name.size()>64||!std::all_of(service_name.begin(),service_name.end(),[](unsigned char c){return (c>='A'&&c<='Z')||(c>='a'&&c<='z')||(c>='0'&&c<='9')||c=='_'||c=='-';}))
+        return {s::Code::invalid,"service name must contain 1..64 ASCII letters, digits, underscores or hyphens"};
+    }
     else return {s::Code::invalid,"optional host arguments are paused and --mesh CONFIG"};
   }
 #ifdef ANAIERO_HAS_CONTINUOUS_MESH
@@ -322,7 +415,7 @@ s::Result execute(int argc,char** argv) {
   }
 #endif
   Commands commands(worker,shutdown);ipc::NativeIpcServer server(argv[2]);
-  ipc::NativeLifecycleOptions lifecycle;lifecycle.windows_service=mode=="service";lifecycle.service_name="AnaieroModular";
+  ipc::NativeLifecycleOptions lifecycle;lifecycle.windows_service=mode=="service";lifecycle.service_name=service_name;
   lifecycle.on_stop=[](void* context)noexcept{static_cast<Shutdown*>(context)->finish();};
   lifecycle.stop_context=&shutdown;
   const auto result=ipc::NativeHostLifecycle::run(server,commands,lifecycle);

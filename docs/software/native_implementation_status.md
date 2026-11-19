@@ -26,7 +26,14 @@ Deliver a substantial complete capability with implementation, adapters,
 runtime/CLI wiring, meaningful Windows/Linux tests and documentation. Keep
 related work in one changeset with reviewable internal commits.
 
-## Current integrated batch — CE-SW-40 operating envelope and lifecycle
+## Current integrated batch — CE-SW-41
+
+[CE-SW-41](CE-SW-41_runtime_lifecycle_and_qualification.md) adds exact commit-latency decisions, bounded index
+reuse and compaction, source/receiver scale profiles, resumable five-engine
+campaigns, leased live bootstrap and a conservative cross-build package
+contract. See its evidence index for observed scope and open operating gates.
+
+## Previous integrated batch — CE-SW-40 operating envelope and lifecycle
 
 `anaiero qualify mixed PROFILE SESSION NEW_OUTPUT` runs all five compiled engine
 families through the actual continuous host. It checks durable pause/retry/resume,

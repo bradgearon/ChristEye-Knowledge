@@ -13,6 +13,9 @@
 namespace anaiero::sdk::host {
 namespace {
 using Clock=std::chrono::steady_clock;
+std::uint64_t monotonic_ns() noexcept {
+  return static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now().time_since_epoch()).count());
+}
 std::string quoted(std::string_view value) {
   std::ostringstream out;out<<'"';
   for(const unsigned char c:value) {
@@ -31,13 +34,13 @@ class CycleDriver {
   SessionService& runtime_;SessionRunner& runner_;
 public:
   CycleDriver(SessionService& runtime,SessionRunner& runner):runtime_(runtime),runner_(runner){}
-  Result advance(bool& completed) {
-    completed=false;
+  Result advance(bool& completed,bool& dispatched) {
+    completed=false;dispatched=false;
     if(runtime_.busy())return runtime_.pump();
     if(!runner_.progress().cycle_pending)return runner_.begin_cycle();
     std::string instance;StepRequest request;bool pending=false;
     if(auto result=runner_.next_step(instance,request,pending);!result)return result;
-    if(pending)return runtime_.begin_step(instance,request);
+    if(pending){dispatched=true;return runtime_.begin_step(instance,request);}
     const auto result=runner_.finish_cycle();completed=result.ok();return result;
   }
 };
@@ -53,10 +56,26 @@ struct NativeContinuousHost::Impl {
   std::deque<CommandResult> results;
   std::optional<Task> task_slot;
   std::unique_ptr<evidence::CommitWorker> writer;
+  struct MeasuredQueue final:evidence::ICommitQueue {
+    Impl& owner;
+    explicit MeasuredQueue(Impl& value):owner(value){}
+    Result submit(evidence::CommitBatch batch,std::uint64_t& ticket) override {
+      if(owner.options.timing_observer)owner.submitted_ns=monotonic_ns();
+      return owner.writer->submit(std::move(batch),ticket);
+    }
+    bool try_complete(evidence::CommitCompletion& completion) override {
+      if(!owner.writer->try_complete(completion))return false;
+      owner.commit_started_ns=completion.started_monotonic_ns;
+      owner.commit_completed_ns=completion.completed_monotonic_ns;return true;
+    }
+  } measured_queue{*this};
   std::thread owner,task_worker;
   Status cached;
   std::uint64_t signal=0,next_ticket=1,watermark=0;
   std::uint64_t through=0,owner_wakeups=0,completed_tasks=0;
+  std::uint64_t submitted_ns=0,commit_started_ns=0,commit_completed_ns=0;
+  std::uint64_t dispatch_started_ns=0,dispatch_cycle=0;
+  bool step_timing_pending=false;
   bool started=false,stopping=false,stopped=false,task_exit=false;
   bool task_active=false,task_done=false,task_threw=false;
   bool running=false,runnable=true;
@@ -67,6 +86,9 @@ struct NativeContinuousHost::Impl {
   void notify() noexcept {
     {std::lock_guard lock(mutex);++signal;}
     wake.notify_one();
+  }
+  void timing(TimingKind kind,std::uint64_t ns,Code result) noexcept {
+    if(options.timing_observer)options.timing_observer->observe({kind,dispatch_cycle,ns,result});
   }
   void publish(bool read_store=true) {
     // The storage lane is quiescent whenever read_store is true. While an
@@ -174,10 +196,17 @@ struct NativeContinuousHost::Impl {
           publish();continue;
         }
         if(!active&&runtime.busy()) {
+          const auto projection_started=options.timing_observer?monotonic_ns():0;
           const auto result=runtime.pump();
           if(result.code==Code::busy) {
             std::unique_lock lock(mutex);wake.wait(lock,[&]{return signal!=observed;});++owner_wakeups;
           }else {
+            if(step_timing_pending){
+              if(commit_started_ns>=submitted_ns)timing(TimingKind::step_queue_wait,commit_started_ns-submitted_ns,result.code);
+              if(commit_completed_ns>=commit_started_ns)timing(TimingKind::step_commit_completion,commit_completed_ns-commit_started_ns,result.code);
+              timing(TimingKind::step_projection,monotonic_ns()-projection_started,result.code);
+              step_timing_pending=false;
+            }
             if(!result)terminal=result;
             prefer_task=true;publish(!runtime.busy());
           }
@@ -209,7 +238,13 @@ struct NativeContinuousHost::Impl {
           }
           if(active) {view_changed.notify_all();task_ready.notify_one();continue;}
           if(terminal.ok()&&(pending||due)) {
-            bool completed=false;const auto result=driver.advance(completed);
+            submitted_ns=0;commit_started_ns=0;commit_completed_ns=0;
+            if(options.timing_observer){dispatch_started_ns=monotonic_ns();dispatch_cycle=runner.progress().completed_cycles+1;}
+            bool completed=false,dispatched=false;const auto result=driver.advance(completed,dispatched);
+            if(dispatched&&options.timing_observer){
+              timing(TimingKind::step_dispatch,monotonic_ns()-dispatch_started_ns,result.code);
+              step_timing_pending=runtime.busy();
+            }
             if(!result&&result.code!=Code::busy)terminal=result;
             if(completed)next=Clock::now()+std::chrono::milliseconds(options.period_ms);
             prefer_task=true;publish(!runtime.busy());continue;
@@ -262,7 +297,7 @@ Result NativeContinuousHost::start() {
   }
   try {
     p.writer=std::make_unique<evidence::CommitWorker>(p.store,1);
-    p.writer->set_wakeup([&p]{p.notify();});p.runtime.set_commit_queue(p.writer.get());
+    p.writer->set_wakeup([&p]{p.notify();});p.runtime.set_commit_queue(&p.measured_queue);
     p.task_worker=std::thread([&p]{p.task_loop();});
     p.owner=std::thread([&p]{p.loop();});
   }catch(...) {

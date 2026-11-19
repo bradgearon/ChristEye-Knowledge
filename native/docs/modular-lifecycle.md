@@ -68,6 +68,12 @@ request. Canonical batch/blob/reference limits also apply; reaching any bound
 returns capacity before publication. The maximum admitted peer/subscription
 lease is 30 days.
 
+At most 15 of the pin slots can be pending live-bootstrap continuations. This
+lower limit leaves room for all peer, subscription and checkpoint withdrawals
+to commit atomically in a default 128-record transaction. The active checkpoint
+retains its `active/2` schema. `Snapshot.pending_bootstraps` counts only the
+typed pending entries, while `pins` counts every active pin.
+
 ## Peer authority, offers and acknowledgements
 
 Peer updates require an exact prior generation and the next generation.
@@ -98,6 +104,16 @@ revision in the common commit domain. Pins reference existing, unexpired
 objects. **A deadline alone does not release a pin.** In particular a live
 reader retains its objects until its owner explicitly releases the lease.
 
+A mesh bootstrap continuation is a separate pin kind. Its capture transaction
+binds the exact peer credential, subscription generation and lease, original
+source identity, checkpoint and tip. It protects its checkpoint, a nonempty
+tip's payload and replay from that tip, including subsequently produced data.
+Ordinary pin updates or releases cannot alter it. Acceptance transfers its
+protection to the actual subscription in one commit. Scoped permission withdrawal,
+credential rotation/revocation, cancellation, and the committed lease sweeps
+release typed continuations while retaining their outcomes. See
+[live bootstrap](continuous-mesh.md#explicit-bootstrap-after-a-history-floor).
+
 Maintenance is a three-step operator operation:
 
 1. `review_maintenance` captures the source tip, protection/subscription
@@ -126,19 +142,34 @@ quota. **The archive quota is separate from the canonical store quota.**
 preserve earlier expired gaps when a later interval is archived. An archive
 receipt is not a promise of permanent external storage availability.
 
-This implementation reclaims **blob payloads** and obsolete derived index
-nodes. It does **not** prune canonical journal prefixes or discard the retained
-historical catalog/operation metadata. Those records consume the finite store
-quota. Admission stops explicitly when remaining protected data and metadata
-leave insufficient headroom. Unlimited-duration operation within fixed disk
-space is not an implemented claim; a later canonical compaction/receipt-expiry
-policy is required for that operating profile.
+Lifecycle maintenance reclaims **blob payloads** and obsolete derived index
+nodes. The separate reviewed canonical-compaction path also replaces redundant
+journal prefixes with a verified base, preserving current authority and exact
+operation receipts by default. Source ownership, identity fences, latest
+tombstones and protected historical metadata continue to consume finite quota.
+Admission stops explicitly when protected data and metadata leave insufficient
+headroom. Receipt-history expiry requires an explicit fenced namespace change
+and remains unsupported for existing built-in modular sessions. See
+[canonical evidence](canonical-evidence.md) for the compaction contract.
 
 Ordinary writes leave the configured maintenance reserve. Drain/seal/retire,
 revocation, lease expiry/release, retention manifests and quarantine recovery use
 the maintenance commit class, so ordinary capacity exhaustion does not consume
 their reserved headroom. Maintenance still has to fit the absolute quota and
 bounded index-writing workspace; the reserve is finite, not an override.
+
+`lifecycle::Service::capacity()` and `session status` expose ordinary and
+maintenance remaining **accounted** bytes at the current canonical generation.
+The values saturate at zero when a quota is exceeded or the index/writer cannot
+safely admit work. Status does not reserve capacity or assert filesystem free
+space. A canonical compaction must separately fit its reviewed temporary-space
+requirement, the absolute quota and physical free space; the fixed reserve
+alone does not guarantee that a large compaction can run.
+
+The [scale qualification campaign](../../qualification/native/SCALE.md) exercises
+source churn, protected roots, overlapping receiver receipts, real payload
+reclamation, canonical compaction and old/middle/recent historical lookup in
+one store. Completed 10k/100k/1m reports are separate from the short CI profile.
 
 ## Bootstrap and restored stores
 

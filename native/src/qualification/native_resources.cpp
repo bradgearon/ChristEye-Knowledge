@@ -16,6 +16,7 @@
 #include <sys/resource.h>
 #include <sys/stat.h>
 #include <sys/statfs.h>
+#include <sys/statvfs.h>
 #include <sys/utsname.h>
 #include <unistd.h>
 #endif
@@ -62,10 +63,41 @@ sdk::Result read_resources(Resources& output){
 sdk::Result measure_disk(std::string_view directory,std::uint64_t maximum_files,DiskUsage& output){
   DiskUsage result;result.allocated_bytes_available=true;
   try{
+    const auto root=native_path(directory);
+    if(!fs::is_directory(fs::symlink_status(root)))return {sdk::Code::invalid,"qualification disk root is not a real directory"};
+    const auto space=fs::space(root);result.filesystem_total_bytes=space.capacity;result.filesystem_available_bytes=space.available;
+    result.directories=1;
+#ifdef _WIN32
+    wchar_t volume[MAX_PATH]{};DWORD sectors=0,sector_bytes=0,free_clusters=0,total_clusters=0;
+    const auto absolute=fs::absolute(root);
+    if(!GetVolumePathNameW(absolute.c_str(),volume,MAX_PATH)||
+       !GetDiskFreeSpaceW(volume,&sectors,&sector_bytes,&free_clusters,&total_clusters))
+      return {sdk::Code::io_error,"filesystem allocation-unit measurement failed"};
+    result.allocation_unit_bytes=static_cast<std::uint64_t>(sectors)*sector_bytes;
+#else
+    struct statfs volume{};struct statvfs nodes{};struct stat root_info{};
+    if(statfs(root.c_str(),&volume)!=0||statvfs(root.c_str(),&nodes)!=0||volume.f_bsize<=0||lstat(root.c_str(),&root_info)!=0||root_info.st_blocks<0)
+      return {sdk::Code::io_error,"filesystem allocation and directory measurement failed"};
+    result.allocation_unit_bytes=static_cast<std::uint64_t>(volume.f_bsize);
+    result.filesystem_file_nodes_available=static_cast<std::uint64_t>(nodes.f_favail);
+    result.file_nodes_available=nodes.f_files!=0&&result.filesystem_file_nodes_available!=std::numeric_limits<std::uint64_t>::max();
+    if(!result.file_nodes_available)result.filesystem_file_nodes_available=0;
+    result.directory_allocated_bytes=static_cast<std::uint64_t>(root_info.st_blocks)*512;
+    result.directory_allocation_available=true;
+#endif
     for(const auto& item:fs::recursive_directory_iterator(native_path(directory))){
       const auto status=item.symlink_status();
       if(fs::is_symlink(status))return {sdk::Code::invalid,"qualification directory contains a symlink"};
-      if(fs::is_directory(status))continue;
+      if(fs::is_directory(status)){
+        if(++result.directories>maximum_files)return {sdk::Code::capacity,"qualification disk inventory exceeds declared directory bound"};
+#ifndef _WIN32
+        struct stat directory_info{};
+        if(lstat(item.path().c_str(),&directory_info)!=0||directory_info.st_blocks<0||
+           !add(result.directory_allocated_bytes,static_cast<std::uint64_t>(directory_info.st_blocks)*512))
+          return {sdk::Code::io_error,"directory allocation measurement failed"};
+#endif
+        continue;
+      }
       if(!fs::is_regular_file(status))return {sdk::Code::invalid,"qualification directory contains a nonregular entry"};
       if(++result.files>maximum_files)return {sdk::Code::capacity,"qualification disk inventory exceeds declared file bound"};
       if(!add(result.logical_bytes,item.file_size()))return {sdk::Code::capacity,"qualification disk inventory overflow"};
@@ -86,6 +118,12 @@ sdk::Result measure_disk(std::string_view directory,std::uint64_t maximum_files,
     }
   }catch(const fs::filesystem_error& error){return {sdk::Code::io_error,error.what()};}
   output=result;return {};
+}
+sdk::Result require_file_nodes(const DiskUsage& measured,std::uint64_t minimum){
+  if(measured.file_nodes_available&&measured.filesystem_file_nodes_available<minimum)
+    return {sdk::Code::capacity,"workload requires at least "+std::to_string(minimum)+
+      " free filesystem file nodes; this volume reports "+std::to_string(measured.filesystem_file_nodes_available)};
+  return {};
 }
 sdk::Result read_environment(std::string_view directory,Environment& output){
   Environment result;result.logical_processors=std::thread::hardware_concurrency();
