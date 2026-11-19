@@ -1,5 +1,23 @@
 # Packed history index trials
 
+## Frozen source trials
+
+Source `97b20a1f` ran the original 10,000-observation commit profile twice on
+one shared Linux overlay. Both runs passed with 0 of 159 commits over two
+seconds. The slowest baseline commit took 469.84 ms. The slowest loaded
+commit took 445.94 ms while the competing writer completed 4,404 flushes.
+The pair did not reproduce the earlier four overruns. The host and its other
+workloads were uncontrolled. [Paired run and per-commit records](commit-load-10k/README.md)
+
+On hosted Ubuntu and Windows, the four fresh 256-observation stores ran in
+single-node, packed, packed, single-node order. Both pairs on each platform
+passed the native and comparison gates. Each packed store used 1,378 fewer
+regular files after compaction and 2,824 fewer regular files plus directories
+at the verified replacement checkpoint, while both indexes were present.
+[Ubuntu](hosted/ubuntu/smoke/comparison.json) · [Windows](hosted/windows/smoke/comparison.json)
+
+## Development pilot
+
 The [development smoke comparison](development-smoke/comparison.json) ran four
 fresh stores from one Linux executable in single-node, packed, packed,
 single-node order. Both pairs passed all native gates. At 256 retained

@@ -54,10 +54,13 @@ the runners or by passing a short integration test.
 [CE-SW-42](CE-SW-42_packed_index_and_latency_experiments.md) implements the
 four storage items below. The [experiment record](../../qualification/reports/2026-11-19-packed-index/README.md)
 tracks achieved scale, exact failures, device scope and outstanding gates.
-The existing single-node layout remains the default. Promote a layout only
-after matched operating measurements and recovery coverage support that choice.
+The existing single-node layout remains the default. The frozen 10k latency
+pair on shared Linux passed in both conditions. The earlier four overruns
+remain unexplained. Both hosted platforms passed the paired 256-observation
+comparison. Scale and promotion decisions use the original profile gates
+on each device.
 
-### Next storage decision after the frozen 10k run
+### Storage decisions and their acceptance criteria
 
 The [frozen run](../../qualification/reports/2026-11-18-runtime-lifecycle/synthetic-10k-frozen/report.json)
 completed its audit and all 10,000 observations, but 4 of 159 commits exceeded

@@ -64,5 +64,6 @@ qualification/reports/**/compatibility-manifest.txt -text -whitespace
 qualification/reports/**/package*manifest.json -text -whitespace
 qualification/reports/**/*-report.json -text -whitespace
 qualification/reports/2026-11-19-packed-index/** -text
+qualification/reports/2026-11-19-packed-index/hosted/windows/**/device.cevdevice -text -whitespace
 native/tests/fixtures/*.zip binary
 native/tests/fixtures/*.cecompact binary

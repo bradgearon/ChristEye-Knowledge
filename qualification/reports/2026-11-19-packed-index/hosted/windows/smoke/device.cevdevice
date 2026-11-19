@@ -1,0 +1,14 @@
+ANAIERODEVICE/1
+name=hosted-windows-2022
+device_class=shared
+machine=Windows  DataCenter Server AMD64; host-visible memory rounded to MiB
+processor=AMD EPYC 9V45 96-Core Processor                
+memory_bytes=17173577728
+storage_device=unavailable on shared runner; not independently verified
+storage_firmware=unavailable on shared runner; not independently verified
+storage_controller=unavailable on shared runner; not independently verified
+filesystem=unavailable on shared runner; not independently verified
+mount_options=unavailable on shared runner; not independently verified
+durability=Native process publication and filesystem flushes
+dependencies=See the exact native build manifest
+concurrent_work=One native trial at a time. Runner exclusivity is unverified.

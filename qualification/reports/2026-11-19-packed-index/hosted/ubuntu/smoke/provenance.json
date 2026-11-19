@@ -1,0 +1,63 @@
+{
+  "source_commit": "97b20a1f9ef6b5664472db5018ac23c452637ad3",
+  "event": "push",
+  "runner": "ubuntu-24.04",
+  "workflow_run_id": 44477108609,
+  "job_id": 135400208767,
+  "job_url": "https://github.com/bradgearon/ChristEye-Knowledge/actions/runs/44477108609/job/135400208767",
+  "checkout_witness": "Push workflow with default checkout of this branch SHA. Each build-manifest input matched the source at that SHA.",
+  "tier": "smoke",
+  "artifact_name": "index-smoke-ubuntu-24.04",
+  "artifact_id": 14506234189,
+  "artifact_url": "https://github.com/bradgearon/ChristEye-Knowledge/actions/runs/44477108609/artifacts/14506234189",
+  "archive_sha256_verified": "b4491fa8bf4f865a50ff395923cff81ff00dda2643c5ce56c804120874c4b771",
+  "archive_bytes": 31208,
+  "build_identity": "8b3952bb50e53700c4533299a7ba7228728e8d285d624cbc902f4b83ed082164",
+  "build_manifest": "../build-manifest.txt",
+  "native_source_inputs_verified": 281,
+  "sources_matching_after_lf_normalization": 0,
+  "sources_matching_after_windows_checkout_crlf": 0,
+  "artifacts": {
+    "index-smoke/profile.cevqualification": {
+      "path": "qualification/reports/2026-11-19-packed-index/hosted/ubuntu/smoke/profile.cevqualification",
+      "sha256": "66c681bdf45dc05fa5188d12b4ac12fd1a90a8e1f5e43b9406a3fa91c6621c94",
+      "bytes": 560
+    },
+    "index-smoke/device.cevdevice": {
+      "path": "qualification/reports/2026-11-19-packed-index/hosted/ubuntu/smoke/device.cevdevice",
+      "sha256": "a64dbcf52f15cd5229a9ed1bd9008d0af38a147e47351635345497ba5b6eff72",
+      "bytes": 738
+    },
+    "index-smoke/comparison.json": {
+      "path": "qualification/reports/2026-11-19-packed-index/hosted/ubuntu/smoke/comparison.json",
+      "sha256": "fefea96fef7473c6dce2b1da11348722520b85a3ea810a204486da969b5eb5f1",
+      "bytes": 14176
+    },
+    "index-smoke/1-node-files/report.json": {
+      "path": "qualification/reports/2026-11-19-packed-index/hosted/ubuntu/smoke/1-node-files/report.json",
+      "sha256": "a733fe107b0af4a4bb05f61dca10bd895c54b6b241b2660e98b1df1b48c66e35",
+      "bytes": 11720
+    },
+    "index-smoke/2-packed-pages/report.json": {
+      "path": "qualification/reports/2026-11-19-packed-index/hosted/ubuntu/smoke/2-packed-pages/report.json",
+      "sha256": "d41a01b3f08f9ead7bc8bbf44bf16949112c7a83bc0c7d36b3b0299dc615fab2",
+      "bytes": 11728
+    },
+    "index-smoke/3-packed-pages/report.json": {
+      "path": "qualification/reports/2026-11-19-packed-index/hosted/ubuntu/smoke/3-packed-pages/report.json",
+      "sha256": "518b68261fce159f40f196957436031cbad5d42ffbb16ee49a98d5799c6829a8",
+      "bytes": 11728
+    },
+    "index-smoke/4-node-files/report.json": {
+      "path": "qualification/reports/2026-11-19-packed-index/hosted/ubuntu/smoke/4-node-files/report.json",
+      "sha256": "f6f4b5bc4e330b9a8057b62410b338f835417460430b20044d65103d5f6759b5",
+      "bytes": 11721
+    },
+    "index/anaiero-builtin-manifest.txt": {
+      "path": "qualification/reports/2026-11-19-packed-index/hosted/ubuntu/build-manifest.txt",
+      "sha256": "8b3952bb50e53700c4533299a7ba7228728e8d285d624cbc902f4b83ed082164",
+      "bytes": 30774
+    }
+  },
+  "executable_sha256": "4364bb8e1251f29e6adf66d88c0cfdbb6d91530cffd2483c2906d2cf84add30a"
+}

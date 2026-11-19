@@ -1,0 +1,14 @@
+ANAIERODEVICE/1
+name=shared-linux-commit-load
+device_class=shared
+machine=Linux 6.18.57 x86_64; host-visible memory rounded to MiB
+processor=Unknown P6 family
+memory_bytes=10451156992
+storage_device=Shared-workspace-overlay
+storage_firmware=Unavailable
+storage_controller=Unavailable
+filesystem=Linux-overlay
+mount_options=Workspace overlay; backing device and cache policy unavailable
+durability=Native software publication with flushes; controlled writer flushes every write
+dependencies=Exact native build identity in each report; executable SHA in comparison plan
+concurrent_work=Shared host, external work unknown. Baseline has no harness writer. Treatment uses one 4 MiB same-volume file, 64 KiB sequential overwrites with fsync every 20 ms.

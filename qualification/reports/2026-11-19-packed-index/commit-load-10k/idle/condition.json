@@ -1,0 +1,54 @@
+{
+  "condition": "idle",
+  "complete": true,
+  "qualification_passed": true,
+  "returncode": 0,
+  "issues": [],
+  "before": {
+    "unix_ns": 1795072007359597976,
+    "filesystem_device": 27,
+    "free_bytes": 54421901312,
+    "free_file_nodes": 2402149,
+    "block_device_counters": null,
+    "io_pressure": null,
+    "cpu_pressure": null
+  },
+  "native_started_ns": 47122085782241,
+  "flushes_during_native": 0,
+  "native_stopped_ns": 47211293014700,
+  "writer": {
+    "completed_flushes": 0,
+    "bytes_written": 0,
+    "flush_total_ns": 0,
+    "flush_max_ns": 0,
+    "period_overruns": 0,
+    "started_ns": null,
+    "stopped_ns": null
+  },
+  "report_sha256": "7a70a63d466b98d7212b8331b19185c7807d15304c2488d68429a72a1f20b1b9",
+  "stdout_sha256": "7a70a63d466b98d7212b8331b19185c7807d15304c2488d68429a72a1f20b1b9",
+  "build_identity": "397e325e2ebbdfaf5637376f470f832245184724d67e3754c748611032170fe7",
+  "device_class": "shared",
+  "observations": 10000,
+  "throughput_commits": {
+    "method": "exact-nearest-rank-threshold/1",
+    "percentile": 99,
+    "limit_ns": 2000000000,
+    "samples": 159,
+    "samples_above_limit": 0,
+    "allowed_above_limit": 1,
+    "passed": true
+  },
+  "above_limit_omitted": 0,
+  "slowest_commits_path": "idle/native/report.json#slow_commits",
+  "audit_passed": true,
+  "after": {
+    "unix_ns": 1795072096655897577,
+    "filesystem_device": 27,
+    "free_bytes": 54216884224,
+    "free_file_nodes": 2354672,
+    "block_device_counters": null,
+    "io_pressure": null,
+    "cpu_pressure": null
+  }
+}
