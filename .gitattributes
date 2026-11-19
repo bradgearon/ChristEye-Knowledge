@@ -50,5 +50,9 @@ examples/scientific/calibration/* -text
 
 # Preserve exact qualification profile and recorded preflight evidence bytes.
 qualification/**/*.cevqualification -text
+qualification/reports/**/*.cevqualification -text -whitespace
 qualification/reports/**/report.json -text
-qualification/reports/**/build-manifest.txt -text -whitespace
+qualification/reports/**/build-manifest*.txt -text -whitespace
+qualification/reports/**/session-input.cevsession -text
+qualification/reports/**/session.definition binary
+qualification/reports/**/artifact.zip binary

@@ -1,0 +1,69 @@
+{
+  "archive_only_files": [],
+  "artifact_created_at": "2026-11-18T23:29:38Z",
+  "artifact_digest": "sha256:68f533b73de82a2796d0d4519b8d025ea837d5e66af09eba62ce2e3e23442f82",
+  "artifact_id": 14480967939,
+  "artifact_name": "modular-native-ubuntu-24.04",
+  "artifact_reported_bytes": 31843,
+  "artifact_url": "https://github.com/bradgearon/ChristEye-Knowledge/actions/runs/44419800252/artifacts/14480967939",
+  "capture_kind": "synthetic",
+  "checkout_sha": "d7ee24e4af098d6df2f8c4c75cef9f496e09cded",
+  "checkout_sha_source": "completed job checkout log: git log -1 --format=%H",
+  "files": [
+    {
+      "archive_path": "qualification-100k/report.json",
+      "bytes": 3860,
+      "path": "synthetic/report.json",
+      "sha256": "3a89509f783ba99d0c12503ae85df5139eae01dd1f81543ac8959f37e868b09c"
+    },
+    {
+      "archive_path": "qualification-100k/profile.cevqualification",
+      "bytes": 441,
+      "path": "synthetic/profile.cevqualification",
+      "sha256": "40b24cc47571b3b348a88106943d8657c4ad5bd4ab9522182243998f8accb76e"
+    },
+    {
+      "archive_path": "modular/anaiero-builtin-manifest.txt",
+      "bytes": 28309,
+      "path": "build-manifest.txt",
+      "sha256": "b1f26eae1dee20b2c46a203441d35346de50072a1a017ffc7fd4186f6236127d"
+    }
+  ],
+  "job_id": 135209470000,
+  "job_name": "native-modular (ubuntu-24.04)",
+  "repository": "bradgearon/ChristEye-Knowledge",
+  "repository_retention": "Original artifact ZIP and selected raw files; explicitly derived LF manifest is labeled separately.",
+  "run_attempt": 1,
+  "run_id": 44419800252,
+  "run_url": "https://github.com/bradgearon/ChristEye-Knowledge/actions/runs/44419800252",
+  "runtime_head_sha": "fc93d15a9955b63617b8baf1321bacb25471c531",
+  "schema": "anaiero.ci-artifact-provenance/1",
+  "stdout_report": {
+    "allowed_normalization": "one trailing CRLF transport newline to LF only",
+    "bytes": 3860,
+    "sha256": "3a89509f783ba99d0c12503ae85df5139eae01dd1f81543ac8959f37e868b09c",
+    "source": "https://github.com/bradgearon/ChristEye-Knowledge/actions/runs/44419800252/job/135209470000"
+  },
+  "trigger": "pull_request",
+  "verification": {
+    "all_profile_hashes_match": true,
+    "all_report_build_identities_match": true,
+    "all_session_hashes_match": null,
+    "build_identity_manifest_sha256": "b1f26eae1dee20b2c46a203441d35346de50072a1a017ffc7fd4186f6236127d",
+    "build_manifest_identity_normalization": "none",
+    "build_manifest_sha256": "b1f26eae1dee20b2c46a203441d35346de50072a1a017ffc7fd4186f6236127d",
+    "mixed_negative_passed": null,
+    "mixed_negative_violations": null,
+    "mixed_positive_passed": null,
+    "raw_bytes_preserved": true,
+    "synthetic_passed": true,
+    "synthetic_stdout_matches_artifact_after_transport_newline": true,
+    "synthetic_violations": []
+  },
+  "workflow_name": "Anaiero Modular Runtime and Evidence Lifecycle",
+  "zip": {
+    "bytes": 31843,
+    "path": "artifact.zip",
+    "sha256": "68f533b73de82a2796d0d4519b8d025ea837d5e66af09eba62ce2e3e23442f82"
+  }
+}

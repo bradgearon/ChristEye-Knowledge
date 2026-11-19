@@ -81,6 +81,20 @@ Its report is retained independently of subsequent optimization runs. All its
 correctness, audit, memory, disk and lookup gates passed; none of those outcomes
 makes the failed latency gate a pass.
 
+The [CE-SW-40 measurement record](../../qualification/reports/2026-11-18-operating-envelope/README.md)
+now retains the completed hosted runs, including every observed failure, with
+original archives and exact source/profile witnesses. Runtime `aec1489d` passed
+the full distribution suites (81/81 on each platform), real TLS/IPC mesh suites
+(9/9 on each), and its PR-triggered 100k profile on both Windows and Linux.
+An independent push-triggered Linux run of the same implementation failed the
+unchanged commit-p99 upper-bound gate: 2.147483648 seconds against 2 seconds,
+with an exact maximum of 3.543940010 seconds. Correctness, audit, recovery,
+memory and disk gates passed. The logarithmic bound does not reveal the exact
+p99 within that bucket, and the cause of the elapsed-time variation is not yet
+established. Hosted latency qualification therefore remains **unresolved**.
+The versioned observed-maximum cap tightens a conservative estimate without
+reclassifying prior reports; it is not itself a storage speed improvement.
+
 ## Historical CE-SW-36 assessment
 
 **Overall: approximately 8/10 as a native engineering research platform.**
@@ -262,10 +276,17 @@ from the new architecture or a passing short test.
 
 | Order | Concrete work | Completion evidence |
 |---|---|---|
-| 1 | Complete the optimized 100,000-observation Windows/Linux measurements and retain both positive and negative reports | Exact profile/build/run witnesses, unchanged budgets, audit and recovery identity; no inferred success from short diagnostics |
+| 1 | Resolve the remaining 100k latency uncertainty with exact counts above predeclared limits and timings for durability stages, then qualify a declared device/filesystem profile | Preserve the existing passing and failing runs; distinguish a coarse percentile-bound miss from actual threshold exceedances; declare measurement changes and budgets before execution; retain exact source/profile/device witnesses |
 | 2 | Run the existing one-million-observation profile on a declared dedicated device and compare 10k/100k/1m index and allocation costs | Completed report plus device/filesystem/dependency declaration; retained failure evidence if a gate is missed |
 | 3 | Run the new elapsed mixed 24-hour/seven-day profiles, then add real TLS peer lag/churn/rotation and actual storage pressure to that operating envelope | Full-duration native reports on both platforms; separate dispatch/commit/projection/remote-ACK measurements and failure classifications |
 | 4 | Extend the conservative package matrix through explicit engine/runtime state migrations and qualify supervisor installation/uninstallation; remove bootstrap producer quiescence only with a pinned continuation contract | Preserved accepted suffix, exact old/new implementation evidence, migration/crash/rollback fixtures and deployment-device qualification |
+
+The initial optimized 100k Windows/Linux executions are complete; their mixed
+hosted outcomes determine the first item above. Further runs need a declared
+diagnostic or device-qualification purpose, and every outcome remains evidence.
+Elapsed/CPU differences alone do not identify a cause, and the passing subset
+does not qualify the operating envelope. The one-million and prolonged profiles
+remain subsequent evidence gates.
 
 CE-SW-40 already implements complete-page receiver expiry, explicit cleanup of
 overlapping receipt copies, protected current cursors/projections, artifact and

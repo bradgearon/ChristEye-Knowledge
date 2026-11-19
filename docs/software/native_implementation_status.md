@@ -57,6 +57,17 @@ order and qualification budgets remain unchanged. The
 [completed Windows 100k failure](../../qualification/reports/2026-11-18-hosted-windows-100k/README.md)
 is preserved; new implementation measurements are separate evidence.
 
+The [retained operating-envelope record](../../qualification/reports/2026-11-18-operating-envelope/README.md)
+includes original CI archives, reports, actual checkout identities and raw build
+manifests with explicit LF identity witnesses where Windows wrote CRLF bytes.
+At runtime `aec1489d`, full native suites pass 81/81 and real TLS/IPC mesh suites
+pass 9/9 on both platforms. PR-triggered 100k profiles pass on Windows and Linux,
+while an independent push Linux run fails its conservative p99 bound (2.147 seconds
+against the unchanged 2-second limit). Its audit, recovery, memory and disk gates
+pass. The measurement method is explicit in new reports, and the failed result
+remains unchanged. This completes the implementation/evidence batch while leaving
+hosted tail-latency qualification and prolonged release qualification open.
+
 ## Previous integrated batch — CE-SW-39 continuous native operation
 
 `anaiero host` runs the canonical modular session continuously with monotonic

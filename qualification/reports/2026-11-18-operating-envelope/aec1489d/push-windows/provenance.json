@@ -1,0 +1,126 @@
+{
+  "archive_only_files": [
+    {
+      "archive_path": "modular/Testing/Temporary/LastTest.log",
+      "bytes": 89525,
+      "sha256": "0ebb2d56bd844f2286b88ffbc871c261a08e5989167896af990815882fdfe8c6"
+    }
+  ],
+  "artifact_created_at": "2026-11-19T00:31:36Z",
+  "artifact_digest": "sha256:520e259b7cc1e5838752776c9b58c7cdd6ab2ea29441b72a50ea36694b63f10b",
+  "artifact_id": 14485408960,
+  "artifact_name": "modular-native-windows-2022",
+  "artifact_reported_bytes": 82951,
+  "artifact_url": "https://github.com/bradgearon/ChristEye-Knowledge/actions/runs/44425514234/artifacts/14485408960",
+  "capture_kind": "mixed",
+  "checkout_sha": "aec1489db375a910d44ee6ad037e321cc9b67e74",
+  "checkout_sha_source": "completed job checkout log: git log -1 --format=%H",
+  "expected_percentile_method": "log2-ceiling-capped-by-observed-maximum/1",
+  "files": [
+    {
+      "archive_path": "modular/mixed-qualification/report.json",
+      "bytes": 6160,
+      "path": "mixed/report.json",
+      "sha256": "521a41adb574d59ed9dde71f6e6b4b469dd3aa68b8ad4db5b2b22214c5e93e26"
+    },
+    {
+      "archive_path": "modular/mixed-qualification/profile.cevqualification",
+      "bytes": 487,
+      "path": "mixed/profile.cevqualification",
+      "sha256": "3b1c32bb76b1c164ee49263e643ff9033cce5c5fb76c6179f58cd7445c1a8a60"
+    },
+    {
+      "archive_path": "modular/mixed-qualification/session-input.cevsession",
+      "bytes": 538,
+      "path": "mixed/session-input.cevsession",
+      "sha256": "d4ceeeb5c2250648d544b5db59a7bd52f4e26ac6f3b9b5ddb2436be655078dd9"
+    },
+    {
+      "archive_path": "modular/mixed-qualification/session.definition",
+      "bytes": 13190,
+      "path": "mixed/session.definition",
+      "sha256": "905babbf94fb326579d9a919e9e6f169f2b8a6e763d660ca06cf62bfd82473e6"
+    },
+    {
+      "archive_path": "modular/mixed-qualification/failed-run/report.json",
+      "bytes": 6216,
+      "path": "mixed/negative/report.json",
+      "sha256": "f6c7e41e0fe04a3df591cdd23bef360a0c74e89cfd6839e89995427a18647d6b"
+    },
+    {
+      "archive_path": "modular/mixed-qualification/failed-run/profile.cevqualification",
+      "bytes": 504,
+      "path": "mixed/negative/profile.cevqualification",
+      "sha256": "fe5f20ded35fb609e020240daccd60e44732da5b76cf117d88b7bc9f870f5f66"
+    },
+    {
+      "archive_path": "qualification-100k/report.json",
+      "bytes": 3937,
+      "path": "synthetic/report.json",
+      "sha256": "e391223e8a454088066f05d1c59647cae3647d9e07b685e742fc94fa9e64a63e"
+    },
+    {
+      "archive_path": "qualification-100k/profile.cevqualification",
+      "bytes": 441,
+      "path": "synthetic/profile.cevqualification",
+      "sha256": "40b24cc47571b3b348a88106943d8657c4ad5bd4ab9522182243998f8accb76e"
+    },
+    {
+      "archive_path": "modular/anaiero-builtin-manifest-Release.txt",
+      "bytes": 29256,
+      "path": "build-manifest.txt",
+      "sha256": "1dbe6abb715473fc2c55688f713dc028e30607591d53b342433627818f5c036e"
+    },
+    {
+      "bytes": 28979,
+      "derivation": "CRLF to LF only",
+      "derived_from": "build-manifest.txt",
+      "path": "build-manifest.lf.txt",
+      "sha256": "e19e0f1a45d2d1d03044ebabe7e1f1e2415d7856e5b1dc124250f952f17fdb93"
+    }
+  ],
+  "job_id": 135229198177,
+  "job_name": "native-modular (windows-2022)",
+  "repository": "bradgearon/ChristEye-Knowledge",
+  "repository_retention": "Original artifact ZIP and selected raw files; explicitly derived LF manifest is labeled separately.",
+  "run_attempt": 1,
+  "run_id": 44425514234,
+  "run_url": "https://github.com/bradgearon/ChristEye-Knowledge/actions/runs/44425514234",
+  "runtime_head_sha": "aec1489db375a910d44ee6ad037e321cc9b67e74",
+  "schema": "anaiero.ci-artifact-provenance/1",
+  "stdout_report": {
+    "allowed_normalization": "one trailing CRLF transport newline to LF only",
+    "bytes": 3937,
+    "sha256": "e391223e8a454088066f05d1c59647cae3647d9e07b685e742fc94fa9e64a63e",
+    "source": "https://github.com/bradgearon/ChristEye-Knowledge/actions/runs/44425514234/job/135229198177"
+  },
+  "trigger": "push",
+  "verification": {
+    "all_profile_hashes_match": true,
+    "all_report_build_identities_match": true,
+    "all_session_hashes_match": true,
+    "build_identity_manifest_sha256": "e19e0f1a45d2d1d03044ebabe7e1f1e2415d7856e5b1dc124250f952f17fdb93",
+    "build_manifest_identity_normalization": "CRLF to LF only; CMake string(SHA256) hashes the in-memory LF manifest before Windows file(WRITE) emits CRLF",
+    "build_manifest_sha256": "1dbe6abb715473fc2c55688f713dc028e30607591d53b342433627818f5c036e",
+    "mixed_negative_passed": false,
+    "mixed_negative_violations": [
+      "mixed process peak resident bytes exceed declared budget"
+    ],
+    "mixed_positive_passed": true,
+    "raw_bytes_preserved": true,
+    "report_percentile_methods": {
+      "mixed": "log2-ceiling-capped-by-observed-maximum/1",
+      "negative": "log2-ceiling-capped-by-observed-maximum/1",
+      "synthetic": "log2-ceiling-capped-by-observed-maximum/1"
+    },
+    "synthetic_passed": true,
+    "synthetic_stdout_matches_artifact_after_transport_newline": true,
+    "synthetic_violations": []
+  },
+  "workflow_name": "Anaiero Modular Runtime and Evidence Lifecycle",
+  "zip": {
+    "bytes": 82951,
+    "path": "artifact.zip",
+    "sha256": "520e259b7cc1e5838752776c9b58c7cdd6ab2ea29441b72a50ea36694b63f10b"
+  }
+}

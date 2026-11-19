@@ -1,6 +1,6 @@
 ---
 title: "CE-SW-40 — Operating Envelope, Receiver Retention and Package Lifecycle"
-status: "Native implementation and reproducible qualification paths; prolonged release evidence remains open"
+status: "Native implementation and reproducible qualification; hosted latency and prolonged release evidence remain open"
 ---
 
 # CE-SW-40 — Operating envelope, receiver retention and package lifecycle
@@ -44,6 +44,27 @@ Regression coverage includes pre-existing node corruption, bounded cache spills,
 multiple source tips, interrupted publication, index repair and old-store
 compatibility. Performance acceptance still uses the predeclared profiles; a
 small diagnostic comparison is not a substitute for the Windows/Linux report.
+
+The [retained operating-envelope measurements](../../qualification/reports/2026-11-18-operating-envelope/README.md)
+keep both passing and failing hosted runs, original CI archives, exact profiles,
+actual checkout identities and source/build manifests. Qualification now records
+the explicit `log2-ceiling-capped-by-observed-maximum/1` percentile method: the
+smaller of the selected logarithmic ceiling and the exact observed maximum is
+still an upper bound on the same nearest-rank observation. A sorted-sample native
+oracle verifies that guarantee, including a real over-budget p99 and an outlier
+outside p99. No profile limits changed and no historical report was reclassified.
+The tighter estimator is separate from the storage optimization and must not be
+interpreted as a runtime speedup. Windows raw CRLF manifests and their explicitly
+derived LF build-identity witnesses are retained separately.
+
+At runtime `aec1489d`, the PR-triggered 100k profiles passed on both platforms.
+A separate Linux push run failed the same unchanged p99 upper-bound gate, with
+2.147483648 seconds against 2 seconds and an exact maximum of 3.543940010 seconds.
+All its correctness, recovery, audit, memory and disk gates passed. The histogram
+does not establish the exact p99 inside the selected bucket, and the cause of
+the runner variation is not proven. The operating-envelope record therefore
+keeps hosted latency qualification unresolved. The next measurements need exact
+threshold counts, durability-stage timing and a declared storage-device profile.
 
 ## 2. Mixed-engine continuous-host qualification
 

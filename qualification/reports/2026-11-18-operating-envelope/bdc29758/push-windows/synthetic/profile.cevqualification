@@ -1,0 +1,17 @@
+ANAIEROQUALIFICATION/1
+name=native-evidence-100k
+storage_label=CI ephemeral filesystem; hardware unspecified
+observations=100000
+epochs=100
+batch_size=63
+payload_bytes=512
+query_samples=256
+checkpoints=10000,100000
+maximum_store_bytes=2147483648
+maximum_disk_bytes=4294967296
+maximum_files=2000000
+maximum_resident_bytes=536870912
+maximum_commit_p99_us=2000000
+maximum_lookup_p99_us=250000
+maximum_reopen_us=5000000
+maximum_lookup_nodes=128

@@ -25,3 +25,17 @@ and original manifest are the precise compiled-source witnesses.
 This negative result remains independent of later optimization measurements.
 Neither its report nor its threshold is rewritten after the outcome. It does
 not establish a general NTFS latency limit or a cause for the measured tail.
+
+The original [CI archive](artifact.zip), [raw build manifest](build-manifest.txt),
+and [provenance record](provenance.json) are now retained beside this report.
+The report and profile were compared with the original archive and match exactly.
+The actual PR merge checkout was
+`5cc720db4e88024c1705db7228c41406ae36944b`.
+Windows wrote the manifest with CRLF bytes; the separately labeled
+[LF manifest witness](build-manifest.lf.txt) preserves the in-memory representation
+hashed by CMake, whose SHA-256 matches the compiled build identity above.
+The raw file is unchanged, and both hashes are recorded.
+
+Later passing and failing measurements, including the explicitly versioned
+percentile estimator, are indexed in the
+[operating-envelope evidence](../2026-11-18-operating-envelope/README.md).
