@@ -101,7 +101,8 @@ std::string mixed_report_json(const MixedReport& r){
      <<",\"durability_level\":\"orderly host shutdown and store reopen; no process crash or power loss\""
      <<",\"latency_scope\":\"cached snapshot call, durable engine-control completion, and queued historical probe completion\""
      <<",\"disk_scope\":\"sampled regular-file allocation in the session store; excludes filesystem metadata\""
-     <<",\"percentiles\":\"bounded log2 histogram upper bounds in nanoseconds\""
+     <<",\"percentile_method\":"<<quote(histogram_percentile_method)
+     <<",\"percentiles\":"<<quote(histogram_percentile_description)
      <<",\"started_utc\":"<<quote(r.started_utc)<<",\"finished_utc\":"<<quote(r.finished_utc)
      <<",\"passed\":"<<(r.passed?"true":"false")<<",\"store_id\":"<<quote(r.store_id)
      <<",\"environment\":{\"os\":"<<quote(r.environment.operating_system)<<",\"architecture\":"<<quote(r.environment.architecture)

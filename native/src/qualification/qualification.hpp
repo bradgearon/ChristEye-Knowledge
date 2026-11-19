@@ -6,9 +6,13 @@
 #include <cstdint>
 #include <functional>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace anaiero::qualification {
+inline constexpr std::string_view histogram_percentile_method="log2-ceiling-capped-by-observed-maximum/1";
+inline constexpr std::string_view histogram_percentile_description=
+    "nearest-rank upper bounds in nanoseconds: min(log2 bucket ceiling, exact observed maximum)";
 struct Profile {
   std::string name,storage_label;
   std::uint64_t observations=0,epochs=0,batch_size=0,payload_bytes=0;

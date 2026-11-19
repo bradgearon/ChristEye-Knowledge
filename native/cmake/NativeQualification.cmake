@@ -24,6 +24,12 @@ function(anaiero_attach_qualification_cli)
 endfunction()
 cmake_language(DEFER CALL anaiero_attach_qualification_cli)
 if(CE_WIND_BUILD_TESTS)
+  add_executable(anaiero_histogram_tests tests/qualification_histogram_tests.cpp)
+  anaiero_sdk_target(anaiero_histogram_tests)
+  target_include_directories(anaiero_histogram_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/qualification)
+  target_link_libraries(anaiero_histogram_tests PRIVATE anaiero_qualification)
+  add_test(NAME anaiero_qualification_histogram COMMAND anaiero_histogram_tests)
+  set_tests_properties(anaiero_qualification_histogram PROPERTIES LABELS "qualification")
   add_test(NAME anaiero_mixed_qualification COMMAND ${CMAKE_COMMAND}
     -DANAIERO_QUALIFY=$<TARGET_FILE:ce_native_qualification>
     -DANAIERO_PROFILE=${CMAKE_CURRENT_SOURCE_DIR}/../qualification/native/mixed-ci.cevqualification

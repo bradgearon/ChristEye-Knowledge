@@ -75,7 +75,8 @@ The JSON report includes:
   compiler, architecture, filesystem identifier and logical processor count.
 - Batch-commit latency and point-query latency using a fixed 65-bucket base-2
   histogram. The p50/p95/p99 fields are **upper bounds**, not exact percentile
-  interpolations. Minimum and maximum samples are exact monotonic durations.
+  interpolations. The selected bucket ceiling is capped by the exact observed
+  maximum; minimum and maximum samples are exact monotonic durations.
 - Ingestion time for preparing/committing throughput batches. Total wall time
   additionally includes queries, reopens, inventories, lifecycle churn and
   full audit. The batch-commit histogram excludes lifecycle administration.
@@ -100,6 +101,26 @@ and remote-ACK latency distributions are not measured by this executable.
 The continuous host and mesh expose bounded wake/page/byte/queue counters;
 their functional tests establish ordering and progress within their fixtures.
 They do not substitute for those missing deployment measurements.
+
+### Percentile estimator
+
+Synthetic and mixed reports declare
+`percentile_method=log2-ceiling-capped-by-observed-maximum/1`. For a nonempty
+histogram with `n` samples, percentile `p` selects the bucket containing sorted
+rank `ceil(n*p/100)`. Its bound is the smaller of that bucket's inclusive
+power-of-two ceiling and the exact maximum sample. The final bucket saturates
+at `UINT64_MAX`; empty and all-zero histograms return zero. Both operands are
+upper bounds on the selected observed quantile, so taking their minimum
+preserves that guarantee. The histogram still stores exactly 65 counters and
+the exact count/extrema, with no per-sample history.
+
+For example, a selected bucket ending at 2.147483648 seconds with an observed
+maximum of 1.6564229 seconds returns at most 1.6564229 seconds. A true observed
+p99 above the declared 2-second budget still fails. All profile thresholds and
+workloads remain unchanged. Earlier reports without this method identifier
+retain their original bucket-only estimates and original pass/fail decisions.
+They are not rewritten or retroactively reclassified; the corrected estimator
+requires fresh execution with its exact source/build identity recorded.
 
 ## CI and release evidence
 

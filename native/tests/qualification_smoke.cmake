@@ -17,12 +17,21 @@ string(JSON active GET "${report}" workload maximum_active_sources)
 string(JSON audited GET "${report}" audit passed)
 string(JSON restarted GET "${report}" audit restart_identity_verified)
 string(JSON identity GET "${report}" profile_sha256)
+string(JSON percentile_method GET "${report}" percentile_method)
 file(SHA256 "${ANAIERO_PROFILE}" expected_identity)
 if(NOT schema STREQUAL "anaiero.native-qualification/1" OR NOT passed OR NOT audited OR
    NOT restarted OR NOT observations EQUAL 256 OR NOT epochs EQUAL 4 OR NOT active EQUAL 1 OR
-   NOT identity STREQUAL expected_identity)
+   NOT identity STREQUAL expected_identity OR
+   NOT percentile_method STREQUAL "log2-ceiling-capped-by-observed-maximum/1")
   message(FATAL_ERROR "Qualification report did not establish its declared workload: ${report}")
 endif()
+string(JSON maximum_ns GET "${report}" commit maximum_ns)
+foreach(percentile p50_upper_ns p95_upper_ns p99_upper_ns)
+  string(JSON upper_ns GET "${report}" commit "${percentile}")
+  if(upper_ns GREATER maximum_ns)
+    message(FATAL_ERROR "Reported commit ${percentile} exceeds its exact observed maximum")
+  endif()
+endforeach()
 execute_process(COMMAND "${ANAIERO_QUALIFY}" run "${ANAIERO_PROFILE}" "${ANAIERO_OUTPUT}"
   RESULT_VARIABLE repeated OUTPUT_QUIET ERROR_QUIET)
 file(READ "${ANAIERO_OUTPUT}/report.json" preserved)

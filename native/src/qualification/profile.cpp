@@ -48,7 +48,13 @@ std::uint64_t Histogram::percentile_upper_ns(unsigned percent)const noexcept{
   std::uint64_t cumulative=0;
   for(std::size_t i=0;i<buckets.size();++i){
     cumulative+=buckets[i];
-    if(cumulative>=target)return i==64?std::numeric_limits<std::uint64_t>::max():(std::uint64_t{1}<<i);
+    if(cumulative>=target){
+      const auto ceiling=i==64?std::numeric_limits<std::uint64_t>::max():(std::uint64_t{1}<<i);
+      // Both quantities bound the selected observed percentile. The exact
+      // maximum tightens a partially occupied final bucket without retaining
+      // samples or changing the fixed histogram's memory bound.
+      return std::min(ceiling,maximum_ns);
+    }
   }
   return maximum_ns;
 }
@@ -106,7 +112,8 @@ std::string report_json(const Report& r){
      <<",\"commit_scope\":\"throughput-batch durability only; lifecycle commits are measured in total wall time\""
      <<",\"wall_time_scope\":\"ingestion, queries, reopens, disk inventories, lifecycle churn and full audit\""
      <<",\"disk_scope\":\"regular-file allocation; excludes directory and filesystem journal metadata\""
-     <<",\"percentiles\":\"bounded log2 histogram upper bounds in nanoseconds\""
+     <<",\"percentile_method\":"<<json_quote(histogram_percentile_method)
+     <<",\"percentiles\":"<<json_quote(histogram_percentile_description)
      <<",\"started_utc\":"<<json_quote(r.started_utc)<<",\"finished_utc\":"<<json_quote(r.finished_utc)
      <<",\"passed\":"<<(r.passed?"true":"false")<<",\"store_id\":"<<json_quote(r.store_id)
      <<",\"environment\":{\"os\":"<<json_quote(r.environment.operating_system)<<",\"architecture\":"<<json_quote(r.environment.architecture)

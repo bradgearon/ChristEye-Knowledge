@@ -121,8 +121,13 @@ The report includes bounded logarithmic histograms for three separate operations
   so the result is not a loaded-peer fairness measurement.
 
 Percentile fields are conservative fixed-histogram **upper bounds**, not exact
-interpolated percentiles. Exact sample counts, minimum and maximum remain in the
-report. Current/peak process memory, CPU and available context-switch counters,
+interpolated percentiles. The report declares
+`percentile_method=log2-ceiling-capped-by-observed-maximum/1`: the selected
+nearest-rank bucket ceiling is capped by the exact observed maximum, using the
+same fixed 65 counters. See the [estimator definition](README.md#percentile-estimator)
+for integer boundary behavior and treatment of historical reports. Exact sample
+counts, minimum and maximum remain in the report. Current/peak process memory,
+CPU and available context-switch counters,
 owner wakeups, completed storage tasks, queue high-water samples and rejections
 are also recorded. Queue high-water fields describe sampled cached state rather
 than instrumentation of every queue transition.
