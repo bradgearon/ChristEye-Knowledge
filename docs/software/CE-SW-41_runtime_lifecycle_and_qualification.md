@@ -85,9 +85,14 @@ stand in for an installed supervisor test.
 
 ## Remaining acceptance work
 
-Collect comparable 100k results on both supported systems and full million-row
-results on adequately provisioned devices, including the scale maintenance
-profile. Retain isolated-volume and supervisor proofs per OS. Complete the
-elapsed 24-hour and seven-day campaigns, and assess physical durability only
-with a separately specified experiment. These are outstanding evidence gates,
-not properties inferred from small passing tests.
+The shared Linux [100k maintenance profile](../../qualification/reports/2026-11-18-runtime-lifecycle/scale-100k-frozen/report.json)
+completed all gates; its final compaction took 376.49 seconds. The shared
+[frozen synthetic 10k run](../../qualification/reports/2026-11-18-runtime-lifecycle/synthetic-10k-frozen/report.json)
+failed commit latency. [Systemd and SCM](../../qualification/reports/2026-11-18-runtime-lifecycle/package-hosted-corrected/README.md)
+passed the supported release pair. Collect comparable 100k results on both
+supported systems and full million-row results on adequately provisioned
+devices, including the scale maintenance profile. The [real isolated Linux
+tmpfs and Windows NTFS VHD jobs](../../qualification/reports/2026-11-18-runtime-lifecycle/pressure-hosted/README.md)
+both passed disk-full admission and post-admission failure recovery. Complete
+the elapsed 24-hour and seven-day campaigns, and assess physical power-loss
+durability with a separately specified experiment.

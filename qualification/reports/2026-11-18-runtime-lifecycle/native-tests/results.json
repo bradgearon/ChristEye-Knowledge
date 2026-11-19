@@ -1,0 +1,473 @@
+{
+  "schema": "anaiero.ctest-result-summary/1",
+  "source_commit": "a8131574e6e4024ea92ecd17e31a69aa0f59530c",
+  "scope": "Linux Release, locally available IPC; two disjoint CTest selections from the same finalized full build. Skips are not passes. This is not a Windows, 24-hour or power-loss qualification.",
+  "whole_build_id": "c820bf2964392f23c7b63d7cd09fe4bdf6036d103d96a0af08578e5efd1a1de8",
+  "verified_native_inputs": 279,
+  "registered": 92,
+  "passed": 89,
+  "skipped": 3,
+  "failed": 0,
+  "tests": [
+    {
+      "test": "anaiero_adaptive_optimization_cli",
+      "result": "passed",
+      "seconds": 0.01
+    },
+    {
+      "test": "anaiero_adaptive_optimization_unit",
+      "result": "passed",
+      "seconds": 0.0
+    },
+    {
+      "test": "anaiero_artifact_publication",
+      "result": "passed",
+      "seconds": 0.09
+    },
+    {
+      "test": "anaiero_async_evidence_and_units",
+      "result": "passed",
+      "seconds": 0.05
+    },
+    {
+      "test": "anaiero_bootstrap_continuation",
+      "result": "passed",
+      "seconds": 12.77
+    },
+    {
+      "test": "anaiero_cells_cli_smoke",
+      "result": "passed",
+      "seconds": 0.05
+    },
+    {
+      "test": "anaiero_cells_profile_replay",
+      "result": "passed",
+      "seconds": 0.01
+    },
+    {
+      "test": "anaiero_cells_windbus",
+      "result": "passed",
+      "seconds": 0.01
+    },
+    {
+      "test": "anaiero_commit_timings",
+      "result": "passed",
+      "seconds": 0.03
+    },
+    {
+      "test": "anaiero_compaction_tests",
+      "result": "passed",
+      "seconds": 1.69
+    },
+    {
+      "test": "anaiero_continuous_host",
+      "result": "passed",
+      "seconds": 1.07
+    },
+    {
+      "test": "anaiero_continuous_host_process",
+      "result": "skipped",
+      "seconds": 0.0
+    },
+    {
+      "test": "anaiero_deployment",
+      "result": "passed",
+      "seconds": 0.4
+    },
+    {
+      "test": "anaiero_deployment_compatibility",
+      "result": "passed",
+      "seconds": 1.29
+    },
+    {
+      "test": "anaiero_dispatch_smoke",
+      "result": "passed",
+      "seconds": 0.1
+    },
+    {
+      "test": "anaiero_engine_kernel",
+      "result": "passed",
+      "seconds": 0.23
+    },
+    {
+      "test": "anaiero_engine_kernel_cli",
+      "result": "passed",
+      "seconds": 0.02
+    },
+    {
+      "test": "anaiero_engine_optimization",
+      "result": "passed",
+      "seconds": 0.02
+    },
+    {
+      "test": "anaiero_environment_cli",
+      "result": "passed",
+      "seconds": 3.86
+    },
+    {
+      "test": "anaiero_environment_model",
+      "result": "passed",
+      "seconds": 0.07
+    },
+    {
+      "test": "anaiero_environment_session",
+      "result": "passed",
+      "seconds": 27.03
+    },
+    {
+      "test": "anaiero_epoch_observations",
+      "result": "passed",
+      "seconds": 0.03
+    },
+    {
+      "test": "anaiero_epoch_replay_cli",
+      "result": "passed",
+      "seconds": 0.06
+    },
+    {
+      "test": "anaiero_evidence_tests",
+      "result": "passed",
+      "seconds": 2.39
+    },
+    {
+      "test": "anaiero_experiment_runtime",
+      "result": "passed",
+      "seconds": 0.7
+    },
+    {
+      "test": "anaiero_index_staging_tests",
+      "result": "passed",
+      "seconds": 16.07
+    },
+    {
+      "test": "anaiero_lifecycle_tests",
+      "result": "passed",
+      "seconds": 4.5
+    },
+    {
+      "test": "anaiero_live_solver_contract",
+      "result": "passed",
+      "seconds": 0.0
+    },
+    {
+      "test": "anaiero_mesh_authorization",
+      "result": "passed",
+      "seconds": 0.01
+    },
+    {
+      "test": "anaiero_mesh_canonical",
+      "result": "passed",
+      "seconds": 4.89
+    },
+    {
+      "test": "anaiero_mesh_continuous",
+      "result": "passed",
+      "seconds": 4.12
+    },
+    {
+      "test": "anaiero_mesh_export",
+      "result": "passed",
+      "seconds": 0.03
+    },
+    {
+      "test": "anaiero_mesh_host_cli",
+      "result": "skipped",
+      "seconds": 0.01
+    },
+    {
+      "test": "anaiero_mesh_ingress",
+      "result": "passed",
+      "seconds": 0.04
+    },
+    {
+      "test": "anaiero_mesh_integration",
+      "result": "passed",
+      "seconds": 25.88
+    },
+    {
+      "test": "anaiero_mesh_mixed_campaign",
+      "result": "passed",
+      "seconds": 46.73
+    },
+    {
+      "test": "anaiero_mesh_replay",
+      "result": "passed",
+      "seconds": 81.64
+    },
+    {
+      "test": "anaiero_mesh_tls",
+      "result": "passed",
+      "seconds": 1.5
+    },
+    {
+      "test": "anaiero_migration_tests",
+      "result": "passed",
+      "seconds": 0.47
+    },
+    {
+      "test": "anaiero_mixed_campaign",
+      "result": "passed",
+      "seconds": 112.22
+    },
+    {
+      "test": "anaiero_mixed_qualification",
+      "result": "passed",
+      "seconds": 46.38
+    },
+    {
+      "test": "anaiero_modular_cli",
+      "result": "passed",
+      "seconds": 56.94
+    },
+    {
+      "test": "anaiero_modular_engines",
+      "result": "passed",
+      "seconds": 0.1
+    },
+    {
+      "test": "anaiero_modular_session",
+      "result": "passed",
+      "seconds": 28.53
+    },
+    {
+      "test": "anaiero_native_host_ipc",
+      "result": "skipped",
+      "seconds": 0.0
+    },
+    {
+      "test": "anaiero_native_package",
+      "result": "passed",
+      "seconds": 7.76
+    },
+    {
+      "test": "anaiero_native_session",
+      "result": "passed",
+      "seconds": 1.61
+    },
+    {
+      "test": "anaiero_operation_recovery",
+      "result": "passed",
+      "seconds": 0.03
+    },
+    {
+      "test": "anaiero_qualification_exact",
+      "result": "passed",
+      "seconds": 7.64
+    },
+    {
+      "test": "anaiero_qualification_histogram",
+      "result": "passed",
+      "seconds": 0.02
+    },
+    {
+      "test": "anaiero_qualification_profile",
+      "result": "passed",
+      "seconds": 5.17
+    },
+    {
+      "test": "anaiero_recorded_experiments",
+      "result": "passed",
+      "seconds": 2.19
+    },
+    {
+      "test": "anaiero_route_delivery",
+      "result": "passed",
+      "seconds": 0.06
+    },
+    {
+      "test": "anaiero_route_delivery_cli",
+      "result": "passed",
+      "seconds": 0.05
+    },
+    {
+      "test": "anaiero_runtime_projector",
+      "result": "passed",
+      "seconds": 0.01
+    },
+    {
+      "test": "anaiero_runtime_simulate",
+      "result": "passed",
+      "seconds": 0.01
+    },
+    {
+      "test": "anaiero_scale_qualification",
+      "result": "passed",
+      "seconds": 17.76
+    },
+    {
+      "test": "anaiero_science_cli",
+      "result": "passed",
+      "seconds": 0.04
+    },
+    {
+      "test": "anaiero_science_coupling",
+      "result": "passed",
+      "seconds": 0.01
+    },
+    {
+      "test": "anaiero_science_trace",
+      "result": "passed",
+      "seconds": 0.0
+    },
+    {
+      "test": "anaiero_scientific_calibration",
+      "result": "passed",
+      "seconds": 0.05
+    },
+    {
+      "test": "anaiero_sdk_conformance",
+      "result": "passed",
+      "seconds": 2.19
+    },
+    {
+      "test": "anaiero_sdk_installed_consumer",
+      "result": "passed",
+      "seconds": 16.14
+    },
+    {
+      "test": "anaiero_segmented_storage",
+      "result": "passed",
+      "seconds": 50.89
+    },
+    {
+      "test": "anaiero_session_batch",
+      "result": "passed",
+      "seconds": 128.94
+    },
+    {
+      "test": "anaiero_session_cli",
+      "result": "passed",
+      "seconds": 0.8
+    },
+    {
+      "test": "anaiero_session_host_control",
+      "result": "passed",
+      "seconds": 0.18
+    },
+    {
+      "test": "anaiero_session_record",
+      "result": "passed",
+      "seconds": 0.09
+    },
+    {
+      "test": "anaiero_storage_pressure_guard",
+      "result": "passed",
+      "seconds": 0.02
+    },
+    {
+      "test": "anaiero_supervised_science",
+      "result": "passed",
+      "seconds": 1.73
+    },
+    {
+      "test": "anaiero_sw5_fork_optimizer",
+      "result": "passed",
+      "seconds": 0.06
+    },
+    {
+      "test": "colony_fidelity_smoke",
+      "result": "passed",
+      "seconds": 0.09
+    },
+    {
+      "test": "colony_fidelity_tests",
+      "result": "passed",
+      "seconds": 0.01
+    },
+    {
+      "test": "colony_lab_tests",
+      "result": "passed",
+      "seconds": 0.01
+    },
+    {
+      "test": "colony_overlay_tests",
+      "result": "passed",
+      "seconds": 0.01
+    },
+    {
+      "test": "living_sim_demo",
+      "result": "passed",
+      "seconds": 0.0
+    },
+    {
+      "test": "living_sim_tests",
+      "result": "passed",
+      "seconds": 0.01
+    },
+    {
+      "test": "sim33_selection_integration",
+      "result": "passed",
+      "seconds": 0.11
+    },
+    {
+      "test": "sim3_colony_runner",
+      "result": "passed",
+      "seconds": 0.02
+    },
+    {
+      "test": "sim3_example_template",
+      "result": "passed",
+      "seconds": 0.0
+    },
+    {
+      "test": "vlm_file_replay",
+      "result": "passed",
+      "seconds": 0.01
+    },
+    {
+      "test": "vlm_learning_plan_template",
+      "result": "passed",
+      "seconds": 0.01
+    },
+    {
+      "test": "vlm_learning_plan_tests",
+      "result": "passed",
+      "seconds": 0.01
+    },
+    {
+      "test": "vlm_process_template",
+      "result": "passed",
+      "seconds": 0.0
+    },
+    {
+      "test": "vlm_process_tests",
+      "result": "passed",
+      "seconds": 0.01
+    },
+    {
+      "test": "vlm_template",
+      "result": "passed",
+      "seconds": 0.0
+    },
+    {
+      "test": "wind_core_tests",
+      "result": "passed",
+      "seconds": 0.0
+    },
+    {
+      "test": "wind_durable_cli_smoke",
+      "result": "passed",
+      "seconds": 0.06
+    },
+    {
+      "test": "wind_durable_tests",
+      "result": "passed",
+      "seconds": 0.01
+    },
+    {
+      "test": "wind_loopback",
+      "result": "passed",
+      "seconds": 0.0
+    },
+    {
+      "test": "wind_media_tests",
+      "result": "passed",
+      "seconds": 0.0
+    },
+    {
+      "test": "wind_registry_tests",
+      "result": "passed",
+      "seconds": 0.01
+    }
+  ]
+}

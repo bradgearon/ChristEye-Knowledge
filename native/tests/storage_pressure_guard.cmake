@@ -5,7 +5,16 @@ file(MAKE_DIRECTORY "${ANAIERO_GUARD_ROOT}")
 string(RANDOM LENGTH 20 ALPHABET 0123456789abcdef nonce)
 set(root "${ANAIERO_GUARD_ROOT}/${nonce}")
 file(MAKE_DIRECTORY "${root}")
-file(WRITE "${root}/OWNER" "ANAIERO-STORAGE-PRESSURE/1\nnonce=${nonce}\n")
+# This marker is a byte-exact protocol field. Plain file(WRITE) can
+# translate newlines on Windows, which tests the nonce check instead of
+# the workspace/volume guard below. Match the real launchers on both OSes.
+set(marker "ANAIERO-STORAGE-PRESSURE/1\nnonce=${nonce}\n")
+file(CONFIGURE OUTPUT "${root}/OWNER" CONTENT "${marker}" @ONLY NEWLINE_STYLE LF)
+string(SHA256 expected_marker "${marker}")
+file(SHA256 "${root}/OWNER" actual_marker)
+if(NOT actual_marker STREQUAL expected_marker)
+  message(FATAL_ERROR "Pressure guard fixture did not write the byte-exact ownership marker")
+endif()
 # Even with a matching marker, a normal workspace is never a disposable tiny
 # volume. No filler, store or report is allowed to be created on refusal.
 execute_process(COMMAND "${ANAIERO_PRESSURE}" "${root}" "${nonce}" "${ANAIERO_GUARD_ROOT}/report-${nonce}"

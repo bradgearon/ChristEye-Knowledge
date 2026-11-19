@@ -31,7 +31,11 @@ related work in one changeset with reviewable internal commits.
 [CE-SW-41](CE-SW-41_runtime_lifecycle_and_qualification.md) adds exact commit-latency decisions, bounded index
 reuse and compaction, source/receiver scale profiles, resumable five-engine
 campaigns, leased live bootstrap and a conservative cross-build package
-contract. See its evidence index for observed scope and open operating gates.
+contract. The [100k maintenance profile](../../qualification/reports/2026-11-18-runtime-lifecycle/scale-100k-frozen/report.json)
+passed on shared Linux; the separate exact synthetic 10k failed latency.
+The compatible release pair passed real systemd and SCM installation, update,
+reverse selection and removal. See the evidence index for actual device,
+source and coverage. Million-row and elapsed-duration gates remain open.
 
 ## Previous integrated batch — CE-SW-40 operating envelope and lifecycle
 

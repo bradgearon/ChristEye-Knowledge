@@ -1,0 +1,51 @@
+{
+  "schema": "anaiero.hosted-pressure-provenance/1",
+  "runner": "windows-2022",
+  "job_id": 135317892969,
+  "event": "push",
+  "job_conclusion": "failure",
+  "step_name": "Verify actual full-filesystem recovery in an isolated Windows volume",
+  "step_conclusion": "success",
+  "repository": "bradgearon/ChristEye-Knowledge",
+  "head_sha": "addf1fda4e4c5255a3ed47f1ab57ad6ff9bf7ce7",
+  "checkout_sha": "addf1fda4e4c5255a3ed47f1ab57ad6ff9bf7ce7",
+  "run_id": 44451985553,
+  "artifact_id": 14497181059,
+  "artifact_name": "modular-native-windows-2022",
+  "artifact_bytes": 180940,
+  "artifact_sha256": "sha256:76daf88b012f76e463625ccbb658733fc1f336cd34970a1478d9093008f4f925",
+  "artifact_created_at": "2026-11-19T03:44:43Z",
+  "artifact_expires_at": "2027-02-17T03:31:05Z",
+  "job_url": "https://github.com/bradgearon/ChristEye-Knowledge/actions/runs/44451985553/job/135317892969",
+  "artifact_url": "https://github.com/bradgearon/ChristEye-Knowledge/actions/runs/44451985553/artifacts/14497181059",
+  "files": [
+    {
+      "archive_path": "pressure-proof/report.json",
+      "path": "report.json",
+      "sha256": "5a46a1b608c8d2ded67777acdd18df190e1481524f43cebbe8191b9530af3707",
+      "bytes": 811
+    },
+    {
+      "archive_path": "pressure-proof/profile.txt",
+      "path": "profile.txt",
+      "sha256": "ff9deef4cd774869cc36d17b31baba0f641d2582a2b742f3e0a1ffa33a97aa56",
+      "bytes": 153
+    },
+    {
+      "archive_path": "modular/anaiero-builtin-manifest-Release.txt",
+      "path": "build-manifest.txt",
+      "sha256": "cc5581a1e4f34ddbc6161362c4e42fd66cbabfea7252a3fb3c18d6598d77aa3d",
+      "bytes": 30691,
+      "derivation": "Convert the original uploaded Release manifest CRLF line endings to LF to reproduce the compiled build identity."
+    },
+    {
+      "archive_path": "modular/anaiero-builtin-manifest-Release.txt",
+      "path": "build-manifest-original.txt",
+      "sha256": "6d3a308cc11eb50eb22c8d4718229d46986a72ef91074eb54ac63410ea0e9fa8",
+      "bytes": 30985
+    }
+  ],
+  "artifact_digest_verified": true,
+  "report_matches_job_output": true,
+  "other_job_failure": "The ordinary workspace guard CTest stopped at the marker byte comparison. The actual VHD exhaustion step later in the same job passed."
+}

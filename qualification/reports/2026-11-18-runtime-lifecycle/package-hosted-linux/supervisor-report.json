@@ -1,0 +1,3 @@
+{
+"schema":"anaiero.supervisor-fixture/1","passed":true,"service":"AnaieroPackageFixture50d85b89bfe2","platform":"Linux","cycles_initial":15,"cycles_after_update":30,"cycles_after_rollback":30,"registration_removed":true,"audit_after_uninstall":true
+}

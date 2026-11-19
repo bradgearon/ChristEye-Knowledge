@@ -1,0 +1,60 @@
+{
+  "schema": "anaiero.hosted-package-proof/1",
+  "repository": "bradgearon/ChristEye-Knowledge",
+  "event": "pull_request",
+  "source_head": "a8131574e6e4024ea92ecd17e31a69aa0f59530c",
+  "actual_checkout_from_job_log": "956dd3cc16c5585b9ccc2802a00494213e2c733d",
+  "platform": "ubuntu-24.04",
+  "workflow": "Anaiero Modular Runtime and Evidence Lifecycle",
+  "run_id": 44451398830,
+  "job_id": 135315964263,
+  "job_url": "https://github.com/bradgearon/ChristEye-Knowledge/actions/runs/44451398830/job/135315964263",
+  "artifact_id": 14496151965,
+  "artifact_url": "https://github.com/bradgearon/ChristEye-Knowledge/actions/runs/44451398830/artifacts/14496151965",
+  "artifact_name": "native-package-upgrades-ubuntu-24.04",
+  "artifact_zip_verified_sha256": "6ae3d4e449ebd3e978167fcad2963be7033101fd91678bcfe72447a2e54e9c42",
+  "artifact_zip_bytes": 51515,
+  "scope": "Actual separate native builds, five-engine session, current-suffix reverse selection, and isolated installed operating-system supervisor. Native short functional fixture, not sustained deployment or physical power-loss qualification.",
+  "members": [
+    {
+      "path": "package-a/package-manifest.json",
+      "bytes": 17449,
+      "sha256": "5956ff85db4b040f898182eab16a24e965554c415923b1f9563e69a1c03a1c99"
+    },
+    {
+      "path": "package-a/share/anaiero/anaiero-builtin-manifest.txt",
+      "bytes": 30586,
+      "sha256": "ba9307de6252ebafb641aa58f1c880bb8f6598ef8ca9dc4e0a27c473cb692139"
+    },
+    {
+      "path": "package-a/share/anaiero/anaiero-compatibility-manifest.txt",
+      "bytes": 13398,
+      "sha256": "2cd27a473f59b7108647e1d55cd2470cd5b4df310fee29bcc93ca860240f6123"
+    },
+    {
+      "path": "package-b/package-manifest.json",
+      "bytes": 17449,
+      "sha256": "6d5e8857811e66442f5853c002834a9c1a03ec5456b170842b8efbb275c58492"
+    },
+    {
+      "path": "package-b/share/anaiero/anaiero-builtin-manifest.txt",
+      "bytes": 30586,
+      "sha256": "3ed390773961d8d68afa42f0bee78c5cc5f94da393e88784e6cc293ce0356ff7"
+    },
+    {
+      "path": "package-b/share/anaiero/anaiero-compatibility-manifest.txt",
+      "bytes": 13398,
+      "sha256": "2cd27a473f59b7108647e1d55cd2470cd5b4df310fee29bcc93ca860240f6123"
+    },
+    {
+      "path": "package-pair-report.json",
+      "bytes": 602,
+      "sha256": "1fde72c4753320452e09f09b505290d946bd8b820578ddc49d7c747b50759324"
+    },
+    {
+      "path": "supervisor-report.json",
+      "bytes": 252,
+      "sha256": "2b654f87450f9d8d0ec6fab4e67d8d3e24adc08d942908b7a6155f0160abbce8"
+    }
+  ]
+}

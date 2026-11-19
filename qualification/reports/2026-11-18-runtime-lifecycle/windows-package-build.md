@@ -10,3 +10,14 @@ or exercised the Windows supervisor. Linux results do not replace that gate.
 The correction gives each role a distinct local name and preserves the
 comparison and receipt logic. The mixed runner's completion callbacks use
 the same convention. No failure is reclassified by the correction.
+
+## Separate Windows storage fixture
+
+The [corrected-source push job](https://github.com/bradgearon/ChristEye-Knowledge/actions/runs/44451985553/job/135317892969)
+built the native distribution. Its ordinary-workspace guard stopped at the
+ownership check instead of reaching the volume check: the canonical marker
+uses LF bytes, while the test setup used platform text output. The harness
+now writes explicit LF and checks the bytes before invoking the unmodified
+native guard. Its separate, real NTFS virtual-disk exhaustion step passed.
+These are different experiments. This job did not run the synthetic 100k
+profile because its preceding CTest step failed.

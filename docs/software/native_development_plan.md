@@ -42,8 +42,11 @@ physical qualification.
 [CE-SW-41](CE-SW-41_runtime_lifecycle_and_qualification.md) implements the next four operational batches.
 Use its [qualification record](../../qualification/reports/2026-11-18-runtime-lifecycle/README.md)
 to distinguish actual measurements from available profiles. The next acceptance
-work is the million-row device matrix, elapsed campaigns, and per-OS
-full-volume and supervisor evidence. No rating increase is implied by adding
+work is the missing cross-platform scale measurements and the million-row
+device and elapsed-campaign runs. Real full-filesystem tests under Linux
+tmpfs and Windows NTFS VHD cover process recovery under those specific
+conditions; physical power loss remains a separate gate. The [supported supervisor matrix](../../qualification/reports/2026-11-18-runtime-lifecycle/package-hosted-corrected/README.md)
+now passes on systemd and SCM for the compatible release pair. No rating increase is implied by adding
 the runners or by passing a short integration test.
 
 ### Next storage decision after the frozen 10k run

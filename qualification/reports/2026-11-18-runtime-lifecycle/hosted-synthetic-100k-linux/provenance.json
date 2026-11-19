@@ -1,0 +1,44 @@
+{
+  "schema": "anaiero.hosted-synthetic-qualification-provenance/1",
+  "runner": "ubuntu-24.04",
+  "job_id": 135315963324,
+  "event": "pull_request",
+  "job_conclusion": "success",
+  "repository": "bradgearon/ChristEye-Knowledge",
+  "head_sha": "a8131574e6e4024ea92ecd17e31a69aa0f59530c",
+  "checkout_sha": "956dd3cc16c5585b9ccc2802a00494213e2c733d",
+  "run_id": 44451398830,
+  "artifact_id": 14495963617,
+  "artifact_name": "modular-native-ubuntu-24.04",
+  "artifact_bytes": 124939,
+  "artifact_sha256": "sha256:46463c608b4c75a1385af7dd85e6899a951a736c327dc8cf0992e4811ef170ef",
+  "artifact_created_at": "2026-11-19T03:46:50Z",
+  "artifact_expires_at": "2027-02-17T03:26:06Z",
+  "job_url": "https://github.com/bradgearon/ChristEye-Knowledge/actions/runs/44451398830/job/135315963324",
+  "artifact_url": "https://github.com/bradgearon/ChristEye-Knowledge/actions/runs/44451398830/artifacts/14495963617",
+  "artifact_digest_verified": true,
+  "files": [
+    {
+      "path": "report.json",
+      "archive_path": "qualification-100k/report.json",
+      "bytes": 9638,
+      "sha256": "ffe7a16a8637a9a68aff1fd8e5d89f853e776705d0bf59b19a1c83c08bc84389"
+    },
+    {
+      "path": "profile.cevqualification",
+      "archive_path": "qualification-100k/profile.cevqualification",
+      "bytes": 501,
+      "sha256": "e797ad450744f4ccddddb762fcba1598b130ec9602db0785b851251de94d3ff1"
+    },
+    {
+      "path": "device.cevdevice",
+      "archive_path": "qualification-100k/device.cevdevice",
+      "bytes": 765,
+      "sha256": "3d8d947984c7217b0480b7c9e7b1c5dd18e5b468cc3c49310689790771f4e40d"
+    }
+  ],
+  "step_name": "Measure 100000 observations with predeclared exact latency thresholds",
+  "step_conclusion": "success",
+  "build_manifest": "../pressure-hosted/ubuntu-24.04/build-manifest.txt",
+  "build_manifest_sha256": "f36673e940f84994fc867c07237f02dcc0778617dc92ccd22fb7df715a3172f5"
+}
