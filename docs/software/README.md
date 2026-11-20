@@ -30,6 +30,10 @@ binding in CE-SW-38. The complete explanation and architecture are in
 
 | Integrated capability | Current specification |
 |---|---|
+| Reduced index work, mixed-host profiles, reviewed receiver retention and canonical package selection/rollback | [CE-SW-40](CE-SW-40_operating_envelope_and_package_lifecycle.md) |
+| Exact timing, scale/recovery campaigns, leased bootstrap and verified cross-build rollback | [CE-SW-41](CE-SW-41_runtime_lifecycle_and_qualification.md) |
+| Per-batch commit timing, packed indexes and measured layout conversion | [CE-SW-42](CE-SW-42_packed_index_and_latency_experiments.md) |
+| Continuous canonical host/mesh, reviewed compaction and native package/profile tooling | [CE-SW-39](CE-SW-39_continuous_native_operation.md) |
 | Compiled SDK, canonical evidence, real shared VLM and lifecycle/retention | [CE-SW-38](CE-SW-38_compiled_runtime_and_lifecycle.md) |
 | Mixed native sessions, restart, operations and local control | [CE-SW-31](CE-SW-31_integrated_native_sessions.md) |
 | Reusable SW5/SIM3 trials, durable receipts and SW5 outcomes | [CE-SW-32](CE-SW-32_reusable_native_experiments.md) |
@@ -43,13 +47,13 @@ binding in CE-SW-38. The complete explanation and architecture are in
 | Profile | Operator entry point | Scope |
 |---|---|---|
 | Full native build | `anaiero` | Dispatcher plus compatible `ce_*` backends and legacy/demo tools |
-| `ANAIERO_CONTROLLER_ONLY=ON` | `ce_modular_session`, `ce_colony_runtime`, scientific configuration/provider/calibration tools | Native session controller and selected utilities; does not build the `anaiero` dispatcher or discover Python |
-| Either profile with `ANAIERO_ENABLE_MESH=ON` | `ce_mesh`; also `anaiero mesh` in the full profile | Optional OpenSSL 3 evidence mesh |
+| `ANAIERO_CONTROLLER_ONLY=ON` | `ce_modular_session`, `ce_modular_host`, `ce_native_qualification`, compatible legacy/scientific tools | Native session controller and selected utilities; does not build the `anaiero` dispatcher or discover Python |
+| Either profile with `ANAIERO_ENABLE_MESH=ON` | `ce_modular_mesh`, host `--mesh`; legacy `ce_mesh`; full dispatcher `mesh-live` / `mesh` | Optional OpenSSL 3 canonical/legacy evidence transport |
 
 Use the [native build instructions](../../native/README.md),
 [mixed-session commands](CE-SW-31_integrated_native_sessions.md),
 [scientific examples](../../examples/scientific/README.md) and
-[mesh guide](../../examples/mesh/README.md). A successful build does not
+[canonical mesh guide](../../native/docs/continuous-mesh.md). A successful build does not
 install an OS service; see the [deployment examples](../../deployment/native/README.md).
 
 ## Target architecture
@@ -60,13 +64,16 @@ implements its M1–M4 batches in the modular session. The architecture specifie
 compiled public/private modules, registered capabilities, recoverable state/
 evidence transactions, verified indexes, complete lifecycle/retention rules,
 continuous mesh scheduling and native qualification gates. Its M1–M6 sequence
-is reflected in the development plan. M5 continuous mesh and M6 sustained
-release qualification remain distinct from the implemented integrations.
+is reflected in the development plan. [CE-SW-39](CE-SW-39_continuous_native_operation.md)
+implements the continuous canonical path, reviewed compaction and M6's native
+package/profile tooling. [CE-SW-40](CE-SW-40_operating_envelope_and_package_lifecycle.md)
+adds receiver retention, conservative package activation/rollback and actual
+mixed-host qualification. Sustained release qualification remains a distinct gate.
 
 ## Historical specifications and increment records
 
 The status column below records each document's original increment. Later
-CE-SW-31–38 integrations supersede several original “pending” statements.
+CE-SW-31–40 integrations supersede several original “pending” statements.
 Use the current capability map above for present behavior; preserve these
 records for design history and the scientific boundaries of each increment.
 

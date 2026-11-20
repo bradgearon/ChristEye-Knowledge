@@ -1,0 +1,14 @@
+ANAIERODEVICE/1
+name=hosted-ubuntu-24.04
+device_class=shared
+machine=Linux 7.0.0-1017-azure x86_64; host-visible memory rounded to MiB
+processor=Unknown AMD family
+memory_bytes=16759390208
+storage_device=unavailable on shared runner; not independently verified
+storage_firmware=unavailable on shared runner; not independently verified
+storage_controller=unavailable on shared runner; not independently verified
+filesystem=unavailable on shared runner; not independently verified
+mount_options=unavailable on shared runner; not independently verified
+durability=Native software publication and flushes; no power-loss experiment
+dependencies=Exact native build manifest retained with this run
+concurrent_work=GitHub-hosted environment; exclusivity is not established

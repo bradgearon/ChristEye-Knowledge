@@ -89,6 +89,10 @@ class NativeArchitectureTests(unittest.TestCase):
                     ("catalog.cpp", "runtime.cpp", "projection.cpp", "experiments.cpp", "observer.cpp")]
         portable += list((source / "session").glob("*.cpp"))
         portable += [source / "lifecycle" / "lifecycle.cpp", source / "lifecycle" / "records.hpp"]
+        portable += [source / "mesh" / "service.cpp"]
+        portable += [source / "host" / name for name in
+                     ("deployment.cpp", "deployment.hpp", "compatibility.cpp",
+                      "compatibility.hpp", "package_retention.cpp", "package_retention.hpp")]
         includes = re.compile(r'^\s*#\s*include\s*["<]([^">]+)[">]', re.M)
         for path in portable:
             self.assertTrue(path.is_file(), str(path))

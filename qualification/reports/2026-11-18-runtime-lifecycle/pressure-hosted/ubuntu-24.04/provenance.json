@@ -1,0 +1,43 @@
+{
+  "schema": "anaiero.hosted-pressure-provenance/1",
+  "runner": "ubuntu-24.04",
+  "job_id": 135315963324,
+  "event": "pull_request",
+  "job_conclusion": "success",
+  "step_name": "Verify actual full-filesystem recovery in an isolated Linux volume",
+  "step_conclusion": "success",
+  "repository": "bradgearon/ChristEye-Knowledge",
+  "head_sha": "a8131574e6e4024ea92ecd17e31a69aa0f59530c",
+  "checkout_sha": "956dd3cc16c5585b9ccc2802a00494213e2c733d",
+  "run_id": 44451398830,
+  "artifact_id": 14495963617,
+  "artifact_name": "modular-native-ubuntu-24.04",
+  "artifact_bytes": 124939,
+  "artifact_sha256": "sha256:46463c608b4c75a1385af7dd85e6899a951a736c327dc8cf0992e4811ef170ef",
+  "artifact_created_at": "2026-11-19T03:46:50Z",
+  "artifact_expires_at": "2027-02-17T03:26:06Z",
+  "job_url": "https://github.com/bradgearon/ChristEye-Knowledge/actions/runs/44451398830/job/135315963324",
+  "artifact_url": "https://github.com/bradgearon/ChristEye-Knowledge/actions/runs/44451398830/artifacts/14495963617",
+  "files": [
+    {
+      "archive_path": "pressure-proof/report.json",
+      "path": "report.json",
+      "sha256": "7fbc71e90d11d5330bf55dda5980ffac25c658d58835f41fb83b49990bad930e",
+      "bytes": 809
+    },
+    {
+      "archive_path": "pressure-proof/profile.txt",
+      "path": "profile.txt",
+      "sha256": "ff9deef4cd774869cc36d17b31baba0f641d2582a2b742f3e0a1ffa33a97aa56",
+      "bytes": 153
+    },
+    {
+      "archive_path": "modular/anaiero-builtin-manifest.txt",
+      "path": "build-manifest.txt",
+      "sha256": "f36673e940f84994fc867c07237f02dcc0778617dc92ccd22fb7df715a3172f5",
+      "bytes": 30587
+    }
+  ],
+  "artifact_digest_verified": true,
+  "report_matches_job_output": true
+}

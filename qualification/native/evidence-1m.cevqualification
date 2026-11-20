@@ -1,0 +1,17 @@
+ANAIEROQUALIFICATION/1
+name=native-evidence-1m
+storage_label=Dedicated qualification filesystem; record device in run evidence
+observations=1000000
+epochs=100
+batch_size=63
+payload_bytes=512
+query_samples=512
+checkpoints=10000,100000,1000000
+maximum_store_bytes=17179869184
+maximum_disk_bytes=34359738368
+maximum_files=16000000
+maximum_resident_bytes=536870912
+maximum_commit_p99_us=2000000
+maximum_lookup_p99_us=250000
+maximum_reopen_us=5000000
+maximum_lookup_nodes=128

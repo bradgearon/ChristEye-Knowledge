@@ -1,0 +1,8 @@
+{
+  "source_commit": "addf1fda4e4c5255a3ed47f1ab57ad6ff9bf7ce7",
+  "scope": "Linux Release, targeted post-rename deployment, cross-build compatibility and mixed-campaign tests, no Windows result implied.",
+  "tests": 3,
+  "passed": 3,
+  "whole_build_id": "074c37e15058906f84ef4d20fc5b8f49e244283bdcf3477d87aea230779517ff",
+  "verified_manifest_files": 279
+}

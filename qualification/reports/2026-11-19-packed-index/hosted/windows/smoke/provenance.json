@@ -1,0 +1,63 @@
+{
+  "source_commit": "97b20a1f9ef6b5664472db5018ac23c452637ad3",
+  "event": "push",
+  "runner": "windows-2022",
+  "workflow_run_id": 44477108609,
+  "job_id": 135400208977,
+  "job_url": "https://github.com/bradgearon/ChristEye-Knowledge/actions/runs/44477108609/job/135400208977",
+  "checkout_witness": "Push workflow with default checkout of this branch SHA. Each build-manifest input matched the source at that SHA.",
+  "tier": "smoke",
+  "artifact_name": "index-smoke-windows-2022",
+  "artifact_id": 14506244716,
+  "artifact_url": "https://github.com/bradgearon/ChristEye-Knowledge/actions/runs/44477108609/artifacts/14506244716",
+  "archive_sha256_verified": "994843f660c0c08fc7ae620929ed4445f8769025758e1c79c7f0e7152ee86695",
+  "archive_bytes": 72109,
+  "build_identity": "62679745ad93cbb420eca8b09c8ff1f77e16c55be78925ce58cbffc7285987b9",
+  "build_manifest": "../build-manifest.txt",
+  "native_source_inputs_verified": 281,
+  "sources_matching_after_lf_normalization": 0,
+  "sources_matching_after_windows_checkout_crlf": 281,
+  "artifacts": {
+    "index-smoke/profile.cevqualification": {
+      "path": "qualification/reports/2026-11-19-packed-index/hosted/windows/smoke/profile.cevqualification",
+      "sha256": "66c681bdf45dc05fa5188d12b4ac12fd1a90a8e1f5e43b9406a3fa91c6621c94",
+      "bytes": 560
+    },
+    "index-smoke/device.cevdevice": {
+      "path": "qualification/reports/2026-11-19-packed-index/hosted/windows/smoke/device.cevdevice",
+      "sha256": "63e31757135e87621a95095ba60fc3ddec3f5152a5e1ff22fc1eea885f02b6e2",
+      "bytes": 784
+    },
+    "index-smoke/comparison.json": {
+      "path": "qualification/reports/2026-11-19-packed-index/hosted/windows/smoke/comparison.json",
+      "sha256": "be31cf227c0af1a8851b98e41da60fad9e3e9d3ff1fa32a3f69ef7953848a0e6",
+      "bytes": 14134
+    },
+    "index-smoke/1-node-files/report.json": {
+      "path": "qualification/reports/2026-11-19-packed-index/hosted/windows/smoke/1-node-files/report.json",
+      "sha256": "620a852dfe655b8aa22c358f9138f0ed865ee6fa670243b26bae50a13ed38d22",
+      "bytes": 11679
+    },
+    "index-smoke/2-packed-pages/report.json": {
+      "path": "qualification/reports/2026-11-19-packed-index/hosted/windows/smoke/2-packed-pages/report.json",
+      "sha256": "b7c219e9aa2c65837540692ef87fe88b467a0476b713b00223c264ce714cb600",
+      "bytes": 11683
+    },
+    "index-smoke/3-packed-pages/report.json": {
+      "path": "qualification/reports/2026-11-19-packed-index/hosted/windows/smoke/3-packed-pages/report.json",
+      "sha256": "fab51b3e8ff2dd634b193f24a62580463cd80a2981b73b2542a7fe348e30dde5",
+      "bytes": 11690
+    },
+    "index-smoke/4-node-files/report.json": {
+      "path": "qualification/reports/2026-11-19-packed-index/hosted/windows/smoke/4-node-files/report.json",
+      "sha256": "1aeb349388efbe31d4d05f6fbe9870aa27d46c4684f33b95700d94cac83cffb9",
+      "bytes": 11679
+    },
+    "index/anaiero-builtin-manifest-Release.txt": {
+      "path": "qualification/reports/2026-11-19-packed-index/hosted/windows/build-manifest-original.txt",
+      "sha256": "6395d5a41af8d8e71ec30fa1cc8ed021e1c2a99342a80bb27267b02142b8441d",
+      "bytes": 31174
+    }
+  },
+  "executable_sha256": "9f9350e296f070d6cd96652a6f541c952e88b61814029343d5bec91d406e745f"
+}

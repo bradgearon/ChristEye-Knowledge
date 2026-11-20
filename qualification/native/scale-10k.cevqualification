@@ -1,0 +1,21 @@
+ANAIEROSCALEQUALIFICATION/1
+name=native-scale-maintenance-10k
+storage_label=Declared qualification filesystem; retain device declaration with run
+observations=10000
+epochs=10
+batch_size=63
+payload_bytes=512
+query_samples=510
+checkpoints=1000,10000
+maximum_store_bytes=1073741824
+maximum_disk_bytes=2147483648
+maximum_files=1000000
+maximum_resident_bytes=536870912
+maximum_commit_p99_us=2000000
+maximum_lookup_p99_us=250000
+maximum_reopen_us=5000000
+maximum_lookup_nodes=128
+receiver_pages_per_checkpoint=16
+receiver_page_observations=16
+retained_receiver_pages=2
+compaction_working_bytes=536870912

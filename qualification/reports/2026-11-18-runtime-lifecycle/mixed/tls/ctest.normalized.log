@@ -1,0 +1,26 @@
+Start testing: Nov 19 03:12 UTC
+----------------------------------------------------------
+19/45 Testing: anaiero_mesh_mixed_campaign
+19/45 Test: anaiero_mesh_mixed_campaign
+Command: "<build>/anaiero_continuous_mesh_tests" "<repository>/native/.." "<build>/mixed-mesh-tests" "<build>/ce_modular_host" "mixed"
+Directory: <build>
+"anaiero_mesh_mixed_campaign" start time: Nov 19 03:12 UTC
+Output:
+----------------------------------------------------------
+continuous native mesh mixed: canonical shared-host integration passed
+<end of output>
+Test time =  59.58 sec
+----------------------------------------------------------
+Test Passed.
+"anaiero_mesh_mixed_campaign" end time: Nov 19 03:13 UTC
+"anaiero_mesh_mixed_campaign" time elapsed: 00:00:59
+----------------------------------------------------------
+
+End testing: Nov 19 03:13 UTC
+
+mesh =  59.58 sec*proc
+
+mixed =  59.58 sec*proc
+
+qualification =  59.58 sec*proc
+

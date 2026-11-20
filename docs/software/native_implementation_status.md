@@ -11,7 +11,13 @@ delivered capabilities from remaining qualification.
 [CE-SW-38](CE-SW-38_compiled_runtime_and_lifecycle.md) implements M1–M4 of
 [CE-SW-37](CE-SW-37_modular_runtime_and_evidence_lifecycle.md) through the new
 compiled modular session path. Continuous mesh integration (M5), sustained
-release qualification (M6), and independent scientific evidence remain separate.
+release qualification (M6), and independent scientific evidence have separate
+gates. [CE-SW-39](CE-SW-39_continuous_native_operation.md) now supplies the
+continuous canonical host/mesh path, reviewed compaction and package/profile
+tooling. Long-duration release qualification remains open.
+The [CE-SW-40 continuation](CE-SW-40_operating_envelope_and_package_lifecycle.md)
+adds measured mixed-host operation, explicit receiver retention, conservative
+package activation/rollback and reduced derived-index work.
 
 ## Standing delivery preference
 
@@ -20,7 +26,99 @@ Deliver a substantial complete capability with implementation, adapters,
 runtime/CLI wiring, meaningful Windows/Linux tests and documentation. Keep
 related work in one changeset with reviewable internal commits.
 
-## Current integrated batch — CE-SW-38 compiled runtime and lifecycle
+## Packed derived index and matched latency trials
+
+[CE-SW-42](CE-SW-42_packed_index_and_latency_experiments.md) adds writable
+packed pages, reviewed conversion, per-batch timing and paired qualification
+on the same device. See the [operating record](../../qualification/reports/2026-11-19-packed-index/README.md)
+for the observed scale and file counts.
+
+## Current integrated batch — CE-SW-41
+
+[CE-SW-41](CE-SW-41_runtime_lifecycle_and_qualification.md) adds exact commit-latency decisions, bounded index
+reuse and compaction, source/receiver scale profiles, resumable five-engine
+campaigns, leased live bootstrap and a conservative cross-build package
+contract. The [100k maintenance profile](../../qualification/reports/2026-11-18-runtime-lifecycle/scale-100k-frozen/report.json)
+passed on shared Linux; the separate exact synthetic 10k failed latency.
+The compatible release pair passed real systemd and SCM installation, update,
+reverse selection and removal. See the evidence index for actual device,
+source and coverage. Million-row and elapsed-duration gates remain open.
+
+## Previous integrated batch — CE-SW-40 operating envelope and lifecycle
+
+`anaiero qualify mixed PROFILE SESSION NEW_OUTPUT` runs all five compiled engine
+families through the actual continuous host. It checks durable pause/retry/resume,
+bounded storage/control pressure, historical payload/receipt reads, declared
+quota rejection, exact orderly restart and full audit. Exact inputs and a report
+are retained. The short profile is executable CI evidence; the supplied 24-hour
+and seven-day profiles require their full elapsed durations before qualification.
+
+Local `receiver-retention-review`, `receiver-retention-status`,
+`receiver-retention-activate` and `receiver-retention-reclaim` commands expire
+explicit received history before deleting it. Whole remaining page members,
+additional overlapping receipts, artifacts and obsolete bootstrap checkpoints
+have bounded selection. Current cursor/projection/pin roots remain protective;
+old reads/retries report history expiry. Both receiver and sender maintenance
+resume missing-file byte accounting after an interrupted deletion.
+
+`anaiero host package-check`, `package-review`, `package-rollback-review`,
+`package-activate`, `package-status` and `check-selected` supply the
+[native package lifecycle](../../deployment/native/package-lifecycle.md).
+Canonical selection and retained host/manifest witnesses commit together.
+Rollback reviews the current store and preserves the accepted suffix. This
+matrix requires unchanged compiled engine identity and an explicit stopped
+supervisor switch; different runtime/engine implementations need migration.
+
+The derived index avoids filesystem checks for discarded transient nodes and
+coalesces source-tip updates within a canonical transaction. Formats, durability
+order and qualification budgets remain unchanged. The
+[completed Windows 100k failure](../../qualification/reports/2026-11-18-hosted-windows-100k/README.md)
+is preserved; new implementation measurements are separate evidence.
+
+The [retained operating-envelope record](../../qualification/reports/2026-11-18-operating-envelope/README.md)
+includes original CI archives, reports, actual checkout identities and raw build
+manifests with explicit LF identity witnesses where Windows wrote CRLF bytes.
+At runtime `aec1489d`, full native suites pass 81/81 and real TLS/IPC mesh suites
+pass 9/9 on both platforms. PR-triggered 100k profiles pass on Windows and Linux,
+while an independent push Linux run fails its conservative p99 bound (2.147 seconds
+against the unchanged 2-second limit). Its audit, recovery, memory and disk gates
+pass. The measurement method is explicit in new reports, and the failed result
+remains unchanged. This completes the implementation/evidence batch while leaving
+hosted tail-latency qualification and prolonged release qualification open.
+
+## Previous integrated batch — CE-SW-39 continuous native operation
+
+`anaiero host` runs the canonical modular session continuously with monotonic
+wall pacing, bounded control/storage queues, cached status and native IPC/service
+lifecycle. Engine clocks keep their original meaning. Accepted durable work
+drains on stop; a killed process recovers the original pending cycle identities.
+The host retains its executable separately from the session CLI's engine package.
+
+The optional `anaiero mesh-live` / CEVMESH/2 path shares that host's serialized
+storage lane. Bounded concurrent TLS admission, commit watermarks, one-page
+credit and byte/work scheduling support live subscribers without per-peer
+unbounded event buffers. Scoped grants, current credential generations, exact
+offers/ACKs, relay receipts, verified artifacts and explicit bootstrap are
+canonical operations. Local asynchronous mesh administration keeps status and
+stop available while a grant or revocation waits for storage.
+
+`session compact-review`, `compact` and `compact-resume` publish a verified
+canonical base before removing redundant journal/index history. Repair and
+audit use that base plus the retained suffix. Exact retry receipts remain by
+default; explicit receipt expiry advances a fenced namespace and is rejected
+for existing modular sessions. Latest ownership/source/pin/tombstone identities
+remain retained and consume finite quota.
+
+Native CMake package tooling installs and verifies exact file inventories and
+retained implementation compatibility. The native qualification executable
+runs predeclared evidence/churn profiles and records latency, lookup/reopen
+work, memory, CPU and both serialized/disk measurements. The
+[profile guide](../../qualification/native/README.md) distinguishes this
+synthetic workload from mixed daemon qualification and identifies the remaining
+24-hour/seven-day and device-specific gates. Exact CI reports accompany the
+reviewed commit; architecture ratings do not replace them.
+
+## Previous integrated batch — CE-SW-38 compiled runtime and lifecycle
 
 `anaiero session` (full build) and `ce_modular_session` (controller profile) run
 five registered engine families through a common canonical commit store. The
@@ -58,11 +156,11 @@ See [storage](../../native/docs/canonical-evidence.md) and
 [lifecycle](../../native/docs/modular-lifecycle.md) for bounded policies.
 
 The store reclaims expired payload files and reserves maintenance headroom.
-Historical canonical metadata and identity fences remain retained under a finite
-accounted-byte budget (distinct from allocated filesystem blocks); journal-prefix pruning is not implemented. Admission stops when
-that budget is exhausted. Separate archives/backups consume their own declared
-storage. No indefinite-operation or sustained-throughput claim follows from
-this functional implementation.
+At CE-SW-38, historical canonical metadata and identity fences remained under
+a finite accounted-byte budget without prefix pruning. CE-SW-39 adds the
+reviewed canonical-base path above. Protected current identities still consume
+finite quota, distinct from allocated filesystem blocks. Separate archives and
+backups have their own budgets; no indefinite finite-disk claim follows.
 
 The Windows/Linux `native-modular.yml` gate builds the complete native
 distribution, runs existing and new regression suites, installs and exercises

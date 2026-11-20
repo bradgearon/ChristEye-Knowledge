@@ -1,0 +1,14 @@
+ANAIERODEVICE/1
+name=shared-linux-lifecycle
+device_class=shared
+machine=Linux 6.18.57 x86_64; host-visible memory rounded to MiB
+processor=Unknown P6 family
+memory_bytes=10451156992
+storage_device=Shared-workspace-overlay
+storage_firmware=unavailable on shared runner; not independently verified
+storage_controller=unavailable on shared runner; not independently verified
+filesystem=Linux-overlay
+mount_options=unavailable on shared runner; not independently verified
+durability=Native software commit path; no hardware power cut
+dependencies=Exact native build and configuration manifests retained
+concurrent_work=Shared workspace with native compilation and regression tests; host exclusivity not established

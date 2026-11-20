@@ -7,14 +7,24 @@ namespace anaiero::sdk::lifecycle {
 enum class SourcePhase : std::uint32_t { registered=0,active,draining,sealed,retired };
 enum class PeerPhase : std::uint32_t { active=0,suspended,revoked };
 enum class SubscriptionPhase : std::uint32_t { active=0,suspended,expired,closed };
-enum class PinKind : std::uint32_t { recovery=0,program,module,operation,reader,backup,operator_pin };
+enum class PinKind : std::uint32_t { recovery=0,program,module,operation,reader,backup,operator_pin,bootstrap_continuation };
+enum class BootstrapContinuationPhase : std::uint32_t { pending=0,accepted,cancelled,expired };
 enum class HistoryAvailability : std::uint32_t { retained=0,archived,expired };
 enum class MaintenancePhase : std::uint32_t { reviewed=0,activated,completed };
+enum class SourceAuthorityKind : std::uint32_t { local=0,relay=1 };
+
+struct SourceAuthority {
+  std::string uid,owner,clock_domain;
+  SourceAuthorityKind kind=SourceAuthorityKind::local;
+};
 
 struct Options {
   std::size_t max_active_sources=32,max_metrics=256,max_active_peers=32,
               max_active_subscriptions=32,max_pins=64,max_pin_objects=64;
   std::uint64_t maximum_lease_seconds=30ULL*24ULL*60ULL*60ULL;
+  // 15 leaves room for atomic expiry with all 32 peers/subscriptions and
+  // installed roots in the native store's default 128-record transaction.
+  std::size_t max_bootstrap_continuations=15;
 };
 struct SourceRef {
   std::string uid;
@@ -52,6 +62,18 @@ struct Snapshot {
   bool quarantined=false;
   std::string incarnation;
   Digest recovery_policy_sha256;
+  std::size_t pending_bootstraps=0;
+};
+// Accounted capacity at one canonical generation. These values describe the
+// configured quota, not filesystem allocation/free space or a reservation for a
+// future transaction. Protected authority/retry/tombstone identities remain
+// retained; source retirement does not promise to reclaim their metadata.
+struct CapacityStatus {
+  std::uint64_t generation=0,accounted_bytes=0,maximum_bytes=0;
+  std::uint64_t ordinary_limit_bytes=0,maintenance_reserve_bytes=0;
+  std::uint64_t ordinary_remaining_bytes=0,maintenance_remaining_bytes=0;
+  std::uint64_t pending_reclamation_bytes=0;
+  bool writable=false,index_ready=false;
 };
 struct Peer {
   std::string principal;
@@ -96,6 +118,17 @@ struct Bootstrap {
   Digest snapshot_sha256;
   Bytes snapshot;
 };
+// An explicit pending checkpoint-to-stream handoff. Its dedicated pin kind
+// consumes one ordinary pin slot and one bounded continuation slot. Metadata
+// remains as an immutable outcome after those resource protections are released.
+struct BootstrapContinuation {
+  std::string id,subscription_id,principal;
+  EngineIdentity source;
+  std::uint64_t generation=0,lease_until_unix_s=0,credential_generation=0;
+  Cursor tip;
+  Digest checkpoint_sha256,state_sha256;
+  BootstrapContinuationPhase phase=BootstrapContinuationPhase::pending;
+};
 struct ArchiveOptions {
   std::uint64_t maximum_bytes=1024ULL*1024ULL*1024ULL;
   std::size_t maximum_object_bytes=8U*1024U*1024U;
@@ -138,7 +171,13 @@ public:
   Service& operator=(const Service&)=delete;
   Result open();
   Result snapshot(Snapshot&) const;
+  Result capacity(CapacityStatus&) const;
   Result source(const SourceRef&,Source&) const;
+  Result source_authority(std::string_view uid,SourceAuthority&) const;
+  // One immutable UID owner/clock/role across local engines and authenticated
+  // relay streams. Stage in the caller's SAME canonical transaction so racing
+  // first registrations cannot establish separate ownership authorities.
+  Result stage_source_authority(evidence::CommitBatch&,const SourceAuthority&);
   Result register_engine(const EngineIdentity&,std::string owner,std::string operation_id);
   Result activate(const SourceRef&,std::string operation_id);
   Result begin_drain(const SourceRef&,std::string operation_id);
@@ -175,6 +214,18 @@ public:
   Result replay_status(const SourceRef&,std::uint64_t after_sequence) const;
   Result accept_bootstrap(const Bootstrap&,std::uint64_t now_unix_s,
                           std::string operation_id);
+  Result bootstrap_continuation(std::string_view id,BootstrapContinuation&) const;
+  Result pending_bootstrap(std::string_view subscription_id,BootstrapContinuation&) const;
+  // Stage into the caller's SAME canonical transaction as its protocol offer
+  // or acceptance/release witness. The caller supplies the operation identity.
+  Result stage_bootstrap_continuation(evidence::CommitBatch&,const BootstrapContinuation&,
+                                      std::uint64_t now_unix_s);
+  Result stage_accept_bootstrap_continuation(evidence::CommitBatch&,std::string_view id,
+      const Bootstrap&,std::uint64_t now_unix_s);
+  Result stage_cancel_bootstrap_continuation(evidence::CommitBatch&,std::string_view id);
+  // Stage scoped grant withdrawal and its active-directory guard in the
+  // protocol's same authority-change transaction.
+  Result stage_revoke_bootstrap_scope(evidence::CommitBatch&,std::string_view principal,const SourceRef&);
   Result installed_bootstrap(std::string_view subscription_id,Bootstrap&) const;
   // Restored stores remain unable to execute or grant replay until an explicit
   // local operator supplies their current policy witness. The witness is an

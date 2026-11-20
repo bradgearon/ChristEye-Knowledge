@@ -16,6 +16,20 @@ five-item delivery order. [CE-SW-38](CE-SW-38_compiled_runtime_and_lifecycle.md)
 now implements M1–M4 in the compiled modular session. The older ratings and
 CI table below remain a historical CE-SW-36 comparison, not current release proof.
 
+**Operational continuation — 2026-11-18:**
+[CE-SW-39](CE-SW-39_continuous_native_operation.md) delivers continuous canonical
+mesh, reviewed canonical compaction, a continuous native host/package path and
+measured operating profiles. These are the next four concrete deliveries under
+M5/M6; the long-duration release gates remain separate.
+
+**Operating-envelope continuation — 2026-11-18:**
+[CE-SW-40](CE-SW-40_operating_envelope_and_package_lifecycle.md) reduces avoidable
+index work, adds a real five-engine continuous-host qualification path, supplies
+reviewed receiver payload/receipt retention and implements canonical package
+selection with suffix-preserving rollback. These close specific operational
+paths within M4/M5/M6; elapsed release evidence and semantic engine migration
+remain explicit work.
+
 Use the [implementation checkpoint](native_implementation_status.md) for what
 currently runs. This document tracks CE-SW-37's forward order and retains the
 readiness evidence and detailed capability subplans. Historical
@@ -24,26 +38,113 @@ increments; their old TODOs are not the current backlog. The
 [project phase roadmap](../roadmap.md) separately records scientific and
 physical qualification.
 
-## Current assessment after M1–M4
+**Runtime lifecycle continuation — 2026-11-18:**
+[CE-SW-41](CE-SW-41_runtime_lifecycle_and_qualification.md) implements the next four operational batches.
+Use its [qualification record](../../qualification/reports/2026-11-18-runtime-lifecycle/README.md)
+to distinguish actual measurements from available profiles. The next acceptance
+work is the missing cross-platform scale measurements and the million-row
+device and elapsed-campaign runs. Real full-filesystem tests under Linux
+tmpfs and Windows NTFS VHD cover process recovery under those specific
+conditions; physical power loss remains a separate gate. The [supported supervisor matrix](../../qualification/reports/2026-11-18-runtime-lifecycle/package-hosted-corrected/README.md)
+now passes on systemd and SCM for the compatible release pair. No rating increase is implied by adding
+the runners or by passing a short integration test.
+
+### Packed-index implementation and qualification
+
+[CE-SW-42](CE-SW-42_packed_index_and_latency_experiments.md) implements the
+four storage items below. The [experiment record](../../qualification/reports/2026-11-19-packed-index/README.md)
+tracks achieved scale, exact failures, device scope and outstanding gates.
+The existing single-node layout remains the default. The frozen 10k latency
+pair on shared Linux passed in both conditions. The earlier four overruns
+remain unexplained. Both hosted platforms passed the paired 256-observation
+comparison. Scale and promotion decisions use the original profile gates
+on each device.
+
+### Storage decisions and their acceptance criteria
+
+The [frozen run](../../qualification/reports/2026-11-18-runtime-lifecycle/synthetic-10k-frozen/report.json)
+completed its audit and all 10,000 observations, but 4 of 159 commits exceeded
+two seconds when the predeclared gate allowed only one. Of 101.04 seconds
+inside commits, the derived index used 61.37 and blob publication used 33.14.
+Aggregate stage times cannot identify which stage caused an individual slow
+commit. The two million-row admissions also exposed a layout constraint that
+free bytes alone cannot solve.
+
+1. Replay the **same executable and profile** on a declared idle device and
+   under one prescribed background I/O load. Keep a bounded sample pairing
+   each slow batch with its stage times. Record free bytes/nodes, filesystem,
+   flush policy and scheduler/device observations. Preserve every result.
+2. Prototype packed pages for the **derived index only**. Keep canonical
+   state, receipts and existing ROOT semantics. Build the alternative from
+   the same retained inputs in a new directory, verify complete sorted
+   coverage and checksums, then switch only after the new index is durable.
+3. Compare the two layouts on the same volume in a predeclared alternating
+   order, then repeat on the second target platform. Measure exact exceedance
+   counts, lookup/reopen costs, resident memory, regular/directory allocation
+   and **peak live file nodes while both indexes coexist**. Never change a
+   threshold after observing the result.
+4. Require an interrupted build/switch/cleanup, damaged-page recovery, old-store
+   open, full audit and exact retry with pins/expiry before considering
+   promotion. Run 100k and 1m at their original budgets on volumes that meet
+   the relevant headroom checks. A capacity refusal is evidence for sizing,
+   never a successful scale run.
+
+## Current assessment after the continuous-operation changes
 
 **Approximately 8.5/10 as a native engineering research platform**, as an
 engineering review judgment rather than a measured completion percentage.
 Extension/reuse and integrated plan execution move from material capability
 gaps to implemented paths with installed-consumer, equivalence and recovery
-fixtures. Sustained operation remains the limiting category.
+fixtures. Continuous operation now has a canonical host/mesh path and explicit
+history compaction. Sustained deployment evidence remains the limiting category;
+the overall rating stays approximately 8.5 until representative longer runs and
+independent application adoption support a higher judgment.
 
 | Area | Current judgment | Implemented improvement | Remaining evidence |
 |---|---:|---|---|
 | Extension and library reuse | 8.5/10 | Compiled SDK, typed catalog, native/process admission, independent installed consumer | Independent application adoption and supported ABI/package upgrade matrix |
 | Integrated plans and digital experiments | 8.5/10 | Real retained VLM execution; coherent SW5/SIM3 changes; frozen selection and canonical outcomes | Broader declared workloads and variant/scientific capability qualification |
-| Evidence and recovery | 8.5/10 | Single canonical commit, verified historical index, expiry guards, migration and crash cuts | Filesystem/power-loss qualification and large retained-history profiles |
-| Source/retention operation | 7/10 | Reusable active slots, indexed history, leases, archive/expiry, payload reclamation and quarantine | Continuous mesh binding, prolonged resource evidence and optional prefix-pruning |
-| Documentation and SDK entry points | 8/10 | Current operator guide, installed SDK example and generated exact public reference | Release/package documentation verified against each shipped profile |
+| Evidence and recovery | 8.5/10 | Single canonical commit; verified historical index; reviewed base/suffix compaction; explicit retry-history floors; migration and process/fault recovery | Filesystem/power-loss qualification and the dedicated million-observation profile |
+| Source/retention operation | 8/10 | Reusable active slots; indexed history; leases/archive/expiry; canonical prefix reclamation; continuous host/mesh binding | Mixed 24-hour/seven-day deployment evidence and policy for arbitrary retained-identity growth |
+| Documentation and SDK entry points | 8.5/10 | Current host/mesh/compaction guides, installed SDK example, package verifier and generated public reference | Supported package upgrade matrix and evidence for each shipped deployment profile |
 
-The numerical scope and authenticated transport retain their prior evidence;
-new lifecycle services do not by themselves upgrade the existing mesh to
-continuous operation. Biological validity remains unestablished. These ratings
-do not assert M5/M6 completion or replace the exact Windows/Linux CI evidence.
+CE-SW-40 adds bounded receiver observation/receipt/artifact/bootstrap reclamation
+and a tested package-selection matrix for unchanged compiled engine identity.
+The mixed qualification executable now measures the actual five-engine host;
+its short profile does not replace the elapsed 24-hour/seven-day gates. The
+assessment remains approximately **8.5/10** until the declared sustained
+envelopes and independent adoption are demonstrated.
+
+The numerical scope retains its prior evidence. CE-SW-39 binds the new
+authenticated mesh to the modular session rather than inferring integration
+from component existence. Biological validity remains unestablished. These
+ratings do not assert M6 release qualification or replace exact Windows/Linux
+CI reports, measured operating profiles or hardware-specific evidence.
+
+The first completed [shared-sandbox 100,000-observation preflight](../../qualification/reports/2026-11-18-shared-sandbox-100k/README.md)
+passed its recovery, audit, memory, disk and indexed-read gates but failed the
+unchanged batch-commit p99 upper-bound budget (2.147 seconds against 2 seconds).
+That negative result remains recorded separately from hosted CI qualification;
+it reinforces the need to declare and measure each deployment's operating limits.
+The [hosted Windows run at `c196e56`](../../qualification/reports/2026-11-18-hosted-windows-100k/README.md)
+also completed and failed only that same unchanged commit-p99 upper-bound gate.
+Its report is retained independently of subsequent optimization runs. All its
+correctness, audit, memory, disk and lookup gates passed; none of those outcomes
+makes the failed latency gate a pass.
+
+The [CE-SW-40 measurement record](../../qualification/reports/2026-11-18-operating-envelope/README.md)
+now retains the completed hosted runs, including every observed failure, with
+original archives and exact source/profile witnesses. Runtime `aec1489d` passed
+the full distribution suites (81/81 on each platform), real TLS/IPC mesh suites
+(9/9 on each), and its PR-triggered 100k profile on both Windows and Linux.
+An independent push-triggered Linux run of the same implementation failed the
+unchanged commit-p99 upper-bound gate: 2.147483648 seconds against 2 seconds,
+with an exact maximum of 3.543940010 seconds. Correctness, audit, recovery,
+memory and disk gates passed. The logarithmic bound does not reveal the exact
+p99 within that bucket, and the cause of the elapsed-time variation is not yet
+established. Hosted latency qualification therefore remains **unresolved**.
+The versioned observed-maximum cap tightens a conservative estimate without
+reclassifying prior reports; it is not itself a storage speed improvement.
 
 ## Historical CE-SW-36 assessment
 
@@ -113,8 +214,9 @@ capability and scale gaps.
 
 The findings below describe the reviewed CE-SW-36 paths. CE-SW-38 closes the
 compiled-module, shared-session VLM, supported SIM3 live-change and modular
-source-lifecycle gaps through a new versioned path. Existing mesh callers still
-need M5 integration. The details remain useful compatibility context.
+source-lifecycle gaps through a new versioned path. CE-SW-39 supplies the M5
+canonical mesh integration; legacy mesh callers retain their original versioned
+path until explicitly adopted. The details remain useful compatibility context.
 
 ### Existing plans execute, but not through the integrated experiment path
 
@@ -198,8 +300,9 @@ modules retain the compact standard deployment.
 Each batch is approximately five related increments delivered as one usable
 capability, including services, adapters, operator wiring, failure tests,
 native Windows/Linux verification and documentation. Internal commits may be
-reviewed separately. M1–M4 are implemented in CE-SW-38 within its stated
-profile; M5/M6 remain forward work.
+reviewed separately. M1–M4 are implemented in CE-SW-38; CE-SW-39 implements the
+continuous operational path and M6's package/profile tooling. Sustained release
+qualification remains an explicit gate.
 
 | Order | Architecture batch | Usable result | Dependency |
 |---|---|---|---|
@@ -207,21 +310,49 @@ profile; M5/M6 remain forward work.
 | M2 — implemented | Canonical transitions and indexed evidence | One recoverable commit/root contract, asynchronous storage and verified historical indexes | M1 contracts |
 | M3 — implemented | Complete engine execution and change paths | Finite durable VLM plans and engine-owned SW5/SIM3 trial/change paths with configuration/state recovery | M1 and M2 |
 | M4 — implemented | Source, peer, subscription and retention lifecycle | Reusable active capacity, versioned checkpoints, archive policy, leases and explicit replay floors | M1 and M2; can proceed alongside M3 |
-| M5 | Continuous mesh service | Event-driven live delivery, byte/work fairness, identity/artifact lifecycle and rebootstrap | M2 and M4 |
-| M6 | Qualified native release | Reproducible packages, compatibility proof, failure matrix and sustained resource/recovery evidence | Integration of preceding batches |
+| M5 — implemented operational path | Continuous mesh service | Canonical shared-host live delivery, bounded TLS admission, byte/work fairness, scoped lifecycle/artifacts/rebootstrap and native multi-peer fixtures | M2 and M4; CE-SW-39 |
+| M6 — tooling and functional evidence; release gate open | Qualified native release | Native host/service packages, installed integrity/compatibility checks, process/fault matrix and measured profiles; prolonged deployment qualification still required | Integration of preceding batches |
 
 See [CE-SW-37's delivery sequence](CE-SW-37_modular_runtime_and_evidence_lifecycle.md#14-delivery-sequence)
 for approximately five related increments per batch and exact closure gates.
-The next implementation changeset is **M5**, connecting continuous authenticated
-transport to the new canonical/index/lifecycle services. M6 must publish a
-measured operating envelope before production readiness is claimed.
+The four-delivery CE-SW-39 changeset connects transport to canonical sessions,
+adds authority-preserving prefix compaction, makes the session continuously
+operable and supplies executable qualification/package gates. The next closure
+work is the dedicated M6 operating envelope: mixed sustained workloads,
+declared device profiles, longer history scale, actual pressure/crash behavior
+and supported upgrade/rollback procedures. Production readiness is not inferred
+from the new architecture or a passing short test.
+
+### Next closure work after CE-SW-40
+
+| Order | Concrete work | Completion evidence |
+|---|---|---|
+| 1 | Resolve the remaining 100k latency uncertainty with exact counts above predeclared limits and timings for durability stages, then qualify a declared device/filesystem profile | Preserve the existing passing and failing runs; distinguish a coarse percentile-bound miss from actual threshold exceedances; declare measurement changes and budgets before execution; retain exact source/profile/device witnesses |
+| 2 | Run the existing one-million-observation profile on a declared dedicated device and compare 10k/100k/1m index and allocation costs | Completed report plus device/filesystem/dependency declaration; retained failure evidence if a gate is missed |
+| 3 | Run the new elapsed mixed 24-hour/seven-day profiles, then add real TLS peer lag/churn/rotation and actual storage pressure to that operating envelope | Full-duration native reports on both platforms; separate dispatch/commit/projection/remote-ACK measurements and failure classifications |
+| 4 | Extend the conservative package matrix through explicit engine/runtime state migrations and qualify supervisor installation/uninstallation; remove bootstrap producer quiescence only with a pinned continuation contract | Preserved accepted suffix, exact old/new implementation evidence, migration/crash/rollback fixtures and deployment-device qualification |
+
+The initial optimized 100k Windows/Linux executions are complete; their mixed
+hosted outcomes determine the first item above. Further runs need a declared
+diagnostic or device-qualification purpose, and every outcome remains evidence.
+Elapsed/CPU differences alone do not identify a cause, and the passing subset
+does not qualify the operating envelope. The one-million and prolonged profiles
+remain subsequent evidence gates.
+
+CE-SW-40 already implements complete-page receiver expiry, explicit cleanup of
+overlapping receipt copies, protected current cursors/projections, artifact and
+superseded-checkpoint reclamation, and missing-file accounting recovery. Permanent
+ownership, retry, tombstone and selected-package witnesses still consume finite
+metadata quota. Automatic deletion of those witnesses is not an implied policy.
 
 Implementation decisions are explicit: a sealed native AVL backend replaces
 the recommended SQLite dependency; old evidence migrates without pretending to
-upgrade old live session state; expired payloads are reclaimed but historical
-canonical metadata remains quota-bounded. The runtime reserves maintenance
-headroom and stops admission at finite capacity. Canonical prefix-pruning needs
-its own authority-summary and restore proof before being enabled.
+upgrade old live session state; verified canonical bases now permit reviewed
+prefix-pruning while preserving latest authority and exact operation receipts
+by default. Explicit receipt expiry requires a new operation namespace and is
+not enabled for existing modular sessions. Arbitrary retained identity
+cardinality remains finite and quota-bounded. The runtime reserves maintenance
+headroom and stops admission when its declared policy cannot reclaim more.
 
 The detailed A–E capability plans below are retained as subplans: A (VLM) and
 C (SIM3 changes) map to M3; B maps to M2/M4/M6; E maps to M5. D remains a

@@ -1,0 +1,5 @@
+ANAIERO-STORAGE-PRESSURE-PROFILE/1
+maximum_filesystem_bytes=67108864
+maximum_filler_bytes=67108864
+post_admission_free_bytes=65536
+payload_bytes=1048576

@@ -341,6 +341,18 @@ public:
   }
   bool running()const noexcept override{return running_;}
   Code status()const noexcept override{return code_;}
+  // Owner-thread collection for supervisors that use a separate IPC channel.
+  // Never wait for stderr or consume an incomplete Windows overlapped read.
+  void collect_diagnostics()noexcept{
+#ifdef _WIN32
+    for(unsigned i=0;i<8&&error_pending_;++i){
+      if(WaitForSingleObject(error_read_.hEvent,0)!=WAIT_OBJECT_0)break;
+      consume_error();
+    }
+#else
+    consume_error();
+#endif
+  }
   std::string diagnostics()const override{return diagnostics_;}
 };
 } // namespace anaiero::process

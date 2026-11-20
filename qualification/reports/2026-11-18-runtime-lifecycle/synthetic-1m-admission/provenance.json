@@ -1,0 +1,18 @@
+{
+  "scope": "Frozen native source; shared Linux workspace, concurrent compilation and tests. This is not a dedicated-device measurement.",
+  "native_git_tree": "eb10386f0ec4a79ba588fa522515f5a5619ce688",
+  "whole_build_id": "3c2eca366662c32986a445ba4f3bb38650b78f6e9344eb34e1c5483195710291",
+  "executable_sha256": "623d66da6e6881c0c6cbba65cc9de2ea6931c20fc2e460cf67c16d9d583dea99",
+  "manifest_files_verified": 279,
+  "store_created": false,
+  "passed": false,
+  "stdout_matches_report_ignoring_final_newline": true,
+  "sha256": {
+    "profile.cevqualification": "bf082159acb2437c8c245f08315acda69b10bb6b01a20e69a07cc99bbd795c36",
+    "device.cevdevice": "ed41fed4c27179c4026ba5621f92633b86903a4be40f7ac88c60f3bede9db77f",
+    "report.json": "dc6aef7f00e685f59ceaae1a3408ec4794a80cb12f89f7e6a42b533fbd9df888",
+    "stderr.log": "6b67808873dc406ecdd3f52e362161df26094770b519e31b751dd0e9519d05d4",
+    "build-manifest.txt": "3c2eca366662c32986a445ba4f3bb38650b78f6e9344eb34e1c5483195710291",
+    "compatibility-manifest.txt": "d94e3f200c052c1076ec1f531ac9756f7ce460fab97950db7cd12a25ce0a0f90"
+  }
+}

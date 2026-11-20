@@ -1,6 +1,49 @@
 # Anaiero native runtime
 
-## Compiled modular sessions (CE-SW-38)
+## Operating envelope and package lifecycle (CE-SW-40)
+
+`anaiero qualify mixed PROFILE SESSION NEW_OUTPUT` measures all five compiled
+engine families through the real continuous host, with bounded pressure,
+durable control retry, historical probes, exact restart and audit. The
+[mixed profile guide](../qualification/native/MIXED.md) separates the short
+CI run from the elapsed 24-hour/seven-day qualification gates.
+
+The [mesh guide](docs/continuous-mesh.md) now includes reviewed receiver
+observation/receipt/artifact/bootstrap expiry and resumable deletion. Canonical
+authority and current cursor/projection/pin roots remain protected. The
+[package lifecycle guide](../deployment/native/package-lifecycle.md) covers
+exact package admission, fenced activation and rollback against the current
+store without discarding accepted writes. Compatibility currently requires
+unchanged compiled engine identity and a stopped supervisor switch.
+
+See [CE-SW-40](../docs/software/CE-SW-40_operating_envelope_and_package_lifecycle.md)
+for these contracts, the derived-index optimization and preserved failed
+measurement evidence. Performance budgets and canonical formats are unchanged.
+
+## Continuous canonical operation (CE-SW-39)
+
+`anaiero host` now runs the modular session continuously through native local
+control and service lifecycle. With `ANAIERO_ENABLE_MESH=ON`, its optional
+`--mesh CONFIG` listener shares the canonical store and delivers committed
+observations through CEVMESH/2. `anaiero mesh-live` supplies the corresponding
+subscriber and local administration commands. The legacy `anaiero mesh` remains
+available with its original protocol/store semantics.
+
+Reviewed `session compact-review` / `compact` / `compact-resume` commands replace
+redundant canonical history with verified base pages before physical deletion.
+`anaiero qualify` runs predeclared evidence/lifecycle profiles and records actual
+resource/lookup/recovery measurements. CMake package tooling verifies installed
+file inventories and retained implementation compatibility.
+
+Start with the [continuous operation guide](../docs/software/CE-SW-39_continuous_native_operation.md),
+[canonical mesh guide](docs/continuous-mesh.md),
+[deployment instructions](../deployment/native/README.md) and
+[qualification profiles](../qualification/native/README.md).
+Controller builds provide `ce_modular_host`, `ce_modular_session`,
+`ce_native_qualification` and, with the optional transport, `ce_modular_mesh`.
+The 24-hour/seven-day deployment and device-specific release gates remain open.
+
+## Compiled modular session foundation (CE-SW-38)
 
 The current modular path is `anaiero session` in the full build, or
 `ce_modular_session` in the controller-only profile. It combines five registered
@@ -21,7 +64,8 @@ On Windows use `build/native/Release/anaiero.exe`. A controller-only build uses
 arguments after `session`. `run` takes an absolute committed cycle target.
 The example's VLM plan completes at tick 12 while the other engines continue.
 The full [operator and implementation guide](../docs/software/CE-SW-38_compiled_runtime_and_lifecycle.md)
-describes commands, compatibility, finite limits and remaining M5/M6 work.
+describes the M1–M4 foundation, commands, compatibility and finite limits.
+CE-SW-39 above supplies the operational continuation.
 
 The [installed SDK guide](docs/module-sdk.md),
 [exact public API reference](docs/sdk-reference.md),

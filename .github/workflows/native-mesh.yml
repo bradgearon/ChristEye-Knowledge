@@ -13,7 +13,7 @@ jobs:
       matrix:
         os: [ubuntu-24.04, windows-2022]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - name: Install Linux OpenSSL development files
@@ -42,15 +42,22 @@ jobs:
           cmake -S native -B build/mesh -A x64 -DANAIERO_CONTROLLER_ONLY=ON -DANAIERO_ENABLE_MESH=ON -DCE_WIND_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_DISABLE_FIND_PACKAGE_Python3=TRUE "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Build controller, authenticated transport and mesh services
-        run: cmake --build build/mesh --config Release --parallel 2 --target ce_colony_runtime ce_scientific_solver_provider ce_scientific_config ce_mesh ce_mesh_tls_tests ce_mesh_integration_tests ce_mesh_authorization_tests ce_mesh_replay_tests ce_mesh_ingress_tests ce_mesh_export_tests
+        run: cmake --build build/mesh --config Release --parallel 2 --target ce_colony_runtime ce_scientific_solver_provider ce_scientific_config ce_mesh ce_mesh_tls_tests ce_mesh_integration_tests ce_mesh_authorization_tests ce_mesh_replay_tests ce_mesh_ingress_tests ce_mesh_export_tests ce_modular_session ce_modular_host ce_modular_mesh anaiero_mesh_service_tests anaiero_continuous_mesh_tests
       - name: Verify native TLS, durable ingress, replay and artifacts
         env:
           ANAIERO_REQUIRE_MESH_TLS: '1'
+          ANAIERO_REQUIRE_IPC: '1'
         run: ctest --test-dir build/mesh -C Release --output-on-failure --no-tests=error -R "anaiero_mesh_"
       - name: Preserve mesh test diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: mesh-test-logs-${{ matrix.os }}
-          path: build/mesh/Testing/Temporary/*.log
+          path: |
+            build/mesh/Testing/Temporary/*.log
+            build/mesh/mixed-mesh-tests/mixed-mesh-report.json
+            build/mesh/mixed-mesh-tests/profile.txt
+            build/mesh/mixed-mesh-tests/session-input.cevsession
+            build/mesh/mixed-mesh-tests/session.definition
+            build/mesh/anaiero-builtin-manifest*.txt
           if-no-files-found: ignore

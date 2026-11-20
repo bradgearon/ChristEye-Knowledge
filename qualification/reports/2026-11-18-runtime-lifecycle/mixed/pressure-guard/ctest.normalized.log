@@ -1,0 +1,24 @@
+Start testing: Nov 19 03:18 UTC
+----------------------------------------------------------
+28/45 Testing: anaiero_storage_pressure_guard
+28/45 Test: anaiero_storage_pressure_guard
+Command: "<cmake-bin>/cmake" "-DANAIERO_PRESSURE=<build>/anaiero_storage_pressure_tests" "-DANAIERO_GUARD_ROOT=<build>/storage-pressure-guard" "-P" "<repository>/native/tests/storage_pressure_guard.cmake"
+Directory: <build>
+"anaiero_storage_pressure_guard" start time: Nov 19 03:18 UTC
+Output:
+----------------------------------------------------------
+-- Ordinary workspace rejected before writes; this guard is not filesystem exhaustion evidence
+<end of output>
+Test time =   0.11 sec
+----------------------------------------------------------
+Test Passed.
+"anaiero_storage_pressure_guard" end time: Nov 19 03:18 UTC
+"anaiero_storage_pressure_guard" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Nov 19 03:18 UTC
+
+pressure =   0.11 sec*proc
+
+qualification =   0.11 sec*proc
+

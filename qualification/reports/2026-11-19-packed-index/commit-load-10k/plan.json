@@ -1,0 +1,23 @@
+{
+  "schema": "anaiero.commit-load-comparison/1",
+  "pins_sha256": {
+    "profile": "ed54ae948cea607799931133b9ac5a036eb703258e0d116e9df0facec38c8bfd",
+    "device": "373be838e85a600de810df5906504416000e810c34838a7859833f4affe4ee22",
+    "executable": "54c7d43767620559d4e18f77a4825fae2937a663de90a08b484996f5112d0a5d"
+  },
+  "executable_name": "ce_native_qualification",
+  "layout": "node-files",
+  "sequence": [
+    "idle",
+    "controlled-load"
+  ],
+  "controlled_writer": {
+    "block_bytes": 65536,
+    "extent_bytes": 4194304,
+    "minimum_start_interval_ns": 20000000,
+    "flush_every_write": true,
+    "pattern": "deterministic alternating sequential rings, one worker, no catch-up"
+  },
+  "idle_scope": "no harness-generated load during the native run; external activity and page cache are uncontrolled",
+  "clock": "monotonic nanoseconds for intervals; before/after snapshots also include Unix time"
+}

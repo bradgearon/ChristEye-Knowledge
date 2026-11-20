@@ -1,0 +1,22 @@
+{
+  "scope": "Frozen native GNU/Linux executable on a shared overlay, one prescribed pair in idle-first order. External activity and filesystem cache state are uncontrolled.",
+  "native_git_tree": "33d7f6fffd24aeafffe49ff83441fb064792dd41",
+  "build_identity": "397e325e2ebbdfaf5637376f470f832245184724d67e3754c748611032170fe7",
+  "build_manifest_verified_source_files": 281,
+  "executable_sha256": "54c7d43767620559d4e18f77a4825fae2937a663de90a08b484996f5112d0a5d",
+  "phase_sha256": {
+    "plan.json": "2ca3f96d22150632dc697c07d87865583b06c2f73eb1044eaffb3eedf9798169",
+    "comparison.json": "3681e849042f511095ecaf9a4f5332fbd999b6269d8b23b74b635ee3266adc05",
+    "profile.cevqualification": "ed54ae948cea607799931133b9ac5a036eb703258e0d116e9df0facec38c8bfd",
+    "device.cevdevice": "373be838e85a600de810df5906504416000e810c34838a7859833f4affe4ee22",
+    "build-manifest.txt": "397e325e2ebbdfaf5637376f470f832245184724d67e3754c748611032170fe7",
+    "compatibility-manifest.txt": "6881e0eb26d65e8de6637b1ab6f59a4fe75fe6127f4d4ae59246b187a046099c",
+    "idle/condition.json": "8a34dd7fd5ff649bf19bf33d3462f5d0fa875b7d501075072737db96d5200424",
+    "idle/native/report.json": "7a70a63d466b98d7212b8331b19185c7807d15304c2488d68429a72a1f20b1b9",
+    "idle/stderr.log": "0f94215aeb055602c98ed62d27866bfbf990eb9fd471c0d90aef3d5a30957304",
+    "controlled-load/condition.json": "a2bb7efb05210286a09c3e6df9f951944474380ceb17d717f7d2c64349f895d5",
+    "controlled-load/native/report.json": "c584f9afe0d5b93dcdbafd164b7a4a679fcd1a000946b4be26252da967c902a0",
+    "controlled-load/stderr.log": "0f94215aeb055602c98ed62d27866bfbf990eb9fd471c0d90aef3d5a30957304"
+  },
+  "source_commit": "97b20a1f9ef6b5664472db5018ac23c452637ad3"
+}

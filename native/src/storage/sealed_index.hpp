@@ -1,6 +1,7 @@
 #pragma once
 #include "anaiero/sdk/evidence.hpp"
 #include <filesystem>
+#include <functional>
 #include <map>
 #include <set>
 #include <stdexcept>
@@ -18,16 +19,27 @@ std::uint64_t parse_number(std::string_view);
 Bytes seal(std::string_view schema,const std::vector<std::string>&);
 std::vector<std::string> unseal(std::string_view,std::string_view schema,std::size_t max_fields=100000,std::size_t max_bytes=64U*1024U*1024U);
 
+class PackedIndex;
 class SealedIndex final {
 public:
   struct Node {std::string key,value;Digest left,right;std::uint64_t height=1,count=1,bytes=0,maximum_node_bytes=0;};
-  explicit SealedIndex(fs::path directory):directory_(std::move(directory)){}
+  explicit SealedIndex(fs::path directory,evidence::IndexLayout layout=evidence::IndexLayout::single_node);
+  ~SealedIndex();
+  bool packed() const noexcept { return static_cast<bool>(packed_); }
+  Digest prepare_packed(const Digest&,const std::map<std::string,std::string>&);
+  std::uint64_t packed_work_bytes() const;
+  std::uint64_t packed_work_files() const;
   std::string get(const Digest&,std::string_view,bool& found);
   void scan(const Digest&,std::string_view prefix,std::string_view after,std::size_t limit,
       std::vector<std::pair<std::string,std::string>>&,bool& more);
   Digest put(const Digest&,std::string key,std::string value);
   Node load(const Digest&);
   void begin();
+  void begin_publication();
+  // Build a new, unpublished tree directly from a verified ordered base.
+  // The caller owns the fresh directory, verifies the result, then publishes.
+  Digest build_sorted(std::uint64_t rows,const std::function<std::pair<std::string,std::string>(std::uint64_t)>& row_at);
+  void discard_cache() noexcept;
   void publish_cleanup(const Digest&);
   void finish_cleanup(const Digest&);
   void audit(const Digest&);
@@ -35,8 +47,9 @@ public:
   const fs::path& directory()const noexcept{return directory_;}
 private:
   fs::path directory_;
+  std::unique_ptr<PackedIndex> packed_;
   std::map<Digest,Node> cache_;
-  std::set<Digest> obsolete_;
+  std::set<Digest> obsolete_,pending_;
   bool caching_=false;
   std::size_t cache_bytes_=0;
   void cache(const Digest&,const Node&);

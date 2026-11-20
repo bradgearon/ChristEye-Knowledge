@@ -1,0 +1,158 @@
+{
+  "schema": "anaiero.local-mixed-evidence/1",
+  "git_base_before_worktree_changes": "d742d556b636cf21cdef34898fc30e5fff9c0729",
+  "exact_clean_commit_claim": false,
+  "build_type": "Release",
+  "compiler": "GCC 14.2.0",
+  "local_tools": {
+    "tls_test_executable_sha256": "9da597539768cff052dc3782b3518b0192e2f38d2da1e136055b9577bbda8d1c",
+    "campaign_test_executable_sha256": "b3ef7be79313b52e5272cf58e55f4f12d12c661217c35dea2a8a77abc10aecec",
+    "pressure_guard_executable_sha256": "28f5dab754919f6b851f1463d4123a6faf8f15b9befe410c6d30429bc8f62511"
+  },
+  "build_witness_origin": "Exact compiled build_manifest string views concatenated in declared order from each local test executable, verified against the corresponding report build identity. No binary is included.",
+  "log_derivation": "Replace only checkout, native build, scratch and CMake executable directory prefixes with <repository>, <build>, <workspace> and <cmake-bin>. Hash of original untouched log recorded separately. Reports, inputs and build manifests are exact bytes.",
+  "original_ctest_selection": [
+    "anaiero_mixed_campaign",
+    "anaiero_mesh_mixed_campaign",
+    "anaiero_storage_pressure_guard"
+  ],
+  "evidence_scope": {
+    "duration_profile": "32-cycle local diagnostic with hardware unspecified",
+    "actual_tls": true,
+    "interrupted_resume": true,
+    "uninterrupted_24h": false,
+    "uninterrupted_7d": false,
+    "filesystem_exhaustion_exercised_locally": false,
+    "physical_power_loss_tested": false
+  },
+  "artifacts": [
+    {
+      "path": "campaign/build-manifest.txt",
+      "bytes": 30700,
+      "sha256": "53e4c35e70c235d0b201d2c0cfad1acf6f684009503387161a19adb457994d4b"
+    },
+    {
+      "path": "campaign/ctest.normalized.log",
+      "bytes": 936,
+      "sha256": "97242952864159df1c547f1530fc9a896a1d607c99eef6c0a12b1cc20a070f78",
+      "raw_log_bytes": 1095,
+      "raw_log_sha256": "46dde73a33b5a666ca07dc140f5e0f880c987123264684c9274f043e821ec75c"
+    },
+    {
+      "path": "campaign/engine-cut/attempt-1-interrupted.json",
+      "bytes": 6007,
+      "sha256": "6443ed26a0e891f9df4add5b307582b013ba2a159d67e138bfdf98b43762e2af"
+    },
+    {
+      "path": "campaign/engine-cut/report.json",
+      "bytes": 9336,
+      "sha256": "2cca3de8d8a6dc0ac99ef3ed2ce597c5958629b9635e447736b3419428f421a8"
+    },
+    {
+      "path": "campaign/engine-cut/status.json",
+      "bytes": 9650,
+      "sha256": "b699f4b67a03642f3d13b1d2f76edc9b3e5462540bc7fb8e5d9994122b50dada"
+    },
+    {
+      "path": "campaign/normal/report.json",
+      "bytes": 9219,
+      "sha256": "0f5111cbfcd74bc77841778c8044b07084499a774f29a32b9b6e5db2cd04b415"
+    },
+    {
+      "path": "campaign/normal/status.json",
+      "bytes": 9533,
+      "sha256": "9da9e3ff6b6d44190031e6f3b8e89ab4ff846e14d0134bd31c3a069fc213411a"
+    },
+    {
+      "path": "campaign/profile.cevqualification",
+      "bytes": 652,
+      "sha256": "059a5872fb8bdc4243bd5c790b3b0473f760185afd163ae4a007124d8f59d3f5"
+    },
+    {
+      "path": "campaign/publication-cut/report.json",
+      "bytes": 9218,
+      "sha256": "e42ba2bb638d185e88cc9ddc9ae75d2ed32999bc83dfd223bee713f97f3e22cd"
+    },
+    {
+      "path": "campaign/publication-cut/status.json",
+      "bytes": 9532,
+      "sha256": "4b84dd05d260adf932272b1a3d9a4b63da4b7afd6c611cfb7baccea64376e224"
+    },
+    {
+      "path": "campaign/session-input.cevsession",
+      "bytes": 538,
+      "sha256": "d4ceeeb5c2250648d544b5db59a7bd52f4e26ac6f3b9b5ddb2436be655078dd9"
+    },
+    {
+      "path": "campaign/session.definition",
+      "bytes": 13190,
+      "sha256": "1acfd5cb48b7bc46ece1f9e414283eca4f62a1f77046c8c4236a4311c52b2588"
+    },
+    {
+      "path": "campaign/work-cut/attempt-1-interrupted.json",
+      "bytes": 6265,
+      "sha256": "0df1ee784da8dd731ad873ef7130b75a3f98876f92c72c5d67fa2f9a64525fd4"
+    },
+    {
+      "path": "campaign/work-cut/report.json",
+      "bytes": 9341,
+      "sha256": "dc10301bc45a84b1ae57292dcfee8be3b066c5867a33c004775a8b1a26f8dd39"
+    },
+    {
+      "path": "campaign/work-cut/status.json",
+      "bytes": 9655,
+      "sha256": "c37c2e30775585068656cd67d979d794c6a298882413f38738f39c7a18784b1d"
+    },
+    {
+      "path": "pressure-guard/ctest.normalized.log",
+      "bytes": 1007,
+      "sha256": "6e85cbc61ea794463b7a4603f3393c96df5d5e2cdc8427e28f7b801c7464354d",
+      "raw_log_bytes": 1213,
+      "raw_log_sha256": "cde6e1b4ac0e74d090d3c08c2932dff5b69be6f791a30e196a381633a255262b"
+    },
+    {
+      "path": "tls-prior/ctest.normalized.log",
+      "bytes": 884,
+      "sha256": "a0d5b950727a1a1ad8ace1df805c17fa899672390e4f06c7086ef0a12f796e6a",
+      "raw_log_bytes": 1083,
+      "raw_log_sha256": "93cb186e930d17cd4c97e18a0e6d59a0b9ed969e9b4c886b75e6a47bacee0be5"
+    },
+    {
+      "path": "tls-prior/profile.txt",
+      "bytes": 147,
+      "sha256": "6be5f4c9b145100781f98a097591d8afb106aa1ef3f89508df0ad3e3b9705bd7"
+    },
+    {
+      "path": "tls/build-manifest.txt",
+      "bytes": 30700,
+      "sha256": "bba74385ac75f0a931fda7246079bce6cb45effcec3584c201b9cf5020cf934e"
+    },
+    {
+      "path": "tls/ctest.normalized.log",
+      "bytes": 919,
+      "sha256": "a20278efec284487d7afc27012e5b9702983f3c5d2f85478aebf2efed9fd7026",
+      "raw_log_bytes": 1118,
+      "raw_log_sha256": "355e87dbca7ce85ff255c110eb8214404c42c058e7ff0d1d67c0a07f10897079"
+    },
+    {
+      "path": "tls/mixed-mesh-report.json",
+      "bytes": 1634,
+      "sha256": "e8a651c6f7f289fd9a4a52744b2dfa8d73c80247b0c4031e3b7bb1dfa84623d8"
+    },
+    {
+      "path": "tls/profile.txt",
+      "bytes": 147,
+      "sha256": "6be5f4c9b145100781f98a097591d8afb106aa1ef3f89508df0ad3e3b9705bd7"
+    },
+    {
+      "path": "tls/session-input.cevsession",
+      "bytes": 538,
+      "sha256": "d4ceeeb5c2250648d544b5db59a7bd52f4e26ac6f3b9b5ddb2436be655078dd9"
+    },
+    {
+      "path": "tls/session.definition",
+      "bytes": 13255,
+      "sha256": "59079076f9b439eae948b96a826c1fa6fa599ef22b61cb8b1b168f0b322daac2"
+    }
+  ]
+}

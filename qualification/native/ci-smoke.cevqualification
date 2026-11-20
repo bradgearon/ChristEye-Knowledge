@@ -1,0 +1,17 @@
+ANAIEROQUALIFICATION/1
+name=native-evidence-smoke
+storage_label=CI ephemeral filesystem; hardware unspecified
+observations=256
+epochs=4
+batch_size=32
+payload_bytes=512
+query_samples=64
+checkpoints=128,256
+maximum_store_bytes=134217728
+maximum_disk_bytes=268435456
+maximum_files=100000
+maximum_resident_bytes=268435456
+maximum_commit_p99_us=2000000
+maximum_lookup_p99_us=250000
+maximum_reopen_us=5000000
+maximum_lookup_nodes=128

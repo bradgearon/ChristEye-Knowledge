@@ -1,0 +1,98 @@
+name: Native index comparison
+on:
+  pull_request:
+    paths: ['native/**', 'qualification/native/**', '.github/workflows/native-index-comparison.yml']
+  # Changing this campaign definition explicitly requests the full hosted trial.
+  push:
+    paths: ['.github/workflows/native-index-comparison.yml']
+  workflow_dispatch:
+    inputs:
+      tier:
+        description: Largest scale to attempt after passing the earlier gates
+        type: choice
+        required: true
+        default: smoke
+        options: [smoke, 10k, 100k, 1m]
+permissions:
+  contents: read
+jobs:
+  layout:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            executable: build/index/ce_native_qualification
+          - os: windows-2022
+            executable: build/index/Release/ce_native_qualification.exe
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 350
+    env:
+      TIER: ${{ inputs.tier || (github.event_name == 'push' && '1m') || 'smoke' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify controlled load and evidence acceptance
+        run: python -m unittest discover -s qualification/native/tests
+      - name: Configure a Release controller with native storage tests
+        run: cmake -S native -B build/index -DANAIERO_CONTROLLER_ONLY=ON -DCE_WIND_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_DISABLE_FIND_PACKAGE_Python3=TRUE
+      - name: Build the qualification executable and recovery fixture
+        run: cmake --build build/index --config Release --parallel 3 --target ce_native_qualification anaiero_packed_recovery_tests
+      - name: Verify compatibility, interrupted migration and repair
+        run: ctest --test-dir build/index -C Release --output-on-failure --no-tests=error -R "^anaiero_packed_index_.*recovery$"
+      - name: Declare the hosted measurement device
+        run: cmake "-DANAIERO_DEVICE_OUTPUT=build/index/device.cevdevice" "-DANAIERO_DEVICE_NAME=hosted-${{ matrix.os }}" "-DANAIERO_CONCURRENT_WORK=One native trial at a time. Runner exclusivity is unverified." "-DANAIERO_DURABILITY=Native process publication and filesystem flushes" "-DANAIERO_DEPENDENCIES=See the exact native build manifest" -P native/cmake/CaptureNativeDevice.cmake
+      - name: Compare both layouts in opposite orders
+        run: python qualification/native/compare-index-layouts.py "${{ matrix.executable }}" qualification/native/scale-ci.cevqualification build/index/device.cevdevice build/index-smoke
+      - name: Retain short comparison and recovery results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: index-smoke-${{ matrix.os }}
+          path: |
+            build/index/Testing/Temporary/LastTest.log
+            build/index/anaiero-builtin-manifest*.txt
+            build/index-smoke/comparison.json
+            build/index-smoke/*.cev*
+            build/index-smoke/*/report.json
+            build/index-smoke/*.stderr
+      - name: Compare 10000 observations in both orders
+        if: env.TIER != 'smoke'
+        run: python qualification/native/compare-index-layouts.py "${{ matrix.executable }}" qualification/native/scale-10k.cevqualification build/index/device.cevdevice build/index-10k
+      - name: Retain the 10k paired measurements
+        if: always() && env.TIER != 'smoke'
+        uses: actions/upload-artifact@v4
+        with:
+          name: index-10k-${{ matrix.os }}
+          path: |
+            build/index-10k/comparison.json
+            build/index-10k/*.cev*
+            build/index-10k/*/report.json
+            build/index-10k/*.stderr
+          if-no-files-found: ignore
+      - name: Run the original 100k maintenance workload on packed pages
+        if: env.TIER == '100k' || env.TIER == '1m'
+        run: ${{ matrix.executable }} scale qualification/native/scale-100k.cevqualification build/index-100k build/index/device.cevdevice --index-layout packed-pages
+      - name: Retain the 100k result
+        if: always() && (env.TIER == '100k' || env.TIER == '1m')
+        uses: actions/upload-artifact@v4
+        with:
+          name: index-100k-${{ matrix.os }}
+          path: |
+            build/index-100k/report.json
+            build/index-100k/*.cev*
+          if-no-files-found: ignore
+      - name: Run the original million-observation maintenance workload on packed pages
+        if: env.TIER == '1m'
+        run: ${{ matrix.executable }} scale qualification/native/scale-1m.cevqualification build/index-1m build/index/device.cevdevice --index-layout packed-pages
+      - name: Retain the million-observation result
+        if: always() && env.TIER == '1m'
+        uses: actions/upload-artifact@v4
+        with:
+          name: index-1m-${{ matrix.os }}
+          path: |
+            build/index-1m/report.json
+            build/index-1m/*.cev*
+          if-no-files-found: ignore

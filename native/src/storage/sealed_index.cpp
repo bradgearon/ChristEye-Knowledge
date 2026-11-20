@@ -1,4 +1,5 @@
 #include "sealed_index.hpp"
+#include "packed_index.hpp"
 #include "christeye/living/durable_io.hpp"
 #include <charconv>
 #include <fstream>
@@ -54,13 +55,20 @@ std::vector<std::string> unseal(std::string_view data,std::string_view schema,st
   if(!unpack(envelope[1],fields,max_fields,max_bytes))throw Failure(Code::corrupt,"invalid canonical storage fields");
   return fields;
 }
+SealedIndex::SealedIndex(fs::path directory,evidence::IndexLayout layout):directory_(std::move(directory)){
+  if(layout==evidence::IndexLayout::packed_pages)packed_=std::make_unique<PackedIndex>(directory_,stats);
+}
+SealedIndex::~SealedIndex()=default;
+Digest SealedIndex::prepare_packed(const Digest& root,const std::map<std::string,std::string>& changes){return packed_->prepare(root,changes);}
+std::uint64_t SealedIndex::packed_work_bytes() const{return packed_->work_bytes();}
+std::uint64_t SealedIndex::packed_work_files() const{return packed_->work_files();}
 SealedIndex::Node SealedIndex::load(const Digest& hash){
+  if(packed_)return packed_->metadata(hash);
   if(hash.empty())return Node{"","","","",0,0,0,0};
   if(!valid_digest(hash))throw Failure(Code::corrupt,"invalid index node identity");
   const auto cached=cache_.find(hash);if(cached!=cache_.end())return cached->second;
   ++stats.nodes_read;
-  if(!regular_exists(directory_/hash))throw Failure(Code::corrupt,"sealed index node is missing");
-  const auto raw=read_file(directory_/hash,32U*1024U*1024U);
+  Bytes raw;try{raw=read_file(directory_/hash,32U*1024U*1024U);}catch(const Failure& e){if(e.code==Code::not_found)throw Failure(Code::corrupt,"sealed index node is missing");throw;}
   if(sha256(raw)!=hash)throw Failure(Code::corrupt,"index node digest mismatch");
   const auto f=unseal(raw,"ANAIERO-INDEX-NODE/2",8);
   if(f.size()!=8)throw Failure(Code::corrupt,"invalid index node");
@@ -72,29 +80,75 @@ SealedIndex::Node SealedIndex::load(const Digest& hash){
 void SealedIndex::cache(const Digest& hash,const Node& n){
   constexpr std::size_t maximum_cache_bytes=32U*1024U*1024U;
   const auto bytes=n.key.size()+n.value.size()+512U;
-  if(caching_&&cache_.size()<8192&&cache_.count(hash)==0&&bytes<=maximum_cache_bytes-cache_bytes_){cache_.emplace(hash,n);cache_bytes_+=bytes;}
+  if(caching_&&cache_.size()<8192&&cache_.count(hash)==0&&bytes<=maximum_cache_bytes-cache_bytes_){cache_.emplace(hash,n);cache_bytes_+=bytes;stats.cache_peak_nodes=std::max(stats.cache_peak_nodes,static_cast<std::uint64_t>(cache_.size()));stats.cache_peak_bytes=std::max(stats.cache_peak_bytes,static_cast<std::uint64_t>(cache_bytes_));}
 }
-void SealedIndex::begin(){cache_.clear();cache_bytes_=0;caching_=true;obsolete_.clear();}
+void SealedIndex::discard_cache()noexcept{if(packed_)packed_->clear();cache_.clear();cache_bytes_=0;caching_=false;obsolete_.clear();pending_.clear();}
+void SealedIndex::begin(){if(packed_){packed_->begin();return;}discard_cache();caching_=true;}
+void SealedIndex::begin_publication(){
+  if(packed_)return;
+  if(!pending_.empty()||!obsolete_.empty())throw Failure(Code::conflict,"publication admission cache already contains mutations");
+  // Admission and publication are one serialized canonical transaction. Nodes
+  // already verified against the same immutable index root remain usable.
+  // Keep ample staging headroom and retain the existing total cache bounds.
+  if(!caching_||cache_.size()>2048||cache_bytes_>8U*1024U*1024U){begin();return;}
+  stats.admission_cache_nodes_reused+=static_cast<std::uint64_t>(cache_.size());
+}
 std::uint64_t SealedIndex::height(const Digest& d){return load(d).height;}
+Digest SealedIndex::build_sorted(std::uint64_t rows,const std::function<std::pair<std::string,std::string>(std::uint64_t)>& row_at){
+  if(packed_)return packed_->build_sorted(rows,row_at);
+  if(!fs::is_empty(directory_)||caching_)throw Failure(Code::conflict,"bulk index construction requires an empty unpublished directory");
+  struct Subtree{Digest digest;std::uint64_t height=0,bytes=0,largest=0;};
+  // Postorder fetches the median row only when both children are ready; the
+  // recursion retains only small child summaries, never O(depth) large values.
+  const auto build=[&](auto&& self,std::uint64_t first,std::uint64_t count)->Subtree{
+    if(count==0)return {};
+    const auto half=count/2;const auto left=self(self,first,half);
+    const auto right=self(self,first+half+1,count-half-1);
+    const auto [key,value]=row_at(first+half);if(key.empty())throw Failure(Code::corrupt,"bulk index row has an empty key");
+    const auto h=1+std::max(left.height,right.height);
+    auto fields=std::vector<std::string>{key,value,left.digest,right.digest,number(h),number(count),number(0),number(0)};
+    const auto own=static_cast<std::uint64_t>(pack({"ANAIERO-INDEX-NODE/2",pack(fields),std::string(64,'0')}).size());
+    if(left.bytes>std::numeric_limits<std::uint64_t>::max()-own||right.bytes>std::numeric_limits<std::uint64_t>::max()-own-left.bytes)
+      throw Failure(Code::capacity,"bulk index byte accounting overflow");
+    const auto bytes=own+left.bytes+right.bytes,largest=std::max({own,left.largest,right.largest});
+    fields[6]=number(bytes);fields[7]=number(largest);const auto raw=seal("ANAIERO-INDEX-NODE/2",fields);
+    if(raw.size()!=own)throw Failure(Code::corrupt,"bulk index node size calculation changed");
+    const auto digest=sha256(raw);const auto file_path=directory_/digest;
+    if(regular_exists(file_path))throw Failure(Code::corrupt,"duplicate row or digest in fresh bulk index");
+    os::File file;if(!file.open(file_path,true)||!file.write_all(raw))throw Failure(Code::io_error,"bulk index node write failed");
+    file.close();++stats.nodes_written;return {digest,h,bytes,largest};
+  };
+  const auto result=build(build,0,rows);
+  if(!os::sync_directory(directory_))throw Failure(Code::io_error,"bulk index directory flush failed");
+  audit(result.digest);return result.digest;
+}
 void SealedIndex::retire(const Digest& d){if(!d.empty())obsolete_.insert(d);}
 Digest SealedIndex::save(Node n){
   const auto l=load(n.left),r=load(n.right);
   n.height=1+std::max(l.height,r.height);n.count=1+l.count+r.count;
   n.bytes=0;
-  auto raw=seal("ANAIERO-INDEX-NODE/2",{n.key,n.value,n.left,n.right,number(n.height),number(n.count),number(n.bytes),number(0)});
-  n.bytes=static_cast<std::uint64_t>(raw.size())+l.bytes+r.bytes;
-  n.maximum_node_bytes=std::max({static_cast<std::uint64_t>(raw.size()),l.maximum_node_bytes,r.maximum_node_bytes});
-  raw=seal("ANAIERO-INDEX-NODE/2",{n.key,n.value,n.left,n.right,number(n.height),number(n.count),number(n.bytes),number(n.maximum_node_bytes)});
-  const auto digest=sha256(raw);const auto p=directory_/digest;
-  if(regular_exists(p)){if(read_file(p,32U*1024U*1024U)!=raw)throw Failure(Code::corrupt,"index CAS collision");}
-  else {
-    // Index nodes are a reconstructible cache. Canonical objects, transactions,
-    // ROOT and the coverage marker retain their stronger flush protocol. A
-    // lost cache node is detected by its digest and rebuilt after a power cut.
-    os::File file;if(!file.open(p,true)||!file.write_all(raw))throw Failure(Code::io_error,"index cache write failed");file.close();++stats.nodes_written;
+  // Fixed-width integer/digest fields make this exact size computable without
+  // hashing the temporary zero-counter envelope a second time.
+  const auto body=pack({n.key,n.value,n.left,n.right,number(n.height),number(n.count),number(0),number(0)});
+  const auto own=pack({"ANAIERO-INDEX-NODE/2",body,std::string(64,'0')}).size();
+  n.bytes=static_cast<std::uint64_t>(own)+l.bytes+r.bytes;
+  n.maximum_node_bytes=std::max({static_cast<std::uint64_t>(own),l.maximum_node_bytes,r.maximum_node_bytes});
+  const auto raw=seal("ANAIERO-INDEX-NODE/2",{n.key,n.value,n.left,n.right,number(n.height),number(n.count),number(n.bytes),number(n.maximum_node_bytes)});
+  const auto digest=sha256(raw);const auto cached=cache_.find(digest);
+  if(cached!=cache_.end()){
+    const auto& previous=cached->second;
+    if(previous.key!=n.key||previous.value!=n.value||previous.left!=n.left||previous.right!=n.right||previous.height!=n.height||previous.count!=n.count||previous.bytes!=n.bytes||previous.maximum_node_bytes!=n.maximum_node_bytes)throw Failure(Code::corrupt,"index cached CAS collision");
+    return digest;
   }
-  cache(digest,n);return digest;
+  cache(digest,n);
+  if(cache_.count(digest)!=0){pending_.insert(digest);++stats.staged_nodes;return digest;}
+  const auto p=directory_/digest;
+  if(regular_exists(p)){if(read_file(p,32U*1024U*1024U)!=raw)throw Failure(Code::corrupt,"index CAS collision");return digest;}
+  // The same fixed cache budget includes read nodes and every staged path copy.
+  // If it fills, spill this reconstructible node using the original write path.
+  os::File file;if(!file.open(p,true)||!file.write_all(raw))throw Failure(Code::io_error,"index cache spill failed");file.close();++stats.nodes_written;++stats.staged_spills;return digest;
 }
+
 Digest SealedIndex::rotate_left(Node n){
   Node right=load(n.right);retire(n.right);n.right=right.left;right.left=save(std::move(n));return save(std::move(right));
 }
@@ -114,8 +168,12 @@ Digest SealedIndex::insert(const Digest& root,const std::string& key,const std::
   retire(root);if(key<node.key)node.left=insert(node.left,key,value);else node.right=insert(node.right,key,value);
   return balance(std::move(node));
 }
-Digest SealedIndex::put(const Digest& root,std::string key,std::string value){return insert(root,key,value);}
+Digest SealedIndex::put(const Digest& root,std::string key,std::string value){
+  if(packed_)throw Failure(Code::unsupported,"packed updates require a complete staged batch");
+  return insert(root,key,value);
+}
 std::string SealedIndex::get(const Digest& root,std::string_view key,bool& found){
+  if(packed_)return packed_->get(root,key,found);
   ++stats.point_queries;auto cursor=root;std::size_t depth=0;found=false;
   while(!cursor.empty()){if(++depth>96)throw Failure(Code::corrupt,"index depth exceeded");const auto node=load(cursor);if(key==node.key){found=true;return node.value;}cursor=key<node.key?node.left:node.right;}return {};
 }
@@ -124,6 +182,7 @@ Digest SealedIndex::node_at(const Digest& root,std::string_view key){
   while(!cursor.empty()){if(++depth>96)throw Failure(Code::corrupt,"index depth exceeded");const auto n=load(cursor);if(key==n.key)return cursor;cursor=key<n.key?n.left:n.right;}return {};
 }
 void SealedIndex::scan(const Digest& root,std::string_view prefix,std::string_view after,std::size_t limit,std::vector<std::pair<std::string,std::string>>& out,bool& more){
+  if(packed_){packed_->scan(root,prefix,after,limit,out,more);return;}
   ++stats.range_queries;out.clear();more=false;std::vector<Node> stack;auto cursor=root;
   const std::string lower=std::string(after)>std::string(prefix)?std::string(after):std::string(prefix);
   while(!cursor.empty()){auto n=load(cursor);if(n.key>=lower){stack.push_back(n);cursor=n.left;}else cursor=n.right;if(stack.size()>96)throw Failure(Code::corrupt,"index range depth exceeded");}
@@ -135,24 +194,45 @@ void SealedIndex::scan(const Digest& root,std::string_view prefix,std::string_vi
   }
 }
 void SealedIndex::publish_cleanup(const Digest& root){
-  // A rotated node can reappear unchanged. Only retire identities absent from
-  // the newly published search tree, including transient path-copy nodes.
+  if(packed_){packed_->publish(root);return;}
+  // Many path copies have the same key. Resolve each final key once within a
+  // separate bounded 8 MiB memo, rather than seeking for every transient version.
+  std::map<std::string,Digest> final_nodes;std::size_t memo_bytes=0;
+  const auto current=[&](const Node& n){const auto found=final_nodes.find(n.key);if(found!=final_nodes.end())return found->second;const auto final=node_at(root,n.key);const auto bytes=n.key.size()+final.size()+128U;if(final_nodes.size()<8192&&bytes<=8U*1024U*1024U-memo_bytes){final_nodes.emplace(n.key,final);memo_bytes+=bytes;}return final;};
+  // Staging does not inspect the filesystem for every temporary path copy.
+  // An existing live node must have been loaded before it is replaced, so it
+  // is already in the non-evicting admission cache (or uses the spill path).
+  // Check an existing destination's exact bytes only if the staged node is
+  // reachable at publication. This also reconciles an interrupted publication.
+  // No transient staged node reaches the filesystem. All reachable staged
+  // nodes are written before directory flush and coverage publication; a crash
+  // still repairs the cache from the already durable canonical transaction.
+  for(const auto& digest:pending_){const auto& n=cache_.at(digest);if(current(n)!=digest){++stats.transient_nodes_elided;continue;}const auto raw=seal("ANAIERO-INDEX-NODE/2",{n.key,n.value,n.left,n.right,number(n.height),number(n.count),number(n.bytes),number(n.maximum_node_bytes)});const auto path=directory_/digest;if(regular_exists(path)){if(read_file(path,32U*1024U*1024U)!=raw)throw Failure(Code::corrupt,"staged index CAS collision");}else {os::File file;if(!file.open(path,true)||!file.write_all(raw))throw Failure(Code::io_error,"staged index cache write failed");file.close();++stats.nodes_written;}}
   std::vector<std::string> chunks{root},dead;
-  for(const auto& d:obsolete_){const auto n=load(d);if(node_at(root,n.key)!=d)dead.push_back(d);if(dead.size()==4096){chunks.push_back(pack(dead));dead.clear();}}
+  for(const auto& d:obsolete_){
+    // A staged identity was not written by this update. Any live predecessor
+    // was loaded before replacement and was therefore not staged a second
+    // time. Current pending identities must remain, even after rotations.
+    if(pending_.count(d)!=0)continue;
+    const auto n=load(d);if(current(n)!=d)dead.push_back(d);
+    if(dead.size()==4096){chunks.push_back(pack(dead));dead.clear();}
+  }
   if(!dead.empty())chunks.push_back(pack(dead));
   const auto sealed=seal("ANAIERO-INDEX-GC/2",chunks);
   if(sealed.empty()||sealed.size()>64U*1024U*1024U)throw Failure(Code::capacity,"bounded index cleanup manifest exhausted");
   if(!os::sync_directory(directory_))throw Failure(Code::io_error,"index cache directory flush failed");
   write_file(directory_.parent_path()/"GC",sealed);
 }
+
 void SealedIndex::finish_cleanup(const Digest& root){
+  if(packed_){packed_->finish(root);return;}
   const auto gc=directory_.parent_path()/"GC";
-  if(!regular_exists(gc)){cache_.clear();cache_bytes_=0;caching_=false;obsolete_.clear();return;}
+  if(!regular_exists(gc)){discard_cache();return;}
   const auto fields=unseal(read_file(gc,64U*1024U*1024U),"ANAIERO-INDEX-GC/2");
   if(fields.empty()||fields[0]!=root)return; // Unpublished update; replay replaces it.
   for(std::size_t i=1;i<fields.size();++i){std::vector<std::string> dead;if(!unpack(fields[i],dead,4096,1024U*1024U))throw Failure(Code::corrupt,"bad index GC chunk");for(const auto& d:dead){if(!valid_digest(d))throw Failure(Code::corrupt,"bad index GC identity");const auto path=directory_/d;if(regular_exists(path)){std::error_code error;if(!fs::remove(path,error)||error)throw Failure(Code::io_error,"index cache cleanup failed");}}}
   if(!os::sync_directory(directory_))throw Failure(Code::io_error,"index cache cleanup flush failed");
-  remove_file(gc);cache_.clear();cache_bytes_=0;caching_=false;obsolete_.clear();
+  remove_file(gc);discard_cache();
 }
 void SealedIndex::audit_node(const Digest& d,const std::string* low,const std::string* high,std::size_t depth){
   if(d.empty())return;
@@ -163,5 +243,5 @@ void SealedIndex::audit_node(const Digest& d,const std::string* low,const std::s
   if(n.bytes!=own+l.bytes+r.bytes||n.maximum_node_bytes!=std::max({own,l.maximum_node_bytes,r.maximum_node_bytes}))throw Failure(Code::corrupt,"index size aggregate violation");
   audit_node(n.left,low,&n.key,depth+1);audit_node(n.right,&n.key,high,depth+1);
 }
-void SealedIndex::audit(const Digest& root){cache_.clear();cache_bytes_=0;caching_=false;audit_node(root,nullptr,nullptr,0);}
+void SealedIndex::audit(const Digest& root){if(packed_){packed_->audit(root);return;}discard_cache();audit_node(root,nullptr,nullptr,0);}
 }

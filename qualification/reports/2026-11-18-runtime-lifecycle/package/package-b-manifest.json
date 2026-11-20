@@ -1,0 +1,495 @@
+{
+  "configuration" : "Release",
+  "files" : 
+  [
+    {
+      "bytes" : 1024128,
+      "path" : "bin/ce_colony_runtime",
+      "sha256" : "0586a8974a7b073b78bfa423c181e0696d4a8674c31b13fbb7e9319d81721a72"
+    },
+    {
+      "bytes" : 38680,
+      "path" : "bin/ce_environment_solver_provider",
+      "sha256" : "670aa7cd3670e68fa100804e306ac3512f81080f14c0f0aa925ce221c580ad35"
+    },
+    {
+      "bytes" : 2467032,
+      "path" : "bin/ce_modular_host",
+      "sha256" : "6ee4621feca419f6bcf4dfc260d7d85dfa9a0c5d865cf9994b6cf9e637a19812"
+    },
+    {
+      "bytes" : 2878376,
+      "path" : "bin/ce_modular_session",
+      "sha256" : "ede1391bf762fff72712e46935c4dd0d710557de13a0e4b678d86bcf83de8134"
+    },
+    {
+      "bytes" : 3211968,
+      "path" : "bin/ce_native_qualification",
+      "sha256" : "fcdc9d4febb656615ded1c363218efc526a1fffb6d5b6ce2052c9b77e6db31fe"
+    },
+    {
+      "bytes" : 129728,
+      "path" : "bin/ce_scientific_calibrate",
+      "sha256" : "38d5b3df3fed8a2278c6fae47b0dc7e670620a036dc37c22aaa1baa2796ab82b"
+    },
+    {
+      "bytes" : 71872,
+      "path" : "bin/ce_scientific_config",
+      "sha256" : "b4009aad110154b032302d4acff84ed11e4e767335df04217c5116cf1bf2e43c"
+    },
+    {
+      "bytes" : 38776,
+      "path" : "bin/ce_scientific_solver_provider",
+      "sha256" : "9e2d915df1eddf2aee94750e210666acc4aa922020eb151e19f3e7f16bffd06d"
+    },
+    {
+      "bytes" : 1147,
+      "path" : "include/anaiero/sdk/catalog.hpp",
+      "sha256" : "b6ecea87ac83cdc4f29ed3d2030ba703840cacf944eb9bc9221124c5904bde18"
+    },
+    {
+      "bytes" : 3849,
+      "path" : "include/anaiero/sdk/engine.hpp",
+      "sha256" : "6c7f377106bea1d231d04423e9c302b8088808a0e0608f2361a78c16c217cf16"
+    },
+    {
+      "bytes" : 967,
+      "path" : "include/anaiero/sdk/engine_files.hpp",
+      "sha256" : "c1a311a612733ded9d175472111ecdc4ad0e064ec59e91c68fac58dcf8b593cd"
+    },
+    {
+      "bytes" : 2120,
+      "path" : "include/anaiero/sdk/engines.hpp",
+      "sha256" : "2bf154a15f57beedb85a500ce8f7da6a878c9682d31fdaa52e60dbe6477ed0e4"
+    },
+    {
+      "bytes" : 9547,
+      "path" : "include/anaiero/sdk/evidence.hpp",
+      "sha256" : "49191ad324dafa1f96b97bbc8e0757f01e63effea2ef657e9d6f0d8327d85957"
+    },
+    {
+      "bytes" : 1607,
+      "path" : "include/anaiero/sdk/experiment_history.hpp",
+      "sha256" : "fab291fe81c41b4a1c9a52c621be741eff70b58cbc26cef3a5d28bb8c05917ca"
+    },
+    {
+      "bytes" : 2555,
+      "path" : "include/anaiero/sdk/experiments.hpp",
+      "sha256" : "de18d005d734e926c1593f3fed870d4bd01ec9901f2acf5ec4047e3754cd0cec"
+    },
+    {
+      "bytes" : 4099,
+      "path" : "include/anaiero/sdk/host.hpp",
+      "sha256" : "05bfbf7ccccf0b4d06168860d8a9af08b4240017ae3765e0faac60d909d7aa81"
+    },
+    {
+      "bytes" : 11728,
+      "path" : "include/anaiero/sdk/lifecycle.hpp",
+      "sha256" : "01ce7b57d5616e309d944b246e1fcb32dc0a5ca299d650a886d1804c9c6ab7eb"
+    },
+    {
+      "bytes" : 8131,
+      "path" : "include/anaiero/sdk/mesh.hpp",
+      "sha256" : "7a999ffbdc51057887033ab6e300d444313e26ec6a196d260611e46897de1fac"
+    },
+    {
+      "bytes" : 2056,
+      "path" : "include/anaiero/sdk/module_abi.h",
+      "sha256" : "6a5c4c08a9da5873875ca3926d5b8dd9bf6d6cca2bc599856fa594bb31c2a868"
+    },
+    {
+      "bytes" : 1387,
+      "path" : "include/anaiero/sdk/module_host.hpp",
+      "sha256" : "e17c5ead618314291511e00795f36adc0ebe7135e10f44dfe417be94c6b77f9e"
+    },
+    {
+      "bytes" : 3982,
+      "path" : "include/anaiero/sdk/native_mesh.hpp",
+      "sha256" : "767d3e7deaea31a4105955ce3fa401e118b1bf1e9d955a335ba4409876a14441"
+    },
+    {
+      "bytes" : 1030,
+      "path" : "include/anaiero/sdk/native_session.hpp",
+      "sha256" : "d3c7fdf4b97e2549504e4dcf44a9b87468c2e29e4f596b0a724a4c88a9de0a0b"
+    },
+    {
+      "bytes" : 1831,
+      "path" : "include/anaiero/sdk/observer.hpp",
+      "sha256" : "956071d349b9e4e82599b055f1109c5e4aacf6beba02da1b723ee0cdff8afe3a"
+    },
+    {
+      "bytes" : 714,
+      "path" : "include/anaiero/sdk/projection.hpp",
+      "sha256" : "d8304748739cef4086277b2c80615d685d87c2ea5536bd1d0f5d2c1933fbe9ca"
+    },
+    {
+      "bytes" : 2302,
+      "path" : "include/anaiero/sdk/runtime.hpp",
+      "sha256" : "5130027301e56991dbe3540c839b9f1929f462c5787a30ab061825f02a4744bf"
+    },
+    {
+      "bytes" : 1192,
+      "path" : "include/anaiero/sdk/session_runner.hpp",
+      "sha256" : "debc0606bc7a45ac80f5778b3281cdb857e5436973940bfd2eb0b634679093d8"
+    },
+    {
+      "bytes" : 3114,
+      "path" : "include/anaiero/sdk/storage_tools.hpp",
+      "sha256" : "1afc85ef2c9533a1211a16df10042a652cf47575dc02241d5adb6ca011659ed8"
+    },
+    {
+      "bytes" : 1891,
+      "path" : "include/anaiero/sdk/types.hpp",
+      "sha256" : "2d4d5d222c41e59ac3ff91dfbe7c388d68d2eb3bdacad77bb3eb8a6f71b202bb"
+    },
+    {
+      "bytes" : 1101,
+      "path" : "lib/cmake/Anaiero/AnaieroConfig.cmake",
+      "sha256" : "59573a02510cf7340cec89d86762e98e5b08a51df057b1243da82eaf5a9df58a"
+    },
+    {
+      "bytes" : 2762,
+      "path" : "lib/cmake/Anaiero/AnaieroConfigVersion.cmake",
+      "sha256" : "f1e79939dfaba0392f914537e69e0ad7ba208bd0e661cb35004e4ad51c3c1310"
+    },
+    {
+      "bytes" : 13239,
+      "path" : "lib/cmake/Anaiero/AnaieroTargets-release.cmake",
+      "sha256" : "4b5cac667783d82e6e8efff7500a1764bde9099b9fee845542e0fd9dc02ed5a2"
+    },
+    {
+      "bytes" : 13031,
+      "path" : "lib/cmake/Anaiero/AnaieroTargets.cmake",
+      "sha256" : "4cc4462e4a92e40029e7200bea63141d3389992b28a7149f2ed322becb49a89f"
+    },
+    {
+      "bytes" : 69496,
+      "path" : "lib/libanaiero_catalog.a",
+      "sha256" : "08e1e5389b3223322cb7a84c0df3ca6eab5ea494fec0951f78a4b3df03ac50fd"
+    },
+    {
+      "bytes" : 147940,
+      "path" : "lib/libanaiero_contracts.a",
+      "sha256" : "ed20a9bb807c51c4138b19f0376950d30e323637b4d3de7415ef5ce00442bc8c"
+    },
+    {
+      "bytes" : 684698,
+      "path" : "lib/libanaiero_deployment.a",
+      "sha256" : "c29c0e519a4b6c8b74138f87771ad7cc9a50d09e643c06e1680a83563361072d"
+    },
+    {
+      "bytes" : 201274,
+      "path" : "lib/libanaiero_engine_cell.a",
+      "sha256" : "86c99be37ef4778ea082776c62945f53cc3d39a18dbc5d72bbe96a29598f8133"
+    },
+    {
+      "bytes" : 257546,
+      "path" : "lib/libanaiero_engine_colony.a",
+      "sha256" : "0f6e434b603660e1dfe360f5d48de2952208f93e0c4bccce7519291408b2fb38"
+    },
+    {
+      "bytes" : 269268,
+      "path" : "lib/libanaiero_engine_files.a",
+      "sha256" : "5c1ed38b006decd737634e1b6fdeee198f1f1587731df8c1551cdc7073b9e0e7"
+    },
+    {
+      "bytes" : 165094,
+      "path" : "lib/libanaiero_engine_numerical.a",
+      "sha256" : "3f4f3814a075bd8c2d312a5072e9df349507afff56a67d1584b5b51c20ebecc8"
+    },
+    {
+      "bytes" : 314728,
+      "path" : "lib/libanaiero_engine_plan.a",
+      "sha256" : "32c0bbd0b5b4532a563b9939d47cfb7ba2f7ea49912f99b91561b04bbd51508f"
+    },
+    {
+      "bytes" : 31340,
+      "path" : "lib/libanaiero_engines.a",
+      "sha256" : "f3552c617858a4be58dbf7f2add11c33f048eb033e91549550a2d7ca062ded1b"
+    },
+    {
+      "bytes" : 100384,
+      "path" : "lib/libanaiero_evidence.a",
+      "sha256" : "dc7dcdc7c47cf94f7aed6804452e113b00191f6ef3a9042032c87a1d8d76bca5"
+    },
+    {
+      "bytes" : 189564,
+      "path" : "lib/libanaiero_experiment_history.a",
+      "sha256" : "8878a8e18970071b55646d226cb65e2472aaa7645cf2a27aabc659c47927f585"
+    },
+    {
+      "bytes" : 154578,
+      "path" : "lib/libanaiero_experiments.a",
+      "sha256" : "0d57d3191f9ef1e03a657557b6854bf757e17ec1c87d7fafe3cffeb4a11afb06"
+    },
+    {
+      "bytes" : 166958,
+      "path" : "lib/libanaiero_host.a",
+      "sha256" : "cecd5b14900872671e6a2ee9f197bcbe759611a936f17491e7eb9999a59d5396"
+    },
+    {
+      "bytes" : 574238,
+      "path" : "lib/libanaiero_lifecycle.a",
+      "sha256" : "da1647b18ff191966f92dd3267f5ac50ef332672f67ec464061a423cd968c186"
+    },
+    {
+      "bytes" : 449648,
+      "path" : "lib/libanaiero_mesh_service.a",
+      "sha256" : "4666609f3a1cb7955c5fe6d4b5e99f485b2288bca2bfbf59b94de3978314e64f"
+    },
+    {
+      "bytes" : 117298,
+      "path" : "lib/libanaiero_module_api.a",
+      "sha256" : "f37392c033d7944f15dd207b5f8602f9e810f598af6aa38f04c8f2955e347f02"
+    },
+    {
+      "bytes" : 296430,
+      "path" : "lib/libanaiero_module_host.a",
+      "sha256" : "59fc7a3f77467c8730cdfba0d3abc7482d1ece566fe26c990873c5cdf8cefe4f"
+    },
+    {
+      "bytes" : 106564,
+      "path" : "lib/libanaiero_native_session.a",
+      "sha256" : "00d2350c860ddb7da27ca04a2ffebf492753c00ef351d344a01614ca1b680c77"
+    },
+    {
+      "bytes" : 37444,
+      "path" : "lib/libanaiero_observers.a",
+      "sha256" : "c1c64202b07b71215b61313aadb4c818fa478b2b3c111bb48d9f98f1f071bdd1"
+    },
+    {
+      "bytes" : 153174,
+      "path" : "lib/libanaiero_projection.a",
+      "sha256" : "eb37f34621b0cb295252b65d1e26caf7d25587a39e40bb6ff71835d620d81816"
+    },
+    {
+      "bytes" : 193336,
+      "path" : "lib/libanaiero_runtime.a",
+      "sha256" : "4446b326a0d20c18072fa313187ebbdf88a7a73b369bf839a0818440ea0c868f"
+    },
+    {
+      "bytes" : 150424,
+      "path" : "lib/libanaiero_session_runner.a",
+      "sha256" : "bb8a0c402abbf5dc12f2a4cf349f3a793f24edaf6a997990cf22869df51cb9b1"
+    },
+    {
+      "bytes" : 1487766,
+      "path" : "lib/libanaiero_storage_native.a",
+      "sha256" : "04c425a1344e62bc1d8fe711dd47df8b5bc243e57822dfbcb2eb937b1ac0bf7b"
+    },
+    {
+      "bytes" : 30585,
+      "path" : "share/anaiero/anaiero-builtin-manifest.txt",
+      "sha256" : "590edbdfb644fb978f6e97328aba808bba0f58c65e6a88906c9d3a353ffec6c7"
+    },
+    {
+      "bytes" : 13397,
+      "path" : "share/anaiero/anaiero-compatibility-manifest.txt",
+      "sha256" : "d94e3f200c052c1076ec1f531ac9756f7ce460fab97950db7cd12a25ce0a0f90"
+    },
+    {
+      "bytes" : 22306,
+      "path" : "share/anaiero/canonical-evidence.md",
+      "sha256" : "b166e964fc0d35f5030a31533356a73e93f1b68fb3654a9a5383c77a18224b4e"
+    },
+    {
+      "bytes" : 27125,
+      "path" : "share/anaiero/continuous-mesh.md",
+      "sha256" : "ce10372f028da5e3f4aa114a3dc3cd64621e73d10d2ccbe92b8395565fc5aeba"
+    },
+    {
+      "bytes" : 3337,
+      "path" : "share/anaiero/deployment/BuildNativePackage.cmake",
+      "sha256" : "37f9448c5dadff0623822ea751b221f4aaa5dab0d96654ad7cf6b9cf6fcc6a55"
+    },
+    {
+      "bytes" : 10585,
+      "path" : "share/anaiero/deployment/README.md",
+      "sha256" : "d8ac0ee083e021771bf97be92a1aba5ad8e27931e092d775a7eae3a08c6b1edb"
+    },
+    {
+      "bytes" : 3824,
+      "path" : "share/anaiero/deployment/VerifyNativePackage.cmake",
+      "sha256" : "6cfe888fb3fae3d6932fe317cf6fb8f51fd138472408655ae628c59fe2269d1d"
+    },
+    {
+      "bytes" : 541,
+      "path" : "share/anaiero/deployment/anaiero-modular.service",
+      "sha256" : "bdfc2dcce1f7813afd0e884fd4e5afdfa4ffcabcc2a736c8eae2559507f47ac8"
+    },
+    {
+      "bytes" : 2836,
+      "path" : "share/anaiero/deployment/manage-modular-service.ps1",
+      "sha256" : "094da621b201831026c833aecfedbbbc0c49e940865eaf38d3a810c69b6b86b6"
+    },
+    {
+      "bytes" : 6495,
+      "path" : "share/anaiero/deployment/manage-modular-service.sh",
+      "sha256" : "9b431d370afa36811cfdd4bd38a55cfd2fff7a1ad9a113315b4cdc1cb7a573e3"
+    },
+    {
+      "bytes" : 8228,
+      "path" : "share/anaiero/deployment/manage-package-service.ps1",
+      "sha256" : "902593d5ae45d3407a2e30636c38c05e10aecf61e2444ffc7ae7bb2143116e97"
+    },
+    {
+      "bytes" : 17623,
+      "path" : "share/anaiero/deployment/package-lifecycle.md",
+      "sha256" : "d16f19b0b045aa6d3b7a339d598948e08f1144d69e2334d21b0e2dc82c13d4b8"
+    },
+    {
+      "bytes" : 1673,
+      "path" : "share/anaiero/examples/independent-sdk/CMakeLists.txt",
+      "sha256" : "aa8c2a6f4aa72e7243fc662bb3e15f011a4d89a886543ce7b54e101ca0af3df6"
+    },
+    {
+      "bytes" : 165,
+      "path" : "share/anaiero/examples/independent-sdk/c_header.c",
+      "sha256" : "4d3d8869e9536ea81be3a2fb19f5e56dacb7bba5ae91cc70aedc5471ba4fe710"
+    },
+    {
+      "bytes" : 16796,
+      "path" : "share/anaiero/examples/independent-sdk/consumer.cpp",
+      "sha256" : "43ae7750ca9ae7869d82c25eeef55d7c0cdcc7ef385e1d7b55594575d1576fed"
+    },
+    {
+      "bytes" : 6109,
+      "path" : "share/anaiero/examples/independent-sdk/counter_engine.hpp",
+      "sha256" : "7e8aa08a20828b9c11df8d9dc2229356286a923dbaf49f35a13d4b18f9285d27"
+    },
+    {
+      "bytes" : 237,
+      "path" : "share/anaiero/examples/independent-sdk/invalid_module.cpp",
+      "sha256" : "7175bc23f32d90b8bd1a3b99a7e10dc29ba9a04486e7ff42632abcfd4f57a010"
+    },
+    {
+      "bytes" : 483,
+      "path" : "share/anaiero/examples/independent-sdk/provider.cpp",
+      "sha256" : "3e487eb59dd80444ba4cef50512e06525ad6cf5e0a4662d6be2b149dbbc38e12"
+    },
+    {
+      "bytes" : 19068,
+      "path" : "share/anaiero/modular-lifecycle.md",
+      "sha256" : "0375ece404b3fcd7a9e249553ca6e709d170d460694b7a8404e704fbf0f8aa75"
+    },
+    {
+      "bytes" : 13196,
+      "path" : "share/anaiero/module-sdk.md",
+      "sha256" : "b4cbc2ed13b4c6b71f477525b3820a4689c0b7c888862b4f9908473700e094d4"
+    },
+    {
+      "bytes" : 21582,
+      "path" : "share/anaiero/qualification/MIXED.md",
+      "sha256" : "45f9cbedd8c7720ea3bb1a3b0a6e7aaa4a09571430afaaed920b6853db4d7968"
+    },
+    {
+      "bytes" : 15488,
+      "path" : "share/anaiero/qualification/README.md",
+      "sha256" : "5f4bbfa9ff069b85c421ea44126018143880f5d7b1cae1cb0d1c1fabe3a280b9"
+    },
+    {
+      "bytes" : 9846,
+      "path" : "share/anaiero/qualification/SCALE.md",
+      "sha256" : "4544e102afde66c507a8c6a6ff976f74040aa5f7fdeb6e659dfb2959277a5722"
+    },
+    {
+      "bytes" : 428,
+      "path" : "share/anaiero/qualification/ci-smoke.cevqualification",
+      "sha256" : "557b208b1baa29f9c4e2b61e2216acecc47741d27044d41a5f98760047b93801"
+    },
+    {
+      "bytes" : 501,
+      "path" : "share/anaiero/qualification/evidence-100k-exact.cevqualification",
+      "sha256" : "e797ad450744f4ccddddb762fcba1598b130ec9602db0785b851251de94d3ff1"
+    },
+    {
+      "bytes" : 441,
+      "path" : "share/anaiero/qualification/evidence-100k.cevqualification",
+      "sha256" : "40b24cc47571b3b348a88106943d8657c4ad5bd4ab9522182243998f8accb76e"
+    },
+    {
+      "bytes" : 492,
+      "path" : "share/anaiero/qualification/evidence-10k-exact.cevqualification",
+      "sha256" : "ed54ae948cea607799931133b9ac5a036eb703258e0d116e9df0facec38c8bfd"
+    },
+    {
+      "bytes" : 511,
+      "path" : "share/anaiero/qualification/evidence-1m-exact.cevqualification",
+      "sha256" : "bf082159acb2437c8c245f08315acda69b10bb6b01a20e69a07cc99bbd795c36"
+    },
+    {
+      "bytes" : 471,
+      "path" : "share/anaiero/qualification/evidence-1m.cevqualification",
+      "sha256" : "d03b13da2cbb5a74d031637b5bf516e36cb383a2a3046ae44a5c6ea6c0e8cb1a"
+    },
+    {
+      "bytes" : 522,
+      "path" : "share/anaiero/qualification/mixed-24h.cevqualification",
+      "sha256" : "47329a5bc5dacef2690579982642a286b7bb09a4324e0b7c0830aa1d91d3abad"
+    },
+    {
+      "bytes" : 523,
+      "path" : "share/anaiero/qualification/mixed-7d.cevqualification",
+      "sha256" : "6e6d7ba75a784055ba111354211d7ba0c57b9326919863b84022e23d84a6bea3"
+    },
+    {
+      "bytes" : 693,
+      "path" : "share/anaiero/qualification/mixed-campaign-24h.cevqualification",
+      "sha256" : "2ceea6561c74ae297791fb00121ac3002120cd00bae5d642675b55934f1ce3ff"
+    },
+    {
+      "bytes" : 694,
+      "path" : "share/anaiero/qualification/mixed-campaign-7d.cevqualification",
+      "sha256" : "5d021fc04bd58a9eb1f0b9d3c48ff21735f3a4013eb0978a2ec82704139d0559"
+    },
+    {
+      "bytes" : 652,
+      "path" : "share/anaiero/qualification/mixed-campaign-ci.cevqualification",
+      "sha256" : "059a5872fb8bdc4243bd5c790b3b0473f760185afd163ae4a007124d8f59d3f5"
+    },
+    {
+      "bytes" : 487,
+      "path" : "share/anaiero/qualification/mixed-ci.cevqualification",
+      "sha256" : "3b1c32bb76b1c164ee49263e643ff9033cce5c5fb76c6179f58cd7445c1a8a60"
+    },
+    {
+      "bytes" : 2912,
+      "path" : "share/anaiero/qualification/run-isolated-pressure.ps1",
+      "sha256" : "fba93668128c81ab1755fff86f521b331d9c12bf32caf73243857faa093bf32f"
+    },
+    {
+      "bytes" : 1010,
+      "path" : "share/anaiero/qualification/run-isolated-pressure.sh",
+      "sha256" : "8c0a855de522eb797c8ad10c5afc190fcfc75a22505e4b4d89243eec0f3c3910"
+    },
+    {
+      "bytes" : 603,
+      "path" : "share/anaiero/qualification/scale-100k.cevqualification",
+      "sha256" : "eea4f2d235fb95be81b1db7af9c231587739d70db0611879493779153e895e80"
+    },
+    {
+      "bytes" : 598,
+      "path" : "share/anaiero/qualification/scale-10k.cevqualification",
+      "sha256" : "90c4fe28a19df196f292e9916cf06fc390f823ddd332918235fca0a7146d3dd0"
+    },
+    {
+      "bytes" : 615,
+      "path" : "share/anaiero/qualification/scale-1m.cevqualification",
+      "sha256" : "3a8995778df4376d8d111361ffd31a97153ec5e7c325132fc37e21fbc8376cb8"
+    },
+    {
+      "bytes" : 560,
+      "path" : "share/anaiero/qualification/scale-ci.cevqualification",
+      "sha256" : "66c681bdf45dc05fa5188d12b4ac12fd1a90a8e1f5e43b9406a3fa91c6621c94"
+    },
+    {
+      "bytes" : 98494,
+      "path" : "share/anaiero/sdk-reference.md",
+      "sha256" : "62321d31591c88a9b3c9c92e2b2563f992661793467d63a7d22c2717f14ed3b0"
+    }
+  ],
+  "host_system" : "Linux",
+  "module_sha256" : "590edbdfb644fb978f6e97328aba808bba0f58c65e6a88906c9d3a353ffec6c7",
+  "profile" : "native-canonical-functional",
+  "schema" : "anaiero.native-package/1"
+}

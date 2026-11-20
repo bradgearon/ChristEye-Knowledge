@@ -1,0 +1,19 @@
+ANAIEROMIXEDQUALIFICATION/1
+name=native-mixed-24h
+storage_label=Dedicated declared device required; unqualified profile
+cycles=8760
+period_ms=10000
+restart_after_cycle=4380
+checkpoint_cycles=120
+blocked_lane_ms=25
+minimum_run_ms=86400000
+maximum_run_ms=129600000
+maximum_store_bytes=8589934592
+maximum_disk_bytes=17179869184
+maximum_files=10000000
+maximum_resident_bytes=536870912
+maximum_status_p99_us=100000
+maximum_control_p99_us=5000000
+maximum_probe_p99_us=5000000
+maximum_reopen_us=20000000
+maximum_lookup_nodes=128

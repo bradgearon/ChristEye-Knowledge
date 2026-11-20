@@ -13,31 +13,36 @@ authoritative declaration text, including defaults, macros, annotations and
 inline definitions. A syntax index is not a substitute for compiling against
 the installed SDK. Operational rules are in [modular-lifecycle.md](modular-lifecycle.md).
 
-**Public-header manifest SHA-256:** `61c51e3b0ef624866f1dc26c4eda8bd6bbd41b0903a2ac05897f7fdf9371d1d0`
+**Public-header manifest SHA-256:** `3fd2c31f9899e5875cf4550edb8afab4a7ab3e4ebab1ac21412bafd23758f2e4`
 
 | Header | SHA-256 |
 |---|---|
-| [catalog.hpp](../sdk/include/anaiero/sdk/catalog.hpp) | `e07ceb3fe2ce59dc95438005fa45769d5b38a4310431ed86b5551d11cebf261a` |
-| [engine.hpp](../sdk/include/anaiero/sdk/engine.hpp) | `6c7f377106bea1d231d04423e9c302b8088808a0e0608f2361a78c16c217cf16` |
+| [catalog.hpp](../sdk/include/anaiero/sdk/catalog.hpp) | `b6ecea87ac83cdc4f29ed3d2030ba703840cacf944eb9bc9221124c5904bde18` |
+| [engine.hpp](../sdk/include/anaiero/sdk/engine.hpp) | `aee1a43631d1afa7a79372193ed0a82e92326634cddd6c95ab4ece5ed6b7c09c` |
 | [engine_files.hpp](../sdk/include/anaiero/sdk/engine_files.hpp) | `c1a311a612733ded9d175472111ecdc4ad0e064ec59e91c68fac58dcf8b593cd` |
 | [engines.hpp](../sdk/include/anaiero/sdk/engines.hpp) | `2bf154a15f57beedb85a500ce8f7da6a878c9682d31fdaa52e60dbe6477ed0e4` |
-| [evidence.hpp](../sdk/include/anaiero/sdk/evidence.hpp) | `33e70af2acdc9849efdf6a9d40a40aac29e40c2fe0a839bf4577f24e8b2f0e18` |
+| [evidence.hpp](../sdk/include/anaiero/sdk/evidence.hpp) | `44cedf34e03fe3143e5e19c4d681c9197f7ff18256be7d0a4afd0296cb4f0722` |
 | [experiment_history.hpp](../sdk/include/anaiero/sdk/experiment_history.hpp) | `fab291fe81c41b4a1c9a52c621be741eff70b58cbc26cef3a5d28bb8c05917ca` |
 | [experiments.hpp](../sdk/include/anaiero/sdk/experiments.hpp) | `de18d005d734e926c1593f3fed870d4bd01ec9901f2acf5ec4047e3754cd0cec` |
-| [lifecycle.hpp](../sdk/include/anaiero/sdk/lifecycle.hpp) | `c859fc5f7130885a360fbf6b3c9684394a0f5d82c36e0dd992303f4e74ba487d` |
+| [host.hpp](../sdk/include/anaiero/sdk/host.hpp) | `05bfbf7ccccf0b4d06168860d8a9af08b4240017ae3765e0faac60d909d7aa81` |
+| [lifecycle.hpp](../sdk/include/anaiero/sdk/lifecycle.hpp) | `01ce7b57d5616e309d944b246e1fcb32dc0a5ca299d650a886d1804c9c6ab7eb` |
+| [mesh.hpp](../sdk/include/anaiero/sdk/mesh.hpp) | `7a999ffbdc51057887033ab6e300d444313e26ec6a196d260611e46897de1fac` |
 | [module_abi.h](../sdk/include/anaiero/sdk/module_abi.h) | `6a5c4c08a9da5873875ca3926d5b8dd9bf6d6cca2bc599856fa594bb31c2a868` |
 | [module_host.hpp](../sdk/include/anaiero/sdk/module_host.hpp) | `e17c5ead618314291511e00795f36adc0ebe7135e10f44dfe417be94c6b77f9e` |
+| [native_mesh.hpp](../sdk/include/anaiero/sdk/native_mesh.hpp) | `767d3e7deaea31a4105955ce3fa401e118b1bf1e9d955a335ba4409876a14441` |
+| [native_session.hpp](../sdk/include/anaiero/sdk/native_session.hpp) | `d3c7fdf4b97e2549504e4dcf44a9b87468c2e29e4f596b0a724a4c88a9de0a0b` |
 | [observer.hpp](../sdk/include/anaiero/sdk/observer.hpp) | `956071d349b9e4e82599b055f1109c5e4aacf6beba02da1b723ee0cdff8afe3a` |
 | [projection.hpp](../sdk/include/anaiero/sdk/projection.hpp) | `d8304748739cef4086277b2c80615d685d87c2ea5536bd1d0f5d2c1933fbe9ca` |
-| [runtime.hpp](../sdk/include/anaiero/sdk/runtime.hpp) | `5130027301e56991dbe3540c839b9f1929f462c5787a30ab061825f02a4744bf` |
+| [runtime.hpp](../sdk/include/anaiero/sdk/runtime.hpp) | `e869e92dc516a1a2aee7d4ac938953ac55375299526ef8a420b05fe2622eb99d` |
 | [session_runner.hpp](../sdk/include/anaiero/sdk/session_runner.hpp) | `debc0606bc7a45ac80f5778b3281cdb857e5436973940bfd2eb0b634679093d8` |
-| [storage_tools.hpp](../sdk/include/anaiero/sdk/storage_tools.hpp) | `4ec3c8c93411c2692642e66f41e016973f2fa4dc7dd57264225d3e97e908ce38` |
+| [storage_tools.hpp](../sdk/include/anaiero/sdk/storage_tools.hpp) | `09ddd2bbb43645aba820d0e9001c2ac6cef43421c354fc57800e38a51761034e` |
 | [types.hpp](../sdk/include/anaiero/sdk/types.hpp) | `2d4d5d222c41e59ac3ff91dfbe7c388d68d2eb3bdacad77bb3eb8a6f71b202bb` |
 
 ## catalog.hpp
 
 | Public symbol | Kind |
 |---|---|
+| `anaiero::sdk::host::NativeSession` | class |
 | `anaiero::sdk::EngineModuleCatalog` | class |
 | `anaiero::sdk::EngineModuleCatalog::EngineModuleCatalog` | constructor |
 | `anaiero::sdk::EngineModuleCatalog::~EngineModuleCatalog` | destructor |
@@ -56,9 +61,15 @@ the installed SDK. Operational rules are in [modular-lifecycle.md](modular-lifec
 #include <memory>
 
 namespace anaiero::sdk {
+namespace host {class NativeSession;}
 class EngineModuleCatalog {
   struct Impl;
   std::unique_ptr<Impl> impl_;
+  // Only NativeSession can install an alias after validating the canonical
+  // exact-source compatibility binding. General SDK consumers cannot bypass
+  // the retained implementation digest through catalog registration.
+  friend class host::NativeSession;
+  Result allow_retained_module(std::string_view retained,std::string_view executing);
 public:
   explicit EngineModuleCatalog(std::size_t capacity=32);
   ~EngineModuleCatalog();
@@ -87,11 +98,22 @@ public:
 | `anaiero::sdk::Observation` | struct |
 | `anaiero::sdk::Observation::operator==` | method |
 | `anaiero::sdk::StepRequest` | struct |
+| `anaiero::sdk::MigrationRequest` | struct |
+| `anaiero::sdk::MigrationPlan` | struct |
+| `anaiero::sdk::encode_migration_request` | function |
+| `anaiero::sdk::decode_migration_request` | function |
+| `anaiero::sdk::encode_migration_plan` | function |
+| `anaiero::sdk::decode_migration_plan` | function |
+| `anaiero::sdk::migration_request_digest` | function |
 | `anaiero::sdk::PreparedTransition` | struct |
 | `anaiero::sdk::IEngine` | class |
 | `anaiero::sdk::ITrialCapability` | struct |
 | `anaiero::sdk::ITrialCapability::~ITrialCapability` | destructor |
 | `anaiero::sdk::ITrialCapability::fork` | method |
+| `anaiero::sdk::IMigrationCapability` | struct |
+| `anaiero::sdk::IMigrationCapability::~IMigrationCapability` | destructor |
+| `anaiero::sdk::IMigrationCapability::implementation_sha256` | method |
+| `anaiero::sdk::IMigrationCapability::prepare_migration` | method |
 | `anaiero::sdk::IChangeCapability` | struct |
 | `anaiero::sdk::IChangeCapability::~IChangeCapability` | destructor |
 | `anaiero::sdk::IChangeCapability::prepare_change` | method |
@@ -103,6 +125,7 @@ public:
 | `anaiero::sdk::IEngine::restore` | method |
 | `anaiero::sdk::IEngine::trials` | method |
 | `anaiero::sdk::IEngine::changes` | method |
+| `anaiero::sdk::IEngine::migrations` | method |
 | `anaiero::sdk::IEngine::request_cancel` | method |
 | `anaiero::sdk::EngineDescriptor` | struct |
 | `anaiero::sdk::IEngineFactory` | struct |
@@ -159,6 +182,25 @@ struct StepRequest {
   std::uint64_t expected_revision=0;
   Envelope input;
 };
+// A migration changes a checkpoint schema under one pinned engine identity.
+// It does not authorize replacing the native module or reinterpret old metrics.
+struct MigrationRequest {
+  std::string operation_id;
+  std::uint64_t expected_revision=0;
+  std::string source_schema,target_schema;
+  Digest implementation_sha256;
+  Envelope parameters{"anaiero.migration-parameters/1",{}};
+};
+struct MigrationPlan {
+  EngineIdentity identity;
+  MigrationRequest request;
+  Digest source_checkpoint_sha256,target_checkpoint_sha256;
+};
+Bytes encode_migration_request(const MigrationRequest&);
+Result decode_migration_request(std::string_view,MigrationRequest&);
+Bytes encode_migration_plan(const MigrationPlan&);
+Result decode_migration_plan(std::string_view,MigrationPlan&);
+Digest migration_request_digest(const EngineIdentity&,const MigrationRequest&);
 struct PreparedTransition {
   EngineIdentity identity;
   std::string operation_id,request_sha256,expected_state_sha256;
@@ -171,6 +213,13 @@ class IEngine;
 struct ITrialCapability {
   virtual ~ITrialCapability()=default;
   virtual Result fork(std::unique_ptr<IEngine>& isolated) const=0;
+};
+struct IMigrationCapability {
+  virtual ~IMigrationCapability()=default;
+  // Module-declared migration algorithm fingerprint; not a publisher signature or byte attestation.
+  virtual std::string_view implementation_sha256() const noexcept=0;
+  // Pure preparation; no authoritative changes or durable side effects.
+  virtual Result prepare_migration(const MigrationRequest&,PreparedTransition&)=0;
 };
 struct IChangeCapability {
   virtual ~IChangeCapability()=default;
@@ -187,6 +236,7 @@ public:
   virtual Result restore(const EngineState& committed)=0;
   virtual ITrialCapability* trials() noexcept { return nullptr; }
   virtual IChangeCapability* changes() noexcept { return nullptr; }
+  virtual IMigrationCapability* migrations() noexcept { return nullptr; }
   virtual void request_cancel() noexcept {}
 };
 struct EngineDescriptor {
@@ -326,9 +376,11 @@ sdk::Result plan_output(const sdk::EngineState&,std::string& image,
 | `anaiero::sdk::evidence::StoreInfo` | struct |
 | `anaiero::sdk::evidence::AuditReport` | struct |
 | `anaiero::sdk::evidence::IndexStatistics` | struct |
+| `anaiero::sdk::evidence::CommitTimings` | struct |
 | `anaiero::sdk::evidence::IAdmissionClock` | class |
 | `anaiero::sdk::evidence::IAdmissionClock::~IAdmissionClock` | destructor |
 | `anaiero::sdk::evidence::IAdmissionClock::unix_seconds` | method |
+| `anaiero::sdk::evidence::IndexLayout` | enum |
 | `anaiero::sdk::evidence::StoreOptions` | struct |
 | `anaiero::sdk::evidence::FaultPoint` | enum |
 | `anaiero::sdk::evidence::IEvidenceIndex` | class |
@@ -353,6 +405,7 @@ sdk::Result plan_output(const sdk::EngineState&,std::string& image,
 | `anaiero::sdk::evidence::set_native_store_fault` | function |
 | `anaiero::sdk::evidence::native_index_statistics` | function |
 | `anaiero::sdk::evidence::reset_native_index_statistics` | function |
+| `anaiero::sdk::evidence::native_commit_timings` | function |
 | `anaiero::sdk::evidence::record_digest` | function |
 | `anaiero::sdk::evidence::batch_digest` | function |
 | `anaiero::sdk::evidence::CommitCompletion` | struct |
@@ -469,19 +522,45 @@ struct StoreInfo {
   std::uint64_t maintenance_reserve_bytes=0,ordinary_limit_bytes=0;
   Digest root_digest,index_root;
   bool writable=false,index_ready=false;
+  // Canonical bytes before this generation were replaced by a verified base.
+  // Exact operation receipts are retained unless an explicit compaction rotates
+  // their namespace. Unknown older-epoch operations then fail HISTORY_EXPIRED.
+  std::uint64_t canonical_base_generation=0,operation_epoch=0;
+  // Last durably admitted native UTC sample; persists through compaction.
+  std::uint64_t admitted_unix_s=0;
+  Digest canonical_base_digest;
+  // Conservative obsolete-file upper bound until durable cleanup completes.
+  std::uint64_t pending_reclamation_bytes=0;
 };
 struct AuditReport {
   std::uint64_t generations=0,records=0,blobs=0,expired_blobs=0;
   std::uint64_t index_nodes_read=0,canonical_records_read=0;
+  std::uint64_t summarized_generations=0,summarized_record_versions=0;
+  std::uint64_t expired_observations=0,base_pages=0;
+  Digest canonical_base_digest;
 };
 struct IndexStatistics {
   std::uint64_t nodes_read=0,nodes_written=0,point_queries=0,range_queries=0;
+  std::uint64_t staged_nodes=0,staged_spills=0,transient_nodes_elided=0;
+  std::uint64_t cache_peak_nodes=0,cache_peak_bytes=0;
+  std::uint64_t admission_cache_nodes_reused=0;
+};
+// Optional, bounded measurements of the most recent native commit attempt.
+// Stages are disjoint monotonic durations. They describe software publication,
+// not a device power-loss guarantee. Failed/retried attempts remain explicit.
+struct CommitTimings {
+  std::uint64_t lock_wait_ns=0,validation_ns=0,staging_ns=0,blobs_ns=0;
+  std::uint64_t transaction_ns=0,root_ns=0,index_ns=0,cleanup_ns=0,total_ns=0;
+  std::uint64_t generation=0;
+  bool enabled=false,committed=false,duplicate=false;
+  Code result=Code::ok;
 };
 class IAdmissionClock {
 public:
   virtual ~IAdmissionClock()=default;
   virtual std::uint64_t unix_seconds() const noexcept=0;
 };
+enum class IndexLayout : std::uint32_t { automatic, single_node, packed_pages };
 struct StoreOptions {
   std::uint64_t maximum_bytes=1024ULL*1024ULL*1024ULL;
   std::uint64_t minimum_free_bytes=1024ULL*1024ULL;
@@ -494,9 +573,21 @@ struct StoreOptions {
   // Ordinary admission leaves min(this, maximum_bytes/8) for explicit bounded
   // maintenance. Maintenance itself still obeys the absolute maximum_bytes.
   std::uint64_t maintenance_reserve_bytes=16U*1024U*1024U;
+  // No callbacks or per-commit allocation; false avoids reading the clock.
+  bool measure_commit_stages=false;
+  // POSIX filesystems with a finite reported file-node pool retain this reserve
+  // in addition to the operation's bounded temporary-file estimate. Native
+  // Windows filesystems do not expose an equivalent pool through this adapter.
+  std::uint64_t minimum_free_file_nodes=128;
+  // Fresh stores use the single-node format by default. A healthy existing
+  // store always reopens its persisted layout.
+  IndexLayout index_layout=IndexLayout::automatic;
+  bool measure_compaction_files=false;
 };
 enum class FaultPoint : std::uint32_t {
-  none,after_objects,after_transaction,after_root,before_index,after_index
+  none,after_objects,after_transaction,after_root,before_index,after_index,
+  compaction_after_base,compaction_after_root,compaction_during_cleanup,
+  compaction_during_index_build,compaction_after_index
 };
 // Typed indexed reads are independent of the canonical writer and blob I/O.
 // A missing/corrupt index cannot be interpreted as evidence of absence.
@@ -533,10 +624,15 @@ Result open_native_store(std::string_view directory,const StoreOptions&,
 void set_native_store_fault(ICommitStore&,FaultPoint) noexcept;
 IndexStatistics native_index_statistics(const ICommitStore&) noexcept;
 void reset_native_index_statistics(ICommitStore&) noexcept;
+CommitTimings native_commit_timings(const ICommitStore&) noexcept;
 Digest record_digest(const Record&);
 Digest batch_digest(const CommitBatch&);
 
-struct CommitCompletion {std::uint64_t ticket=0;Result result;CommitReceipt receipt;};
+struct CommitCompletion {
+  std::uint64_t ticket=0;Result result;CommitReceipt receipt;
+  // Process-local steady-clock timestamps; never persisted as event time.
+  std::uint64_t started_monotonic_ns=0,completed_monotonic_ns=0;
+};
 class ICommitQueue {
 public:
   virtual ~ICommitQueue()=default;
@@ -704,6 +800,137 @@ public:
 }
 ```
 
+## host.hpp
+
+| Public symbol | Kind |
+|---|---|
+| `anaiero::sdk::host::StoreTask` | alias |
+| `anaiero::sdk::host::StoreTaskCompletion` | alias |
+| `anaiero::sdk::host::IStoreTaskExecutor` | class |
+| `anaiero::sdk::host::IStoreTaskExecutor::~IStoreTaskExecutor` | destructor |
+| `anaiero::sdk::host::IStoreTaskExecutor::submit` | method |
+| `anaiero::sdk::host::TimingKind` | enum |
+| `anaiero::sdk::host::TimingObservation` | struct |
+| `anaiero::sdk::host::ITimingObserver` | class |
+| `anaiero::sdk::host::ITimingObserver::~ITimingObserver` | destructor |
+| `anaiero::sdk::host::ITimingObserver::observe` | method |
+| `anaiero::sdk::host::Options` | struct |
+| `anaiero::sdk::host::CommandKind` | enum |
+| `anaiero::sdk::host::Command` | struct |
+| `anaiero::sdk::host::CommandResult` | struct |
+| `anaiero::sdk::host::EngineStatus` | struct |
+| `anaiero::sdk::host::Status` | struct |
+| `anaiero::sdk::host::NativeContinuousHost` | class |
+| `anaiero::sdk::host::NativeContinuousHost::NativeContinuousHost` | constructor |
+| `anaiero::sdk::host::NativeContinuousHost::~NativeContinuousHost` | destructor |
+| `anaiero::sdk::host::NativeContinuousHost::operator=` | method |
+| `anaiero::sdk::host::NativeContinuousHost::start` | method |
+| `anaiero::sdk::host::NativeContinuousHost::enqueue` | method |
+| `anaiero::sdk::host::NativeContinuousHost::submit` | method |
+| `anaiero::sdk::host::NativeContinuousHost::snapshot` | method |
+| `anaiero::sdk::host::NativeContinuousHost::command_result` | method |
+| `anaiero::sdk::host::NativeContinuousHost::set_commit_wakeup` | method |
+| `anaiero::sdk::host::NativeContinuousHost::request_stop` | method |
+| `anaiero::sdk::host::NativeContinuousHost::shutdown` | method |
+| `anaiero::sdk::host::encode_status` | function |
+
+```cpp
+#pragma once
+#include "anaiero/sdk/session_runner.hpp"
+#include <functional>
+#include <memory>
+
+namespace anaiero::sdk::host {
+using StoreTask=std::function<Result(evidence::ICommitStore&)>;
+using StoreTaskCompletion=std::function<void(Result)>;
+// Trusted adapters submit bounded work, never arbitrary remote code. Accepted
+// work owns its captures and completes exactly once. Success here means queued,
+// not durable; only the completion carries the canonical operation result.
+// Completion signals its consumer on the task worker; it must not wait for
+// another host operation, call shutdown, or access the store again.
+class IStoreTaskExecutor {
+public:
+  virtual ~IStoreTaskExecutor()=default;
+  virtual Result submit(StoreTask,StoreTaskCompletion)=0;
+};
+enum class TimingKind : std::uint32_t {step_dispatch,step_queue_wait,step_commit_completion,step_projection};
+struct TimingObservation {
+  TimingKind kind=TimingKind::step_dispatch;
+  std::uint64_t cycle=0,elapsed_ns=0;
+  Code result=Code::ok;
+};
+// Borrowed, bounded observation port invoked only on the host owner. It must
+// return immediately, never reenter the host/store or perform blocking I/O.
+// Dispatch spans preparation/submission. Queue wait spans submission through
+// writer entry. Commit spans actual writer execution, without owner wake delay.
+// Projection spans successful completion adoption by SessionService::pump.
+// These do not measure synchronous cycle-boundary/control commits or TLS ACKs.
+class ITimingObserver {
+public:
+  virtual ~ITimingObserver()=default;
+  virtual void observe(const TimingObservation&) noexcept=0;
+};
+struct Options {
+  // Wall monotonic pacing is independent of each engine's logical clock.
+  std::uint32_t period_ms=100;
+  std::size_t command_capacity=32,task_capacity=16;
+  bool initially_running=true;
+  ITimingObserver* timing_observer=nullptr;
+};
+enum class CommandKind : std::uint32_t {run,pause,through,engine_pause,engine_resume,engine_cancel};
+struct Command {
+  CommandKind kind=CommandKind::pause;
+  std::string instance_id,operation_id;
+  std::uint64_t through_cycle=0;
+};
+struct CommandResult {
+  std::uint64_t ticket=0;
+  bool complete=false,durable=false;
+  Result result;
+};
+struct EngineStatus {
+  EngineIdentity identity;
+  Phase phase=Phase::ready;
+  std::uint64_t tick=0,revision=0;
+  Digest state_sha256;
+};
+struct Status {
+  std::uint64_t revision=0,completed_cycles=0,through_cycle=0;
+  std::uint64_t owner_wakeups=0,completed_tasks=0;
+  std::size_t queued_commands=0,queued_tasks=0;
+  bool running=false,busy=false,cycle_pending=false,stopping=false,stopped=false;
+  Result result;
+  evidence::StoreInfo store;
+  std::vector<EngineStatus> engines;
+};
+// Native threading adapter around one SessionService/SessionRunner owner.
+// Borrowed services must outlive this object and may not be called concurrently.
+// Storage tasks are serialized with engine commits, on a separate bounded lane.
+// Cached status/control admission remain available while either lane is busy.
+class NativeContinuousHost final:public IStoreTaskExecutor {
+  struct Impl;
+  std::unique_ptr<Impl> impl_;
+public:
+  NativeContinuousHost(SessionService&,SessionRunner&,evidence::ICommitStore&,Options={});
+  ~NativeContinuousHost();
+  NativeContinuousHost(const NativeContinuousHost&)=delete;
+  NativeContinuousHost& operator=(const NativeContinuousHost&)=delete;
+  Result start();
+  Result enqueue(Command,std::uint64_t& ticket);
+  Result submit(StoreTask,StoreTaskCompletion) override;
+  Status snapshot(std::uint64_t after_revision=0,std::uint32_t wait_ms=0) const;
+  Result command_result(std::uint64_t ticket,CommandResult&) const;
+  // Signal-only callback, never reenter the host or touch the borrowed store.
+  void set_commit_wakeup(std::function<void(std::uint64_t)>);
+  void request_stop() noexcept;
+  void shutdown() noexcept;
+};
+// Bounded IPC presentation; engine checkpoints and payloads are never copied
+// into this cached response. Source/engine details can be paginated by offset.
+Bytes encode_status(const Status&,std::size_t engine_offset=0,std::size_t engine_limit=8);
+}
+```
+
 ## lifecycle.hpp
 
 | Public symbol | Kind |
@@ -712,8 +939,11 @@ public:
 | `anaiero::sdk::lifecycle::PeerPhase` | enum |
 | `anaiero::sdk::lifecycle::SubscriptionPhase` | enum |
 | `anaiero::sdk::lifecycle::PinKind` | enum |
+| `anaiero::sdk::lifecycle::BootstrapContinuationPhase` | enum |
 | `anaiero::sdk::lifecycle::HistoryAvailability` | enum |
 | `anaiero::sdk::lifecycle::MaintenancePhase` | enum |
+| `anaiero::sdk::lifecycle::SourceAuthorityKind` | enum |
+| `anaiero::sdk::lifecycle::SourceAuthority` | struct |
 | `anaiero::sdk::lifecycle::Options` | struct |
 | `anaiero::sdk::lifecycle::SourceRef` | struct |
 | `anaiero::sdk::lifecycle::SourceRef::operator==` | method |
@@ -724,12 +954,14 @@ public:
 | `anaiero::sdk::lifecycle::decode_source_observation` | function |
 | `anaiero::sdk::lifecycle::Metric` | struct |
 | `anaiero::sdk::lifecycle::Snapshot` | struct |
+| `anaiero::sdk::lifecycle::CapacityStatus` | struct |
 | `anaiero::sdk::lifecycle::Peer` | struct |
 | `anaiero::sdk::lifecycle::Subscription` | struct |
 | `anaiero::sdk::lifecycle::Pin` | struct |
 | `anaiero::sdk::lifecycle::MaintenanceRequest` | struct |
 | `anaiero::sdk::lifecycle::MaintenancePlan` | struct |
 | `anaiero::sdk::lifecycle::Bootstrap` | struct |
+| `anaiero::sdk::lifecycle::BootstrapContinuation` | struct |
 | `anaiero::sdk::lifecycle::ArchiveOptions` | struct |
 | `anaiero::sdk::lifecycle::IArchiveStore` | struct |
 | `anaiero::sdk::lifecycle::IArchiveStore::~IArchiveStore` | destructor |
@@ -746,7 +978,10 @@ public:
 | `anaiero::sdk::lifecycle::Service::operator=` | method |
 | `anaiero::sdk::lifecycle::Service::open` | method |
 | `anaiero::sdk::lifecycle::Service::snapshot` | method |
+| `anaiero::sdk::lifecycle::Service::capacity` | method |
 | `anaiero::sdk::lifecycle::Service::source` | method |
+| `anaiero::sdk::lifecycle::Service::source_authority` | method |
+| `anaiero::sdk::lifecycle::Service::stage_source_authority` | method |
 | `anaiero::sdk::lifecycle::Service::register_engine` | method |
 | `anaiero::sdk::lifecycle::Service::activate` | method |
 | `anaiero::sdk::lifecycle::Service::begin_drain` | method |
@@ -771,6 +1006,12 @@ public:
 | `anaiero::sdk::lifecycle::Service::execute_maintenance` | method |
 | `anaiero::sdk::lifecycle::Service::replay_status` | method |
 | `anaiero::sdk::lifecycle::Service::accept_bootstrap` | method |
+| `anaiero::sdk::lifecycle::Service::bootstrap_continuation` | method |
+| `anaiero::sdk::lifecycle::Service::pending_bootstrap` | method |
+| `anaiero::sdk::lifecycle::Service::stage_bootstrap_continuation` | method |
+| `anaiero::sdk::lifecycle::Service::stage_accept_bootstrap_continuation` | method |
+| `anaiero::sdk::lifecycle::Service::stage_cancel_bootstrap_continuation` | method |
+| `anaiero::sdk::lifecycle::Service::stage_revoke_bootstrap_scope` | method |
 | `anaiero::sdk::lifecycle::Service::installed_bootstrap` | method |
 | `anaiero::sdk::lifecycle::Service::quarantine_restore` | method |
 | `anaiero::sdk::lifecycle::Service::reauthorize_restore` | method |
@@ -787,14 +1028,24 @@ namespace anaiero::sdk::lifecycle {
 enum class SourcePhase : std::uint32_t { registered=0,active,draining,sealed,retired };
 enum class PeerPhase : std::uint32_t { active=0,suspended,revoked };
 enum class SubscriptionPhase : std::uint32_t { active=0,suspended,expired,closed };
-enum class PinKind : std::uint32_t { recovery=0,program,module,operation,reader,backup,operator_pin };
+enum class PinKind : std::uint32_t { recovery=0,program,module,operation,reader,backup,operator_pin,bootstrap_continuation };
+enum class BootstrapContinuationPhase : std::uint32_t { pending=0,accepted,cancelled,expired };
 enum class HistoryAvailability : std::uint32_t { retained=0,archived,expired };
 enum class MaintenancePhase : std::uint32_t { reviewed=0,activated,completed };
+enum class SourceAuthorityKind : std::uint32_t { local=0,relay=1 };
+
+struct SourceAuthority {
+  std::string uid,owner,clock_domain;
+  SourceAuthorityKind kind=SourceAuthorityKind::local;
+};
 
 struct Options {
   std::size_t max_active_sources=32,max_metrics=256,max_active_peers=32,
               max_active_subscriptions=32,max_pins=64,max_pin_objects=64;
   std::uint64_t maximum_lease_seconds=30ULL*24ULL*60ULL*60ULL;
+  // 15 leaves room for atomic expiry with all 32 peers/subscriptions and
+  // installed roots in the native store's default 128-record transaction.
+  std::size_t max_bootstrap_continuations=15;
 };
 struct SourceRef {
   std::string uid;
@@ -832,6 +1083,18 @@ struct Snapshot {
   bool quarantined=false;
   std::string incarnation;
   Digest recovery_policy_sha256;
+  std::size_t pending_bootstraps=0;
+};
+// Accounted capacity at one canonical generation. These values describe the
+// configured quota, not filesystem allocation/free space or a reservation for a
+// future transaction. Protected authority/retry/tombstone identities remain
+// retained; source retirement does not promise to reclaim their metadata.
+struct CapacityStatus {
+  std::uint64_t generation=0,accounted_bytes=0,maximum_bytes=0;
+  std::uint64_t ordinary_limit_bytes=0,maintenance_reserve_bytes=0;
+  std::uint64_t ordinary_remaining_bytes=0,maintenance_remaining_bytes=0;
+  std::uint64_t pending_reclamation_bytes=0;
+  bool writable=false,index_ready=false;
 };
 struct Peer {
   std::string principal;
@@ -876,6 +1139,17 @@ struct Bootstrap {
   Digest snapshot_sha256;
   Bytes snapshot;
 };
+// An explicit pending checkpoint-to-stream handoff. Its dedicated pin kind
+// consumes one ordinary pin slot and one bounded continuation slot. Metadata
+// remains as an immutable outcome after those resource protections are released.
+struct BootstrapContinuation {
+  std::string id,subscription_id,principal;
+  EngineIdentity source;
+  std::uint64_t generation=0,lease_until_unix_s=0,credential_generation=0;
+  Cursor tip;
+  Digest checkpoint_sha256,state_sha256;
+  BootstrapContinuationPhase phase=BootstrapContinuationPhase::pending;
+};
 struct ArchiveOptions {
   std::uint64_t maximum_bytes=1024ULL*1024ULL*1024ULL;
   std::size_t maximum_object_bytes=8U*1024U*1024U;
@@ -918,7 +1192,13 @@ public:
   Service& operator=(const Service&)=delete;
   Result open();
   Result snapshot(Snapshot&) const;
+  Result capacity(CapacityStatus&) const;
   Result source(const SourceRef&,Source&) const;
+  Result source_authority(std::string_view uid,SourceAuthority&) const;
+  // One immutable UID owner/clock/role across local engines and authenticated
+  // relay streams. Stage in the caller's SAME canonical transaction so racing
+  // first registrations cannot establish separate ownership authorities.
+  Result stage_source_authority(evidence::CommitBatch&,const SourceAuthority&);
   Result register_engine(const EngineIdentity&,std::string owner,std::string operation_id);
   Result activate(const SourceRef&,std::string operation_id);
   Result begin_drain(const SourceRef&,std::string operation_id);
@@ -955,6 +1235,18 @@ public:
   Result replay_status(const SourceRef&,std::uint64_t after_sequence) const;
   Result accept_bootstrap(const Bootstrap&,std::uint64_t now_unix_s,
                           std::string operation_id);
+  Result bootstrap_continuation(std::string_view id,BootstrapContinuation&) const;
+  Result pending_bootstrap(std::string_view subscription_id,BootstrapContinuation&) const;
+  // Stage into the caller's SAME canonical transaction as its protocol offer
+  // or acceptance/release witness. The caller supplies the operation identity.
+  Result stage_bootstrap_continuation(evidence::CommitBatch&,const BootstrapContinuation&,
+                                      std::uint64_t now_unix_s);
+  Result stage_accept_bootstrap_continuation(evidence::CommitBatch&,std::string_view id,
+      const Bootstrap&,std::uint64_t now_unix_s);
+  Result stage_cancel_bootstrap_continuation(evidence::CommitBatch&,std::string_view id);
+  // Stage scoped grant withdrawal and its active-directory guard in the
+  // protocol's same authority-change transaction.
+  Result stage_revoke_bootstrap_scope(evidence::CommitBatch&,std::string_view principal,const SourceRef&);
   Result installed_bootstrap(std::string_view subscription_id,Bootstrap&) const;
   // Restored stores remain unable to execute or grant replay until an explicit
   // local operator supplies their current policy witness. The witness is an
@@ -969,6 +1261,232 @@ public:
 };
 std::string_view phase_name(SourcePhase) noexcept;
 std::string_view phase_name(SubscriptionPhase) noexcept;
+}
+```
+
+## mesh.hpp
+
+| Public symbol | Kind |
+|---|---|
+| `anaiero::sdk::mesh::AuthenticatedIdentity` | struct |
+| `anaiero::sdk::mesh::Session` | struct |
+| `anaiero::sdk::mesh::Grant` | struct |
+| `anaiero::sdk::mesh::Options` | struct |
+| `anaiero::sdk::mesh::DeliveryItem` | struct |
+| `anaiero::sdk::mesh::Delivery` | struct |
+| `anaiero::sdk::mesh::ReceiveReceipt` | struct |
+| `anaiero::sdk::mesh::TransferCost` | struct |
+| `anaiero::sdk::mesh::ArtifactChunk` | struct |
+| `anaiero::sdk::mesh::BootstrapOffer` | struct |
+| `anaiero::sdk::mesh::ReceiverRetentionRequest` | struct |
+| `anaiero::sdk::mesh::ReceiverRetentionPlan` | struct |
+| `anaiero::sdk::mesh::encode_delivery` | function |
+| `anaiero::sdk::mesh::decode_delivery` | function |
+| `anaiero::sdk::mesh::encode_grant` | function |
+| `anaiero::sdk::mesh::decode_grant` | function |
+| `anaiero::sdk::mesh::encode_bootstrap` | function |
+| `anaiero::sdk::mesh::decode_bootstrap` | function |
+| `anaiero::sdk::mesh::Service` | class |
+| `anaiero::sdk::mesh::Service::Service` | constructor |
+| `anaiero::sdk::mesh::Service::~Service` | destructor |
+| `anaiero::sdk::mesh::Service::authenticate` | method |
+| `anaiero::sdk::mesh::Service::authorize` | method |
+| `anaiero::sdk::mesh::Service::authorize_delivery` | method |
+| `anaiero::sdk::mesh::Service::authorize_artifact` | method |
+| `anaiero::sdk::mesh::Service::authorize_bootstrap` | method |
+| `anaiero::sdk::mesh::Service::bootstrap_accepted` | method |
+| `anaiero::sdk::mesh::Service::configure_grant` | method |
+| `anaiero::sdk::mesh::Service::grant` | method |
+| `anaiero::sdk::mesh::Service::subscribe` | method |
+| `anaiero::sdk::mesh::Service::next` | method |
+| `anaiero::sdk::mesh::Service::acknowledge` | method |
+| `anaiero::sdk::mesh::Service::receive` | method |
+| `anaiero::sdk::mesh::Service::received` | method |
+| `anaiero::sdk::mesh::Service::received_observation` | method |
+| `anaiero::sdk::mesh::Service::artifact_chunk` | method |
+| `anaiero::sdk::mesh::Service::receive_artifact` | method |
+| `anaiero::sdk::mesh::Service::offer_bootstrap` | method |
+| `anaiero::sdk::mesh::Service::install_bootstrap` | method |
+| `anaiero::sdk::mesh::Service::accept_bootstrap` | method |
+| `anaiero::sdk::mesh::Service::cancel_bootstrap` | method |
+| `anaiero::sdk::mesh::Service::review_receiver_retention` | method |
+| `anaiero::sdk::mesh::Service::receiver_retention` | method |
+| `anaiero::sdk::mesh::Service::activate_receiver_retention` | method |
+| `anaiero::sdk::mesh::Service::reclaim_receiver_retention` | method |
+| `anaiero::sdk::mesh::ScheduleKey` | struct |
+| `anaiero::sdk::mesh::SchedulerOptions` | struct |
+| `anaiero::sdk::mesh::FairScheduler` | class |
+| `anaiero::sdk::mesh::FairScheduler::FairScheduler` | constructor |
+| `anaiero::sdk::mesh::FairScheduler::~FairScheduler` | destructor |
+| `anaiero::sdk::mesh::FairScheduler::enqueue` | method |
+| `anaiero::sdk::mesh::FairScheduler::take` | method |
+| `anaiero::sdk::mesh::FairScheduler::cancel` | method |
+| `anaiero::sdk::mesh::FairScheduler::queued` | method |
+
+```cpp
+#pragma once
+#include "anaiero/sdk/lifecycle.hpp"
+
+namespace anaiero::sdk::mesh {
+// Authentication is asserted only by an authenticated transport adapter. Scope
+// and current authority are checked separately against the canonical store.
+struct AuthenticatedIdentity {
+  Digest certificate_sha256;
+  std::uint64_t certificate_expiry_unix_s=0;
+  bool verified=false;
+};
+struct Session {
+  std::string principal;
+  Digest certificate_sha256;
+  std::uint64_t credential_generation=0,certificate_expiry_unix_s=0,authority_expiry_unix_s=0;
+};
+struct Grant {
+  std::string principal;
+  EngineIdentity source;
+  std::uint64_t generation=1;
+  bool send=false,receive=false,bootstrap=false;
+  std::vector<Digest> artifacts;
+};
+struct Options {
+  std::size_t maximum_page_observations=16,maximum_page_bytes=24576;
+  std::size_t maximum_artifact_bytes=8U*1024U*1024U,maximum_artifacts=32;
+};
+struct DeliveryItem {evidence::ObservationClaim claim;Bytes payload;};
+struct Delivery {
+  std::string subscription_id;
+  std::uint64_t generation=0;
+  EngineIdentity source;
+  lifecycle::Cursor from,to;
+  std::vector<DeliveryItem> observations;
+};
+struct ReceiveReceipt {
+  lifecycle::Cursor cursor;
+  std::uint64_t generation=0,store_generation=0;
+  Digest receipt_sha256;
+  bool duplicate=false;
+};
+struct TransferCost {std::uint64_t bytes=0,work=0;};
+struct ArtifactChunk {
+  Digest digest;
+  std::uint64_t offset=0,total_bytes=0;
+  Bytes bytes;
+};
+struct BootstrapOffer {
+  std::string id,subscription_id;
+  std::uint64_t generation=0,lease_until_unix_s=0;
+  EngineIdentity source;
+  lifecycle::Cursor tip;
+  Digest checkpoint_sha256;
+  Bytes checkpoint;
+};
+// Trusted local receiver retention is explicit and bounded. An observation
+// interval must contain complete received pages (at most 32 observations).
+// Artifact/checkpoint expiry never removes source authority or retry identities.
+struct ReceiverRetentionRequest {
+  std::string id,principal;
+  lifecycle::SourceRef source;
+  std::uint64_t first_sequence=0,last_sequence=0;
+  std::vector<Digest> artifacts;
+  std::vector<std::string> bootstrap_ids;
+  // Extra copies received under overlapping subscriptions are selected by
+  // their returned receipt digest, without an unbounded historical scan.
+  std::vector<Digest> delivery_receipts={};
+};
+struct ReceiverRetentionPlan {
+  ReceiverRetentionRequest request;
+  lifecycle::MaintenancePhase phase=lifecycle::MaintenancePhase::reviewed;
+  std::string store_id;
+  Digest reviewed_root,candidate_sha256;
+  std::uint64_t reviewed_generation=0,expected_bytes=0;
+  std::vector<Digest> objects;
+};
+Bytes encode_delivery(const Delivery&);
+Result decode_delivery(std::string_view,Delivery&,const Options& options={});
+Bytes encode_grant(const Grant&);
+Result decode_grant(std::string_view,Grant&);
+Bytes encode_bootstrap(const BootstrapOffer&);
+Result decode_bootstrap(std::string_view,BootstrapOffer&,std::size_t maximum_bytes=8U*1024U*1024U);
+
+// All calls execute on the same serialized storage lane as engine commits.
+// No transport, OS handle or background thread is owned by this domain service.
+// Receive receipts identify the authenticated relay; they never assert an
+// original-author signature which has not been independently verified.
+class Service {
+  struct Impl;std::unique_ptr<Impl> impl_;
+public:
+  explicit Service(evidence::ICommitStore&,Options options={});
+  ~Service();
+  Result authenticate(const AuthenticatedIdentity&,std::string_view principal,
+                      std::uint64_t now_unix_s,Session&) const;
+  Result authorize(const Session&,const lifecycle::SourceRef&,bool sending,
+                   std::uint64_t now_unix_s,Grant* grant=nullptr) const;
+  Result authorize_delivery(const Session&,const Delivery&,std::uint64_t now_unix_s) const;
+  Result authorize_artifact(const Session&,const lifecycle::SourceRef&,std::string_view digest,
+                            std::uint64_t now_unix_s) const;
+  Result authorize_bootstrap(const Session&,const BootstrapOffer&,std::uint64_t now_unix_s) const;
+  Result bootstrap_accepted(const Session&,std::string_view subscription_id,std::uint64_t generation,
+                            std::string_view checkpoint_sha256,const lifecycle::Cursor&,
+                            std::uint64_t now_unix_s) const;
+  Result configure_grant(const Grant&,std::uint64_t expected_generation,
+                         std::string operation_id);
+  Result grant(std::string_view principal,const lifecycle::SourceRef&,Grant&) const;
+  Result subscribe(const Session&,const lifecycle::Subscription&,
+                   std::uint64_t now_unix_s);
+  Result next(const Session&,std::string_view subscription_id,std::uint64_t generation,
+              std::uint64_t now_unix_s,Delivery&,TransferCost&);
+  Result acknowledge(const Session&,const Delivery&,std::uint64_t now_unix_s);
+  Result receive(const Session&,const Delivery&,std::uint64_t now_unix_s,ReceiveReceipt&);
+  Result received(std::string_view principal,std::string_view subscription_id,
+                  const lifecycle::SourceRef&,ReceiveReceipt&) const;
+  // Relay evidence has its own indexed canonical namespace. Installing a
+  // bootstrap advances its cursor without inventing locally observed events.
+  Result received_observation(std::string_view principal,const lifecycle::SourceRef&,
+                              std::uint64_t sequence,DeliveryItem&) const;
+  Result artifact_chunk(const Session&,const lifecycle::SourceRef&,std::string_view digest,
+                        std::uint64_t offset,std::size_t maximum_bytes,
+                        std::uint64_t now_unix_s,ArtifactChunk&,TransferCost&);
+  Result receive_artifact(const Session&,const lifecycle::SourceRef&,std::string_view digest,
+                          Bytes bytes,std::uint64_t now_unix_s,ReceiveReceipt&);
+  Result offer_bootstrap(const Session&,std::string subscription_id,std::uint64_t generation,
+                        const lifecycle::SourceRef&,std::uint64_t lease_until_unix_s,
+                        std::uint64_t now_unix_s,BootstrapOffer&);
+  Result install_bootstrap(const Session&,const BootstrapOffer&,std::uint64_t now_unix_s,
+                          ReceiveReceipt&);
+  Result accept_bootstrap(const Session&,const BootstrapOffer&,std::uint64_t now_unix_s);
+  // Trusted local maintenance; releasing a live transfer must follow transport
+  // cancellation. Expiry alone does not assert that a reader released its data.
+  Result cancel_bootstrap(std::string_view offer_id,std::string operation_id);
+  // Review is a canonical immutable plan; activation rejects every intervening
+  // store mutation. Current cursors/projections, live pins and all other roots
+  // remain protective. Reclamation can resume after interruption; expired
+  // reads/retries return HISTORY_EXPIRED instead of recreating accepted data.
+  Result review_receiver_retention(const ReceiverRetentionRequest&,
+                                  std::string operation_id,ReceiverRetentionPlan&);
+  Result receiver_retention(std::string_view plan_id,ReceiverRetentionPlan&) const;
+  Result activate_receiver_retention(std::string_view plan_id,std::string operation_id);
+  Result reclaim_receiver_retention(std::string_view plan_id,std::string operation_id);
+};
+
+// Cost-aware deficit round robin. Each connection has one queued bounded unit;
+// repeated connections share principal and source round budgets. The adapter
+// also reserves a separate bounded control queue for close and completion.
+struct ScheduleKey {std::uint64_t connection=0;std::string principal,source;};
+struct SchedulerOptions {
+  std::size_t maximum_connections=8;
+  std::uint64_t byte_quantum=32768,work_quantum=64;
+  std::uint64_t principal_byte_budget=65536,source_byte_budget=65536;
+  std::uint64_t principal_work_budget=4096,source_work_budget=4096;
+};
+class FairScheduler {
+  struct Impl;std::unique_ptr<Impl> impl_;
+public:
+  explicit FairScheduler(SchedulerOptions options={});
+  ~FairScheduler();
+  Result enqueue(ScheduleKey,TransferCost);
+  bool take(std::uint64_t& connection);
+  void cancel(std::uint64_t connection);
+  std::size_t queued() const noexcept;
+};
 }
 ```
 
@@ -1074,6 +1592,181 @@ public:
 // Process module entry point. Uses bounded chunked stdin/stdout framing and
 // exactly one engine per process. Diagnostics belong on stderr.
 int run_module_stdio(EngineDescriptor,std::shared_ptr<IEngineFactory>);
+}
+```
+
+## native_mesh.hpp
+
+| Public symbol | Kind |
+|---|---|
+| `anaiero::sdk::mesh::NativeCredentials` | struct |
+| `anaiero::sdk::mesh::AcknowledgementTiming` | struct |
+| `anaiero::sdk::mesh::IAcknowledgementObserver` | class |
+| `anaiero::sdk::mesh::IAcknowledgementObserver::~IAcknowledgementObserver` | destructor |
+| `anaiero::sdk::mesh::IAcknowledgementObserver::observe` | method |
+| `anaiero::sdk::mesh::NativeServerOptions` | struct |
+| `anaiero::sdk::mesh::NativeServerStatus` | struct |
+| `anaiero::sdk::mesh::NativeServer` | class |
+| `anaiero::sdk::mesh::NativeServer::NativeServer` | constructor |
+| `anaiero::sdk::mesh::NativeServer::~NativeServer` | destructor |
+| `anaiero::sdk::mesh::NativeServer::start` | method |
+| `anaiero::sdk::mesh::NativeServer::notify_commit` | method |
+| `anaiero::sdk::mesh::NativeServer::status` | method |
+| `anaiero::sdk::mesh::NativeServer::request_stop` | method |
+| `anaiero::sdk::mesh::NativeServer::stop` | method |
+| `anaiero::sdk::mesh::read_native_server_options` | function |
+| `anaiero::sdk::mesh::administer_native` | function |
+| `anaiero::sdk::mesh::submit_native_administration` | function |
+| `anaiero::sdk::mesh::NativeSubscriberOptions` | struct |
+| `anaiero::sdk::mesh::NativeSubscriberStatus` | struct |
+| `anaiero::sdk::mesh::NativeSubscriber` | class |
+| `anaiero::sdk::mesh::NativeSubscriber::NativeSubscriber` | constructor |
+| `anaiero::sdk::mesh::NativeSubscriber::~NativeSubscriber` | destructor |
+| `anaiero::sdk::mesh::NativeSubscriber::start` | method |
+| `anaiero::sdk::mesh::NativeSubscriber::status` | method |
+| `anaiero::sdk::mesh::NativeSubscriber::wait` | method |
+| `anaiero::sdk::mesh::NativeSubscriber::request_stop` | method |
+| `anaiero::sdk::mesh::NativeSubscriber::stop` | method |
+| `anaiero::sdk::mesh::fetch_native_artifact` | function |
+| `anaiero::sdk::mesh::install_native_bootstrap` | function |
+
+```cpp
+#pragma once
+#include "anaiero/sdk/host.hpp"
+#include "anaiero/sdk/mesh.hpp"
+
+namespace anaiero::sdk::mesh {
+struct NativeCredentials {std::string certificate_file,private_key_file,authority_file;};
+struct AcknowledgementTiming {
+  std::uint64_t elapsed_ns=0,subscription_generation=0,to_sequence=0;
+};
+// Borrowed bounded observation port, called on authenticated client workers.
+// Calls can overlap; implementations must be thread safe, nonblocking and must
+// not reenter transport or canonical storage. Elapsed time spans offered-page
+// write through durable acceptance of its exact ACK, including receiver work.
+class IAcknowledgementObserver {
+public:
+  virtual ~IAcknowledgementObserver()=default;
+  virtual void observe(const AcknowledgementTiming&) noexcept=0;
+};
+struct NativeServerOptions {
+  NativeCredentials credentials;
+  std::string address="127.0.0.1";
+  std::uint16_t port=0;
+  std::size_t maximum_clients=8,maximum_handshakes=4;
+  std::uint32_t handshake_timeout_ms=5000,io_timeout_ms=5000;
+  Options service;
+  IAcknowledgementObserver* acknowledgement_observer=nullptr;
+};
+struct NativeServerStatus {
+  std::uint64_t accepted_connections=0,rejected_connections=0,delivered_pages=0,
+                acknowledged_pages=0,delivered_bytes=0,charged_read_bytes=0,
+                owner_wakeups=0,availability_generation=0;
+  std::size_t handshakes=0,clients=0,queued_work=0;
+  bool running=false;
+  std::string address;
+  std::uint16_t port=0;
+};
+// Storage tasks execute through the host's bounded lane, after in-flight engine
+// commits. Transport workers never touch canonical state directly. notify_commit
+// is a coalescible signal, safe on the host's signal-only completion callback.
+class NativeServer {
+  struct Impl;std::unique_ptr<Impl> impl_;
+public:
+  NativeServer(host::IStoreTaskExecutor&,NativeServerOptions);
+  ~NativeServer();
+  Result start();
+  void notify_commit(std::uint64_t generation) noexcept;
+  NativeServerStatus status() const;
+  void request_stop() noexcept;
+  void stop() noexcept;
+};
+Result read_native_server_options(std::string_view path,NativeServerOptions&);
+// Local IPC/operator adapter only. The remote TLS protocol has no admin verb.
+Result administer_native(host::IStoreTaskExecutor&,std::string_view command,Bytes& response);
+Result submit_native_administration(host::IStoreTaskExecutor&,std::string command,
+                                    std::function<void(Result,Bytes)> completion);
+
+struct NativeSubscriberOptions {
+  NativeCredentials credentials;
+  std::string address="127.0.0.1",local_principal,remote_principal;
+  std::uint16_t port=0;
+  Digest server_certificate_sha256;
+  lifecycle::Subscription subscription;
+  std::uint32_t connect_timeout_ms=5000,io_timeout_ms=5000;
+  std::uint32_t minimum_retry_ms=100,maximum_retry_ms=5000;
+  // Zero runs until stopped. A finite target supports reproducible qualification.
+  std::uint64_t through_sequence=0;
+  Options service;
+};
+struct NativeSubscriberStatus {
+  std::uint64_t connections=0,reconnects=0,committed_pages=0,committed_bytes=0;
+  lifecycle::Cursor cursor;
+  bool running=false,blocked=false,completed=false;
+  Result result;
+};
+class NativeSubscriber {
+  struct Impl;std::unique_ptr<Impl> impl_;
+public:
+  NativeSubscriber(host::IStoreTaskExecutor&,NativeSubscriberOptions);
+  ~NativeSubscriber();
+  Result start();
+  NativeSubscriberStatus status() const;
+  Result wait(std::uint32_t timeout_ms) const;
+  void request_stop() noexcept;
+  void stop() noexcept;
+};
+// Finite artifact/bootstrap transfers use independent authenticated connections
+// and the same bounded scheduler. Every chunk is reauthorized before handoff.
+Result fetch_native_artifact(host::IStoreTaskExecutor&,const NativeSubscriberOptions&,
+                            std::string_view digest,ReceiveReceipt&);
+Result install_native_bootstrap(host::IStoreTaskExecutor&,const NativeSubscriberOptions&,
+                               std::uint64_t next_generation,ReceiveReceipt&);
+}
+```
+
+## native_session.hpp
+
+| Public symbol | Kind |
+|---|---|
+| `anaiero::sdk::host::NativeSession` | class |
+| `anaiero::sdk::host::NativeSession::NativeSession` | constructor |
+| `anaiero::sdk::host::NativeSession::~NativeSession` | destructor |
+| `anaiero::sdk::host::NativeSession::bind_catalog` | method |
+| `anaiero::sdk::host::NativeSession::open` | method |
+| `anaiero::sdk::host::NativeSession::ensure_engines` | method |
+| `anaiero::sdk::host::NativeSession::retain_host_artifact` | method |
+| `anaiero::sdk::host::NativeSession::runtime` | method |
+| `anaiero::sdk::host::NativeSession::runner` | method |
+| `anaiero::sdk::host::NativeSession::store` | method |
+| `anaiero::sdk::host::NativeSession::lifecycle` | method |
+
+```cpp
+#pragma once
+#include "anaiero/sdk/host.hpp"
+#include "anaiero/sdk/lifecycle.hpp"
+namespace anaiero::sdk::host {
+// Native composition for an already initialized canonical modular session.
+// Opening checks retained module/model identities and the persisted capacity.
+// No legacy/live-session format is silently migrated by this adapter.
+class NativeSession {
+  struct Impl;
+  std::unique_ptr<Impl> impl_;
+public:
+  NativeSession();
+  ~NativeSession();
+  // Validates the canonical selected build and its exact retained source
+  // witnesses before enabling any old logical engine identity. No raw alias
+  // can be supplied by the caller. Call before freezing the native catalog.
+  static Result bind_catalog(evidence::ICommitStore&,EngineModuleCatalog&);
+  Result open(std::string_view store_directory);
+  Result ensure_engines();
+  Result retain_host_artifact(std::string_view executable_path);
+  SessionService& runtime();
+  SessionRunner& runner();
+  evidence::ICommitStore& store();
+  lifecycle::Service& lifecycle();
+};
 }
 ```
 
@@ -1220,6 +1913,8 @@ public:
 | `anaiero::sdk::SessionService::pump` | method |
 | `anaiero::sdk::SessionService::step` | method |
 | `anaiero::sdk::SessionService::control` | method |
+| `anaiero::sdk::SessionService::review_migration` | method |
+| `anaiero::sdk::SessionService::apply_migration` | method |
 | `anaiero::sdk::SessionService::remove_retired` | method |
 | `anaiero::sdk::SessionService::scheduling_admission` | method |
 | `anaiero::sdk::SessionService::busy` | method |
@@ -1264,6 +1959,10 @@ public:
   Result pump();
   Result step(std::string_view instance_id,const StepRequest&,bool change=false);
   Result control(std::string_view instance_id,std::string operation_id,Phase phase);
+  // Review and activate a versioned checkpoint transformation on the session owner.
+  // The engine must be paused; an accepted transition preserves its tick/identity.
+  Result review_migration(std::string_view instance_id,const MigrationRequest&,MigrationPlan&);
+  Result apply_migration(std::string_view instance_id,const MigrationPlan&);
   Result remove_retired(std::string_view instance_id);
   Result scheduling_admission(std::string_view instance_id,bool& eligible) const;
   bool busy() const noexcept;
@@ -1333,6 +2032,14 @@ Result decode_session_definition(std::string_view,SessionDefinition&);
 |---|---|
 | `anaiero::sdk::evidence::MigrationReport` | struct |
 | `anaiero::sdk::evidence::migrate_legacy_evidence` | function |
+| `anaiero::sdk::evidence::CompactionOptions` | struct |
+| `anaiero::sdk::evidence::CompactionPlan` | struct |
+| `anaiero::sdk::evidence::CompactionReport` | struct |
+| `anaiero::sdk::evidence::preview_native_compaction` | function |
+| `anaiero::sdk::evidence::execute_native_compaction` | function |
+| `anaiero::sdk::evidence::resume_native_compaction` | function |
+| `anaiero::sdk::evidence::qualify_operation_id` | function |
+| `anaiero::sdk::evidence::inspect_native_operation_epoch` | function |
 
 ```cpp
 #pragma once
@@ -1352,6 +2059,54 @@ struct MigrationReport {
 // is explicitly reported outside the canonical store's quota.
 Result migrate_legacy_evidence(std::string_view source,std::string_view destination,
     const StoreOptions&,MigrationReport&);
+
+struct CompactionOptions {
+  std::string operation_id;
+  std::uint64_t expected_generation=any_generation;
+  Digest expected_root;
+  // Additional temporary bytes, separately checked against store and filesystem
+  // headroom. Pages and index work remain bounded while the history is scanned.
+  std::uint64_t working_budget_bytes=256ULL*1024ULL*1024ULL;
+  bool expire_operation_receipts=false;
+  // Automatic preserves the current layout. An explicit change is bound to
+  // the reviewed plan and built in the inactive index directory.
+  IndexLayout target_index_layout=IndexLayout::automatic;
+};
+struct CompactionPlan {
+  CompactionOptions options;
+  Digest plan_digest,source_root,source_base;
+  std::uint64_t generation=0,next_operation_epoch=0;
+  std::uint64_t accounted_bytes_before=0,required_working_bytes=0;
+  std::uint64_t retained_records=0,retained_blobs=0,retained_operations=0;
+  std::uint64_t summarized_record_versions=0,expired_observations=0;
+  std::uint64_t canonical_transactions_removed=0;
+};
+struct CompactionReport {
+  Digest plan_digest,canonical_base_digest;
+  std::uint64_t generation=0,operation_epoch=0;
+  std::uint64_t accounted_bytes_before=0,accounted_bytes_after=0;
+  std::uint64_t removed_transaction_bytes=0,removed_index_bytes=0;
+  std::uint64_t summarized_record_versions=0,expired_observations=0;
+  bool activated=false,cleanup_complete=false,already_complete=false;
+  // Sampled after both complete indexes exist, before older files are removed.
+  // Directory count excludes the store root. Only reported by the measured run.
+  bool coexistence_measured=false;
+  std::uint64_t coexistence_files=0,coexistence_directories=0;
+  std::uint64_t coexistence_old_index_files=0,coexistence_new_index_files=0;
+};
+// A maintenance scan creates a deterministic plan. Execution revalidates the
+// exact root/index/base and recomputes the plan before publication. All latest
+// records (including tombstones/authority), blob identity fences and source tips
+// remain protected; arbitrary identity cardinality still consumes finite quota.
+Result preview_native_compaction(ICommitStore&,const CompactionOptions&,CompactionPlan&);
+Result execute_native_compaction(ICommitStore&,const CompactionPlan&,CompactionReport&);
+Result resume_native_compaction(ICommitStore&,CompactionReport&);
+// Explicitly create a NEW operation identity after an operator rotates receipt
+// history. Never use this to relabel an unknown retry from an earlier epoch.
+std::string qualify_operation_id(std::uint64_t epoch,std::string_view logical_id);
+// Read-only format/epoch inspection for a caller holding a quiescent store lock.
+// Does not open a writer, repair a cache, or initialize missing storage.
+Result inspect_native_operation_epoch(std::string_view directory,std::uint64_t& epoch);
 }
 ```
 
@@ -1435,9 +2190,13 @@ masked with equal-length whitespace for parsing only; displayed source is unchan
 
 | Header | Line | Parser note |
 |---|---|---|
-| `engine.hpp` | 73 | `type_identifier: (missing syntax node)` |
-| `evidence.hpp` | 142 | `type_identifier: (missing syntax node)` |
-| `evidence.hpp` | 142 | `type_identifier: (missing syntax node)` |
-| `lifecycle.hpp` | 127 | `type_identifier: (missing syntax node)` |
-| `lifecycle.hpp` | 135 | `type_identifier: (missing syntax node)` |
-| `lifecycle.hpp` | 182 | `type_identifier: (missing syntax node)` |
+| `engine.hpp` | 100 | `type_identifier: (missing syntax node)` |
+| `evidence.hpp` | 180 | `type_identifier: (missing syntax node)` |
+| `evidence.hpp` | 180 | `type_identifier: (missing syntax node)` |
+| `host.hpp` | 77 | `type_identifier: (missing syntax node)` |
+| `lifecycle.hpp` | 160 | `type_identifier: (missing syntax node)` |
+| `lifecycle.hpp` | 168 | `type_identifier: (missing syntax node)` |
+| `lifecycle.hpp` | 233 | `type_identifier: (missing syntax node)` |
+| `mesh.hpp` | 78 | `type_identifier: (missing syntax node)` |
+| `mesh.hpp` | 91 | `type_identifier: (missing syntax node)` |
+| `mesh.hpp` | 157 | `type_identifier: (missing syntax node)` |

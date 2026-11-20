@@ -1,4 +1,5 @@
 // Composition and operator presentation for the compiled modular runtime.
+#include "anaiero/sdk/native_session.hpp"
 #include "anaiero/sdk/engine_files.hpp"
 #include "anaiero/sdk/evidence.hpp"
 #include "anaiero/sdk/experiments.hpp"
@@ -43,6 +44,28 @@ std::string json(std::string_view text){
   out<<'"';
   return out.str();
 }
+std::string_view index_layout_label(std::string_view backend) {
+  if (backend == "native-sealed-avl") return "node-files";
+  if (backend == "native-packed-pages/1") return "packed-pages";
+  return backend;
+}
+
+std::string_view target_layout_label(ev::IndexLayout layout) {
+  switch (layout) {
+    case ev::IndexLayout::single_node: return "node-files";
+    case ev::IndexLayout::packed_pages: return "packed-pages";
+    case ev::IndexLayout::automatic: return "preserve";
+  }
+  return "unknown";
+}
+
+s::Result parse_index_layout(std::string_view text, ev::IndexLayout& layout) {
+  if (text == "node-files") layout = ev::IndexLayout::single_node;
+  else if (text == "packed-pages") layout = ev::IndexLayout::packed_pages;
+  else return invalid("index layout must be node-files or packed-pages");
+  return {};
+}
+
 bool number(std::string_view text,std::uint64_t& value){
   const auto r=std::from_chars(text.data(),text.data()+text.size(),value);
   return !text.empty()&&r.ec==std::errc{}&&r.ptr==text.data()+text.size();
@@ -139,7 +162,6 @@ struct Application {
   s::Result open(std::string_view directory,bool create,std::string_view archive_path={},
                   std::uint64_t maximum_bytes=0){
     if(auto r=e::register_builtin_engines(catalog);!r)return r;
-    if(auto r=catalog.freeze();!r)return r;
     const fs::path directory_path(directory);
     if(!create&&!canonical_root_exists(directory_path))return {s::Code::not_found,"canonical store ROOT does not exist"};
     if(create&&!canonical_root_exists(directory_path)){
@@ -163,6 +185,8 @@ struct Application {
       if(auto r=ev::open_native_store(directory,options,store);!r)return r;
       if(store->info().store_id!=store_id)return {s::Code::conflict,"store identity changed while reopening its byte policy"};
     }
+    if(auto r=s::host::NativeSession::bind_catalog(*store,catalog);!r)return r;
+    if(auto r=catalog.freeze();!r)return r;
     if(!policy_exists&&create){
       ev::CommitBatch batch;batch.operation_id="session-storage-policy";
       const auto payload=s::pack({"store-budget/1",std::to_string(options.maximum_bytes)});
@@ -277,6 +301,8 @@ struct Application {
   }
   s::Result status(){
     const auto info=store->info();
+    life::CapacityStatus capacity;
+    if(auto r=lifecycle->capacity(capacity);!r)return r;
     life::Snapshot snapshot;
     const auto life_result=lifecycle->snapshot(snapshot);
     if(!life_result)return life_result;
@@ -285,13 +311,21 @@ struct Application {
     const auto progress=opened?runner->progress():s::SessionProgress{};
     std::cout<<"{\"schema\":\"anaiero.session-status/1\",\"evidence_class\":\"SIMULATED_UNCALIBRATED\",\"store_id\":"<<json(info.store_id)
       <<",\"generation\":"<<info.generation<<",\"index_generation\":"<<info.index_generation
-      <<",\"index_backend\":"<<json(info.index_backend)<<",\"accounted_bytes\":"<<info.physical_bytes
+      <<",\"index_backend\":"<<json(info.index_backend)<<",\"index_layout\":"<<json(index_layout_label(info.index_backend))<<",\"accounted_bytes\":"<<info.physical_bytes
       <<",\"quota_basis\":\"accounted_serialized_bytes\",\"maintenance_reserve_bytes\":"<<info.maintenance_reserve_bytes
       <<",\"ordinary_limit_bytes\":"<<info.ordinary_limit_bytes
+      <<",\"ordinary_remaining_bytes\":"<<capacity.ordinary_remaining_bytes
+      <<",\"maintenance_remaining_bytes\":"<<capacity.maintenance_remaining_bytes
+      <<",\"writable\":"<<(capacity.writable?"true":"false")<<",\"index_ready\":"<<(capacity.index_ready?"true":"false")
+      <<",\"retained_identity_policy\":\"preserve-authority-source-tombstone-and-exact-retry-identities\""
+      <<",\"canonical_base_generation\":"<<info.canonical_base_generation<<",\"canonical_base_sha256\":"<<json(info.canonical_base_digest)
+      <<",\"operation_epoch\":"<<info.operation_epoch<<",\"pending_reclamation_bytes\":"<<info.pending_reclamation_bytes
       <<",\"maximum_bytes\":"<<info.maximum_bytes<<",\"completed_cycles\":"<<progress.completed_cycles
       <<",\"cycle_pending\":"<<(progress.cycle_pending?"true":"false")
       <<",\"quarantined\":"<<(snapshot.quarantined?"true":"false")<<",\"incarnation\":"<<json(snapshot.incarnation)
       <<",\"lifetime_observations\":"<<snapshot.lifetime_observations<<",\"active_sources\":"<<snapshot.sources.size()
+      <<",\"active_peers\":"<<snapshot.active_peers<<",\"active_subscriptions\":"<<snapshot.active_subscriptions
+      <<",\"pins\":"<<snapshot.pins<<",\"pending_bootstraps\":"<<snapshot.pending_bootstraps
       <<",\"engines\":[";
     bool first=true;
     for(const auto& engine:runtime->view().engines){
@@ -561,16 +595,108 @@ s::Result admin(Application& app,const fs::path& file){
   }
   return invalid("unknown administration command; see the modular session guide");
 }
+s::Bytes encode_compaction_plan(const ev::CompactionPlan& p){
+  const bool explicit_layout = p.options.target_index_layout != ev::IndexLayout::automatic;
+  std::vector<std::string> fields{explicit_layout ? "anaiero.compaction-plan/2" : "anaiero.compaction-plan/1",p.options.operation_id,std::to_string(p.options.expected_generation),p.options.expected_root,
+    std::to_string(p.options.working_budget_bytes),p.options.expire_operation_receipts?"1":"0",p.plan_digest,p.source_root,p.source_base,
+    std::to_string(p.generation),std::to_string(p.next_operation_epoch),std::to_string(p.accounted_bytes_before),std::to_string(p.required_working_bytes),
+    std::to_string(p.retained_records),std::to_string(p.retained_blobs),std::to_string(p.retained_operations),std::to_string(p.summarized_record_versions),
+    std::to_string(p.expired_observations),std::to_string(p.canonical_transactions_removed)};
+  if (explicit_layout) fields.emplace_back(target_layout_label(p.options.target_index_layout));
+  return s::pack(fields);
+}
+s::Result decode_compaction_plan(std::string_view bytes,ev::CompactionPlan& p){
+  std::vector<std::string> f;
+  if (!s::unpack(bytes, f, 20, 16384) || f.empty()) return invalid("invalid compaction plan artifact");
+  const bool legacy = f[0] == "anaiero.compaction-plan/1" && f.size() == 19;
+  const bool explicit_layout = f[0] == "anaiero.compaction-plan/2" && f.size() == 20;
+  if ((!legacy && !explicit_layout) || (f[5]!="0"&&f[5]!="1")||
+     !s::valid_digest(f[6])||!s::valid_digest(f[7])||(!f[8].empty()&&!s::valid_digest(f[8])))return invalid("invalid compaction plan artifact");
+  p.options.target_index_layout = ev::IndexLayout::automatic;
+  if (explicit_layout) {
+    if (auto result = parse_index_layout(f.back(), p.options.target_index_layout); !result) return result;
+  }
+  p.options.operation_id=f[1];p.options.expected_root=f[3];p.options.expire_operation_receipts=f[5]=="1";
+  p.plan_digest=f[6];p.source_root=f[7];p.source_base=f[8];
+  const std::pair<std::size_t,std::uint64_t*> numbers[]={{2,&p.options.expected_generation},{4,&p.options.working_budget_bytes},
+    {9,&p.generation},{10,&p.next_operation_epoch},{11,&p.accounted_bytes_before},{12,&p.required_working_bytes},
+    {13,&p.retained_records},{14,&p.retained_blobs},{15,&p.retained_operations},{16,&p.summarized_record_versions},
+    {17,&p.expired_observations},{18,&p.canonical_transactions_removed}};
+  for(const auto& [index,value]:numbers)if(!number(f[index],*value)||std::to_string(*value)!=f[index])return invalid("noncanonical compaction plan number");
+  return {};
+}
+s::Result compaction_arguments(int argc, char** argv, ev::CompactionOptions& options) {
+  bool budget_supplied = false;
+  for (int i = 5; i < argc; ++i) {
+    const std::string_view argument = argv[i];
+    if (argument == "--index-layout") {
+      if (options.target_index_layout != ev::IndexLayout::automatic || i + 1 >= argc) {
+        return invalid("--index-layout requires one explicit target layout");
+      }
+      if (auto result = parse_index_layout(argv[++i], options.target_index_layout); !result) return result;
+    } else if (argument == "expire-receipts") {
+      if (options.expire_operation_receipts) return invalid("duplicate expire-receipts option");
+      options.expire_operation_receipts = true;
+    } else {
+      if (budget_supplied || !number(argument, options.working_budget_bytes) || options.working_budget_bytes < 65536) {
+        return invalid("invalid compaction working byte budget or option");
+      }
+      budget_supplied = true;
+    }
+  }
+  return {};
+}
+
+s::Result open_maintenance_store(std::string_view directory,std::unique_ptr<ev::ICommitStore>& store){
+  if(!canonical_root_exists(fs::path(directory)))return {s::Code::not_found,"canonical store ROOT does not exist"};
+  ev::StoreOptions options;std::string identity;
+  for(unsigned attempt=0;attempt<4;++attempt){
+    store.reset();
+    if(!canonical_root_exists(fs::path(directory)))return {s::Code::conflict,"canonical root disappeared during maintenance admission"};
+    if(auto r=ev::open_native_store(directory,options,store);!r)return r;
+    if(!identity.empty()&&identity!=store->info().store_id)return {s::Code::conflict,"store identity changed during maintenance admission"};
+    identity=store->info().store_id;
+    std::uint64_t persisted=0;bool exists=false;if(auto r=stored_budget(*store,persisted,exists);!r)return r;
+    if(!exists||persisted==options.maximum_bytes)return {};
+    options.maximum_bytes=persisted;
+  }
+  return {s::Code::busy,"store capacity policy changed repeatedly"};
+}
+s::Result compaction_receipt_admission(ev::ICommitStore& store,bool expire){
+  if(!expire)return {};
+  ev::StoredRecord session;const auto found=store.latest("session-definition","main",session);
+  if(found)return {s::Code::unsupported,"receipt epoch rotation requires an epoch-aware SDK client; this modular session retains its original operation namespace"};
+  if(found.code!=s::Code::not_found)return found;
+  ev::StoredRecord mesh;const auto runtime=store.latest("operator.runtime","canonical-mesh",mesh);
+  if(runtime)return {s::Code::unsupported,"built-in canonical mesh retains its original operation namespace; receipt epoch rotation requires an epoch-aware SDK client"};
+  if(runtime.code!=s::Code::not_found)return runtime;
+  std::vector<ev::StoredRecord> grants;bool more=false;
+  if(auto r=store.scan_latest("mesh.grant",{},{},1,grants,more);!r)return r;
+  if(!grants.empty())return {s::Code::unsupported,"retained mesh grants require the original operation namespace"};
+  return {};
+}
+void compaction_report(const ev::CompactionReport& r, const ev::StoreInfo& info){
+  std::cout<<"{\"compaction\":\"canonical-base\",\"plan_sha256\":"<<json(r.plan_digest)<<",\"canonical_base_sha256\":"<<json(r.canonical_base_digest)
+    <<",\"index_layout\":"<<json(index_layout_label(info.index_backend))
+    <<",\"generation\":"<<r.generation<<",\"operation_epoch\":"<<r.operation_epoch<<",\"accounted_bytes_before\":"<<r.accounted_bytes_before
+    <<",\"accounted_bytes_after\":"<<r.accounted_bytes_after<<",\"removed_transaction_bytes\":"<<r.removed_transaction_bytes
+    <<",\"removed_index_bytes\":"<<r.removed_index_bytes<<",\"summarized_record_versions\":"<<r.summarized_record_versions
+    <<",\"expired_observations\":"<<r.expired_observations<<",\"activated\":"<<(r.activated?"true":"false")
+    <<",\"cleanup_complete\":"<<(r.cleanup_complete?"true":"false")<<",\"already_complete\":"<<(r.already_complete?"true":"false")<<"}\n";
+}
 void help(){
   std::cout<<"Anaiero modular sessions\n"
     "  catalog\n  init CONFIG STORE [MAXIMUM_BYTES]\n  configure CONFIG STORE OPERATION\n  run STORE THROUGH_CYCLE\n  status STORE\n"
     "  change STORE INSTANCE OPERATION CHANGE_FILE\n  pause|resume|cancel STORE INSTANCE OPERATION\n"
+    "  migration-review STORE INSTANCE OPERATION TARGET_SCHEMA PLAN_FILE\n"
+    "  migration-activate STORE INSTANCE PLAN_FILE\n  migration-status STORE OPERATION\n"
     "  trial STORE INSTANCE TICKS [CHANGE_FILE]\n  export-plan STORE INSTANCE IMAGE RECEIPTS\n"
     "  select STORE INSTANCE EXPERIMENT_ID TICKS METRIC CHANGE_FILE [CHANGE_FILE...]\n"
     "  selection|resume-experiment STORE EXPERIMENT_ID\n  apply-selected|outcome|release-experiment STORE EXPERIMENT_ID OPERATION\n"
     "  audit|repair-index STORE [WORKING_BUDGET_BYTES]\n  capacity STORE MAXIMUM_BYTES OPERATION\n  admin STORE COMMAND_FILE [ARCHIVE_DIRECTORY]\n"
+    "  compact-review STORE OPERATION PLAN_FILE [WORKING_BUDGET_BYTES] [--index-layout node-files|packed-pages] [expire-receipts]\n  compact STORE PLAN_FILE\n  compact-resume STORE [RECOVERY_WORKING_BUDGET_BYTES]\n"
     "  migrate-evidence LEGACY_STORE NEW_STORE\n  restore SOURCE_STORE NEW_STORE OPERATION\n"
-    "  module-packages STORE [AFTER_MODULE]\n  export-artifact STORE SHA256 OUTPUT\n"
+    "  module-packages|host-packages STORE [AFTER_PACKAGE]\n  export-artifact STORE SHA256 OUTPUT\n"
     "  export-state STORE INSTANCE FILE\n"
     "Run uses an absolute committed cycle target. Restart and repeat the same target to finish interrupted work.\n"
     "Changes and controls require stable caller operation IDs. Plan and model artifacts are retained at init.\n";
@@ -589,7 +715,50 @@ s::Result execute(int argc,char** argv){
     return {};
   }
   if(argc<3)return invalid("store path is required");
-  if((command=="module-packages"&&(argc==3||argc==4))||(command=="export-artifact"&&argc==5)){
+  if(command=="compact-review"||command=="compact"||command=="compact-resume"){
+    if((command=="compact-review"&&(argc<5||argc>9))||(command=="compact"&&argc!=4)||(command=="compact-resume"&&(argc!=3&&argc!=4)))
+      return invalid("invalid canonical compaction command; see help");
+    if(command=="compact-resume"){
+      // The retained capacity policy is indexed. Recovery must first establish
+      // coverage from the canonical base; consulting latest() before repair
+      // would block the after-ROOT/before-index interruption it must recover.
+      if(!canonical_root_exists(argv[2]))return {s::Code::not_found,"canonical store ROOT does not exist"};
+      ev::StoreOptions recovery;
+      if(argc==4&&(!number(argv[3],recovery.maximum_bytes)||recovery.maximum_bytes<65536))return invalid("invalid compaction recovery working budget");
+      std::unique_ptr<ev::ICommitStore> store;if(auto r=ev::open_native_store(argv[2],recovery,store);!r)return r;
+      ev::CompactionReport report;const auto result=ev::resume_native_compaction(*store,report);
+      compaction_report(report,store->info());return result;
+    }
+    std::unique_ptr<ev::ICommitStore> store;if(auto r=open_maintenance_store(argv[2],store);!r)return r;
+    ev::CompactionPlan plan;
+    if(command=="compact-review"){
+      ev::CompactionOptions options;options.operation_id=argv[3];options.expected_generation=store->generation();options.expected_root=store->info().root_digest;
+      if (auto result = compaction_arguments(argc, argv, options); !result) return result;
+      if(auto r=compaction_receipt_admission(*store,options.expire_operation_receipts);!r)return r;
+      if(auto r=ev::preview_native_compaction(*store,options,plan);!r)return r;
+      if(auto r=e::write_new_artifact(argv[4],encode_compaction_plan(plan));!r)return r;
+      const auto source_backend = store->info().index_backend;
+      const auto target = options.target_index_layout == ev::IndexLayout::automatic
+                        ? index_layout_label(source_backend) : target_layout_label(options.target_index_layout);
+      std::cout<<"{\"compaction\":\"reviewed\",\"source_index_layout\":"<<json(index_layout_label(source_backend))
+        <<",\"target_index_layout\":"<<json(target)<<",\"plan_sha256\":"<<json(plan.plan_digest)<<",\"source_root\":"<<json(plan.source_root)
+        <<",\"source_generation\":"<<plan.generation<<",\"required_working_bytes\":"<<plan.required_working_bytes
+        <<",\"retained_records\":"<<plan.retained_records<<",\"retained_blob_identities\":"<<plan.retained_blobs
+        <<",\"retained_operations\":"<<plan.retained_operations<<",\"summarized_record_versions\":"<<plan.summarized_record_versions
+        <<",\"expired_observations\":"<<plan.expired_observations<<",\"transactions_removed\":"<<plan.canonical_transactions_removed
+        <<",\"next_operation_epoch\":"<<plan.next_operation_epoch<<",\"plan_file\":"<<json(argv[4])<<"}\n";
+      return {};
+    }
+    ev::CompactionReport report;s::Result result;
+    if(command=="compact"){
+      std::string bytes;if(!read_file(fs::path(argv[3]),bytes,16384))return invalid("cannot read bounded compaction plan artifact");
+      if(auto r=decode_compaction_plan(bytes,plan);!r)return r;
+      if(auto r=compaction_receipt_admission(*store,plan.options.expire_operation_receipts);!r)return r;
+      result=ev::execute_native_compaction(*store,plan,report);
+    }
+    compaction_report(report,store->info());return result;
+  }
+  if(((command=="module-packages"||command=="host-packages")&&(argc==3||argc==4))||(command=="export-artifact"&&argc==5)){
     if(!canonical_root_exists(argv[2]))return {s::Code::not_found,"canonical store ROOT does not exist"};
     std::unique_ptr<ev::ICommitStore> store;
     if(auto r=ev::open_native_store(argv[2],{},store);!r)return r;
@@ -599,14 +768,23 @@ s::Result execute(int argc,char** argv){
       return e::write_new_artifact(argv[4],bytes);
     }
     std::vector<ev::StoredRecord> records;bool more=false;
-    if(auto r=store->scan_latest("sdk.module-installation",{},argc==4?argv[3]:"",32,records,more);!r)return r;
+    const bool host_package=command=="host-packages";
+    if(auto r=store->scan_latest(host_package?"sdk.host-installation":"sdk.module-installation",{},argc==4?argv[3]:"",32,records,more);!r)return r;
     std::cout<<"{\"packages\":[";bool first=true;
     for(const auto& record:records){
       if(record.record.tombstone)continue;
-      if(!s::valid_digest(record.record.key)||!s::valid_digest(record.record.payload))return {s::Code::corrupt,"retained module package identity is invalid"};
+      s::Digest module=record.record.key,artifact=record.record.payload;
+      if(host_package){
+        std::vector<std::string> fields;
+        if(!s::unpack(record.record.payload,fields,3,1024)||fields.size()!=3||fields[0]!="native-host-package/1"||
+           record.record.key!=s::sha256(s::pack({fields[1],fields[2]})))return {s::Code::corrupt,"retained host package identity is invalid"};
+        module=fields[1];artifact=fields[2];
+      }
+      if(!s::valid_digest(module)||!s::valid_digest(artifact))return {s::Code::corrupt,"retained module package identity is invalid"};
       if(!first)std::cout<<',';
       first=false;
-      std::cout<<"{\"module_sha256\":"<<json(record.record.key)<<",\"artifact_sha256\":"<<json(record.record.payload)<<'}';
+      std::cout<<"{\"kind\":"<<json(host_package?"host":"session")<<",\"package_id\":"<<json(record.record.key)
+        <<",\"module_sha256\":"<<json(module)<<",\"artifact_sha256\":"<<json(artifact)<<'}';
     }
     std::cout<<"],\"more\":"<<(more?"true":"false")<<",\"after\":"<<json(records.empty()?"":records.back().record.key)<<"}\n";
     return {};
@@ -641,6 +819,8 @@ s::Result execute(int argc,char** argv){
     if(auto r=store->audit(report);!r)return r;
     std::cout<<"{\"audit\":\"verified\",\"generations\":"<<report.generations<<",\"records\":"<<report.records
       <<",\"blobs\":"<<report.blobs<<",\"expired_blobs\":"<<report.expired_blobs
+      <<",\"summarized_generations\":"<<report.summarized_generations<<",\"summarized_record_versions\":"<<report.summarized_record_versions
+      <<",\"expired_observations\":"<<report.expired_observations<<",\"base_pages\":"<<report.base_pages<<",\"canonical_base_sha256\":"<<json(report.canonical_base_digest)
       <<",\"canonical_records_read\":"<<report.canonical_records_read<<",\"index_nodes_read\":"<<report.index_nodes_read<<"}\n";
     return {};
   }
@@ -698,6 +878,65 @@ s::Result execute(int argc,char** argv){
   const std::string_view archive_path=command=="admin"&&argc==5?argv[4]:"";
   if(auto r=app.open(argv[2],false,archive_path);!r)return r;
   if(command=="status"&&argc==3){return app.status();
+  }
+  if(command=="migration-status"&&argc==4) {
+    ev::StoredRecord audit;
+    if(auto r=app.store->latest("sdk.engine-migration",argv[3],audit);!r)return r;
+    std::vector<std::string> fields;s::MigrationPlan plan;
+    if(audit.record.tombstone||!s::unpack(audit.record.payload,fields,3)||
+       fields.size()!=3||fields[0]!="engine-migration-receipt/1"||
+       !s::valid_digest(fields[2])||!s::decode_migration_plan(fields[1],plan)||
+       audit.record.references!=std::vector<s::Digest>{plan.source_checkpoint_sha256,plan.target_checkpoint_sha256})
+      return {s::Code::corrupt,"invalid retained migration receipt"};
+    std::cout<<"{\"migration\":\"committed\",\"instance\":"<<json(plan.identity.instance_id)
+      <<",\"operation\":"<<json(plan.request.operation_id)
+      <<",\"source_schema\":"<<json(plan.request.source_schema)
+      <<",\"target_schema\":"<<json(plan.request.target_schema)
+      <<",\"source_checkpoint_sha256\":"<<json(plan.source_checkpoint_sha256)
+      <<",\"target_checkpoint_sha256\":"<<json(plan.target_checkpoint_sha256)
+      <<",\"generation\":"<<audit.generation<<"}\n";
+    return {};
+  }
+  if(command=="migration-review"||command=="migration-activate") {
+    if((command=="migration-review"&&argc!=7)||(command=="migration-activate"&&argc!=5))
+      return invalid("invalid engine migration arguments; see help");
+    if(auto r=app.runner->open();!r)return r;
+    if(app.runner->progress().cycle_pending)
+      return {s::Code::busy,"finish the durable cycle before migration"};
+    if(auto r=app.ensure_engines();!r)return r;
+    if(command=="migration-review") {
+      auto* engine=app.runtime->find(argv[3]);
+      if(!engine)return {s::Code::not_found,"migration engine not found"};
+      auto* migrator=engine->migrations();
+      if(!migrator)return {s::Code::unsupported,"engine has no migration capability"};
+      s::MigrationRequest request{argv[4],engine->state().revision,engine->state().checkpoint.schema,
+        argv[5],std::string(migrator->implementation_sha256()),{"anaiero.migration-parameters/1",{}}};
+      s::MigrationPlan plan;
+      if(auto r=app.runtime->review_migration(argv[3],request,plan);!r)return r;
+      const auto bytes=s::encode_migration_plan(plan);
+      if(bytes.empty())return {s::Code::corrupt,"review produced an invalid migration plan"};
+      if(auto r=e::write_new_artifact(argv[6],bytes);!r)return r;
+      std::cout<<"{\"migration\":\"reviewed\",\"instance\":"<<json(argv[3])
+        <<",\"source_schema\":"<<json(request.source_schema)
+        <<",\"target_schema\":"<<json(request.target_schema)
+        <<",\"source_checkpoint_sha256\":"<<json(plan.source_checkpoint_sha256)
+        <<",\"target_checkpoint_sha256\":"<<json(plan.target_checkpoint_sha256)
+        <<",\"plan_sha256\":"<<json(s::sha256(bytes))
+        <<",\"plan_file\":"<<json(argv[6])<<"}\n";
+      return {};
+    }
+    std::string bytes;
+    if(!read_file(fs::path(argv[4]),bytes,4U*1024U*1024U+16384U))
+      return invalid("cannot read bounded migration plan");
+    s::MigrationPlan plan;
+    if(auto r=s::decode_migration_plan(bytes,plan);!r)return r;
+    const auto applied=app.runtime->apply_migration(argv[3],plan);
+    if(applied.committed())
+      std::cout<<"{\"migration\":\"committed\",\"instance\":"<<json(argv[3])
+        <<",\"operation\":"<<json(plan.request.operation_id)
+        <<",\"target_checkpoint_sha256\":"<<json(plan.target_checkpoint_sha256)
+        <<",\"generation\":"<<app.store->info().generation<<"}\n";
+    return applied;
   }
   if(command=="run"&&argc==4){std::uint64_t through=0;
   if(!number(argv[3],through))return invalid("invalid absolute cycle target");

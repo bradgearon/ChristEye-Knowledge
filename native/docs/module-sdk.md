@@ -25,6 +25,15 @@ native module and built-in engine providers are separate targets. Public SDK
 headers live under `anaiero/sdk/`; the old `anaiero/` and `christeye/` implementation
 trees are not installed as SDK headers.
 
+`anaiero_mesh_service` includes typed `ReceiverRetentionRequest` and
+`ReceiverRetentionPlan` records plus review/status/activate/reclaim operations.
+They use the same serialized store lane as delivery, preserve current roots and
+immutable ownership/retry identities, and expose explicit expired-history results.
+See the [receiver retention guide](continuous-mesh.md#review-and-reclaim-receiver-history)
+for bounded pages, overlapping receipts and interruption recovery. Native package
+selection is an operator service behind the host commands; it adds no operating
+system or package-parser dependency to these domain SDK contracts.
+
 The installed `share/anaiero/examples/independent-sdk` project builds a new engine
 without modifying or including Anaiero core sources. It exercises linked, native
 module and supervised process delivery. Its counter and deliberately failing
@@ -171,6 +180,35 @@ owned child through native Windows/Linux process supervision, and a fresh proces
 can restore the last committed checkpoint. The supervision boundary does not
 claim an OS security sandbox or an enforced child-memory/CPU quota.
 
+## Continuous host and authenticated mesh
+
+`host.hpp` exposes `NativeContinuousHost`, bounded control/status records and
+`IStoreTaskExecutor`. `native_session.hpp` provides native composition for an
+already initialized canonical modular session. Borrowed runtime/runner/store
+objects outlive the host and are never called concurrently outside its ownership
+boundary. Accepted storage jobs own their captures, reserve completion capacity
+and complete exactly once. Stop closes admission and drains accepted jobs.
+
+`mesh.hpp` is the portable canonical mesh service and cost-aware scheduler.
+`native_mesh.hpp` is the optional native authenticated adapter. It submits
+storage tasks to the same host lane used by engines, and consumes coalesced
+commit availability signals. Native transport and platform headers remain
+outside the installed SDK. Link `anaiero::anaiero_mesh_native` only in the
+optional mesh profile; `anaiero::anaiero_mesh_service` remains transport-free.
+
+Signal-only wake callbacks must not reenter the host or inspect the borrowed
+store. Local administration has a nonblocking submission API with owned result
+bytes; its synchronous convenience adapter is for a separate caller, not the
+serialized IPC/status handler. Peer/session/grant records do not authorize
+remote arbitrary code execution. See [continuous mesh](continuous-mesh.md) and
+[CE-SW-39](../../docs/software/CE-SW-39_continuous_native_operation.md) for concrete
+host composition, lifecycle, retries and profile limits.
+
+`storage_tools.hpp` also exposes reviewed canonical compaction. Existing
+operation identities remain valid when receipts are retained. Explicit receipt
+expiry requires an application-owned new intent/operation namespace; fetching
+the current epoch and automatically stamping an uncertain retry is incorrect.
+
 ## Verification limits
 
 The conformance tests cover canonical codecs, an engine absent from the core,
@@ -180,3 +218,30 @@ ABI rejection, process deadline termination and checkpoint reconstruction.
 They are deterministic engineering checks. Sustained resource qualification,
 continuous authenticated mesh scheduling and empirical scientific validation
 have their own gates and are not implied by passing this SDK suite.
+
+## Versioned checkpoint migrations (CE-SW-43)
+
+An engine may optionally implement `IMigrationCapability` and return it through `IEngine::migrations()`.
+This is for **state-bearing checkpoint schema changes within an unchanged engine/module identity**.
+It is intentionally separate from ordinary `IChangeCapability` and from package selection.
+
+1. Declare both source and target checkpoint schemas in the registered `EngineDescriptor`.
+2. Implement `implementation_sha256()` to return a stable, versioned algorithm fingerprint declared by the module, and
+   `prepare_migration()` to calculate a deterministic staged `PreparedTransition`.
+3. Pause the engine under the session owner. Build a `MigrationRequest` with the exact expected revision,
+   source/target schemas, implementation digest, typed parameters and unique operation ID.
+4. Call `SessionService::review_migration(instance,request,plan)`, then
+   `SessionService::apply_migration(instance,plan)`. The latter recomputes the candidate and checks
+   both checkpoint digests before one canonical guarded commit. Previous and new checkpoint blobs
+   remain referenced by the indexed `sdk.engine-migration` receipt.
+5. Resume normal engine work after a successful migration, or recover the canonical store before retrying
+   the **same** operation ID if the commit result is uncertain.
+
+Migrations must preserve the paused phase, configuration, source identity, and logical tick. The
+engine's normal `restore()` and `install()` must accept both checkpoint representations during
+the migration transition. Past metrics are not rewritten and the Projector is not an authority.
+
+A source-to-target schema conversion is **not** an engine binary hot swap, publisher signature,
+semantic validation of learned ability, or a general downgrade mechanism. For implementation
+and an executable v1→v2 example see
+[CE-SW-43](../../docs/software/CE-SW-43_versioned_engine_checkpoint_evolution.md).

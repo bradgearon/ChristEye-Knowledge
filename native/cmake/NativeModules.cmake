@@ -17,7 +17,7 @@ function(anaiero_sdk_target target)
   endif()
 endfunction()
 
-add_library(anaiero_contracts STATIC src/sdk/contracts.cpp)
+add_library(anaiero_contracts STATIC src/sdk/contracts.cpp src/sdk/migration.cpp)
 anaiero_sdk_target(anaiero_contracts)
 add_library(anaiero_catalog STATIC src/sdk/catalog.cpp)
 anaiero_sdk_target(anaiero_catalog)
@@ -52,6 +52,9 @@ if(TARGET anaiero_evidence)
 endif()
 include(${CMAKE_CURRENT_LIST_DIR}/NativeLifecycle.cmake OPTIONAL)
 include(${CMAKE_CURRENT_LIST_DIR}/NativeEngines.cmake OPTIONAL)
+include(${CMAKE_CURRENT_LIST_DIR}/NativeHost.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/NativeContinuousMesh.cmake OPTIONAL)
+include(${CMAKE_CURRENT_LIST_DIR}/NativeQualification.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/ModularSessionTests.cmake)
 
 install(TARGETS anaiero_contracts anaiero_catalog anaiero_projection anaiero_runtime anaiero_experiments
@@ -59,7 +62,7 @@ install(TARGETS anaiero_contracts anaiero_catalog anaiero_projection anaiero_run
   EXPORT AnaieroTargets ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(DIRECTORY sdk/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(FILES docs/module-sdk.md docs/canonical-evidence.md docs/modular-lifecycle.md
-  docs/sdk-reference.md DESTINATION ${CMAKE_INSTALL_DATADIR}/anaiero)
+  docs/sdk-reference.md docs/continuous-mesh.md DESTINATION ${CMAKE_INSTALL_DATADIR}/anaiero)
 configure_package_config_file(${CMAKE_CURRENT_LIST_DIR}/AnaieroConfig.cmake.in
   ${CMAKE_CURRENT_BINARY_DIR}/AnaieroConfig.cmake
   INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Anaiero)
@@ -71,6 +74,19 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/AnaieroConfig.cmake ${CMAKE_CURRENT_BI
 install(DIRECTORY tests/sdk_consumer/ DESTINATION ${CMAKE_INSTALL_DATADIR}/anaiero/examples/independent-sdk)
 
 if(CE_WIND_BUILD_TESTS)
+  # CE-SW-43: actual v1 -> v2 checkpoint conversion and committed recovery.
+  add_executable(anaiero_engine_migration_tests tests/engine_migration_tests.cpp)
+  anaiero_sdk_target(anaiero_engine_migration_tests)
+  target_link_libraries(anaiero_engine_migration_tests PRIVATE anaiero_runtime anaiero_storage_native)
+  add_test(NAME anaiero_engine_migration COMMAND anaiero_engine_migration_tests
+    "${CMAKE_CURRENT_BINARY_DIR}/engine-migration-tests")
+  set_tests_properties(anaiero_engine_migration PROPERTIES TIMEOUT 120 LABELS "migration;recovery")
+  add_test(NAME anaiero_engine_migration_cli COMMAND ${CMAKE_COMMAND}
+    "-DCE_SESSION=$<TARGET_FILE:ce_modular_session>"
+    "-DCE_REPO=${CMAKE_CURRENT_SOURCE_DIR}/.."
+    "-DCE_TEMP=${CMAKE_CURRENT_BINARY_DIR}/engine-migration-cli"
+    -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/engine_migration_cli_smoke.cmake")
+  set_tests_properties(anaiero_engine_migration_cli PROPERTIES TIMEOUT 180 LABELS "migration;cli")
   add_library(anaiero_independent_native MODULE tests/sdk_consumer/provider.cpp)
   anaiero_sdk_target(anaiero_independent_native)
   target_compile_definitions(anaiero_independent_native PRIVATE ANAIERO_MODULE_BUILD)

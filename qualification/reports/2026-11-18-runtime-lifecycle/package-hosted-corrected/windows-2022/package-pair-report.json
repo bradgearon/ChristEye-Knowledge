@@ -1,0 +1,12 @@
+{
+  "schema":"anaiero.package-pair/1",
+  "passed":true,
+  "migration":"compatibility-binding/1",
+  "old_build":"d71cc7ad517f6e8e2a92848cabd38048befb38d1088bf4673656f0ecbaefc6c9",
+  "new_build":"51b3d8cae36d44bfa09329fe0b1712aec07b6df2d09e5aa9e5a52f8e074ae51e",
+  "old_executable_sha256":"579b30ece9b550877252d44e5b8d8fccd6b73a642eca1c4a2ac2b41e3dff0bcf",
+  "new_executable_sha256":"53f1d3ffea06b9f864b257fe0bced1da4f9bed2c6b80125947c1d353e497d694",
+  "compatibility_sha256":"7e08001b0e932f3fbfd439ee11226b5c123ebd9a83a7130c9a131d11739d5e37",
+  "cycles_before_rollback":4,
+  "cycles_after_rollback":5
+}

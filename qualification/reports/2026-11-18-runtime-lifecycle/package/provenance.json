@@ -1,0 +1,61 @@
+{
+  "schema": "anaiero.local-package-proof/1",
+  "base_commit_before_changes": "d742d556b636cf21cdef34898fc30e5fff9c0729",
+  "git_commit_matching_every_source_file_in_a_build_manifest": "a8131574e6e4024ea92ecd17e31a69aa0f59530c",
+  "compiler": "GNU 14.2.0",
+  "system": "Linux x86_64",
+  "configuration": "Release",
+  "controller_only": true,
+  "mesh_enabled": false,
+  "build_manifest_input_count": 279,
+  "compatibility_manifest_input_count": 130,
+  "only_different_pinned_source": [
+    "src/host/release_notice.txt"
+  ],
+  "old_and_new_compatibility_manifests_byte_identical": true,
+  "old_and_new_complete_project_dependency_closures_validated_against_fixture_sources": true,
+  "unit_log_derivation": "Only replace the local absolute CTest build path with <build>; execution counts and durations are unchanged.",
+  "scope": "Two actual locally compiled and installed binaries. Companion CTest results use the integrated local build; real service installation/switch control is a separate hosted gate.",
+  "artifacts": [
+    {
+      "file": "anaiero-builtin-manifest-a.txt",
+      "bytes": 30585,
+      "sha256": "3c2eca366662c32986a445ba4f3bb38650b78f6e9344eb34e1c5483195710291"
+    },
+    {
+      "file": "anaiero-builtin-manifest-b.txt",
+      "bytes": 30585,
+      "sha256": "590edbdfb644fb978f6e97328aba808bba0f58c65e6a88906c9d3a353ffec6c7"
+    },
+    {
+      "file": "anaiero-compatibility-manifest-a.txt",
+      "bytes": 13397,
+      "sha256": "d94e3f200c052c1076ec1f531ac9756f7ce460fab97950db7cd12a25ce0a0f90"
+    },
+    {
+      "file": "anaiero-compatibility-manifest-b.txt",
+      "bytes": 13397,
+      "sha256": "d94e3f200c052c1076ec1f531ac9756f7ce460fab97950db7cd12a25ce0a0f90"
+    },
+    {
+      "file": "deployment-ctest.normalized.log",
+      "bytes": 529,
+      "sha256": "c758ba8647d18e8d26cde64e4829856a07f54220819f4e71c3d79b7f2f31542f"
+    },
+    {
+      "file": "package-a-manifest.json",
+      "bytes": 17449,
+      "sha256": "b143e1536e1ff540360e2beab6dc0dc57f186674e0e8e4569b2c6cf521396df2"
+    },
+    {
+      "file": "package-b-manifest.json",
+      "bytes": 17449,
+      "sha256": "ad860e29cae3653e7dbd95458f86fba5dce9cd693f33c41139ce77850f83d255"
+    },
+    {
+      "file": "package-pair-report.json",
+      "bytes": 602,
+      "sha256": "81c4478b07befa8548b31d8a2c1cf0d1b1b714bf90139b4d5fb7cab6f2d485c2"
+    }
+  ]
+}

@@ -1,0 +1,419 @@
+{
+  "complete": true,
+  "criterion": "Both native gates pass in each pair, fewer steady files and fewer coexisting nodes at each checkpoint, no additional commits over budget",
+  "device_sha256": "603756d6862519f884e89486b153ce9a90fcc33ffb38b9ca61c78ff4abb23ac9",
+  "executable_sha256": "31e51cecb73293e732e8f3921118b92b6d647eb4967a91edd7eef01bd9efe137",
+  "file_node_scope": "regular files plus directories at verified replacement before cleanup",
+  "order": "ABBA",
+  "pairs": [
+    {
+      "additional_over_budget_commits": 0,
+      "baseline": "1-node-files",
+      "candidate": "2-packed-pages",
+      "checkpoints": [
+        {
+          "fewer_coexisting_file_nodes": 1446,
+          "fewer_steady_files": 694,
+          "observations": 128
+        },
+        {
+          "fewer_coexisting_file_nodes": 2824,
+          "fewer_steady_files": 1378,
+          "observations": 256
+        }
+      ],
+      "passed": true
+    },
+    {
+      "additional_over_budget_commits": 0,
+      "baseline": "4-node-files",
+      "candidate": "3-packed-pages",
+      "checkpoints": [
+        {
+          "fewer_coexisting_file_nodes": 1446,
+          "fewer_steady_files": 694,
+          "observations": 128
+        },
+        {
+          "fewer_coexisting_file_nodes": 2824,
+          "fewer_steady_files": 1378,
+          "observations": 256
+        }
+      ],
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "profile_sha256": "66c681bdf45dc05fa5188d12b4ac12fd1a90a8e1f5e43b9406a3fa91c6621c94",
+  "runs": [
+    {
+      "admission": {
+        "disk": {
+          "allocated_bytes": 8192,
+          "allocated_bytes_available": true,
+          "allocation_unit_bytes": 4096,
+          "directories": 1,
+          "directory_allocated_bytes": 4096,
+          "directory_allocation_available": true,
+          "file_nodes_available": true,
+          "files": 4,
+          "filesystem_available_bytes": 54532980736,
+          "filesystem_file_nodes_available": 2417132,
+          "filesystem_total_bytes": 67586535424,
+          "logical_bytes": 1306,
+          "scope": "regular files plus separately reported directory allocation; excludes filesystem journal, inode-table and external metadata; filesystem free space is volume-wide"
+        },
+        "minimum_file_nodes": 1920,
+        "scope": "distinct payload files plus old and replacement single-node indexes; minimum only"
+      },
+      "build_identity": "babbdb396d4b62ef2f8388e201bfd50e72407bbeb8328cd3cb48ad873074da93",
+      "directory": "1-node-files",
+      "layout": "node-files",
+      "metrics": {
+        "checkpoints": [
+          {
+            "allocated_bytes": 3821568,
+            "coexistence_directories": 7,
+            "coexistence_files": 1732,
+            "compaction_ns": 716596898,
+            "directory_bytes": 118784,
+            "lookup_p99_upper_ns": {
+              "middle": 495522,
+              "oldest": 405094,
+              "recent": 554928
+            },
+            "new_index_files": 718,
+            "observations": 128,
+            "old_index_files": 789,
+            "reopen_ns": 234785,
+            "steady_directories": 7,
+            "steady_files": 872
+          },
+          {
+            "allocated_bytes": 7532544,
+            "coexistence_directories": 7,
+            "coexistence_files": 3325,
+            "compaction_ns": 1992525955,
+            "directory_bytes": 208896,
+            "lookup_p99_upper_ns": {
+              "middle": 957098,
+              "oldest": 652786,
+              "recent": 402244
+            },
+            "new_index_files": 1426,
+            "observations": 256,
+            "old_index_files": 1515,
+            "reopen_ns": 261701,
+            "steady_directories": 7,
+            "steady_files": 1718
+          }
+        ],
+        "commit": {
+          "allowed_above_limit": 0,
+          "limit_ns": 2000000000,
+          "method": "exact-nearest-rank-threshold/1",
+          "passed": true,
+          "percentile": 99,
+          "samples": 8,
+          "samples_above_limit": 0
+        },
+        "counts": {
+          "commit_over_budget": 0,
+          "commit_samples": 8,
+          "lookup_over_budget": 0,
+          "lookup_samples": 96
+        },
+        "peak_resident_bytes": 16674816,
+        "wall_ns": 10879365457,
+        "workload": {
+          "distinct_local_source_uids": 3,
+          "epochs": 4,
+          "observations": 256,
+          "receiver_expired_observations": 24,
+          "receiver_observations": 32
+        }
+      },
+      "report_sha256": "d5520ef34db424f640c9c5669d71d85e8f614670f6472f3b1d074c85fa6ca326",
+      "returncode": 0,
+      "usable": true,
+      "violations": []
+    },
+    {
+      "admission": {
+        "disk": {
+          "allocated_bytes": 8192,
+          "allocated_bytes_available": true,
+          "allocation_unit_bytes": 4096,
+          "directories": 1,
+          "directory_allocated_bytes": 4096,
+          "directory_allocation_available": true,
+          "file_nodes_available": true,
+          "files": 4,
+          "filesystem_available_bytes": 54527533056,
+          "filesystem_file_nodes_available": 2415279,
+          "filesystem_total_bytes": 67586535424,
+          "logical_bytes": 1306,
+          "scope": "regular files plus separately reported directory allocation; excludes filesystem journal, inode-table and external metadata; filesystem free space is volume-wide"
+        },
+        "minimum_file_nodes": 384,
+        "scope": "one distinct payload file per observation plus reserve; packed pages and metadata require additional headroom"
+      },
+      "build_identity": "babbdb396d4b62ef2f8388e201bfd50e72407bbeb8328cd3cb48ad873074da93",
+      "directory": "2-packed-pages",
+      "layout": "packed-pages",
+      "metrics": {
+        "checkpoints": [
+          {
+            "allocated_bytes": 1150976,
+            "coexistence_directories": 7,
+            "coexistence_files": 286,
+            "compaction_ns": 624148344,
+            "directory_bytes": 49152,
+            "lookup_p99_upper_ns": {
+              "middle": 1650172,
+              "oldest": 840821,
+              "recent": 821143
+            },
+            "new_index_files": 24,
+            "observations": 128,
+            "old_index_files": 37,
+            "reopen_ns": 309206,
+            "steady_directories": 7,
+            "steady_files": 178
+          },
+          {
+            "allocated_bytes": 2228224,
+            "coexistence_directories": 7,
+            "coexistence_files": 501,
+            "compaction_ns": 1632600039,
+            "directory_bytes": 65536,
+            "lookup_p99_upper_ns": {
+              "middle": 1179021,
+              "oldest": 1037170,
+              "recent": 1179060
+            },
+            "new_index_files": 48,
+            "observations": 256,
+            "old_index_files": 69,
+            "reopen_ns": 249697,
+            "steady_directories": 7,
+            "steady_files": 340
+          }
+        ],
+        "commit": {
+          "allowed_above_limit": 0,
+          "limit_ns": 2000000000,
+          "method": "exact-nearest-rank-threshold/1",
+          "passed": true,
+          "percentile": 99,
+          "samples": 8,
+          "samples_above_limit": 0
+        },
+        "counts": {
+          "commit_over_budget": 0,
+          "commit_samples": 8,
+          "lookup_over_budget": 0,
+          "lookup_samples": 96
+        },
+        "peak_resident_bytes": 15790080,
+        "wall_ns": 11906114307,
+        "workload": {
+          "distinct_local_source_uids": 3,
+          "epochs": 4,
+          "observations": 256,
+          "receiver_expired_observations": 24,
+          "receiver_observations": 32
+        }
+      },
+      "report_sha256": "4cfa353c6b2f1f35e260c9e63f25e09ac3f24ac5b920f6fd52fa62bec1285fbc",
+      "returncode": 0,
+      "usable": true,
+      "violations": []
+    },
+    {
+      "admission": {
+        "disk": {
+          "allocated_bytes": 8192,
+          "allocated_bytes_available": true,
+          "allocation_unit_bytes": 4096,
+          "directories": 1,
+          "directory_allocated_bytes": 4096,
+          "directory_allocation_available": true,
+          "file_nodes_available": true,
+          "files": 4,
+          "filesystem_available_bytes": 54517448704,
+          "filesystem_file_nodes_available": 2413503,
+          "filesystem_total_bytes": 67586535424,
+          "logical_bytes": 1306,
+          "scope": "regular files plus separately reported directory allocation; excludes filesystem journal, inode-table and external metadata; filesystem free space is volume-wide"
+        },
+        "minimum_file_nodes": 384,
+        "scope": "one distinct payload file per observation plus reserve; packed pages and metadata require additional headroom"
+      },
+      "build_identity": "babbdb396d4b62ef2f8388e201bfd50e72407bbeb8328cd3cb48ad873074da93",
+      "directory": "3-packed-pages",
+      "layout": "packed-pages",
+      "metrics": {
+        "checkpoints": [
+          {
+            "allocated_bytes": 1150976,
+            "coexistence_directories": 7,
+            "coexistence_files": 286,
+            "compaction_ns": 533941272,
+            "directory_bytes": 45056,
+            "lookup_p99_upper_ns": {
+              "middle": 721929,
+              "oldest": 1357705,
+              "recent": 1013618
+            },
+            "new_index_files": 24,
+            "observations": 128,
+            "old_index_files": 37,
+            "reopen_ns": 335978,
+            "steady_directories": 7,
+            "steady_files": 178
+          },
+          {
+            "allocated_bytes": 2228224,
+            "coexistence_directories": 7,
+            "coexistence_files": 501,
+            "compaction_ns": 1331673250,
+            "directory_bytes": 65536,
+            "lookup_p99_upper_ns": {
+              "middle": 1067331,
+              "oldest": 1321178,
+              "recent": 1272451
+            },
+            "new_index_files": 48,
+            "observations": 256,
+            "old_index_files": 69,
+            "reopen_ns": 235553,
+            "steady_directories": 7,
+            "steady_files": 340
+          }
+        ],
+        "commit": {
+          "allowed_above_limit": 0,
+          "limit_ns": 2000000000,
+          "method": "exact-nearest-rank-threshold/1",
+          "passed": true,
+          "percentile": 99,
+          "samples": 8,
+          "samples_above_limit": 0
+        },
+        "counts": {
+          "commit_over_budget": 0,
+          "commit_samples": 8,
+          "lookup_over_budget": 0,
+          "lookup_samples": 96
+        },
+        "peak_resident_bytes": 15622144,
+        "wall_ns": 10598353482,
+        "workload": {
+          "distinct_local_source_uids": 3,
+          "epochs": 4,
+          "observations": 256,
+          "receiver_expired_observations": 24,
+          "receiver_observations": 32
+        }
+      },
+      "report_sha256": "a048dfd93fc37befccb07c8757cff1addfa0cd768dba1ae141edec717f332546",
+      "returncode": 0,
+      "usable": true,
+      "violations": []
+    },
+    {
+      "admission": {
+        "disk": {
+          "allocated_bytes": 8192,
+          "allocated_bytes_available": true,
+          "allocation_unit_bytes": 4096,
+          "directories": 1,
+          "directory_allocated_bytes": 4096,
+          "directory_allocation_available": true,
+          "file_nodes_available": true,
+          "files": 4,
+          "filesystem_available_bytes": 54505926656,
+          "filesystem_file_nodes_available": 2411398,
+          "filesystem_total_bytes": 67586535424,
+          "logical_bytes": 1306,
+          "scope": "regular files plus separately reported directory allocation; excludes filesystem journal, inode-table and external metadata; filesystem free space is volume-wide"
+        },
+        "minimum_file_nodes": 1920,
+        "scope": "distinct payload files plus old and replacement single-node indexes; minimum only"
+      },
+      "build_identity": "babbdb396d4b62ef2f8388e201bfd50e72407bbeb8328cd3cb48ad873074da93",
+      "directory": "4-node-files",
+      "layout": "node-files",
+      "metrics": {
+        "checkpoints": [
+          {
+            "allocated_bytes": 3821568,
+            "coexistence_directories": 7,
+            "coexistence_files": 1732,
+            "compaction_ns": 582732962,
+            "directory_bytes": 122880,
+            "lookup_p99_upper_ns": {
+              "middle": 303297,
+              "oldest": 340684,
+              "recent": 422960
+            },
+            "new_index_files": 718,
+            "observations": 128,
+            "old_index_files": 789,
+            "reopen_ns": 241990,
+            "steady_directories": 7,
+            "steady_files": 872
+          },
+          {
+            "allocated_bytes": 7532544,
+            "coexistence_directories": 7,
+            "coexistence_files": 3325,
+            "compaction_ns": 1831103120,
+            "directory_bytes": 208896,
+            "lookup_p99_upper_ns": {
+              "middle": 518738,
+              "oldest": 452240,
+              "recent": 549054
+            },
+            "new_index_files": 1426,
+            "observations": 256,
+            "old_index_files": 1515,
+            "reopen_ns": 375728,
+            "steady_directories": 7,
+            "steady_files": 1718
+          }
+        ],
+        "commit": {
+          "allowed_above_limit": 0,
+          "limit_ns": 2000000000,
+          "method": "exact-nearest-rank-threshold/1",
+          "passed": true,
+          "percentile": 99,
+          "samples": 8,
+          "samples_above_limit": 0
+        },
+        "counts": {
+          "commit_over_budget": 0,
+          "commit_samples": 8,
+          "lookup_over_budget": 0,
+          "lookup_samples": 96
+        },
+        "peak_resident_bytes": 16588800,
+        "wall_ns": 9550481400,
+        "workload": {
+          "distinct_local_source_uids": 3,
+          "epochs": 4,
+          "observations": 256,
+          "receiver_expired_observations": 24,
+          "receiver_observations": 32
+        }
+      },
+      "report_sha256": "fa0164058c1919c61b0dd328287e7ed9e6fc30ebf7d688e8a5023d33ab75a623",
+      "returncode": 0,
+      "usable": true,
+      "violations": []
+    }
+  ],
+  "schema": "anaiero.index-comparison/1"
+}

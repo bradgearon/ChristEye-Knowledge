@@ -1,9 +1,9 @@
 name: Anaiero Modular Runtime and Evidence Lifecycle
 on:
   push:
-    paths: ['native/**', 'examples/runtime/**', 'tools/sdk-reference/**', '.github/workflows/native-modular.yml']
+    paths: ['native/**', 'examples/runtime/**', 'qualification/native/**', 'deployment/native/**', 'tools/sdk-reference/**', '.github/workflows/native-modular.yml']
   pull_request:
-    paths: ['native/**', 'examples/runtime/**', 'tools/sdk-reference/**', '.github/workflows/native-modular.yml']
+    paths: ['native/**', 'examples/runtime/**', 'qualification/native/**', 'deployment/native/**', 'tools/sdk-reference/**', '.github/workflows/native-modular.yml']
 permissions:
   contents: read
 jobs:
@@ -13,12 +13,13 @@ jobs:
       matrix:
         os: [ubuntu-24.04, windows-2022]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       - name: Configure native runtime and regression contracts
         run: cmake -S native -B build/modular -DCE_WIND_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_DISABLE_FIND_PACKAGE_Python3=TRUE
       - name: Build complete native distribution and installed SDK fixtures
+        id: distribution
         run: cmake --build build/modular --config Release --parallel 3
       - name: Verify modules, evidence, lifecycle, operator flow and existing behavior
         env:
@@ -28,6 +29,17 @@ jobs:
         run: cmake -S native -B build/controller -DANAIERO_CONTROLLER_ONLY=ON -DCE_WIND_BUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_DISABLE_FIND_PACKAGE_Python3=TRUE
       - name: Build controller profile
         run: cmake --build build/controller --config Release --parallel 3
+      - name: Declare the shared hosted measurement environment
+        run: cmake "-DANAIERO_DEVICE_OUTPUT=build/qualification-device.cevdevice" "-DANAIERO_DEVICE_NAME=hosted-${{ matrix.os }}" "-DANAIERO_CONCURRENT_WORK=GitHub-hosted environment; exclusivity is not established" "-DANAIERO_DURABILITY=Native software publication and flushes; no power-loss experiment" "-DANAIERO_DEPENDENCIES=Exact native build manifest retained with this run" -P native/cmake/CaptureNativeDevice.cmake
+      - name: Measure 100000 observations with predeclared exact latency thresholds
+        run: cmake "-DANAIERO_BUILD_DIR=build/modular" "-DANAIERO_PROFILE=qualification/native/evidence-100k-exact.cevqualification" "-DANAIERO_OUTPUT=build/qualification-100k" "-DANAIERO_DEVICE=build/qualification-device.cevdevice" "-DANAIERO_CONFIG=Release" -P native/cmake/RunNativeQualification.cmake
+      - name: Verify actual full-filesystem recovery in an isolated Linux volume
+        if: ${{ !cancelled() && steps.distribution.outcome == 'success' && runner.os == 'Linux' }}
+        run: bash qualification/native/run-isolated-pressure.sh build/modular/anaiero_storage_pressure_tests build/pressure-proof
+      - name: Verify actual full-filesystem recovery in an isolated Windows volume
+        if: ${{ !cancelled() && steps.distribution.outcome == 'success' && runner.os == 'Windows' }}
+        shell: pwsh
+        run: ./qualification/native/run-isolated-pressure.ps1 -TestExecutable build/modular/Release/anaiero_storage_pressure_tests.exe -ReportDirectory build/pressure-proof
       - name: Preserve native verification logs and module manifests
         if: always()
         uses: actions/upload-artifact@v4
@@ -36,7 +48,57 @@ jobs:
           path: |
             build/modular/Testing/Temporary/*.log
             build/modular/anaiero-builtin-manifest*.txt
+            build/modular/qualification-smoke/report.json
+            build/modular/qualification-smoke/profile.cevqualification
+            build/modular/mixed-qualification/report.json
+            build/modular/mixed-qualification/profile.cevqualification
+            build/modular/mixed-qualification/session-input.cevsession
+            build/modular/mixed-qualification/session.definition
+            build/modular/mixed-qualification/failed-run/report.json
+            build/modular/mixed-qualification/failed-run/profile.cevqualification
+            build/qualification-100k/report.json
+            build/qualification-100k/profile.cevqualification
+            build/qualification-100k/device.cevdevice
+            build/modular/qualification-exact/accepted/report.json
+            build/modular/qualification-exact/accepted/profile.cevqualification
+            build/modular/qualification-exact/accepted/device.cevdevice
+            build/modular/qualification-exact/failed/report.json
+            build/modular/scale-qualification-tests/**/*.json
+            build/modular/mixed-campaign-tests/**/*.json
+            build/modular/mixed-campaign-tests/normal/profile.cevqualification
+            build/modular/mixed-campaign-tests/normal/session-input.cevsession
+            build/modular/mixed-campaign-tests/normal/session.definition
+            build/modular/anaiero-compatibility-manifest*.txt
+            build/pressure-proof/report.json
+            build/pressure-proof/profile.txt
+            build/modular/native-package-tests/native package/package-manifest.json
           if-no-files-found: ignore
+  package-upgrades:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2022]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build actual release pair and verify upgrade and post-write rollback
+        run: cmake "-DCE_REPO=${{ github.workspace }}" "-DCE_TEMP=${{ runner.temp }}/anaiero-package-pair" -DCE_CONFIG=Release -P native/tests/native_package_upgrade_tests.cmake
+      - name: Exercise isolated native supervisor install, switch, recovery and removal
+        env:
+          ANAIERO_REQUIRE_SUPERVISOR: '1'
+        run: cmake "-DCE_REPO=${{ github.workspace }}" "-DCE_PAIR=${{ runner.temp }}/anaiero-package-pair" -P native/tests/native_supervisor_lifecycle.cmake
+      - name: Preserve actual release-pair and supervisor evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-package-upgrades-${{ matrix.os }}
+          path: |
+            ${{ runner.temp }}/anaiero-package-pair/package-pair-report.json
+            ${{ runner.temp }}/anaiero-package-pair/supervisor-report.json
+            ${{ runner.temp }}/anaiero-package-pair/package-*/package-manifest.json
+            ${{ runner.temp }}/anaiero-package-pair/package-*/share/anaiero/anaiero-*-manifest.txt
+          if-no-files-found: warn
   sdk-reference:
     runs-on: ubuntu-24.04
     steps:

@@ -12,7 +12,7 @@ bool schemas(const std::vector<std::string>& values,bool required=true) {
   return true;
 }
 bool has(const std::vector<std::string>& v,std::string_view s) {return std::find(v.begin(),v.end(),s)!=v.end();}
-class OwnedEngine final:public IEngine,public ITrialCapability,public IChangeCapability {
+class OwnedEngine final:public IEngine,public ITrialCapability,public IChangeCapability,public IMigrationCapability {
   // Owner (and any native image) outlives the engine and its virtual destructor.
   std::shared_ptr<IEngineFactory> owner_;
   std::unique_ptr<IEngine> inner_;
@@ -25,6 +25,13 @@ public:
   Result restore(const EngineState& s)override{return inner_->restore(s);}
   ITrialCapability* trials()noexcept override{return inner_->trials()?this:nullptr;}
   IChangeCapability* changes()noexcept override{return inner_->changes()?this:nullptr;}
+  IMigrationCapability* migrations()noexcept override{return inner_->migrations()?this:nullptr;}
+  std::string_view implementation_sha256()const noexcept override {
+    auto* capability=inner_->migrations();return capability?capability->implementation_sha256():std::string_view{};
+  }
+  Result prepare_migration(const MigrationRequest& r,PreparedTransition& t)override {
+    auto* capability=inner_->migrations();return capability?capability->prepare_migration(r,t):Result{Code::unsupported,"migration unavailable"};
+  }
   void request_cancel()noexcept override{inner_->request_cancel();}
   Result fork(std::unique_ptr<IEngine>& out)const override{
     auto* capability=inner_->trials();if(!capability)return {Code::unsupported,"isolated trials unavailable"};
@@ -40,10 +47,17 @@ public:
 struct EngineModuleCatalog::Impl {
   struct Entry {EngineDescriptor descriptor;std::shared_ptr<IEngineFactory> factory;};
   std::size_t capacity;bool frozen=false;std::vector<Entry> entries;
+  std::vector<std::pair<Digest,Digest>> compatible;
   explicit Impl(std::size_t value):capacity(value){}
 };
 EngineModuleCatalog::EngineModuleCatalog(std::size_t capacity):impl_(std::make_unique<Impl>(capacity)){}
 EngineModuleCatalog::~EngineModuleCatalog()=default;
+Result EngineModuleCatalog::allow_retained_module(std::string_view retained,std::string_view executing){
+  if(impl_->frozen||!valid_digest(retained)||!valid_digest(executing)||retained==executing)
+    return {Code::invalid,"invalid verified compatibility binding"};
+  if(impl_->compatible.size()==16)return {Code::capacity,"compatibility binding capacity"};
+  impl_->compatible.emplace_back(retained,executing);return {};
+}
 Result EngineModuleCatalog::add(EngineDescriptor d,std::shared_ptr<IEngineFactory> f){
   if(impl_->frozen)return {Code::conflict,"catalog is frozen"};
   if(!f||!valid_token(d.type_id)||d.display_name.empty()||d.display_name.size()>128||!valid_token(d.behavior_id)||
@@ -73,7 +87,9 @@ Result EngineModuleCatalog::create(const EngineIdentity& id,const Envelope& conf
   if(!impl_->frozen)return {Code::conflict,"catalog must be frozen before activation"};
   if(!valid_identity(id))return {Code::invalid,"invalid engine identity"};
   for(const auto& e:impl_->entries){const auto& d=e.descriptor;if(d.type_id!=id.type_id)continue;
-    if(id.module_sha256!=d.module_sha256||id.behavior_id!=d.behavior_id)return {Code::conflict,"pinned module/behavior mismatch"};
+    const bool compatible=std::find(impl_->compatible.begin(),impl_->compatible.end(),
+      std::pair<Digest,Digest>{id.module_sha256,d.module_sha256})!=impl_->compatible.end();
+    if((id.module_sha256!=d.module_sha256&&!compatible)||id.behavior_id!=d.behavior_id)return {Code::conflict,"pinned module/behavior mismatch"};
     if(!has(d.configuration_schemas,configuration.schema)||configuration.payload.size()>d.limits.max_payload_bytes)
       return {Code::unsupported,"configuration schema/bounds"};
     if(saved&&(!valid_state(*saved,d.limits)||saved->configuration!=configuration||!has(d.checkpoint_schemas,saved->checkpoint.schema)))

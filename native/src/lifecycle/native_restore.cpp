@@ -1,4 +1,5 @@
 #include "anaiero/sdk/lifecycle.hpp"
+#include "anaiero/sdk/storage_tools.hpp"
 #include "christeye/living/durable_io.hpp"
 #include <algorithm>
 #include <charconv>
@@ -178,6 +179,8 @@ Result restore_quarantined_store(std::string_view source_text,std::string_view d
     os::File source_lock;
     if(!source_lock.open(source/"WRITER")||!source_lock.lock_exclusive())fail(Code::busy,"restore source still has an active native store owner");
     const auto source_file_digest=sha256(read_file(source/"ROOT",16384));
+    std::uint64_t operation_epoch=0;require(evidence::inspect_native_operation_epoch(path_text(source),operation_epoch));
+    if(operation_epoch!=0)fail(Code::unsupported,"restore of an explicitly expired operation namespace requires an epoch-aware quarantine workflow");
     Intent intent{path_text(source),path_text(destination),operation,source_file_digest,{}, {}};
     const bool staged=fs::exists(stage,error);if(error)fail(Code::io_error,"cannot inspect restore staging");
     if(staged){

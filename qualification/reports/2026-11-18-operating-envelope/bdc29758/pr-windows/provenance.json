@@ -1,0 +1,78 @@
+{
+  "archive_only_files": [],
+  "artifact_created_at": "2026-11-18T23:55:22Z",
+  "artifact_digest": "sha256:9d1cc10c8db565811ddb6105fe02181e96d71ffef632b4bbf5b147dc78f93f24",
+  "artifact_id": 14483676307,
+  "artifact_name": "modular-native-windows-2022",
+  "artifact_reported_bytes": 82631,
+  "artifact_url": "https://github.com/bradgearon/ChristEye-Knowledge/actions/runs/44421242342/artifacts/14483676307",
+  "capture_kind": "synthetic",
+  "checkout_sha": "4fcd7fcbf18ea594336c87dcdb09da64069922b0",
+  "checkout_sha_source": "completed job checkout log: git log -1 --format=%H",
+  "files": [
+    {
+      "archive_path": "qualification-100k/report.json",
+      "bytes": 3887,
+      "path": "synthetic/report.json",
+      "sha256": "4a7a5f1445d1d1b23d900f646e7f227912008eff134f6545f1cb2a05d2968a3b"
+    },
+    {
+      "archive_path": "qualification-100k/profile.cevqualification",
+      "bytes": 441,
+      "path": "synthetic/profile.cevqualification",
+      "sha256": "40b24cc47571b3b348a88106943d8657c4ad5bd4ab9522182243998f8accb76e"
+    },
+    {
+      "archive_path": "modular/anaiero-builtin-manifest-Release.txt",
+      "bytes": 29256,
+      "path": "build-manifest.txt",
+      "sha256": "3d4e9be3872a8ded8b99885de37b831d03dd56cda9ea60d200cec91526311188"
+    },
+    {
+      "bytes": 28979,
+      "derivation": "CRLF to LF only",
+      "derived_from": "build-manifest.txt",
+      "path": "build-manifest.lf.txt",
+      "sha256": "cda8f20174a4526b3be11fa35c01ffd08bc54cdaea32b95d8c6fbb31e713f7a4"
+    }
+  ],
+  "job_id": 135214499520,
+  "job_name": "native-modular (windows-2022)",
+  "repository": "bradgearon/ChristEye-Knowledge",
+  "repository_retention": "Original artifact ZIP and selected raw files; explicitly derived LF manifest is labeled separately.",
+  "run_attempt": 1,
+  "run_id": 44421242342,
+  "run_url": "https://github.com/bradgearon/ChristEye-Knowledge/actions/runs/44421242342",
+  "runtime_head_sha": "bdc29758d5896d56d4f59122d78f909c404fd3c5",
+  "schema": "anaiero.ci-artifact-provenance/1",
+  "stdout_report": {
+    "allowed_normalization": "one trailing CRLF transport newline to LF only",
+    "bytes": 3887,
+    "sha256": "4a7a5f1445d1d1b23d900f646e7f227912008eff134f6545f1cb2a05d2968a3b",
+    "source": "https://github.com/bradgearon/ChristEye-Knowledge/actions/runs/44421242342/job/135214499520"
+  },
+  "trigger": "pull_request",
+  "verification": {
+    "all_profile_hashes_match": true,
+    "all_report_build_identities_match": true,
+    "all_session_hashes_match": null,
+    "build_identity_manifest_sha256": "cda8f20174a4526b3be11fa35c01ffd08bc54cdaea32b95d8c6fbb31e713f7a4",
+    "build_manifest_identity_normalization": "CRLF to LF only; CMake string(SHA256) hashes the in-memory LF manifest before Windows file(WRITE) emits CRLF",
+    "build_manifest_sha256": "3d4e9be3872a8ded8b99885de37b831d03dd56cda9ea60d200cec91526311188",
+    "mixed_negative_passed": null,
+    "mixed_negative_violations": null,
+    "mixed_positive_passed": null,
+    "raw_bytes_preserved": true,
+    "synthetic_passed": false,
+    "synthetic_stdout_matches_artifact_after_transport_newline": true,
+    "synthetic_violations": [
+      "batch commit p99 upper bound exceeds declared budget"
+    ]
+  },
+  "workflow_name": "Anaiero Modular Runtime and Evidence Lifecycle",
+  "zip": {
+    "bytes": 82631,
+    "path": "artifact.zip",
+    "sha256": "9d1cc10c8db565811ddb6105fe02181e96d71ffef632b4bbf5b147dc78f93f24"
+  }
+}

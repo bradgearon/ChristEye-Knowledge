@@ -105,6 +105,30 @@ static void colony_staging_changes_and_recovery(){
   auto next=prepare(*restored,engines::no_input(engines::multi_colony));CHECK(next.receipts.empty());
   CHECK(!fs::exists(temp/"modern"/"culture.state")); // New model execution has no independent authoritative store.
 }
+static void cell_checkpoint_migration() {
+  const auto config=cell_config();auto engine=create(engines::cell_behavior,config);
+  auto* migration=engine->migrations();CHECK(migration);
+  auto paused=engine->state();paused.phase=Phase::paused;paused.revision=1;
+  CHECK(engine->restore(paused));
+  MigrationRequest request{"cell-tagged-checkpoint",paused.revision,"CEVCELLSTATE/1","CEVCELLSTATE/2",
+    std::string(migration->implementation_sha256()),{"anaiero.migration-parameters/1",{}}};
+  const auto before=engine->state();PreparedTransition candidate;
+  CHECK(migration->prepare_migration(request,candidate));
+  CHECK(engine->state()==before);
+  CHECK(candidate.identity==engine->identity()&&candidate.target.tick==before.tick);
+  CHECK(candidate.target.revision==before.revision+1&&candidate.target.phase==Phase::paused);
+  CHECK(candidate.target.checkpoint.schema=="CEVCELLSTATE/2");
+  auto recovered=create(engines::cell_behavior,config,&candidate.target);
+  auto corrupted=candidate.target;corrupted.checkpoint.payload.back()^=1;
+  EngineIdentity identity=engine->identity();std::unique_ptr<IEngine> rejected;
+  CHECK(!catalog.create(identity,config,&corrupted,rejected));
+  auto resumed=candidate.target;resumed.phase=Phase::running;++resumed.revision;
+  CHECK(recovered->restore(resumed));
+  const auto next=prepare(*recovered,engines::cell_input(80,0,50,true));
+  CHECK(next.target.checkpoint.schema=="CEVCELLSTATE/2");
+  auto subsequent=create(engines::cell_behavior,config,&next.target);
+  CHECK(subsequent->state()==next.target);
+}
 static void plan_matches_interpreter_and_every_tick_restart(){
   const auto config=plan_config();auto engine=create(engines::vlm_plan,config);
   const auto initial=engine->state();
@@ -157,6 +181,6 @@ static void numerical_quantity_and_restore(){
 int main(int argc,char** argv){
   CHECK(argc==3);root=fs::canonical(argv[1]);temp=fs::absolute(argv[2]);fs::create_directories(temp);
   CHECK(engines::register_builtin_engines(catalog));CHECK(catalog.size()==5);CHECK(catalog.freeze());
-  cell_staging_and_trials();colony_staging_changes_and_recovery();plan_matches_interpreter_and_every_tick_restart();numerical_quantity_and_restore();
+  cell_staging_and_trials();cell_checkpoint_migration();colony_staging_changes_and_recovery();plan_matches_interpreter_and_every_tick_restart();numerical_quantity_and_restore();
   std::cout<<"Registered engine staging, VLM equivalence, complete SIM3 changes and numerical recovery passed\n";
 }

@@ -1,7 +1,7 @@
 #pragma once
 // Optional native Windows/Linux TLS1.3 transport. OpenSSL 3 owns cryptography;
 // operator enrollment and request authorization belong to separate services.
-// Lifecycle/I/O are single-owner. cancel() alone is thread-safe; join the owner
+// Lifecycle/I/O are single-owner. cancel()/notify_activity() are thread-safe; join the owner
 // before destroying a connection/listener. Contexts outlive their listeners.
 // Configure a Context before starting transport owners; do not reopen it until
 // all listeners and connections using it have stopped.
@@ -48,6 +48,7 @@ using mesh::Endpoint;
 enum class Role : std::uint8_t {server,client};
 struct Configuration {
   std::string certificate_file,private_key_file,authority_file;
+  std::string application_protocol="anaiero-mesh/1";
 };
 namespace detail {
 inline constexpr std::string_view kProtocol="anaiero-mesh/1";
@@ -275,16 +276,17 @@ inline BIO_METHOD* socket_bio_method() noexcept {
 class Context {
   SSL_CTX* value_=nullptr;
   Role role_=Role::client;
-  std::string fingerprint_,error_;
+  std::string fingerprint_,error_,protocol_="anaiero-mesh/1";
   std::uint64_t expiry_=0;
   friend class Connection;friend class Listener;
   static int alpn(SSL*,const unsigned char** selected,unsigned char* selected_size,
-                  const unsigned char* offered,unsigned int offered_size,void*) noexcept {
+                  const unsigned char* offered,unsigned int offered_size,void* argument) noexcept {
+    const auto& protocol=static_cast<const Context*>(argument)->protocol_;
     unsigned int offset=0;
     while(offset<offered_size){
       const auto size=static_cast<unsigned int>(offered[offset++]);
       if(size==0||size>offered_size-offset)return SSL_TLSEXT_ERR_ALERT_FATAL;
-      if(size==detail::kProtocol.size()&&std::memcmp(offered+offset,detail::kProtocol.data(),size)==0){
+      if(size==protocol.size()&&std::memcmp(offered+offset,protocol.data(),size)==0){
         *selected=offered+offset;*selected_size=static_cast<unsigned char>(size);return SSL_TLSEXT_ERR_OK;
       }
       offset+=size;
@@ -300,10 +302,10 @@ public:
   Context(const Context&)=delete;Context&operator=(const Context&)=delete;
   TransportCode open(const Configuration& config,Role role) noexcept {
     if(value_)SSL_CTX_free(value_);
-    value_=nullptr;fingerprint_.clear();expiry_=0;error_.clear();role_=role;
+    value_=nullptr;fingerprint_.clear();expiry_=0;error_.clear();role_=role;protocol_=config.application_protocol;
     ERR_clear_error();
     if((role!=Role::server&&role!=Role::client)||!detail::bounded_file(config.certificate_file)||!detail::bounded_file(config.private_key_file)||
-       !detail::bounded_file(config.authority_file))return fail(TransportCode::invalid,"invalid or oversized TLS credential file");
+       !detail::bounded_file(config.authority_file)||(protocol_!="anaiero-mesh/1"&&protocol_!="anaiero-mesh/2"))return fail(TransportCode::invalid,"invalid or oversized TLS credential file or application protocol");
     value_=SSL_CTX_new(TLS_method());
     if(!value_)return fail(TransportCode::tls_error,"TLS context allocation");
     if(SSL_CTX_set_min_proto_version(value_,TLS1_3_VERSION)!=1||
@@ -326,9 +328,13 @@ public:
        X509_cmp_current_time(X509_get0_notBefore(local))>=0||
        X509_cmp_current_time(X509_get0_notAfter(local))<=0)
       return fail(TransportCode::unverified_peer,"local certificate is outside its validity interval");
-    if(role==Role::server)SSL_CTX_set_alpn_select_cb(value_,alpn,nullptr);
-    else if(SSL_CTX_set_alpn_protos(value_,detail::kAlpn.data(),static_cast<unsigned>(detail::kAlpn.size()))!=0)
-      return fail(TransportCode::tls_error,"ALPN configuration");
+    if(role==Role::server)SSL_CTX_set_alpn_select_cb(value_,alpn,this);
+    else {
+      std::vector<unsigned char> encoded;encoded.push_back(static_cast<unsigned char>(protocol_.size()));
+      encoded.insert(encoded.end(),protocol_.begin(),protocol_.end());
+      if(SSL_CTX_set_alpn_protos(value_,encoded.data(),static_cast<unsigned>(encoded.size()))!=0)
+        return fail(TransportCode::tls_error,"ALPN configuration");
+    }
     return TransportCode::ok;
   }
   bool valid()const noexcept{return value_!=nullptr;}
@@ -349,7 +355,7 @@ class Connection {
   } peer_;
   detail::Socket socket_=detail::kInvalidSocket;
   SSL* ssl_=nullptr;
-  detail::Wakeup wakeup_;
+  detail::Wakeup wakeup_,activity_;
   std::string error_;
   friend class Listener;
   TransportCode fail(TransportCode code,std::string_view message) noexcept {
@@ -382,8 +388,8 @@ class Connection {
        SSL_get_verify_result(ssl_)!=X509_V_OK)return fail(TransportCode::unverified_peer,"TLS peer verification required");
     const unsigned char* protocol=nullptr;unsigned int protocol_size=0;
     SSL_get0_alpn_selected(ssl_,&protocol,&protocol_size);
-    if(protocol_size!=detail::kProtocol.size()||
-       std::memcmp(protocol,detail::kProtocol.data(),protocol_size)!=0)
+    if(protocol_size!=context.protocol_.size()||
+       std::memcmp(protocol,context.protocol_.data(),protocol_size)!=0)
       return fail(TransportCode::protocol_error,"mesh ALPN required");
     X509* certificate=SSL_get1_peer_certificate(ssl_);
     const bool identity=detail::certificate_identity(certificate,peer_.fingerprint_,peer_.expiry_);
@@ -422,12 +428,53 @@ public:
     ssl_=nullptr;detail::close_socket(socket_);socket_=detail::kInvalidSocket;
   }
   void cancel()noexcept {wakeup_.cancel();}
+  // Coalescible application availability notification, independent of stop.
+  // Only these two signal methods may run outside the connection's owner.
+  void notify_activity()noexcept {activity_.cancel();}
+  TransportCode wait_activity(std::uint32_t timeout_ms,bool& readable)noexcept {
+    readable=false;
+    if(!connected())return TransportCode::closed;
+    if(!detail::valid_timeout(timeout_ms)||!activity_.valid())return TransportCode::invalid;
+    if(wakeup_.cancelled())return TransportCode::cancelled;
+    if(activity_.cancelled()){activity_.reset();return TransportCode::ok;}
+    if(SSL_pending(ssl_)>0||SSL_has_pending(ssl_)){readable=true;return TransportCode::ok;}
+    const detail::Deadline deadline(timeout_ms);
+#ifdef _WIN32
+    const WSAEVENT socket_event=WSACreateEvent();if(socket_event==WSA_INVALID_EVENT)return TransportCode::io_error;
+    if(WSAEventSelect(socket_,socket_event,FD_READ|FD_CLOSE)!=0){WSACloseEvent(socket_event);return TransportCode::io_error;}
+    const HANDLE events[3]={wakeup_.handle(),activity_.handle(),socket_event};
+    const auto result=WaitForMultipleObjects(3,events,FALSE,static_cast<DWORD>(deadline.remaining_ms()));
+    WSAEventSelect(socket_,nullptr,0);WSACloseEvent(socket_event);
+    if(wakeup_.cancelled()||result==WAIT_OBJECT_0)return TransportCode::cancelled;
+    if(result==WAIT_OBJECT_0+1){activity_.reset();return TransportCode::ok;}
+    if(result==WAIT_TIMEOUT)return TransportCode::timeout;
+    if(result!=WAIT_OBJECT_0+2)return TransportCode::io_error;
+    readable=true;return TransportCode::ok;
+#else
+    pollfd descriptors[3]={{socket_,POLLIN,0},{wakeup_.handle(),POLLIN,0},{activity_.handle(),POLLIN,0}};
+    for(;;){
+      const auto result=::poll(descriptors,3,deadline.remaining_ms());
+      if(result<0){if(errno==EINTR&&deadline.remaining_ms())continue;return TransportCode::io_error;}
+      if(wakeup_.cancelled()||descriptors[1].revents)return TransportCode::cancelled;
+      if(descriptors[2].revents){activity_.reset();return TransportCode::ok;}
+      if(!result)return TransportCode::timeout;
+      if(descriptors[0].revents){readable=true;return TransportCode::ok;}
+    }
+#endif
+  }
   const IAuthenticatedPeer& peer()const noexcept{return peer_;}
   const std::string& last_error()const noexcept{return error_;}
   bool connected()const noexcept{return ssl_&&peer_.verified_;}
+  // The listener can hand a bounded raw TCP connection to a handshake worker.
+  // This call belongs to that worker; cancellation remains thread-safe.
+  TransportCode complete_server_handshake(Context& context,std::uint32_t timeout_ms) noexcept {
+    if(socket_==detail::kInvalidSocket||ssl_||!context.valid()||context.role_!=Role::server||!detail::valid_timeout(timeout_ms))
+      return TransportCode::invalid;
+    return handshake(context,detail::Deadline(timeout_ms),{});
+  }
   TransportCode connect(Context& context,const Endpoint& endpoint,std::string_view expected_server_sha256,
                         std::uint32_t timeout_ms) noexcept {
-    close();wakeup_.reset();error_.clear();
+    close();wakeup_.reset();activity_.reset();error_.clear();
     if(!context.valid()||context.role_!=Role::client||!endpoint.port||
        !detail::valid_timeout(timeout_ms)||!detail::digest(expected_server_sha256))
       return fail(TransportCode::invalid,"invalid TLS client configuration");
@@ -539,7 +586,7 @@ public:
   }
   TransportCode accept(Connection& output,std::uint32_t timeout_ms) noexcept {
     if(socket_==detail::kInvalidSocket||!context_||!detail::valid_timeout(timeout_ms))return TransportCode::invalid;
-    output.close();output.wakeup_.reset();output.error_.clear();
+    output.close();output.wakeup_.reset();output.activity_.reset();output.error_.clear();
     const detail::Deadline deadline(timeout_ms);
     detail::Socket accepted=detail::kInvalidSocket;
     for(;;){
@@ -558,6 +605,25 @@ public:
     {std::lock_guard lock(active_mutex_);accepting_=nullptr;}
     if(result!=TransportCode::ok)error_=output.last_error();
     return result;
+  }
+  // TCP accept is independent of TLS authentication. A slow unauthenticated
+  // peer occupies one bounded worker, never the sole socket accept owner.
+  TransportCode accept_socket(Connection& output,std::uint32_t timeout_ms) noexcept {
+    if(socket_==detail::kInvalidSocket||!context_||!detail::valid_timeout(timeout_ms))return TransportCode::invalid;
+    output.close();output.wakeup_.reset();output.activity_.reset();output.error_.clear();
+    const detail::Deadline deadline(timeout_ms);
+    for(;;){
+      if(wakeup_.cancelled())return TransportCode::cancelled;
+      if(!deadline.remaining_ms())return TransportCode::timeout;
+      const auto accepted=::accept(socket_,nullptr,nullptr);
+      if(accepted!=detail::kInvalidSocket){
+        if(!detail::prepare_socket(accepted)){detail::close_socket(accepted);return TransportCode::io_error;}
+        output.socket_=accepted;return TransportCode::ok;
+      }
+      if(!detail::would_block(detail::socket_error()))return TransportCode::io_error;
+      const auto status=detail::wait_socket(socket_,detail::Interest::accept,deadline,wakeup_);
+      if(status!=TransportCode::ok)return status;
+    }
   }
 };
 } // namespace anaiero::mesh::tls

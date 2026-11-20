@@ -1,0 +1,21 @@
+ANAIEROSCALEQUALIFICATION/1
+name=native-scale-maintenance-ci
+storage_label=CI ephemeral filesystem; hardware unspecified
+observations=256
+epochs=4
+batch_size=32
+payload_bytes=512
+query_samples=48
+checkpoints=128,256
+maximum_store_bytes=268435456
+maximum_disk_bytes=536870912
+maximum_files=200000
+maximum_resident_bytes=268435456
+maximum_commit_p99_us=2000000
+maximum_lookup_p99_us=250000
+maximum_reopen_us=5000000
+maximum_lookup_nodes=128
+receiver_pages_per_checkpoint=4
+receiver_page_observations=4
+retained_receiver_pages=2
+compaction_working_bytes=67108864
