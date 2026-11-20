@@ -63,6 +63,9 @@ Digest SessionEvidenceService::phase_request(const EngineIdentity& identity,
   return sha256(pack({"phase-control/1",encode_identity(identity),
     std::string(operation),std::string(phase_name(phase))}));
 }
+std::string SessionEvidenceService::detach_operation(const EngineIdentity& identity) const {
+  return "detach-"+sha256(encode_identity(identity));
+}
 Digest SessionEvidenceService::detach_request(const EngineIdentity& identity) const {
   return sha256(pack({"detach/1",encode_identity(identity)}));
 }
