@@ -1,6 +1,6 @@
 # Native canonical ledger and sealed ordered index. No database/Python runtime
 # or third-party download is required by the Windows/Linux controller profile.
-add_library(anaiero_evidence STATIC src/evidence/evidence.cpp)
+add_library(anaiero_evidence STATIC src/evidence/evidence.cpp src/evidence/migration_receipts.cpp src/evidence/migration_evidence_service.cpp src/evidence/session_evidence_service.cpp)
 anaiero_sdk_target(anaiero_evidence)
 target_link_libraries(anaiero_evidence PUBLIC anaiero_contracts PRIVATE Threads::Threads)
 add_library(anaiero_storage_native STATIC src/storage/sealed_index.cpp src/storage/packed_index.cpp src/storage/native_store.cpp src/storage/legacy_migration.cpp)

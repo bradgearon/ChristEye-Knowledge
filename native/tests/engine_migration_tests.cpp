@@ -2,6 +2,10 @@
 #include "anaiero/sdk/catalog.hpp"
 #include "anaiero/sdk/runtime.hpp"
 #include "anaiero/sdk/evidence.hpp"
+#include "anaiero/sdk/migration_receipts.hpp"
+#include "anaiero/sdk/migration_evidence_service.hpp"
+#include "anaiero/sdk/session_evidence_service.hpp"
+#include "anaiero/sdk/session_record_codec.hpp"
 #include <charconv>
 #include <filesystem>
 #include <iostream>
@@ -119,11 +123,23 @@ int main(int argc,char** argv) {
   const fs::path path=argv[1];fs::remove_all(path);
   std::unique_ptr<ev::ICommitStore> store;
   CHECK(ev::open_native_store(path.string(),{},store));
+  ev::MigrationEvidenceService migration_evidence(*store);
+  ev::SessionEvidenceService session_evidence(*store);
   s::EngineModuleCatalog catalog;CHECK(catalog.add(descriptor(),std::make_shared<Factory>()));
   CHECK(catalog.freeze());
   s::ProjectionService projection;s::SessionService runtime(catalog,*store,projection);
   const s::Envelope configuration{"counter.configuration/1","fixture"};
   CHECK(runtime.add_engine(identity("learner"),configuration));
+  s::PreparedTransition registration;
+  CHECK(session_evidence.registration(identity("learner"),runtime.find("learner")->state(),registration));
+  CHECK(registration.operation_id=="register-"+s::sha256(s::encode_identity(identity("learner"))));
+  CHECK(registration.request_sha256==s::sha256(s::pack({"register/1",
+    s::encode_identity(identity("learner")),s::encode_state(runtime.find("learner")->state())})));
+  CHECK(session_evidence.phase_request(identity("learner"),"pause-learner",s::Phase::paused)==
+    s::sha256(s::pack({"phase-control/1",s::encode_identity(identity("learner")),
+      "pause-learner","paused"})));
+  CHECK(session_evidence.detach_operation(identity("learner"))==
+    "detach-"+s::sha256(s::encode_identity(identity("learner"))));
   CHECK(runtime.step("learner",{"train-3",0,{"counter.add/1","3"}}));
   auto* engine=runtime.find("learner");CHECK(engine);
   std::uint64_t value=0;CHECK(state_value(engine->state(),value)&&value==3);
@@ -137,6 +153,14 @@ int main(int argc,char** argv) {
   CHECK(plan.identity==identity("learner"));
   CHECK(s::valid_digest(plan.source_checkpoint_sha256)&&s::valid_digest(plan.target_checkpoint_sha256));
   CHECK(plan.source_checkpoint_sha256!=plan.target_checkpoint_sha256);
+  s::EngineState stored_before;
+  CHECK(session_evidence.read_checkpoint(plan.source_checkpoint_sha256,plan.identity,stored_before));
+  CHECK(stored_before==before);
+  s::StepRequest migration_step;
+  CHECK(migration_evidence.request_step(plan.identity,plan.request,migration_step));
+  CHECK(migration_step.input.schema=="anaiero.engine-migration/1");
+  CHECK(s::request_digest(plan.identity,migration_step)==s::migration_request_digest(plan.identity,plan.request));
+  CHECK(migration_evidence.verify_plan(plan));
   s::MigrationPlan decoded;
   const auto encoded=s::encode_migration_plan(plan);
   CHECK(s::decode_migration_plan(encoded,decoded));
@@ -154,10 +178,40 @@ int main(int argc,char** argv) {
   CHECK(engine->state().tick==before.tick&&engine->state().phase==s::Phase::paused);
   CHECK(engine->state().checkpoint.schema=="counter.checkpoint/2");
   CHECK(state_value(engine->state(),value)&&value==3);
+  bool replayed=false;
+  CHECK(migration_evidence.accepted_retry(plan,replayed)&&replayed);
   CHECK(runtime.apply_migration("learner",plan)); // exact durable operation retry
   auto reused=plan;reused.request.parameters.payload="changed";
+  CHECK(migration_evidence.match_plans(plan,reused).code==s::Code::conflict);
   CHECK(runtime.apply_migration("learner",reused).code==s::Code::conflict);
   ev::StoredRecord audit;CHECK(store->latest("sdk.engine-migration","upgrade-learner",audit));
+  ev::StoredMigrationReceipt typed_audit;
+  CHECK(ev::read_migration_receipt(*store,"upgrade-learner",typed_audit));
+  CHECK(typed_audit.generation==audit.generation);
+  CHECK(s::encode_migration_plan(typed_audit.receipt.plan)==encoded);
+  CHECK(s::encode_migration_receipt(typed_audit.receipt)==audit.record.payload);
+  s::MigrationReceipt receipt_decoded;
+  CHECK(s::decode_migration_receipt(audit.record.payload,receipt_decoded));
+  CHECK(s::decode_migration_receipt(audit.record.payload+"x",receipt_decoded).code==s::Code::corrupt);
+  CHECK(s::encode_migration_receipt({plan,""}).empty());
+  s::SessionEngineRecord source_record{plan.identity,plan.source_checkpoint_sha256,plan.target_checkpoint_sha256};
+  const auto source_wire=s::encode_session_engine_record(source_record);
+  CHECK(source_wire==s::pack({"session-engine/1",s::encode_identity(plan.identity),
+    plan.source_checkpoint_sha256,plan.target_checkpoint_sha256}));
+  s::SessionEngineRecord engine_decoded;
+  CHECK(s::decode_session_engine_record(source_wire,engine_decoded));
+  CHECK(engine_decoded.identity==plan.identity);
+  CHECK(engine_decoded.checkpoint_sha256==plan.source_checkpoint_sha256);
+  CHECK(s::decode_session_engine_record(source_wire+"x",engine_decoded).code==s::Code::corrupt);
+  s::SessionMetricRecord metric_record{plan.identity,
+    {"counter.observation/1","count","dimensionless_count","count",3,0},2};
+  const auto metric_wire=s::encode_session_metric_record(metric_record);
+  CHECK(metric_wire==s::pack({"session-metric/1",s::encode_identity(plan.identity),
+    s::encode_observation(metric_record.observation),"2"}));
+  s::SessionMetricRecord metric_decoded;
+  CHECK(s::decode_session_metric_record(metric_wire,metric_decoded));
+  CHECK(metric_decoded.revision==2&&metric_decoded.observation.value==3);
+  CHECK(s::decode_session_metric_record(metric_wire+"x",metric_decoded).code==s::Code::corrupt);
   CHECK(audit.record.references.size()==2);
   CHECK(audit.record.references[0]==plan.source_checkpoint_sha256);
   CHECK(audit.record.references[1]==plan.target_checkpoint_sha256);

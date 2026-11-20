@@ -245,3 +245,45 @@ A source-to-target schema conversion is **not** an engine binary hot swap, publi
 semantic validation of learned ability, or a general downgrade mechanism. For implementation
 and an executable v1→v2 example see
 [CE-SW-43](../../docs/software/CE-SW-43_versioned_engine_checkpoint_evolution.md).
+
+### Codec and persistence boundaries
+
+The runtime service does not decode canonical engine, metric or migration-receipt
+framing. `session_record_codec.hpp` encodes/decodes versioned
+`session-engine/1` and `session-metric/1` records, while
+`migration_receipt_codec.hpp` handles the binary `engine-migration-receipt/1`
+payload. The typed `migration_receipts.hpp` evidence adapter owns
+`sdk.engine-migration` record keys, reference validation and generation
+lookup. `SessionService` owns migration eligibility, deterministic review,
+authorization and commit ordering; it never interprets the stored wire fields.
+The operator CLI prints typed migration status as JSON and does not parse
+migration receipt fields itself.
+
+No XML is present in this protocol: `pack`/`unpack` are Anaiero's existing
+length-prefixed binary framing. A future XML import/export adapter could use
+pugixml in infrastructure without changing the canonical store format.
+
+### Canonical integrity and cryptographic ownership
+
+`SessionService` coordinates the active engines, revision checks, commit
+sequencing, and the Projector. It no longer computes SHA-256, hashes encoded
+checkpoints, assembles canonical records or interprets migration receipts.
+
+`SessionEvidenceService` (`session_evidence_service.hpp`) owns checkpoint
+digest verification, canonical session transition records and immutable object
+references, deterministic engine registration and phase/detach operation
+identifiers, and the source-epoch metric namespace hash.
+
+`MigrationEvidenceService` (`migration_evidence_service.hpp`) owns
+canonical migration-request witnesses, source/target checkpoint digest checks,
+migration-plan equivalence, transition receipt construction, staged migration
+evidence and exact accepted retry verification. The underlying binary codecs
+and `migration_receipts` adapter remain responsible for versioned encoding and
+retained-record referential integrity.
+
+Both are compiled, native, typed evidence services; neither owns a thread,
+changes the independent Lotus authority boundary, or introduces a new source
+of truth. Both use Anaiero's existing SHA-256 implementation and sealed
+canonical store, preserving the exact established wire formats and operation
+identity digests. They do not create digital signatures or prove publisher
+authenticity.
