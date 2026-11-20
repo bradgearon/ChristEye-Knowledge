@@ -13,12 +13,12 @@ authoritative declaration text, including defaults, macros, annotations and
 inline definitions. A syntax index is not a substitute for compiling against
 the installed SDK. Operational rules are in [modular-lifecycle.md](modular-lifecycle.md).
 
-**Public-header manifest SHA-256:** `5b82ef503a2e69d3e598de823190c9efd5829849fd7f2b29f060c587c402f098`
+**Public-header manifest SHA-256:** `3fd2c31f9899e5875cf4550edb8afab4a7ab3e4ebab1ac21412bafd23758f2e4`
 
 | Header | SHA-256 |
 |---|---|
 | [catalog.hpp](../sdk/include/anaiero/sdk/catalog.hpp) | `b6ecea87ac83cdc4f29ed3d2030ba703840cacf944eb9bc9221124c5904bde18` |
-| [engine.hpp](../sdk/include/anaiero/sdk/engine.hpp) | `6c7f377106bea1d231d04423e9c302b8088808a0e0608f2361a78c16c217cf16` |
+| [engine.hpp](../sdk/include/anaiero/sdk/engine.hpp) | `aee1a43631d1afa7a79372193ed0a82e92326634cddd6c95ab4ece5ed6b7c09c` |
 | [engine_files.hpp](../sdk/include/anaiero/sdk/engine_files.hpp) | `c1a311a612733ded9d175472111ecdc4ad0e064ec59e91c68fac58dcf8b593cd` |
 | [engines.hpp](../sdk/include/anaiero/sdk/engines.hpp) | `2bf154a15f57beedb85a500ce8f7da6a878c9682d31fdaa52e60dbe6477ed0e4` |
 | [evidence.hpp](../sdk/include/anaiero/sdk/evidence.hpp) | `44cedf34e03fe3143e5e19c4d681c9197f7ff18256be7d0a4afd0296cb4f0722` |
@@ -33,7 +33,7 @@ the installed SDK. Operational rules are in [modular-lifecycle.md](modular-lifec
 | [native_session.hpp](../sdk/include/anaiero/sdk/native_session.hpp) | `d3c7fdf4b97e2549504e4dcf44a9b87468c2e29e4f596b0a724a4c88a9de0a0b` |
 | [observer.hpp](../sdk/include/anaiero/sdk/observer.hpp) | `956071d349b9e4e82599b055f1109c5e4aacf6beba02da1b723ee0cdff8afe3a` |
 | [projection.hpp](../sdk/include/anaiero/sdk/projection.hpp) | `d8304748739cef4086277b2c80615d685d87c2ea5536bd1d0f5d2c1933fbe9ca` |
-| [runtime.hpp](../sdk/include/anaiero/sdk/runtime.hpp) | `5130027301e56991dbe3540c839b9f1929f462c5787a30ab061825f02a4744bf` |
+| [runtime.hpp](../sdk/include/anaiero/sdk/runtime.hpp) | `e869e92dc516a1a2aee7d4ac938953ac55375299526ef8a420b05fe2622eb99d` |
 | [session_runner.hpp](../sdk/include/anaiero/sdk/session_runner.hpp) | `debc0606bc7a45ac80f5778b3281cdb857e5436973940bfd2eb0b634679093d8` |
 | [storage_tools.hpp](../sdk/include/anaiero/sdk/storage_tools.hpp) | `09ddd2bbb43645aba820d0e9001c2ac6cef43421c354fc57800e38a51761034e` |
 | [types.hpp](../sdk/include/anaiero/sdk/types.hpp) | `2d4d5d222c41e59ac3ff91dfbe7c388d68d2eb3bdacad77bb3eb8a6f71b202bb` |
@@ -98,11 +98,22 @@ public:
 | `anaiero::sdk::Observation` | struct |
 | `anaiero::sdk::Observation::operator==` | method |
 | `anaiero::sdk::StepRequest` | struct |
+| `anaiero::sdk::MigrationRequest` | struct |
+| `anaiero::sdk::MigrationPlan` | struct |
+| `anaiero::sdk::encode_migration_request` | function |
+| `anaiero::sdk::decode_migration_request` | function |
+| `anaiero::sdk::encode_migration_plan` | function |
+| `anaiero::sdk::decode_migration_plan` | function |
+| `anaiero::sdk::migration_request_digest` | function |
 | `anaiero::sdk::PreparedTransition` | struct |
 | `anaiero::sdk::IEngine` | class |
 | `anaiero::sdk::ITrialCapability` | struct |
 | `anaiero::sdk::ITrialCapability::~ITrialCapability` | destructor |
 | `anaiero::sdk::ITrialCapability::fork` | method |
+| `anaiero::sdk::IMigrationCapability` | struct |
+| `anaiero::sdk::IMigrationCapability::~IMigrationCapability` | destructor |
+| `anaiero::sdk::IMigrationCapability::implementation_sha256` | method |
+| `anaiero::sdk::IMigrationCapability::prepare_migration` | method |
 | `anaiero::sdk::IChangeCapability` | struct |
 | `anaiero::sdk::IChangeCapability::~IChangeCapability` | destructor |
 | `anaiero::sdk::IChangeCapability::prepare_change` | method |
@@ -114,6 +125,7 @@ public:
 | `anaiero::sdk::IEngine::restore` | method |
 | `anaiero::sdk::IEngine::trials` | method |
 | `anaiero::sdk::IEngine::changes` | method |
+| `anaiero::sdk::IEngine::migrations` | method |
 | `anaiero::sdk::IEngine::request_cancel` | method |
 | `anaiero::sdk::EngineDescriptor` | struct |
 | `anaiero::sdk::IEngineFactory` | struct |
@@ -170,6 +182,25 @@ struct StepRequest {
   std::uint64_t expected_revision=0;
   Envelope input;
 };
+// A migration changes a checkpoint schema under one pinned engine identity.
+// It does not authorize replacing the native module or reinterpret old metrics.
+struct MigrationRequest {
+  std::string operation_id;
+  std::uint64_t expected_revision=0;
+  std::string source_schema,target_schema;
+  Digest implementation_sha256;
+  Envelope parameters{"anaiero.migration-parameters/1",{}};
+};
+struct MigrationPlan {
+  EngineIdentity identity;
+  MigrationRequest request;
+  Digest source_checkpoint_sha256,target_checkpoint_sha256;
+};
+Bytes encode_migration_request(const MigrationRequest&);
+Result decode_migration_request(std::string_view,MigrationRequest&);
+Bytes encode_migration_plan(const MigrationPlan&);
+Result decode_migration_plan(std::string_view,MigrationPlan&);
+Digest migration_request_digest(const EngineIdentity&,const MigrationRequest&);
 struct PreparedTransition {
   EngineIdentity identity;
   std::string operation_id,request_sha256,expected_state_sha256;
@@ -182,6 +213,13 @@ class IEngine;
 struct ITrialCapability {
   virtual ~ITrialCapability()=default;
   virtual Result fork(std::unique_ptr<IEngine>& isolated) const=0;
+};
+struct IMigrationCapability {
+  virtual ~IMigrationCapability()=default;
+  // Module-declared migration algorithm fingerprint; not a publisher signature or byte attestation.
+  virtual std::string_view implementation_sha256() const noexcept=0;
+  // Pure preparation; no authoritative changes or durable side effects.
+  virtual Result prepare_migration(const MigrationRequest&,PreparedTransition&)=0;
 };
 struct IChangeCapability {
   virtual ~IChangeCapability()=default;
@@ -198,6 +236,7 @@ public:
   virtual Result restore(const EngineState& committed)=0;
   virtual ITrialCapability* trials() noexcept { return nullptr; }
   virtual IChangeCapability* changes() noexcept { return nullptr; }
+  virtual IMigrationCapability* migrations() noexcept { return nullptr; }
   virtual void request_cancel() noexcept {}
 };
 struct EngineDescriptor {
@@ -1874,6 +1913,8 @@ public:
 | `anaiero::sdk::SessionService::pump` | method |
 | `anaiero::sdk::SessionService::step` | method |
 | `anaiero::sdk::SessionService::control` | method |
+| `anaiero::sdk::SessionService::review_migration` | method |
+| `anaiero::sdk::SessionService::apply_migration` | method |
 | `anaiero::sdk::SessionService::remove_retired` | method |
 | `anaiero::sdk::SessionService::scheduling_admission` | method |
 | `anaiero::sdk::SessionService::busy` | method |
@@ -1918,6 +1959,10 @@ public:
   Result pump();
   Result step(std::string_view instance_id,const StepRequest&,bool change=false);
   Result control(std::string_view instance_id,std::string operation_id,Phase phase);
+  // Review and activate a versioned checkpoint transformation on the session owner.
+  // The engine must be paused; an accepted transition preserves its tick/identity.
+  Result review_migration(std::string_view instance_id,const MigrationRequest&,MigrationPlan&);
+  Result apply_migration(std::string_view instance_id,const MigrationPlan&);
   Result remove_retired(std::string_view instance_id);
   Result scheduling_admission(std::string_view instance_id,bool& eligible) const;
   bool busy() const noexcept;
@@ -2145,7 +2190,7 @@ masked with equal-length whitespace for parsing only; displayed source is unchan
 
 | Header | Line | Parser note |
 |---|---|---|
-| `engine.hpp` | 73 | `type_identifier: (missing syntax node)` |
+| `engine.hpp` | 100 | `type_identifier: (missing syntax node)` |
 | `evidence.hpp` | 180 | `type_identifier: (missing syntax node)` |
 | `evidence.hpp` | 180 | `type_identifier: (missing syntax node)` |
 | `host.hpp` | 77 | `type_identifier: (missing syntax node)` |
