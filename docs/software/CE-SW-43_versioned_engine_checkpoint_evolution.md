@@ -15,7 +15,7 @@ Cell Behavior now accepts a legacy CEVCELLSTATE/1 payload or a new CEVCELLSTATE/
 - SessionService::apply_migration recomputes and compares the reviewed result, then commits a new engine state plus indexed migration receipt in one guarded transaction.
 - Exact retry resolves the accepted operation and verifies its retained migration plan. Recovery reconstructs from the new checkpoint.
 
-The implementation digest is an exact *byte identity claim*, not an independently authenticated publisher signature or scientific-validity proof.
+The migration digest is a module-declared algorithm fingerprint, not proof of the compiled bytes or publisher. The separate exact module/build identity pins executable compatibility; neither proves scientific validity.
 
 ## Native session operator workflow
 
