@@ -12,7 +12,7 @@ bool valid(const Package& p){
     valid_digest(p.manifest_sha256)&&valid_digest(p.host_sha256)&&valid_digest(p.module_sha256);
 }
 Bytes package_wire(const Package& p){return pack({p.directory,p.manifest_sha256,p.host_sha256,p.module_sha256});}
-Result package_read(std::string_view bytes,Package& p,bool empty=false){
+Result package_read(std::string_view bytes,Package& p,bool empty){
   std::vector<std::string> f;
   if(!unpack(bytes,f,4,40000)||f.size()!=4)return {Code::corrupt,"invalid deployment package identity"};
   p={f[0],f[1],f[2],f[3]};
