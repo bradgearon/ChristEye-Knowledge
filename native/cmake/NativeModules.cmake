@@ -74,6 +74,13 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/AnaieroConfig.cmake ${CMAKE_CURRENT_BI
 install(DIRECTORY tests/sdk_consumer/ DESTINATION ${CMAKE_INSTALL_DATADIR}/anaiero/examples/independent-sdk)
 
 if(CE_WIND_BUILD_TESTS)
+  # CE-SW-43: actual v1 -> v2 checkpoint conversion and committed recovery.
+  add_executable(anaiero_engine_migration_tests tests/engine_migration_tests.cpp)
+  anaiero_sdk_target(anaiero_engine_migration_tests)
+  target_link_libraries(anaiero_engine_migration_tests PRIVATE anaiero_runtime anaiero_storage_native)
+  add_test(NAME anaiero_engine_migration COMMAND anaiero_engine_migration_tests
+    "${CMAKE_CURRENT_BINARY_DIR}/engine-migration-tests")
+  set_tests_properties(anaiero_engine_migration PROPERTIES TIMEOUT 120 LABELS "migration;recovery")
   add_library(anaiero_independent_native MODULE tests/sdk_consumer/provider.cpp)
   anaiero_sdk_target(anaiero_independent_native)
   target_compile_definitions(anaiero_independent_native PRIVATE ANAIERO_MODULE_BUILD)
