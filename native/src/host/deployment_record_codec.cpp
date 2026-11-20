@@ -53,6 +53,8 @@ Result decode_selection(std::string_view bytes,std::string_view expected_store,S
   result.operation_id=f[4];result.plan_sha256=f[5];out=std::move(result);return {};
 }
 }
+using recordcodec::body;using recordcodec::package_read;using recordcodec::validate;
+using recordcodec::number;
 Bytes encode_plan(const Plan& p){return pack({body(p),p.plan_sha256});}
 Result decode_plan(std::string_view bytes,Plan& p){
   std::vector<std::string> outer,f;Plan next;
