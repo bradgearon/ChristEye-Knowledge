@@ -72,63 +72,6 @@ public:
 };
 }
 
-Bytes encode_grant(const Grant& grant){
-  std::vector<std::string> f{"mesh-grant/2",grant.principal,encode_identity(grant.source),number(grant.generation),
-    grant.send?"1":"0",grant.receive?"1":"0",grant.bootstrap?"1":"0"};
-  f.insert(f.end(),grant.artifacts.begin(),grant.artifacts.end());return pack(f);
-}
-Result decode_grant(std::string_view bytes,Grant& grant){
-  std::vector<std::string> f;if(!unpack(bytes,f,39,32768)||f.size()<7||f[0]!="mesh-grant/2"||
-      !valid_token(f[1],256)||!decode_identity(f[2],grant.source)||!integer(f[3],grant.generation)||!grant.generation)
-    return fail(Code::corrupt,"invalid mesh scope grant");
-  for(std::size_t i=4;i<7;++i)if(f[i]!="0"&&f[i]!="1")return fail(Code::corrupt,"invalid mesh grant flag");
-  grant.principal=f[1];grant.send=f[4]=="1";grant.receive=f[5]=="1";grant.bootstrap=f[6]=="1";
-  grant.artifacts.assign(f.begin()+7,f.end());std::set<Digest> unique;
-  for(const auto& digest:grant.artifacts)if(!valid_digest(digest)||!unique.insert(digest).second)
-    return fail(Code::corrupt,"invalid mesh artifact grant");
-  return {};
-}
-Bytes encode_delivery(const Delivery& page){
-  std::vector<std::string> f{"mesh-page/2",page.subscription_id,number(page.generation),encode_identity(page.source),
-    encode_cursor(page.from),encode_cursor(page.to)};
-  for(const auto& item:page.observations)f.push_back(pack({number(item.claim.sequence),item.claim.payload_digest,
-    item.claim.receipt_digest,item.payload}));
-  return pack(f);
-}
-Result decode_delivery(std::string_view bytes,Delivery& page,const Options& options){
-  page={};std::vector<std::string> f;
-  if(!unpack(bytes,f,6+options.maximum_page_observations,options.maximum_page_bytes)||f.size()<7||f[0]!="mesh-page/2"||
-      !valid_token(f[1],256)||!integer(f[2],page.generation)||!page.generation||!decode_identity(f[3],page.source)||
-      !decode_cursor(f[4],page.from)||!decode_cursor(f[5],page.to))return fail(Code::invalid,"invalid bounded mesh page");
-  page.subscription_id=f[1];auto sequence=page.from.sequence;
-  for(std::size_t i=6;i<f.size();++i){
-    std::vector<std::string> item;DeliveryItem value;lc::SourceRef source;std::uint64_t observed_sequence=0;Observation observation;
-    if(!unpack(f[i],item,4,options.maximum_page_bytes)||item.size()!=4||!integer(item[0],value.claim.sequence)||
-       sequence==std::numeric_limits<std::uint64_t>::max()||value.claim.sequence!=++sequence||
-       !valid_digest(item[1])||!valid_digest(item[2])||sha256(item[3])!=item[1]||
-       !lc::decode_source_observation(item[3],source,observed_sequence,observation)||source!=scope(page.source)||observed_sequence!=sequence)
-      return fail(Code::corrupt,"mesh page observation identity, digest or continuity mismatch");
-    value.claim={page.source.source_uid,page.source.epoch,sequence,item[1],item[2]};value.payload=std::move(item[3]);
-    page.observations.push_back(std::move(value));
-  }
-  if(page.to!=lc::Cursor{sequence,page.observations.back().claim.payload_digest})
-    return fail(Code::corrupt,"mesh page terminal cursor differs from its bytes");
-  return {};
-}
-Bytes encode_bootstrap(const BootstrapOffer& offer){return pack({"mesh-bootstrap/2",offer.id,offer.subscription_id,
-  number(offer.generation),number(offer.lease_until_unix_s),encode_identity(offer.source),encode_cursor(offer.tip),
-  offer.checkpoint_sha256,offer.checkpoint});}
-Result decode_bootstrap(std::string_view bytes,BootstrapOffer& offer,std::size_t maximum){
-  std::vector<std::string> f;
-  if(!unpack(bytes,f,9,maximum)||f.size()!=9||f[0]!="mesh-bootstrap/2"||!valid_token(f[1],256)||!valid_token(f[2],256)||
-      !integer(f[3],offer.generation)||!offer.generation||!integer(f[4],offer.lease_until_unix_s)||
-      !decode_identity(f[5],offer.source)||!decode_cursor(f[6],offer.tip)||!valid_digest(f[7])||sha256(f[8])!=f[7])
-    return fail(Code::invalid,"invalid bounded mesh bootstrap");
-  EngineIdentity id;EngineState state;if(!decode_checkpoint(f[8],id,state)||id!=offer.source)
-    return fail(Code::corrupt,"bootstrap checkpoint context mismatch");
-  offer.id=f[1];offer.subscription_id=f[2];offer.checkpoint_sha256=f[7];offer.checkpoint=std::move(f[8]);return {};
-}
-
 struct Service::Impl {
   ev::ICommitStore& store;Options options;lc::Service lifecycle;
   Impl(ev::ICommitStore& value,Options bounds):store(value),options(bounds),lifecycle(value){}
