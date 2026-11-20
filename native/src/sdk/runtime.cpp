@@ -1,5 +1,6 @@
 #include "anaiero/sdk/runtime.hpp"
 #include "anaiero/sdk/evidence.hpp"
+#include "anaiero/sdk/migration_receipts.hpp"
 #include "validation.hpp"
 #include <algorithm>
 #include <charconv>
@@ -158,9 +159,8 @@ struct SessionService::Impl {
       const auto encoded=encode_migration_plan(*migration);
       if(encoded.empty()||prior!=migration->source_checkpoint_sha256||
          next!=migration->target_checkpoint_sha256)return {Code::conflict,"migration state or review witness changed"};
-      const auto audit=pack({"engine-migration-receipt/1",encoded,sha256(encode_transition(transition))});
-      batch.guards.push_back({"sdk.engine-migration",migration->request.operation_id,0,{}});
-      batch.records.push_back({"sdk.engine-migration",migration->request.operation_id,audit,{prior,next},false});
+      const auto receipt=MigrationReceipt{*migration,sha256(encode_transition(transition))};
+      if(auto staged=evidence::stage_migration_receipt(batch,receipt);!staged)return staged;
     }
     Pending work{index,std::move(transition),std::move(latest),0};
     if(asynchronous&&queue) {
@@ -423,13 +423,10 @@ Result SessionService::apply_migration(std::string_view id,const MigrationPlan& 
     migration_request_digest(plan.identity,plan.request),duplicate);
   if(!prior)return prior;
   if(duplicate) {
-    evidence::StoredRecord audit;
-    auto read=impl_->store.latest("sdk.engine-migration",plan.request.operation_id,audit);
-    if(!read)return read;
-    std::vector<std::string> fields;
-    if(audit.record.tombstone||!unpack(audit.record.payload,fields,3)||
-       fields.size()!=3||fields[0]!="engine-migration-receipt/1"||
-       fields[1]!=encode_migration_plan(plan)||!valid_digest(fields[2]))
+    evidence::StoredMigrationReceipt accepted;
+    if(auto read=evidence::read_migration_receipt(impl_->store,plan.request.operation_id,accepted);!read)
+      return read;
+    if(encode_migration_plan(accepted.receipt.plan)!=encode_migration_plan(plan))
       return {Code::conflict,"operation was accepted with a different migration review"};
     return {};
   }
