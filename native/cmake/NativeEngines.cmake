@@ -70,7 +70,7 @@ install(TARGETS anaiero_engines anaiero_engine_cell anaiero_engine_colony anaier
 add_library(anaiero_session_runner STATIC src/session/session_runner.cpp)
 anaiero_sdk_target(anaiero_session_runner)
 target_link_libraries(anaiero_session_runner PUBLIC anaiero_runtime anaiero_evidence)
-add_library(anaiero_experiment_history STATIC src/session/experiment_history.cpp)
+add_library(anaiero_experiment_history STATIC src/session/experiment_history.cpp src/session/experiment_history_codec.cpp src/session/experiment_evidence.cpp)
 anaiero_sdk_target(anaiero_experiment_history)
 target_link_libraries(anaiero_experiment_history PUBLIC anaiero_runtime anaiero_evidence anaiero_experiments)
 add_library(anaiero_engine_files STATIC src/engine_adapters/native_configurations.cpp src/engine_adapters/native_artifact.cpp)
