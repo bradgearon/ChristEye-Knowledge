@@ -226,7 +226,7 @@ This is for **state-bearing checkpoint schema changes within an unchanged engine
 It is intentionally separate from ordinary `IChangeCapability` and from package selection.
 
 1. Declare both source and target checkpoint schemas in the registered `EngineDescriptor`.
-2. Implement `implementation_sha256()` to return a stable digest of the migration code, and
+2. Implement `implementation_sha256()` to return a stable, versioned algorithm fingerprint declared by the module, and
    `prepare_migration()` to calculate a deterministic staged `PreparedTransition`.
 3. Pause the engine under the session owner. Build a `MigrationRequest` with the exact expected revision,
    source/target schemas, implementation digest, typed parameters and unique operation ID.
