@@ -1,9 +1,9 @@
 #include "anaiero/sdk/runtime.hpp"
 #include "anaiero/sdk/evidence.hpp"
 #include "anaiero/sdk/migration_receipts.hpp"
+#include "anaiero/sdk/session_record_codec.hpp"
 #include "validation.hpp"
 #include <algorithm>
-#include <charconv>
 #include <exception>
 #include <limits>
 #include <optional>
@@ -15,26 +15,24 @@ std::string metric_prefix(const EngineIdentity& identity) {
   return sha256(pack({identity.source_uid,std::to_string(identity.epoch)}))+"/";
 }
 Bytes engine_record(const EngineIdentity& identity,std::string state,std::string transition) {
-  return pack({"session-engine/1",encode_identity(identity),std::move(state),std::move(transition)});
+  return encode_session_engine_record({identity,std::move(state),std::move(transition)});
 }
 Result read_engine_record(std::string_view bytes,EngineIdentity& identity,Digest& state,Digest& transition) {
-  std::vector<std::string> fields;auto result=unpack(bytes,fields,4,8192);if(!result)return result;
-  if(fields.size()!=4||fields[0]!="session-engine/1"||!decode_identity(fields[1],identity)||
-      !valid_digest(fields[2])||!valid_digest(fields[3]))return {Code::corrupt,"session engine record"};
-  state=std::move(fields[2]);transition=std::move(fields[3]);return {};
+  SessionEngineRecord record;
+  if(auto parsed=decode_session_engine_record(bytes,record);!parsed)return parsed;
+  identity=std::move(record.identity);
+  state=std::move(record.checkpoint_sha256);
+  transition=std::move(record.transition_sha256);
+  return {};
 }
 Bytes metric_record(const PreparedTransition& transition,const Observation& observation) {
-  return pack({"session-metric/1",encode_identity(transition.identity),encode_observation(observation),
-    std::to_string(transition.target.revision)});
+  return encode_session_metric_record({transition.identity,observation,transition.target.revision});
 }
 Result read_metric(const evidence::StoredRecord& record,MetricView& value) {
-  std::vector<std::string> fields;auto result=unpack(record.record.payload,fields,4,16384);if(!result)return result;
-  if(fields.size()!=4||fields[0]!="session-metric/1"||!decode_identity(fields[1],value.identity)||
-      !decode_observation(fields[2],value.observation))return {Code::corrupt,"session metric record"};
-  const auto parsed=std::from_chars(fields[3].data(),fields[3].data()+fields[3].size(),value.revision);
-  if(parsed.ec!=std::errc{}||parsed.ptr!=fields[3].data()+fields[3].size()||
-      std::to_string(value.revision)!=fields[3])return {Code::corrupt,"session metric revision"};
-  value.generation=record.generation;return {};
+  SessionMetricRecord parsed;
+  if(auto decoded=decode_session_metric_record(record.record.payload,parsed);!decoded)return decoded;
+  value.identity=std::move(parsed.identity);value.observation=std::move(parsed.observation);
+  value.revision=parsed.revision;value.generation=record.generation;return {};
 }
 }
 struct SessionService::Impl {
