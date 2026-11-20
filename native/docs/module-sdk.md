@@ -245,3 +245,20 @@ A source-to-target schema conversion is **not** an engine binary hot swap, publi
 semantic validation of learned ability, or a general downgrade mechanism. For implementation
 and an executable v1→v2 example see
 [CE-SW-43](../../docs/software/CE-SW-43_versioned_engine_checkpoint_evolution.md).
+
+### Codec and persistence boundaries
+
+The runtime service does not decode canonical engine, metric or migration-receipt
+framing. `session_record_codec.hpp` encodes/decodes versioned
+`session-engine/1` and `session-metric/1` records, while
+`migration_receipt_codec.hpp` handles the binary `engine-migration-receipt/1`
+payload. The typed `migration_receipts.hpp` evidence adapter owns
+`sdk.engine-migration` record keys, reference validation and generation
+lookup. `SessionService` owns migration eligibility, deterministic review,
+authorization and commit ordering; it never interprets the stored wire fields.
+The operator CLI prints typed migration status as JSON and does not parse
+migration receipt fields itself.
+
+No XML is present in this protocol: `pack`/`unpack` are Anaiero's existing
+length-prefixed binary framing. A future XML import/export adapter could use
+pugixml in infrastructure without changing the canonical store format.
