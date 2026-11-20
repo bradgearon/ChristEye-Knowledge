@@ -22,6 +22,8 @@ The 2026-11-15 [P01 Physical Module Composition and Counts](../phases/P01/docs/0
 
 **Source warning:** The counts in R1/R2/R3 are a worked BrainXell/Axion reference associated with an illustrative 24-well MEA geometry, **not** a laboratory instruction to plate those numbers. The 3D organoid and additional immune/OPC/neuromodulatory populations explicitly cannot inherit that planar count.
 
+The [P06 Lily–Lotus plan](P06-lily-lotus-regional-plan.md) names the first spatial comparison. It pairs a floor-plate organizer with identified spinal commissural axons and a registered receiving region, with support and readouts for both sides. Forebrain midline zipper glia and cortical Cajal–Retzius cells are separate comparison cohorts. Physical counts, ratios and yields for each 3D model are open.
+
 ## 2. Actual planning arithmetic — before vendor purchase
 
 | Scenario | Verified calculation | What it does and does not establish |

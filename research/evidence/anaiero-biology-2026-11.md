@@ -1,11 +1,11 @@
 ---
 title: "Anaiero biological systems — evidence anchors"
-date: 2026-11-15
+date: 2026-11-20
 owner: We Develop Software LLC
 status: "Cited reference index, not verification of a new Anaiero device"
 ---
 
-# Scientific evidence and vendor precedence — revision 2026-11-15
+# Scientific evidence and vendor precedence — revision 2026-11-20
 
 Every process specification uses the **same named source IDs**. A literature study supports *its own preparation and assay*, not arbitrary generalization to a proposed Anaiero organoid. Read [P01 existing sources](../../phases/P01/references.md), the [corrected scientific synthesis](../full-markdown/R03_03_Formal_Models_and_Reconciliation_1_.md) and the [current field process index](../../processes/README.md) before choosing equipment.
 
@@ -29,6 +29,12 @@ Every process specification uses the **same named source IDs**. A literature stu
 | **B16** | [*The emergence of electrical activity in human brain organoids*, Stem Cell Reports (2025)](https://pmc.ncbi.nlm.nih.gov/articles/PMC12447339/) | Developmental diversity and network electrophysiology; spontaneous activity ≠ trained knowledge |
 | **B17** | [*A human corticospinal organoid–slice connectoid* abstract and study details](https://www.sciencedirect.com/science/article/pii/S2211124726004778) | Biologically relevant long-range axon integration with measured structural and functional limitations |
 | **B18** | [*Organoid analytical toolkits*, Nature Reviews Bioengineering (2026)](https://www.nature.com/articles/s44222-025-00384-5) | Optical/electrical/omics/biophysical measurement validity and sampling tradeoffs |
+| **B19** | [Onesto et al., *Midline assembloids reveal regulators of human axon guidance*, Science (2025)](https://doi.org/10.1126/science.adq7934) | Human stem-cell-derived floor-plate and spinal organoids supported ventral patterning, commissural axon guidance and bilateral connectivity in this model. |
+| **B20** | [Gobius et al., *Astroglial-mediated remodeling of the interhemispheric midline is required for the formation of the corpus callosum*, Cell Reports (2016)](https://doi.org/10.1016/j.celrep.2016.09.033) | Midline zipper glia remodel the forebrain crossing site. The authors combine human anatomy and imaging with developmental perturbation in mice. |
+| **B21** | [Amin et al., *Generating human neural diversity with a multiplexed morphogen screen in organoids*, Cell Stem Cell (2024)](https://doi.org/10.1016/j.stem.2024.10.016) | Human medial pallium organoids contained TP73/RELN-positive Cajal–Retzius cells. The study follows their migration in assembloids. |
+| **B22** | [Bielle et al., *Multiple origins of Cajal-Retzius cells at the borders of the developing pallium*, Nature Neuroscience (2005)](https://doi.org/10.1038/nn1511) | In mice, Cajal–Retzius populations arise at several border sites and spread by tangential migration. Birthplace and final position can be measured separately. |
+| **B23** | [*Specific contribution of Reelin expressed by Cajal–Retzius cells or GABAergic interneurons to cortical lamination*, PNAS (2022)](https://doi.org/10.1073/pnas.2120079119) | Cell-source-specific Reelin loss in mice altered neuronal positioning in region- and stage-dependent ways. |
+| **B24** | [Quattrocolo & Maccaferri, *Optogenetic activation of Cajal-Retzius cells reveals their glutamatergic output and a novel feedforward circuit in the developing mouse hippocampus*, Journal of Neuroscience (2014)](https://doi.org/10.1523/JNEUROSCI.1407-14.2014) | Target recordings after CR-cell activation demonstrated glutamatergic output in mouse hippocampal slices. |
 
 ## Evidence fields required in every design
 

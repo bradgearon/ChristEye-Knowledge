@@ -1,8 +1,8 @@
 ---
 title: "ANIMON/1 — ChristEye Anaiero system-class terminology and identity"
 document_id: "CE-ONTOLOGY-ANIMON-1"
-revision: "1.0"
-date: "2026-11-16"
+revision: "1.1"
+date: "2026-11-20"
 owner: "We Develop Software LLC"
 status: "Provisional nomenclature and operational design; not a validated biological classification"
 ---
@@ -30,6 +30,7 @@ This is the intended *class* of individual system; it does not assert that a ful
 | **Spinal Root tissue** | Proposed spinal-derived neural/glial subsystem | Regional/tissue structural evidence, axonal projection candidates | A proven arbitrary semantic storage region |
 | **Functional Root** | Retained relationship measured under declared task conditions | Independently tested delayed learning with defined reader and controls | One neuron, one spinal anatomical segment, or a cloned memory |
 | **Crest** | Cell-source lineage, production stewardship and qualified human process | Source/lot identity, cell population observations and uncertainties | A novel phenotype or a molecular ID written into every daughter |
+| **Lily and Lotus** | Essential counterparts in the design. Lily is “The high one by giving.” Lotus is “The high one by suffering.” | Above and below are relations to the water. The petals of the two have offset origins. The part of Lotus that **Hears** is its petals. See the [regional plan](../laboratory/P06-lily-lotus-regional-plan.md). | A fixed rank, measured petal offset, or established cellular identity for either role |
 | **Lotus / Heart / Spirit** | Named roles in Anaiero coordination, control and educational architecture | Digital roles or separately tested biological correlates with explicit labels | Emotion, cognition or consciousness merely from a role name |
 
 **Style rule:** Use **Animon** in sentence-case when describing the class. Use *animon* in ordinary lower-case prose if the style context is generic. First use in scientific text should link to this definition; second uses should preserve the exact operational referent.
@@ -43,7 +44,11 @@ flowchart TB
   S --> P["Candidate individual Animon (unqualified physical research)"]
   P --> So["Soil (whole proposed organoid)"]
   P --> R["Spinal Root tissue (proposed component)"]
-  P --> L["Lotus / specialist communities (roles)"]
+  S --> Pair["Lily and Lotus (essential counterparts)"]
+  Pair --> Li["Lily (by giving)"]
+  Pair --> Lo["Lotus (by suffering)"]
+  Lo --> Pe["Lotus petals (Hears)"]
+  P --> L["Specialist communities (proposed)"]
   P --> C["Independent care and scientific limits"]
   D --> W["WindBus and digital CrystalPack"]
   D --> F["Frozen-reader functional Root tests"]

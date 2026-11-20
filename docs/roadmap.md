@@ -12,7 +12,7 @@ The project's phases are evidence-gated, not date-gated. An insertion or revisio
 | P03 | qualified planar neuronal/glial preparation | Research-gated | independently approved source and interface release |
 | P04 | acquisition, retained Roots and assessment | Research-gated | delayed, independently scored skill beyond controls |
 | P05 | observer, support and recipient networks | Research-gated | joined contribution, isolation and interference tests |
-| P06 | 3D Soil/regional specialization and expansion | Research-gated | geometry-specific living qualification |
+| P06 | 3D Soil/regional specialization and expansion, including the [Lily–Lotus plan](../laboratory/P06-lily-lotus-regional-plan.md) | Research-gated | geometry-specific living qualification, registered source and recipient regions, and separately scored evidence for guidance and reception |
 | P07 | physical Crystal and molecular transfer | Hypothesis | identified carrier, reader and task-specific causal evidence |
 | P08 | scaling, service lifecycle and deployment | Future | reproducible end-to-end service release |
 
