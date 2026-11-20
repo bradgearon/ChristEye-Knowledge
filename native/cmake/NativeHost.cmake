@@ -7,7 +7,7 @@ anaiero_sdk_target(anaiero_native_session)
 target_link_libraries(anaiero_native_session PUBLIC anaiero_host anaiero_lifecycle
   PRIVATE anaiero_engine_files anaiero_storage_native anaiero_deployment)
 install(TARGETS anaiero_host anaiero_native_session EXPORT AnaieroTargets ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
-add_library(anaiero_deployment STATIC src/host/deployment.cpp src/host/native_deployment.cpp
+add_library(anaiero_deployment STATIC src/host/deployment.cpp src/host/deployment_record_codec.cpp src/host/native_deployment.cpp
   src/host/compatibility.cpp src/host/build_witness.cpp src/host/package_retention.cpp src/host/release_notice.cpp)
 anaiero_sdk_target(anaiero_deployment)
 target_include_directories(anaiero_deployment PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
