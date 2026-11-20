@@ -1,6 +1,6 @@
 #include "anaiero/sdk/runtime.hpp"
 #include "anaiero/sdk/evidence.hpp"
-#include "anaiero/sdk/migration_receipts.hpp"
+#include "anaiero/sdk/migration_evidence_service.hpp"
 #include "anaiero/sdk/session_record_codec.hpp"
 #include "validation.hpp"
 #include <algorithm>
@@ -45,13 +45,14 @@ struct SessionService::Impl {
   };
   struct Pending {std::size_t entry=0;PreparedTransition transition;evidence::Record record;std::uint64_t ticket=0;};
   EngineModuleCatalog& catalog;evidence::ICommitStore& store;ProjectionService& projection;
+  evidence::MigrationEvidenceService migration_evidence;
   ICommitPolicy* policy;evidence::ICommitQueue* queue=nullptr;std::size_t capacity;
   IObserverSink* observer=nullptr;bool in_call=false;
   struct Guard {bool& flag;explicit Guard(bool& value):flag(value){flag=true;}~Guard(){flag=false;}};
   std::vector<Entry> entries;std::optional<Pending> pending;
   bool degraded=false;std::string error;
   Impl(EngineModuleCatalog& c,evidence::ICommitStore& s,ProjectionService& p,ICommitPolicy* policy_value,std::size_t cap):
-    catalog(c),store(s),projection(p),policy(policy_value),capacity(cap){}
+    catalog(c),store(s),projection(p),migration_evidence(s),policy(policy_value),capacity(cap){}
   std::size_t locate(std::string_view id)const {
     for(std::size_t i=0;i<entries.size();++i)if(entries[i].identity.instance_id==id)return i;
     return entries.size();
@@ -152,13 +153,8 @@ struct SessionService::Impl {
     evidence::CommitBatch batch;evidence::Record latest;
     auto built=batch_for(transition,entries[index],batch,latest);if(!built)return built;
     if(migration) {
-      const auto prior=checkpoint_digest(entries[index].identity,entries[index].committed_state);
-      const auto next=checkpoint_digest(transition.identity,transition.target);
-      const auto encoded=encode_migration_plan(*migration);
-      if(encoded.empty()||prior!=migration->source_checkpoint_sha256||
-         next!=migration->target_checkpoint_sha256)return {Code::conflict,"migration state or review witness changed"};
-      const auto receipt=MigrationReceipt{*migration,sha256(encode_transition(transition))};
-      if(auto staged=evidence::stage_migration_receipt(batch,receipt);!staged)return staged;
+      if(auto staged=migration_evidence.stage(batch,entries[index].identity,
+           entries[index].committed_state,transition,*migration);!staged)return staged;
     }
     Pending work{index,std::move(transition),std::move(latest),0};
     if(asynchronous&&queue) {
@@ -210,8 +206,8 @@ struct SessionService::Impl {
     if(index==entries.size())return {Code::not_found,"unknown active engine"};
     auto& entry=entries[index];auto& engine=*entry.engine;
     if(auto canonical=canonical_state(entry);!canonical)return canonical;
-    const auto encoded=encode_migration_request(request);
-    if(encoded.empty())return {Code::invalid,"invalid migration request"};
+    StepRequest pseudo;
+    if(auto parsed=migration_evidence.request_step(entry.identity,request,pseudo);!parsed)return parsed;
     const auto before=entry.committed_state;
     if(request.expected_revision!=before.revision)return {Code::conflict,"migration review is stale"};
     if(before.phase!=Phase::paused)return {Code::conflict,"pause engine before a state migration"};
@@ -224,8 +220,6 @@ struct SessionService::Impl {
     auto* capability=engine.migrations();
     if(!capability||capability->implementation_sha256()!=request.implementation_sha256)
       return {Code::unsupported,"pinned migration implementation unavailable"};
-    const StepRequest pseudo{request.operation_id,request.expected_revision,
-      {"anaiero.engine-migration/1",encoded}};
     PreparedTransition transition;
     try {
       auto prepared=capability->prepare_migration(request,transition);
@@ -242,9 +236,8 @@ struct SessionService::Impl {
          transition.target.checkpoint.schema!=request.target_schema||
          !transition.observations.empty()||!transition.receipts.empty())
         return {Code::corrupt,"migration changed time, configuration, phase or emitted unreviewed effects"};
-      plan={entry.identity,request,checkpoint_digest(entry.identity,before),
-        checkpoint_digest(entry.identity,transition.target)};
-      if(encode_migration_plan(plan).empty())return {Code::corrupt,"migration review witness invalid"};
+      if(auto witnessed=migration_evidence.review(entry.identity,before,request,transition,plan);!witnessed)
+        return witnessed;
       output=std::move(transition);return {};
     }catch(const std::exception& e){return {Code::io_error,std::string("migration preparation failed: ")+e.what()};}
     catch(...){return {Code::io_error,"migration preparation failed"};}
@@ -414,29 +407,17 @@ Result SessionService::apply_migration(std::string_view id,const MigrationPlan& 
   if(impl_->in_call)return {Code::busy,"session owner is not reentrant"};
   Impl::Guard guard(impl_->in_call);
   if(auto admission=impl_->admitted();!admission)return admission;
-  if(plan.identity.instance_id!=id||encode_migration_plan(plan).empty())
-    return {Code::invalid,"invalid pinned migration plan"};
+  if(plan.identity.instance_id!=id)return {Code::invalid,"migration targets another engine"};
   bool duplicate=false;
-  auto prior=impl_->duplicate(plan.request.operation_id,
-    migration_request_digest(plan.identity,plan.request),duplicate);
-  if(!prior)return prior;
-  if(duplicate) {
-    evidence::StoredMigrationReceipt accepted;
-    if(auto read=evidence::read_migration_receipt(impl_->store,plan.request.operation_id,accepted);!read)
-      return read;
-    if(encode_migration_plan(accepted.receipt.plan)!=encode_migration_plan(plan))
-      return {Code::conflict,"operation was accepted with a different migration review"};
-    return {};
-  }
+  if(auto checked=impl_->migration_evidence.accepted_retry(plan,duplicate);!checked)return checked;
+  if(duplicate)return {};
   PreparedTransition transition;MigrationPlan reviewed;
   if(auto checked=impl_->prepare_migration(id,plan.request,transition,reviewed);!checked)return checked;
-  if(encode_migration_plan(reviewed)!=encode_migration_plan(plan))
-    return {Code::conflict,"migration plan is stale or transformation changed"};
+  if(auto matched=impl_->migration_evidence.match_plans(reviewed,plan);!matched)return matched;
   const auto index=impl_->locate(id);
   const auto* descriptor=impl_->catalog.find(plan.identity.type_id);
   if(!descriptor||descriptor->limits.max_receipts==0)return {Code::capacity,"migration receipt capacity unavailable"};
-  transition.receipts.push_back({"anaiero.engine-migration-receipt/1",
-    pack({plan.request.implementation_sha256,plan.source_checkpoint_sha256,plan.target_checkpoint_sha256})});
+  if(auto recorded=impl_->migration_evidence.append_receipt(transition,plan);!recorded)return recorded;
   return impl_->submit(index,std::move(transition),false,&plan);
 }
 Result SessionService::remove_retired(std::string_view id) {
