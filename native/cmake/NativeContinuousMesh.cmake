@@ -1,4 +1,4 @@
-add_library(anaiero_mesh_service STATIC src/mesh/service.cpp)
+add_library(anaiero_mesh_service STATIC src/mesh/service.cpp src/mesh/mesh_record_codec.cpp)
 anaiero_sdk_target(anaiero_mesh_service)
 target_link_libraries(anaiero_mesh_service PUBLIC anaiero_lifecycle anaiero_evidence)
 install(TARGETS anaiero_mesh_service EXPORT AnaieroTargets ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
