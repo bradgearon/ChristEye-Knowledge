@@ -56,3 +56,18 @@ The SDK fixture creates a synthetic SDK counter, trains and pauses it, reviews a
 ## Restrictions
 
 Migration is only permitted while paused and with no pending canonical operation. A nondeterministic transformer cannot activate its reviewed result. Precommit exceptions and failed guards do not advance the Projector. No claim is made about biological fidelity, transferable learning, physical intervention, or arbitrary binary upgrades.
+
+## CE-SW-43 record parsing ownership refactor
+
+Migration-receipt and session-engine/metric binary framing now reside in
+dedicated compiled codecs under `src/sdk`. A typed evidence adapter
+(`src/evidence/migration_receipts.cpp`) reads and stages migration records
+with protected checkpoint references and operation-identity validation.
+The runtime service only requests typed evidence operations, and
+`migration-status` renders the adapter's typed result. The existing
+`session-engine/1`, `session-metric/1` and
+`engine-migration-receipt/1` on-disk representations are unchanged.
+
+The current records are not XML; therefore pugixml is intentionally not a
+dependency for this path. XML support, if needed, should be an optional
+infrastructure serializer, not a service or canonical storage dependency.
