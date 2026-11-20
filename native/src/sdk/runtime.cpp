@@ -1,6 +1,7 @@
 #include "anaiero/sdk/runtime.hpp"
 #include "anaiero/sdk/evidence.hpp"
 #include "anaiero/sdk/migration_evidence_service.hpp"
+#include "anaiero/sdk/session_evidence_service.hpp"
 #include "anaiero/sdk/session_record_codec.hpp"
 #include "validation.hpp"
 #include <algorithm>
@@ -11,12 +12,6 @@
 namespace anaiero::sdk {
 namespace {
 constexpr std::string_view engine_kind="sdk.engine",metric_kind="sdk.metric";
-std::string metric_prefix(const EngineIdentity& identity) {
-  return sha256(pack({identity.source_uid,std::to_string(identity.epoch)}))+"/";
-}
-Bytes engine_record(const EngineIdentity& identity,std::string state,std::string transition) {
-  return encode_session_engine_record({identity,std::move(state),std::move(transition)});
-}
 Result read_engine_record(std::string_view bytes,EngineIdentity& identity,Digest& state,Digest& transition) {
   SessionEngineRecord record;
   if(auto parsed=decode_session_engine_record(bytes,record);!parsed)return parsed;
@@ -24,9 +19,6 @@ Result read_engine_record(std::string_view bytes,EngineIdentity& identity,Digest
   state=std::move(record.checkpoint_sha256);
   transition=std::move(record.transition_sha256);
   return {};
-}
-Bytes metric_record(const PreparedTransition& transition,const Observation& observation) {
-  return encode_session_metric_record({transition.identity,observation,transition.target.revision});
 }
 Result read_metric(const evidence::StoredRecord& record,MetricView& value) {
   SessionMetricRecord parsed;
@@ -46,13 +38,14 @@ struct SessionService::Impl {
   struct Pending {std::size_t entry=0;PreparedTransition transition;evidence::Record record;std::uint64_t ticket=0;};
   EngineModuleCatalog& catalog;evidence::ICommitStore& store;ProjectionService& projection;
   evidence::MigrationEvidenceService migration_evidence;
+  evidence::SessionEvidenceService session_evidence;
   ICommitPolicy* policy;evidence::ICommitQueue* queue=nullptr;std::size_t capacity;
   IObserverSink* observer=nullptr;bool in_call=false;
   struct Guard {bool& flag;explicit Guard(bool& value):flag(value){flag=true;}~Guard(){flag=false;}};
   std::vector<Entry> entries;std::optional<Pending> pending;
   bool degraded=false;std::string error;
   Impl(EngineModuleCatalog& c,evidence::ICommitStore& s,ProjectionService& p,ICommitPolicy* policy_value,std::size_t cap):
-    catalog(c),store(s),projection(p),migration_evidence(s),policy(policy_value),capacity(cap){}
+    catalog(c),store(s),projection(p),migration_evidence(s),session_evidence(s),policy(policy_value),capacity(cap){}
   std::size_t locate(std::string_view id)const {
     for(std::size_t i=0;i<entries.size();++i)if(entries[i].identity.instance_id==id)return i;
     return entries.size();
@@ -92,29 +85,9 @@ struct SessionService::Impl {
   }
   Result batch_for(const PreparedTransition& transition,const Entry& entry,evidence::CommitBatch& batch,
       evidence::Record& latest) {
-    batch.operation_id=transition.operation_id;batch.request_digest=transition.request_sha256;
-    if(entry.record_revision&&transition.observations.empty()&&
-        (transition.target.phase==Phase::paused||transition.target.phase==Phase::cancelled)&&
-        transition.target.tick==entry.committed_state.tick&&
-        transition.target.checkpoint==entry.committed_state.checkpoint&&
-        transition.target.configuration==entry.committed_state.configuration)
-      batch.commit_class=evidence::CommitClass::maintenance;
-    const auto state=encode_checkpoint(transition.identity,transition.target),prepared=encode_transition(transition);
-    if(state.empty()||prepared.empty())return {Code::capacity,"canonical transition encoding bound"};
-    const auto state_sha=sha256(state),transition_sha=sha256(prepared);
-    batch.blobs.push_back({state_sha,state,{}});
-    batch.blobs.push_back({transition_sha,prepared,{}});
-    latest={std::string(engine_kind),transition.identity.instance_id,
-      engine_record(transition.identity,state_sha,transition_sha),{state_sha,transition_sha},false};
-    batch.records.push_back(latest);
-    batch.guards.push_back({std::string(engine_kind),transition.identity.instance_id,
-      entry.record_revision,entry.record_digest});
-    const auto prefix=metric_prefix(transition.identity);
-    for(const auto& observation:transition.observations)
-      batch.records.push_back({std::string(metric_kind),prefix+observation.metric,
-        metric_record(transition,observation),{},false});
-    if(policy)return policy->enrich(batch,transition);
-    return {};
+    if(auto staged=session_evidence.stage_transition(transition,entry.record_revision,entry.record_digest,
+          entry.committed_state,batch,latest);!staged)return staged;
+    return policy?policy->enrich(batch,transition):Result{};
   }
   Result finish(Pending work,const Result& committed,const evidence::CommitReceipt& receipt) {
     if(!committed.committed()) {
@@ -262,11 +235,8 @@ Result SessionService::add_engine(const EngineIdentity& identity,const Envelope&
     EngineIdentity saved_identity;Digest state_sha,transition_sha;
     auto parsed=read_engine_record(existing.record.payload,saved_identity,state_sha,transition_sha);if(!parsed)return parsed;
     if(saved_identity!=identity)return {Code::conflict,"instance has a different durable identity"};
-    Bytes bytes;auto fetched=impl_->store.get_blob(state_sha,bytes);if(!fetched)return fetched;
-    if(sha256(bytes)!=state_sha)return {Code::corrupt,"retained state digest mismatch"};
-    EngineState state;EngineIdentity checkpoint_identity;
-    auto decoded=decode_checkpoint(bytes,checkpoint_identity,state);if(!decoded)return decoded;
-    if(checkpoint_identity!=identity)return {Code::corrupt,"retained checkpoint source identity mismatch"};
+    EngineState state;
+    if(auto recovered=impl_->session_evidence.read_checkpoint(state_sha,identity,state);!recovered)return recovered;
     if(state.configuration!=configuration||(initial&&*initial!=state))return {Code::conflict,"retained configuration/state mismatch"};
     std::unique_ptr<IEngine> engine;auto created=impl_->catalog.create(identity,state.configuration,&state,engine);if(!created)return created;
     impl_->entries.push_back({std::move(engine),existing.revision,existing.generation,existing.digest,state,identity});return {};
@@ -274,10 +244,9 @@ Result SessionService::add_engine(const EngineIdentity& identity,const Envelope&
   if(read&&existing.record.tombstone)return {Code::expired,"instance identity was retired"};
   if(!read&&read.code!=Code::not_found)return read;
   std::unique_ptr<IEngine> engine;auto created=impl_->catalog.create(identity,configuration,initial,engine);if(!created)return created;
-  PreparedTransition transition;transition.identity=identity;transition.target=engine->state();
-  transition.expected_revision=transition.target.revision;transition.expected_state_sha256=state_digest(transition.target);
-  transition.operation_id="register-"+sha256(encode_identity(identity));
-  transition.request_sha256=sha256(pack({"register/1",encode_identity(identity),encode_state(transition.target)}));
+  PreparedTransition transition;
+  if(auto registered=impl_->session_evidence.registration(identity,engine->state(),transition);!registered)
+    return registered;
   Impl::Entry entry{std::move(engine),0,0,{},transition.target,identity};evidence::CommitBatch batch;evidence::Record record;
   auto built=impl_->batch_for(transition,entry,batch,record);if(!built)return built;
   evidence::CommitReceipt receipt;auto committed=impl_->store.commit(batch,receipt);if(!committed.committed())return committed;
@@ -326,18 +295,15 @@ Result SessionService::recover() {
       auto parsed=read_engine_record(record.record.payload,identity,state_sha,transition_sha);if(!parsed)return parsed;
       if(impl_->policy){auto allowed=impl_->policy->restore_admission(identity);if(allowed.code==Code::expired)continue;if(!allowed)return allowed;}
       if(!impl_->capacity||impl_->capacity>256||next.size()==impl_->capacity)return {Code::capacity,"recovered active engine capacity"};
-      Bytes bytes;auto fetched=impl_->store.get_blob(state_sha,bytes);if(!fetched)return fetched;
-      if(sha256(bytes)!=state_sha)return {Code::corrupt,"recovered state digest mismatch"};
-      EngineState state;EngineIdentity checkpoint_identity;
-      auto decoded=decode_checkpoint(bytes,checkpoint_identity,state);if(!decoded)return decoded;
-      if(checkpoint_identity!=identity)return {Code::corrupt,"recovered checkpoint source identity mismatch"};
+      EngineState state;
+      if(auto recovered=impl_->session_evidence.read_checkpoint(state_sha,identity,state);!recovered)return recovered;
       std::unique_ptr<IEngine> engine;auto created=impl_->catalog.create(identity,state.configuration,&state,engine);if(!created)return created;
       next.push_back({std::move(engine),record.revision,record.generation,record.digest,state,identity});
     }
   }
   std::vector<MetricView> metrics;
   for(const auto& entry:next) {
-    const auto prefix=metric_prefix(entry.engine->identity());after.clear();more=true;
+    const auto prefix=impl_->session_evidence.metric_prefix(entry.engine->identity());after.clear();more=true;
     while(more) {
       std::vector<evidence::StoredRecord> page;
       auto read=impl_->store.scan_latest(metric_kind,prefix,after,64,page,more);if(!read)return read;
@@ -385,7 +351,7 @@ Result SessionService::control(std::string_view id,std::string operation,Phase p
   auto canonical=impl_->canonical_state(impl_->entries[index]);if(!canonical)return canonical;
   if(!valid_token(operation))return {Code::invalid,"control operation identity"};
   // Control retry identity intentionally excludes mutable state/revision.
-  const auto request=sha256(pack({"phase-control/1",encode_identity(engine.identity()),operation,std::string(phase_name(phase))}));
+  const auto request=impl_->session_evidence.phase_request(engine.identity(),operation,phase);
   bool previous=false;auto prior=impl_->duplicate(operation,request,previous);if(!prior||previous)return prior;
   const auto before=engine.state();
   const bool allowed=(phase==Phase::paused&&(before.phase==Phase::ready||before.phase==Phase::running))||
@@ -431,14 +397,14 @@ Result SessionService::remove_retired(std::string_view id) {
   auto decoded=read_engine_record(stored.record.payload,identity,state_sha,transition_sha);if(!decoded)return decoded;
   if(!impl_->policy||impl_->policy->restore_admission(identity).code!=Code::expired)
     return {Code::conflict,"source must be durably retired before detaching its engine"};
-  evidence::CommitBatch batch;batch.operation_id="detach-"+sha256(encode_identity(identity));
+  evidence::CommitBatch batch;batch.operation_id=impl_->session_evidence.detach_operation(identity);
   batch.commit_class=evidence::CommitClass::maintenance;
-  batch.request_digest=sha256(pack({"detach/1",encode_identity(identity)}));
+  batch.request_digest=impl_->session_evidence.detach_request(identity);
   batch.guards.push_back({std::string(engine_kind),identity.instance_id,stored.revision,stored.digest});
   // Retain the small identity/digest witness in the tombstone, with no roots.
   // Scheduling can prove retirement after restart without retaining payloads.
   batch.records.push_back({std::string(engine_kind),identity.instance_id,stored.record.payload,{},true});
-  const auto prefix=metric_prefix(identity);std::string after;bool more=true;
+  const auto prefix=impl_->session_evidence.metric_prefix(identity);std::string after;bool more=true;
   while(more) {
     std::vector<evidence::StoredRecord> page;auto read=impl_->store.scan_latest(metric_kind,prefix,after,64,page,more);if(!read)return read;
     if(more&&page.empty())return {Code::corrupt,"retired metric scan made no progress"};
