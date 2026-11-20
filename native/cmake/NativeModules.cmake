@@ -81,6 +81,12 @@ if(CE_WIND_BUILD_TESTS)
   add_test(NAME anaiero_engine_migration COMMAND anaiero_engine_migration_tests
     "${CMAKE_CURRENT_BINARY_DIR}/engine-migration-tests")
   set_tests_properties(anaiero_engine_migration PROPERTIES TIMEOUT 120 LABELS "migration;recovery")
+  add_test(NAME anaiero_engine_migration_cli COMMAND ${CMAKE_COMMAND}
+    "-DCE_SESSION=$<TARGET_FILE:ce_modular_session>"
+    "-DCE_REPO=${CMAKE_CURRENT_SOURCE_DIR}/.."
+    "-DCE_TEMP=${CMAKE_CURRENT_BINARY_DIR}/engine-migration-cli"
+    -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/engine_migration_cli_smoke.cmake")
+  set_tests_properties(anaiero_engine_migration_cli PROPERTIES TIMEOUT 180 LABELS "migration;cli")
   add_library(anaiero_independent_native MODULE tests/sdk_consumer/provider.cpp)
   anaiero_sdk_target(anaiero_independent_native)
   target_compile_definitions(anaiero_independent_native PRIVATE ANAIERO_MODULE_BUILD)
