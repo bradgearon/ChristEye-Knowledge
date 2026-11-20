@@ -688,6 +688,8 @@ void help(){
   std::cout<<"Anaiero modular sessions\n"
     "  catalog\n  init CONFIG STORE [MAXIMUM_BYTES]\n  configure CONFIG STORE OPERATION\n  run STORE THROUGH_CYCLE\n  status STORE\n"
     "  change STORE INSTANCE OPERATION CHANGE_FILE\n  pause|resume|cancel STORE INSTANCE OPERATION\n"
+    "  migration-review STORE INSTANCE OPERATION TARGET_SCHEMA PLAN_FILE\n"
+    "  migration-activate STORE INSTANCE PLAN_FILE\n  migration-status STORE OPERATION\n"
     "  trial STORE INSTANCE TICKS [CHANGE_FILE]\n  export-plan STORE INSTANCE IMAGE RECEIPTS\n"
     "  select STORE INSTANCE EXPERIMENT_ID TICKS METRIC CHANGE_FILE [CHANGE_FILE...]\n"
     "  selection|resume-experiment STORE EXPERIMENT_ID\n  apply-selected|outcome|release-experiment STORE EXPERIMENT_ID OPERATION\n"
@@ -876,6 +878,65 @@ s::Result execute(int argc,char** argv){
   const std::string_view archive_path=command=="admin"&&argc==5?argv[4]:"";
   if(auto r=app.open(argv[2],false,archive_path);!r)return r;
   if(command=="status"&&argc==3){return app.status();
+  }
+  if(command=="migration-status"&&argc==4) {
+    ev::StoredRecord audit;
+    if(auto r=app.store->latest("sdk.engine-migration",argv[3],audit);!r)return r;
+    std::vector<std::string> fields;s::MigrationPlan plan;
+    if(audit.record.tombstone||!s::unpack(audit.record.payload,fields,3)||
+       fields.size()!=3||fields[0]!="engine-migration-receipt/1"||
+       !s::valid_digest(fields[2])||!s::decode_migration_plan(fields[1],plan)||
+       audit.record.references!=std::vector<s::Digest>{plan.source_checkpoint_sha256,plan.target_checkpoint_sha256})
+      return {s::Code::corrupt,"invalid retained migration receipt"};
+    std::cout<<"{\"migration\":\"committed\",\"instance\":"<<json(plan.identity.instance_id)
+      <<",\"operation\":"<<json(plan.request.operation_id)
+      <<",\"source_schema\":"<<json(plan.request.source_schema)
+      <<",\"target_schema\":"<<json(plan.request.target_schema)
+      <<",\"source_checkpoint_sha256\":"<<json(plan.source_checkpoint_sha256)
+      <<",\"target_checkpoint_sha256\":"<<json(plan.target_checkpoint_sha256)
+      <<",\"generation\":"<<audit.generation<<"}\n";
+    return {};
+  }
+  if(command=="migration-review"||command=="migration-activate") {
+    if((command=="migration-review"&&argc!=7)||(command=="migration-activate"&&argc!=5))
+      return invalid("invalid engine migration arguments; see help");
+    if(auto r=app.runner->open();!r)return r;
+    if(app.runner->progress().cycle_pending)
+      return {s::Code::busy,"finish the durable cycle before migration"};
+    if(auto r=app.ensure_engines();!r)return r;
+    if(command=="migration-review") {
+      auto* engine=app.runtime->find(argv[3]);
+      if(!engine)return {s::Code::not_found,"migration engine not found"};
+      auto* migrator=engine->migrations();
+      if(!migrator)return {s::Code::unsupported,"engine has no migration capability"};
+      s::MigrationRequest request{argv[4],engine->state().revision,engine->state().checkpoint.schema,
+        argv[5],std::string(migrator->implementation_sha256()),{"anaiero.migration-parameters/1",{}}};
+      s::MigrationPlan plan;
+      if(auto r=app.runtime->review_migration(argv[3],request,plan);!r)return r;
+      const auto bytes=s::encode_migration_plan(plan);
+      if(bytes.empty())return {s::Code::corrupt,"review produced an invalid migration plan"};
+      if(auto r=e::write_new_artifact(argv[6],bytes);!r)return r;
+      std::cout<<"{\"migration\":\"reviewed\",\"instance\":"<<json(argv[3])
+        <<",\"source_schema\":"<<json(request.source_schema)
+        <<",\"target_schema\":"<<json(request.target_schema)
+        <<",\"source_checkpoint_sha256\":"<<json(plan.source_checkpoint_sha256)
+        <<",\"target_checkpoint_sha256\":"<<json(plan.target_checkpoint_sha256)
+        <<",\"plan_sha256\":"<<json(s::sha256(bytes))
+        <<",\"plan_file\":"<<json(argv[6])<<"}\n";
+      return {};
+    }
+    std::string bytes;
+    if(!read_file(fs::path(argv[4]),bytes,4U*1024U*1024U+16384U))
+      return invalid("cannot read bounded migration plan");
+    s::MigrationPlan plan;
+    if(auto r=s::decode_migration_plan(bytes,plan);!r)return r;
+    const auto applied=app.runtime->apply_migration(argv[3],plan);
+    if(applied.committed())
+      std::cout<<"{\"migration\":\"committed\",\"instance\":"<<json(argv[3])
+        <<",\"operation\":"<<json(plan.request.operation_id)
+        <<",\"target_checkpoint_sha256\":"<<json(plan.target_checkpoint_sha256)
+        <<",\"generation\":"<<app.store->info().generation<<"}\n";
+    return applied;
   }
   if(command=="run"&&argc==4){std::uint64_t through=0;
   if(!number(argv[3],through))return invalid("invalid absolute cycle target");
