@@ -12,6 +12,28 @@ constexpr std::string_view config_schema="anaiero.cell-bundle/1";
 constexpr std::string_view input_schema="anaiero.cell-input/1";
 constexpr std::string_view change_schema="anaiero.cell-change/1";
 constexpr std::string_view checkpoint_schema="CEVCELLSTATE/1";
+constexpr std::string_view checkpoint_schema_v2="CEVCELLSTATE/2";
+const Digest& migration_digest() {
+  static const Digest digest=sha256("CEVCELLSTATE/1-to-CEVCELLSTATE/2-tagged-world/1");
+  return digest;
+}
+Bytes wrap_checkpoint(std::string_view schema,std::string_view original) {
+  if(schema==checkpoint_schema_v2)
+    return pack({std::string(checkpoint_schema_v2),std::string(original),sha256(original)});
+  return std::string(original);
+}
+Result unwrap_checkpoint(const Envelope& checkpoint,Bytes& original) {
+  if(checkpoint.schema==checkpoint_schema) {
+    original=checkpoint.payload;return {};
+  }
+  if(checkpoint.schema!=checkpoint_schema_v2)
+    return corrupt("unsupported Cell Behavior checkpoint format");
+  std::vector<std::string> fields;
+  if(!unpack(checkpoint.payload,fields,3)||fields.size()!=3||
+     fields[0]!=checkpoint_schema_v2||fields[2]!=sha256(fields[1]))
+    return corrupt("damaged tagged Cell Behavior checkpoint");
+  original=std::move(fields[1]);return {};
+}
 constexpr std::string_view observation_schema="anaiero.cell-observation/1";
 Result unpack_cell(const Envelope& configuration,Bundle& bundle,cells::Atlas& atlas,cells::World& initial){
   if(configuration.schema!=config_schema||!decode(configuration.payload,bundle)||
@@ -31,7 +53,7 @@ std::vector<Observation> observations(const cells::World& world){
           {std::string(observation_schema),"energy","model_energy_proxy","synthetic_proxy",m.total_energy,world.tick},
           {std::string(observation_schema),"learning","model_learning_proxy","synthetic_proxy",m.total_learning,world.tick}};
 }
-class CellEngine final:public IEngine,public ITrialCapability,public IChangeCapability {
+class CellEngine final:public IEngine,public ITrialCapability,public IChangeCapability,public IMigrationCapability {
   EngineIdentity identity_;EngineState state_;
   cells::Atlas atlas_{};cells::World world_{};
 public:
@@ -48,12 +70,30 @@ public:
   const EngineState& state()const noexcept override{return state_;}
   ITrialCapability* trials()noexcept override{return this;}
   IChangeCapability* changes()noexcept override{return this;}
+  IMigrationCapability* migrations()noexcept override{return this;}
+  std::string_view implementation_sha256()const noexcept override{return migration_digest();}
+  Result prepare_migration(const MigrationRequest& request,PreparedTransition& output)override {
+    if(request.source_schema!=checkpoint_schema||request.target_schema!=checkpoint_schema_v2||
+       request.implementation_sha256!=migration_digest()||
+       request.parameters.schema!="anaiero.migration-parameters/1"||!request.parameters.payload.empty())
+      return {Code::unsupported,"unrecognized Cell Behavior migration"};
+    if(state_.phase!=Phase::paused||request.expected_revision!=state_.revision||
+       state_.checkpoint.schema!=checkpoint_schema)return {Code::conflict,"cell migration source changed"};
+    EngineState target=state_;target.checkpoint.schema=std::string(checkpoint_schema_v2);
+    target.checkpoint.payload=wrap_checkpoint(checkpoint_schema_v2,state_.checkpoint.payload);
+    const StepRequest proxy{request.operation_id,request.expected_revision,
+      {"anaiero.engine-migration/1",encode_migration_request(request)}};
+    output=prepared(*this,proxy,std::move(target));return {};
+  }
   Result restore(const EngineState& next)override{
-    if(!valid_base(next,config_schema,checkpoint_schema))return corrupt("invalid Cell Behavior checkpoint schema");
+    if(!valid_state(next)||next.configuration.schema!=config_schema||
+       (next.checkpoint.schema!=checkpoint_schema&&next.checkpoint.schema!=checkpoint_schema_v2))
+      return corrupt("invalid Cell Behavior checkpoint schema");
     Bundle bundle;cells::Atlas atlas;cells::World initial{},world{};
     if(auto r=unpack_cell(next.configuration,bundle,atlas,initial);!r)return r;
+    Bytes raw; if(auto decoded=unwrap_checkpoint(next.checkpoint,raw);!decoded)return decoded;
     if(identity_.model_sha256!=atlas.model_digest||
-       cells::files::deserialize_world(next.checkpoint.payload,atlas,world)!=cells::Status::ok||
+       cells::files::deserialize_world(raw,atlas,world)!=cells::Status::ok||
        world.tick!=next.tick)return corrupt("Cell Behavior checkpoint does not match its model or tick");
     atlas_=std::move(atlas);world_=world;state_=next;return {};
   }
@@ -75,7 +115,7 @@ public:
        trial.step({support,stress,signal,lesson==1})!=cells::Status::ok)
       return invalid("Cell Behavior rejected input or capacity");
     EngineState target=state_;target.tick=trial.world().tick;target.phase=Phase::running;
-    target.checkpoint.payload=cells::files::serialize_world(trial.world(),atlas_);
+    target.checkpoint.payload=wrap_checkpoint(target.checkpoint.schema,cells::files::serialize_world(trial.world(),atlas_));
     auto transition=prepared(*this,request,std::move(target));
     transition.observations=observations(trial.world());output=std::move(transition);return {};
   }
@@ -102,7 +142,7 @@ public:
         if(world_.intents[i].from==from&&world_.intents[i].to==to){existed=true;previous=world_.intents[i].guidance_weight;}
       if(!existed||!policy.undo(world_,route,false,0,changed))return invalid("route guidance does not exist");
     }else return {Code::unsupported,"unsupported Cell Behavior change"};
-    EngineState target=state_;target.checkpoint.payload=cells::files::serialize_world(changed,atlas_);
+    EngineState target=state_;target.checkpoint.payload=wrap_checkpoint(target.checkpoint.schema,cells::files::serialize_world(changed,atlas_));
     auto transition=prepared(*this,request,std::move(target));transition.observations=observations(changed);
     transition.receipts.push_back({"anaiero.cell-change-receipt/1",
       "CECELLCHANGE-RECEIPT/1\n"+verb+" "+std::to_string(from)+" "+std::to_string(to)+" "+
@@ -126,6 +166,7 @@ Result add_cell(EngineModuleCatalog& catalog){
   auto d=descriptor(cell_behavior,"Cell Behavior Engine","anaiero-sw5/1",
     std::string(config_schema),std::string(input_schema),std::string(checkpoint_schema),std::string(observation_schema));
   d.isolated_trials=true;d.change_preparation=true;d.change_schemas={std::string(change_schema)};
+  d.checkpoint_schemas.push_back(std::string(checkpoint_schema_v2));
   return catalog.add(std::move(d),std::make_shared<CellFactory>());
 }
 }
