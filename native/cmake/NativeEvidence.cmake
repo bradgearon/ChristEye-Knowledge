@@ -9,6 +9,15 @@ target_include_directories(anaiero_storage_native PRIVATE ${CMAKE_CURRENT_SOURCE
 target_link_libraries(anaiero_storage_native PUBLIC anaiero_evidence)
 install(TARGETS anaiero_evidence anaiero_storage_native EXPORT AnaieroTargets
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})
+if(CE_WIND_BUILD_TESTS)
+  add_executable(anaiero_native_store_boundary_tests tests/native_store_boundary_tests.cpp)
+  anaiero_sdk_target(anaiero_native_store_boundary_tests)
+  target_include_directories(anaiero_native_store_boundary_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/storage)
+  target_link_libraries(anaiero_native_store_boundary_tests PRIVATE anaiero_storage_native)
+  add_test(NAME anaiero_native_store_boundaries
+    COMMAND anaiero_native_store_boundary_tests "${CMAKE_CURRENT_BINARY_DIR}/native-store-boundary-tests")
+  set_tests_properties(anaiero_native_store_boundaries PROPERTIES TIMEOUT 90 LABELS "storage;recovery")
+endif()
 if(CE_WIND_BUILD_TESTS AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/tests/canonical_evidence_tests.cpp)
   add_executable(anaiero_evidence_tests tests/canonical_evidence_tests.cpp)
   anaiero_sdk_target(anaiero_evidence_tests)
