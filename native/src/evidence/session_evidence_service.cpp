@@ -1,4 +1,5 @@
 #include "anaiero/sdk/session_evidence_service.hpp"
+#include <utility>
 
 namespace anaiero::sdk::evidence {
 Result SessionEvidenceService::stage_transition(const PreparedTransition& transition,
