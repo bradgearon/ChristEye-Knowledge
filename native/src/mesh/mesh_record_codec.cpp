@@ -1,6 +1,8 @@
 #include "mesh_record_codec.hpp"
 #include <charconv>
+#include <limits>
 #include <set>
+#include <utility>
 namespace anaiero::sdk::mesh::recordcodec {
 namespace ev=evidence;
 namespace lc=lifecycle;
