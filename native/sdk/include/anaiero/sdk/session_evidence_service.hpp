@@ -17,6 +17,7 @@ public:
   Result registration(const EngineIdentity&,const EngineState&,PreparedTransition&) const;
   Digest phase_request(const EngineIdentity&,std::string_view operation,Phase) const;
   Digest detach_request(const EngineIdentity&) const;
+  std::string detach_operation(const EngineIdentity&) const;
   std::string metric_prefix(const EngineIdentity&) const;
 };
 } // namespace anaiero::sdk::evidence
