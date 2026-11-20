@@ -4,6 +4,8 @@
 file(GLOB_RECURSE anaiero_builtin_inputs CONFIGURE_DEPENDS
   "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/*.inc"
+  "${CMAKE_CURRENT_SOURCE_DIR}/examples/*.inc"
   "${CMAKE_CURRENT_SOURCE_DIR}/examples/modular_session_cli.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/examples/modular_host_cli.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/examples/modular_mesh_cli.cpp"
