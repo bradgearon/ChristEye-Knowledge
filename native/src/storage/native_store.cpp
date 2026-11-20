@@ -1,4 +1,6 @@
 #include "sealed_index.hpp"
+#include "native_store_filesystem.hpp"
+#include "native_store_recovery.hpp"
 #include "packed_index.hpp"
 #include "anaiero/sdk/storage_tools.hpp"
 #include "christeye/living/durable_io.hpp"
@@ -16,23 +18,14 @@
 namespace anaiero::storage {
 using namespace sdk::evidence;
 namespace os=christeye::living::durable::os;
+using fsops::require_file_capacity;
+using fsops::measure_coexistence;
+using fsops::directory;
 namespace {
 constexpr std::size_t decode_limit=64U*1024U*1024U;
 constexpr auto index_coverage_name="INDEX-COVERAGE";
 constexpr std::string_view operation_epoch_prefix="__epoch/";
 constexpr std::size_t operation_logical_offset=operation_epoch_prefix.size()+17U;
-void require_file_capacity(const fs::path& path,std::uint64_t temporary,std::uint64_t reserve){
-#ifndef _WIN32
-  struct statvfs status{};
-  if(statvfs(path.c_str(),&status)!=0)throw Failure(Code::io_error,"cannot measure filesystem file-node headroom");
-  const auto available=static_cast<std::uint64_t>(status.f_favail);
-  if(status.f_files!=0&&available!=any_generation&&
-     (available<reserve||temporary>available-reserve))
-    throw Failure(Code::capacity,"filesystem file-node admission headroom exhausted; free bytes do not imply free file entries");
-#else
-  (void)path;(void)temporary;(void)reserve;
-#endif
-}
 bool valid_layout(IndexLayout layout){
   return layout==IndexLayout::automatic||layout==IndexLayout::single_node||layout==IndexLayout::packed_pages;
 }
@@ -55,18 +48,6 @@ std::vector<std::string> compaction_intent(const fs::path& path){
   auto fields=unseal(raw,"ANAIERO-COMPACTION-INTENT/2",8);
   if(fields.size()!=8)throw Failure(Code::corrupt,"invalid compaction target intent");
   (void)read_layout(fields[7]);return fields;
-}
-void measure_coexistence(const fs::path& store,const fs::path& old_index,const fs::path& new_index,CompactionReport& sample){
-  for(const auto& entry:fs::recursive_directory_iterator(store)){
-    const auto type=entry.symlink_status().type();
-    if(type==fs::file_type::directory)++sample.coexistence_directories;
-    else if(type==fs::file_type::regular){
-      ++sample.coexistence_files;
-      if(entry.path().parent_path()==old_index)++sample.coexistence_old_index_files;
-      if(entry.path().parent_path()==new_index)++sample.coexistence_new_index_files;
-    }else throw Failure(Code::corrupt,"unexpected entry in compaction file inventory");
-  }
-  sample.coexistence_measured=true;
 }
 using MonotonicClock=std::chrono::steady_clock;
 std::uint64_t nanoseconds(MonotonicClock::duration duration)noexcept{
@@ -107,152 +88,7 @@ bool legacy_index_exists(const fs::path& store){
   }
   return regular_exists(legacy);
 }
-std::vector<std::string> fields(std::string_view bytes,std::size_t max=100000){
-  std::vector<std::string> f;if(!unpack(bytes,f,max,decode_limit))throw Failure(Code::corrupt,"invalid canonical field list");return f;
-}
-bool text_key(std::string_view v,std::size_t maximum=1024){return !v.empty()&&v.size()<=maximum&&v.find('\0')==std::string_view::npos;}
-std::string record_key(std::string_view kind,std::string_view key){return "r"+std::string(kind)+'\0'+std::string(key);}
-std::string history_key(const StoredRecord& r){return "h"+r.record.kind+'\0'+r.record.key+'\0'+number(r.revision);}
-std::string observation_prefix(std::string_view source,std::uint64_t epoch){return pack({std::string(source),number(epoch)});}
-std::string observation_key(const ObservationClaim& c){return "o"+observation_prefix(c.source_uid,c.epoch)+number(c.sequence);}
-std::string event_tuple(const EventKey& e){return pack({e.kind,e.entity,e.clock,e.producer,number(e.source_tick)});}
-std::string exact_event_key(const RegistryEvent& e){return "x"+event_tuple(e.key)+pack({e.object_digest,e.origin});}
-Bytes encode_record(const StoredRecord& r){return pack({r.record.kind,r.record.key,r.record.payload,pack(r.record.references),r.record.tombstone?"1":"0",number(r.revision),number(r.generation),r.digest});}
-StoredRecord decode_record(std::string_view bytes){
-  const auto f=fields(bytes,8);if(f.size()!=8||(f[4]!="0"&&f[4]!="1"))throw Failure(Code::corrupt,"invalid stored record");
-  StoredRecord r{{f[0],f[1],f[2],fields(f[3]),f[4]=="1"},parse_number(f[5]),parse_number(f[6]),f[7]};
-  if(r.revision==0||r.generation==0||r.digest!=record_digest(r.record))throw Failure(Code::corrupt,"stored record identity mismatch");
-  return r;
-}
-Bytes encode_blob(const BlobInfo& b){return pack({b.digest,number(b.ordinal),number(b.bytes),number(b.created_generation),number(b.expired_generation),b.present?"1":"0",pack(b.references)});}
-BlobInfo decode_blob(std::string_view bytes){
-  const auto f=fields(bytes,7);if(f.size()!=7||(f[5]!="0"&&f[5]!="1")||!valid_digest(f[0]))throw Failure(Code::corrupt,"invalid stored blob metadata");
-  BlobInfo b{f[0],parse_number(f[1]),parse_number(f[2]),parse_number(f[3]),parse_number(f[4]),f[5]=="1",fields(f[6])};
-  if(b.ordinal==0||b.created_generation==0||(!b.present&&b.expired_generation==0))throw Failure(Code::corrupt,"invalid blob lifecycle metadata");
-  return b;
-}
-Bytes encode_claim(const ObservationClaim& c){return pack({c.source_uid,number(c.epoch),number(c.sequence),c.payload_digest,c.receipt_digest});}
-ObservationClaim decode_claim(std::string_view bytes){
-  const auto f=fields(bytes,5);if(f.size()!=5||!text_key(f[0])||!valid_digest(f[3])||!valid_digest(f[4]))throw Failure(Code::corrupt,"invalid observation claim");
-  ObservationClaim c{f[0],parse_number(f[1]),parse_number(f[2]),f[3],f[4]};if(c.sequence==0)throw Failure(Code::corrupt,"zero observation sequence");return c;
-}
-Bytes encode_event(const StoredEvent& e){return pack({event_tuple(e.event.key),e.event.object_digest,e.event.origin,number(e.generation),number(e.position),e.digest});}
-StoredEvent decode_event(std::string_view bytes){
-  const auto f=fields(bytes,6);if(f.size()!=6)throw Failure(Code::corrupt,"invalid stored event");const auto k=fields(f[0],5);if(k.size()!=5)throw Failure(Code::corrupt,"invalid event tuple");
-  StoredEvent e{{{k[0],k[1],k[2],k[3],parse_number(k[4])},f[1],f[2]},parse_number(f[3]),parse_number(f[4]),f[5]};
-  if(e.digest!=sha256(pack({f[0],f[1],f[2]})))throw Failure(Code::corrupt,"event identity mismatch");
-  return e;
-}
-Bytes encode_authorizations(const std::vector<AuthorizationGuard>& authorizations){std::vector<std::string> values;for(const auto& a:authorizations)values.push_back(pack({a.principal,a.scope,number(a.credential_generation),number(a.not_after_unix_s)}));return pack(values);}
-std::vector<AuthorizationGuard> decode_authorizations(std::string_view encoded){std::vector<AuthorizationGuard> result;for(const auto& raw:fields(encoded,16)){const auto f=fields(raw,4);if(f.size()!=4||!text_key(f[0],256)||!text_key(f[1],1024))throw Failure(Code::corrupt,"invalid admission authorization");result.push_back({f[0],f[1],parse_number(f[2]),parse_number(f[3])});}return result;}
-Bytes encode_receipt(const CommitReceipt& r){return pack({r.operation_id,r.request_digest,r.batch_digest,r.root_digest,number(r.generation),number(r.admitted_unix_s),encode_authorizations(r.authorizations),number(static_cast<std::uint64_t>(r.commit_class))});}
-CommitReceipt decode_receipt(std::string_view bytes){
-  const auto f=fields(bytes,8);if((f.size()!=5&&f.size()!=7&&f.size()!=8)||!valid_digest(f[1])||!valid_digest(f[2])||!valid_digest(f[3]))throw Failure(Code::corrupt,"invalid commit receipt");CommitReceipt r{f[0],f[1],f[2],f[3],parse_number(f[4]),false};if(f.size()>=7){r.admitted_unix_s=parse_number(f[5]);r.authorizations=decode_authorizations(f[6]);}if(f.size()==8){const auto kind=parse_number(f[7]);if(kind>1)throw Failure(Code::corrupt,"invalid canonical commit class");r.commit_class=static_cast<CommitClass>(kind);}return r;
-}
-struct Root {
-  std::string store;
-  std::uint64_t generation=0,blobs=0,records=0,canonical_bytes=0,blob_bytes=0;
-  Digest digest,base;
-};
-Bytes encode_root(const Root& r){
-  std::vector<std::string> f{r.store,number(r.generation),r.digest,number(r.blobs),number(r.records),number(r.canonical_bytes),number(r.blob_bytes)};
-  if(!r.base.empty())f.push_back(r.base);
-  return seal(r.base.empty()?"ANAIERO-CANONICAL-ROOT/1":"ANAIERO-CANONICAL-ROOT/2",f);
-}
-Root decode_root(std::string_view data){
-  const auto envelope=fields(data,3);if(envelope.size()!=3||(envelope[0]!="ANAIERO-CANONICAL-ROOT/1"&&envelope[0]!="ANAIERO-CANONICAL-ROOT/2"))throw Failure(Code::corrupt,"unsupported canonical root version");
-  const auto f=unseal(data,envelope[0],8);if(f.size()!=(envelope[0]=="ANAIERO-CANONICAL-ROOT/1"?7U:8U))throw Failure(Code::corrupt,"invalid canonical root");
-  Root r{f[0],parse_number(f[1]),parse_number(f[3]),parse_number(f[4]),parse_number(f[5]),parse_number(f[6]),f[2],f.size()==8?f[7]:Digest{}};
-  if(!valid_digest(r.store)||(r.generation!=0&&!valid_digest(r.digest))||(r.generation==0&&!r.digest.empty())||(!r.base.empty()&&!valid_digest(r.base)))throw Failure(Code::corrupt,"invalid root identity");
-  return r;
-}
-bool same_root_witness(Root a,Root b){a.base.clear();b.base.clear();return encode_root(a)==encode_root(b);}
-struct BasePage {Digest digest;std::string first,last;std::uint64_t bytes=0,rows=0;};
-struct CanonicalBase {
-  Root anchor;
-  std::string operation_id;
-  Digest plan_digest,previous_base;
-  std::uint64_t admitted=0,operation_epoch=0,storage_bytes=0;
-  std::uint64_t summarized_records=0,expired_observations=0;
-  std::uint64_t before_bytes=0,removed_transaction_bytes=0,removed_index_bytes=0;
-  std::array<std::uint64_t,256> counts{};
-  std::vector<BasePage> pages;
-};
-Bytes encode_base(const CanonicalBase& b){
-  std::vector<std::string> pages,counts;for(const auto& p:b.pages)pages.push_back(pack({p.digest,p.first,p.last,number(p.bytes),number(p.rows)}));
-  for(std::size_t i=0;i<b.counts.size();++i)if(b.counts[i]!=0)counts.push_back(pack({std::string(1,static_cast<char>(i)),number(b.counts[i])}));
-  Root anchor=b.anchor;anchor.base.clear();
-  return seal("ANAIERO-CANONICAL-BASE/1",{encode_root(anchor),b.operation_id,b.plan_digest,b.previous_base,number(b.admitted),number(b.operation_epoch),number(b.storage_bytes),number(b.summarized_records),number(b.expired_observations),number(b.before_bytes),number(b.removed_transaction_bytes),number(b.removed_index_bytes),pack(counts),pack(pages)});
-}
-CanonicalBase decode_base(std::string_view raw){
-  const auto f=unseal(raw,"ANAIERO-CANONICAL-BASE/1",14);if(f.size()!=14)throw Failure(Code::corrupt,"invalid canonical base manifest");
-  CanonicalBase b;b.anchor=decode_root(f[0]);b.operation_id=f[1];b.plan_digest=f[2];b.previous_base=f[3];b.admitted=parse_number(f[4]);b.operation_epoch=parse_number(f[5]);b.storage_bytes=parse_number(f[6]);b.summarized_records=parse_number(f[7]);b.expired_observations=parse_number(f[8]);b.before_bytes=parse_number(f[9]);b.removed_transaction_bytes=parse_number(f[10]);b.removed_index_bytes=parse_number(f[11]);
-  if(!text_key(b.operation_id,256)||!valid_digest(b.plan_digest)||(!b.previous_base.empty()&&!valid_digest(b.previous_base))||!b.anchor.base.empty()||b.anchor.generation==0)throw Failure(Code::corrupt,"invalid canonical base identity");
-  for(const auto& value:fields(f[12],256)){const auto c=fields(value,2);if(c.size()!=2||c[0].size()!=1||b.counts[static_cast<unsigned char>(c[0][0])]!=0)throw Failure(Code::corrupt,"invalid base row counts");b.counts[static_cast<unsigned char>(c[0][0])]=parse_number(c[1]);}
-  std::string previous;std::uint64_t bytes=static_cast<std::uint64_t>(raw.size());
-  for(const auto& value:fields(f[13],100000)){const auto p=fields(value,5);if(p.size()!=5||!valid_digest(p[0])||p[1].empty()||p[2]<p[1]||(!previous.empty()&&p[1]<=previous))throw Failure(Code::corrupt,"invalid ordered canonical base page");BasePage page{p[0],p[1],p[2],parse_number(p[3]),parse_number(p[4])};if(page.rows==0||page.rows>128||page.bytes>decode_limit/2)throw Failure(Code::corrupt,"invalid bounded canonical base page");previous=page.last;if(page.bytes>any_generation-bytes)throw Failure(Code::corrupt,"base size overflow");bytes+=page.bytes;b.pages.push_back(std::move(page));}
-  if(bytes!=b.storage_bytes)throw Failure(Code::corrupt,"canonical base byte accounting mismatch");
-  return b;
-}
-std::uint64_t operation_epoch(std::string_view id){
-  if(!id.starts_with(operation_epoch_prefix))return 0;
-  if(id.size()<=operation_logical_offset||id[operation_logical_offset-1]!='/'||id.substr(operation_logical_offset).starts_with(operation_epoch_prefix))throw Failure(Code::invalid,"invalid qualified operation identity");
-  try{const auto epoch=parse_number(id.substr(operation_epoch_prefix.size(),16));if(epoch==0)throw Failure(Code::invalid,"zero qualified operation epoch");return epoch;}catch(const Failure& e){throw Failure(Code::invalid,e.what());}
-}
-
-struct Transaction {
-  Root root;
-  Digest predecessor;
-  CommitReceipt receipt;
-  std::vector<StoredRecord> records;
-  std::vector<BlobInfo> blobs;
-  std::vector<ObservationClaim> observations;
-  std::vector<StoredEvent> events;
-  std::vector<std::pair<Digest,std::uint64_t>> references;
-  std::vector<RecordGuard> guards;
-  std::uint64_t expected_generation=any_generation;
-};
-class IndexCursor {
-  SealedIndex& index_;Digest root_;std::string prefix_,after_;
-  std::vector<std::pair<std::string,std::string>> rows_;std::size_t offset_=0;bool more_=true;
-public:
-  IndexCursor(SealedIndex& index,Digest root,std::string prefix):index_(index),root_(std::move(root)),prefix_(std::move(prefix)){}
-  bool next(std::pair<std::string,std::string>& row){
-    if(offset_==rows_.size()){if(!more_)return false;index_.scan(root_,prefix_,after_,128,rows_,more_);offset_=0;if(rows_.empty())return false;}
-    row=rows_[offset_++];after_=row.first;return true;
-  }
-};
-Bytes encode_transaction(const Transaction& t){
-  std::vector<std::string> records,blobs,claims,events,refs,guards;
-  for(const auto& v:t.records)records.push_back(encode_record(v));
-  for(const auto& v:t.blobs)blobs.push_back(encode_blob(v));
-  for(const auto& v:t.observations)claims.push_back(encode_claim(v));
-  for(const auto& v:t.events)events.push_back(encode_event(v));
-  for(const auto& v:t.references)refs.push_back(pack({v.first,number(v.second)}));
-  for(const auto& v:t.guards)guards.push_back(pack({v.kind,v.key,number(v.expected_revision),v.expected_digest}));
-  return seal("ANAIERO-CANONICAL-TRANSACTION/4",{t.root.store,number(t.root.generation),t.predecessor,t.receipt.operation_id,t.receipt.request_digest,t.receipt.batch_digest,pack(records),pack(blobs),pack(claims),pack(events),pack(refs),number(t.root.blobs),number(t.root.records),number(t.root.canonical_bytes),number(t.root.blob_bytes),number(t.receipt.admitted_unix_s),encode_authorizations(t.receipt.authorizations),number(t.expected_generation),pack(guards),number(static_cast<std::uint64_t>(t.receipt.commit_class))});
-}
-Transaction decode_transaction(std::string_view raw){
-  const auto envelope=fields(raw,3);if(envelope.size()!=3||(envelope[0]!="ANAIERO-CANONICAL-TRANSACTION/1"&&envelope[0]!="ANAIERO-CANONICAL-TRANSACTION/2"&&envelope[0]!="ANAIERO-CANONICAL-TRANSACTION/3"&&envelope[0]!="ANAIERO-CANONICAL-TRANSACTION/4"))throw Failure(Code::corrupt,"invalid canonical transaction schema");
-  const auto f=unseal(raw,envelope[0],20);if((envelope[0]=="ANAIERO-CANONICAL-TRANSACTION/1"&&f.size()!=15)||(envelope[0]=="ANAIERO-CANONICAL-TRANSACTION/2"&&f.size()!=17)||(envelope[0]=="ANAIERO-CANONICAL-TRANSACTION/3"&&f.size()!=19)||(envelope[0]=="ANAIERO-CANONICAL-TRANSACTION/4"&&f.size()!=20))throw Failure(Code::corrupt,"invalid canonical transaction");
-  Transaction t;t.root={f[0],parse_number(f[1]),parse_number(f[11]),parse_number(f[12]),parse_number(f[13]),parse_number(f[14]),sha256(raw),{}};t.predecessor=f[2];t.receipt={f[3],f[4],f[5],t.root.digest,t.root.generation,false};
-  if(f.size()>=17){t.receipt.admitted_unix_s=parse_number(f[15]);t.receipt.authorizations=decode_authorizations(f[16]);for(const auto& a:t.receipt.authorizations)if(a.not_after_unix_s!=0&&t.receipt.admitted_unix_s>=a.not_after_unix_s)throw Failure(Code::corrupt,"canonical receipt was admitted after authorization expiry");}
-  if(f.size()>=19){t.expected_generation=parse_number(f[17]);if(t.expected_generation!=any_generation&&t.expected_generation!=t.root.generation-1)throw Failure(Code::corrupt,"canonical generation admission fence mismatch");for(const auto& raw_guard:fields(f[18],4096)){const auto guard=fields(raw_guard,4);if(guard.size()!=4||!text_key(guard[0],128)||!text_key(guard[1])||(!guard[3].empty()&&!valid_digest(guard[3])))throw Failure(Code::corrupt,"invalid canonical record admission fence");t.guards.push_back({guard[0],guard[1],parse_number(guard[2]),guard[3]});}}
-  if(f.size()==20){const auto kind=parse_number(f[19]);if(kind>1)throw Failure(Code::corrupt,"invalid canonical commit class");t.receipt.commit_class=static_cast<CommitClass>(kind);}
-  if(!valid_digest(t.root.store)||!valid_digest(t.receipt.request_digest)||!valid_digest(t.receipt.batch_digest)||t.root.generation==0||(t.root.generation>1&&!valid_digest(t.predecessor)))throw Failure(Code::corrupt,"invalid transaction identity");
-  for(const auto& v:fields(f[6]))t.records.push_back(decode_record(v));
-  for(const auto& v:fields(f[7]))t.blobs.push_back(decode_blob(v));
-  for(const auto& v:fields(f[8]))t.observations.push_back(decode_claim(v));
-  for(const auto& v:fields(f[9]))t.events.push_back(decode_event(v));
-  for(const auto& v:fields(f[10])){const auto pair=fields(v,2);if(pair.size()!=2||!valid_digest(pair[0]))throw Failure(Code::corrupt,"invalid reference counter");t.references.emplace_back(pair[0],parse_number(pair[1]));}
-  for(const auto& r:t.records)if(r.generation!=t.root.generation)throw Failure(Code::corrupt,"record generation mismatch");
-  return t;
-}
-void directory(const fs::path& p){
-  std::error_code ec;const auto s=fs::symlink_status(p,ec);
-  if(!ec&&fs::is_symlink(s))throw Failure(Code::corrupt,"storage directory symlink rejected");
-  ec.clear();fs::create_directories(p,ec);if(ec||!fs::is_directory(p))throw Failure(Code::io_error,"cannot create storage directory");
-}
+#include "native_store_canonical_codec.inc"
 }
 
 class NativeStore final:public ICommitStore {
@@ -333,191 +169,6 @@ private:
   std::uint64_t usage()const;
 };
 
-void NativeStore::load_base(){
-  base_={};base_pages_.clear();
-  if(root_.base.empty())return;
-  directory(path_/"bases");directory(path_/"bases"/"pages");
-  const auto raw=read_file(path_/"bases"/(root_.base+".base"),decode_limit);
-  if(sha256(raw)!=root_.base)throw Failure(Code::corrupt,"canonical base digest mismatch");
-  base_=decode_base(raw);
-  if(base_.anchor.store!=root_.store||base_.anchor.generation>root_.generation||base_.anchor.canonical_bytes>root_.canonical_bytes)throw Failure(Code::corrupt,"canonical base scope mismatch");
-  for(std::size_t i=0;i<base_.pages.size();++i)if(!base_pages_.emplace(base_.pages[i].digest,i).second)throw Failure(Code::corrupt,"repeated canonical base page");
-  if(base_.anchor.generation==root_.generation&&!same_root_witness(base_.anchor,root_))throw Failure(Code::corrupt,"canonical base terminal witness mismatch");
-}
-std::vector<std::pair<std::string,std::string>> NativeStore::base_page(const BasePage& page){
-  const auto raw=read_file(path_/"bases"/"pages"/page.digest,decode_limit/2);
-  if(raw.size()!=page.bytes||sha256(raw)!=page.digest)throw Failure(Code::corrupt,"canonical base page digest mismatch");
-  const auto f=unseal(raw,"ANAIERO-CANONICAL-BASE-PAGE/1",2,decode_limit/2);
-  if(f.size()!=2||f[0]!=root_.store)throw Failure(Code::corrupt,"canonical base page scope mismatch");
-  std::vector<std::pair<std::string,std::string>> result;std::string previous;
-  for(const auto& value:fields(f[1],128)){const auto r=fields(value,2);if(r.size()!=2||r[0].empty()||(!previous.empty()&&r[0]<=previous))throw Failure(Code::corrupt,"canonical base page ordering mismatch");previous=r[0];result.emplace_back(r[0],r[1]);}
-  if(result.empty()||result.size()!=page.rows||result.front().first!=page.first||result.back().first!=page.last)throw Failure(Code::corrupt,"canonical base page range mismatch");
-  return result;
-}
-std::string NativeStore::derived_base_value(const BasePage& page,std::size_t slot,const std::pair<std::string,std::string>& row){
-  if(row.first.front()=='r'||row.first.front()=='h'){const auto r=decode_record(row.second);return pack({"record/2",page.digest,number(slot),r.digest});}return row.second;
-}
-bool NativeStore::base_value(std::string_view key,std::string& out){
-  const auto found=std::lower_bound(base_.pages.begin(),base_.pages.end(),key,[](const BasePage& page,std::string_view wanted){return page.last<wanted;});
-  if(found==base_.pages.end()||key<found->first)return false;
-  const auto rows=base_page(*found);const auto row=std::lower_bound(rows.begin(),rows.end(),key,[](const auto& value,std::string_view wanted){return value.first<wanted;});
-  if(row==rows.end()||row->first!=key)return false;
-  out=derived_base_value(*found,static_cast<std::size_t>(row-rows.begin()),*row);return true;
-}
-void NativeStore::initialize_index_from_base(){
-  index_root_.clear();index_generation_=0;index_canonical_.clear();
-  if(root_.base.empty())return;
-  index_root_=build_base_index(*index_,base_);
-  index_generation_=base_.anchor.generation;index_canonical_=base_.anchor.digest;
-}
-Digest NativeStore::build_base_index(SealedIndex& target,const CanonicalBase& base,bool compaction_build){
-  std::vector<std::uint64_t> ends;ends.reserve(base.pages.size());std::uint64_t rows=0;
-  for(const auto& page:base.pages){rows+=page.rows;ends.push_back(rows);}
-  std::size_t loaded=base.pages.size();std::vector<std::pair<std::string,std::string>> cached;
-  return target.build_sorted(rows,[&](std::uint64_t ordinal){
-    if(compaction_build&&ordinal==rows/2)inject(FaultPoint::compaction_during_index_build);
-    const auto index=static_cast<std::size_t>(std::upper_bound(ends.begin(),ends.end(),ordinal)-ends.begin());
-    if(index>=base.pages.size())throw Failure(Code::corrupt,"bulk index lookup exceeded verified base");
-    const auto& page=base.pages[index];if(index!=loaded){cached=base_page(page);loaded=index;}
-    const auto slot=static_cast<std::size_t>(ordinal-(index?ends[index-1]:0));const auto& row=cached.at(slot);
-    return std::make_pair(row.first,derived_base_value(page,slot,row));
-  });
-}
-void NativeStore::fill_compaction_report(CompactionReport& report,bool already)const{
-  report={};report.plan_digest=base_.plan_digest;report.canonical_base_digest=root_.base;report.generation=base_.anchor.generation;report.operation_epoch=base_.operation_epoch;report.accounted_bytes_before=base_.before_bytes;report.accounted_bytes_after=usage();report.removed_transaction_bytes=base_.removed_transaction_bytes;report.removed_index_bytes=base_.removed_index_bytes;report.summarized_record_versions=base_.summarized_records;report.expired_observations=base_.expired_observations;report.activated=!root_.base.empty();report.cleanup_complete=pending_reclamation_bytes_==0;report.already_complete=already;
-}
-void NativeStore::cleanup_compaction(){
-  const auto marker=path_/"COMPACTION";
-  if(!regular_exists(marker)){pending_reclamation_bytes_=0;return;}
-  const auto f=compaction_intent(marker);
-  if(f[0]!=root_.store||!valid_digest(f[1])||(!f[2].empty()&&!valid_digest(f[2]))||(!f[3].empty()&&!valid_digest(f[3])))throw Failure(Code::corrupt,"invalid compaction cleanup intent");
-  const auto through=parse_number(f[4]),first=parse_number(f[5]);pending_reclamation_bytes_=parse_number(f[6]);if(first==0||first>through+1)throw Failure(Code::corrupt,"invalid compaction cleanup range");
-  const bool activated=!f[3].empty()&&root_.base==f[3];
-  if(activated&&(base_.plan_digest!=f[1]||base_.anchor.generation!=through))throw Failure(Code::corrupt,"compaction cleanup authority mismatch");
-  if(!activated&&root_.base!=f[2])throw Failure(Code::corrupt,"compaction cleanup root diverged");
-  // Canonical files are removed only after ROOT names the verified replacement.
-  // A prepublication interruption only removes unreferenced staging objects.
-  if(activated){for(std::uint64_t g=first;g<=through;++g){remove_file(path_/"transactions"/(number(g)+".txn"));inject(FaultPoint::compaction_during_cleanup);if(g==through)break;}}
-  const auto bases=path_/"bases",pages=bases/"pages";
-  if(fs::exists(bases))directory(bases);
-  if(fs::exists(pages))directory(pages);
-  if(fs::exists(pages)){for(const auto& entry:fs::directory_iterator(pages)){const auto name=entry.path().filename().string();if(!valid_digest(name))throw Failure(Code::corrupt,"unexpected canonical base page path");if(base_pages_.count(name)==0)remove_file(entry.path());}}
-  if(fs::exists(bases)){for(const auto& entry:fs::directory_iterator(bases)){if(entry.path().filename()=="pages")continue;const auto name=entry.path().filename().string();if(name.size()!=69||!name.ends_with(".base")||!valid_digest(std::string_view(name).substr(0,64)))throw Failure(Code::corrupt,"unexpected canonical base manifest path");if(name!=root_.base+".base")remove_file(entry.path());}}
-  cleanup_inactive_index();remove_file(marker);pending_reclamation_bytes_=0;
-}
-void NativeStore::compacted_rows(bool expire_operations,const std::function<void(const std::pair<std::string,std::string>&)>& emit,std::uint64_t& summarized,std::uint64_t& expired){
-  summarized=base_.summarized_records;expired=0;
-  const auto each=[&](std::string_view prefix,const auto& callback){IndexCursor cursor(*index_,index_root_,std::string(prefix));std::pair<std::string,std::string> row;while(cursor.next(row))callback(row);};
-  for(const auto family:{"b","e","f"})each(family,emit);
-  each("h",[&](const auto& row){const auto r=indexed_record(row.second);StoredRecord latest;if(!record(r.record.kind,r.record.key,latest))throw Failure(Code::corrupt,"record history has no latest authority");if(r.revision==latest.revision){if(r.digest!=latest.digest)throw Failure(Code::corrupt,"record history/latest identity mismatch");emit({row.first,encode_record(r)});}else ++summarized;});
-  const auto is_expired=[&](const ObservationClaim& c){BlobInfo payload,receipt;if(!blob(c.payload_digest,payload)||!blob(c.receipt_digest,receipt))throw Failure(Code::corrupt,"observation has no blob identity fence");return payload.expired_generation!=0&&receipt.expired_generation!=0;};
-  std::string group;std::pair<std::string,std::string> boundary;bool pruning=true;
-  const auto flush_boundary=[&]{if(!boundary.first.empty()){emit(boundary);boundary={};}};
-  each("o",[&](const auto& row){const auto f=fields(row.second,2);if(f.size()!=2)throw Failure(Code::corrupt,"invalid observation row during compaction");const auto c=decode_claim(f[1]);const auto next=observation_prefix(c.source_uid,c.epoch);if(next!=group){flush_boundary();group=next;pruning=true;}if(pruning&&is_expired(c)){boundary=row;return;}flush_boundary();pruning=false;emit(row);});flush_boundary();
-  if(!expire_operations)each("p",emit);
-  // A second bounded pass emits one exact closed-through fence per stream,
-  // retaining its last original claim as a boundary witness. No event is made up.
-  group.clear();boundary={};pruning=true;std::uint64_t floor=0;
-  const auto flush_floor=[&]{if(floor!=0){emit({"q"+group,boundary.second});if(floor>any_generation-expired)throw Failure(Code::capacity,"observation summary counter exhausted");expired+=floor;}floor=0;boundary={};};
-  each("o",[&](const auto& row){const auto f=fields(row.second,2);const auto c=decode_claim(f[1]);const auto next=observation_prefix(c.source_uid,c.epoch);if(next!=group){flush_floor();group=next;pruning=true;}if(pruning&&is_expired(c)){floor=c.sequence;boundary=row;}else pruning=false;});flush_floor();
-  each("r",[&](const auto& row){emit({row.first,encode_record(indexed_record(row.second))});});
-  for(const auto family:{"t","v","x"})each(family,emit);
-}
-void NativeStore::preview_compaction_locked(const CompactionOptions& options,CompactionPlan& plan,std::uint64_t* working_files){
-  require_ready();if(!writable_)throw Failure(Code::busy,"canonical admission is stopped");
-  if(!text_key(options.operation_id,256)||options.operation_id.starts_with("__storage/")||options.working_budget_bytes==0)throw Failure(Code::invalid,"invalid compaction operation/budget");
-  if(root_.generation==0)throw Failure(Code::invalid,"empty canonical history has no prefix to compact");
-  if(options.expected_generation!=any_generation&&options.expected_generation!=root_.generation)throw Failure(Code::conflict,"compaction generation fence changed");
-  if(!options.expected_root.empty()&&options.expected_root!=root_.digest)throw Failure(Code::conflict,"compaction root fence changed");
-  if(options.expire_operation_receipts&&base_.operation_epoch==any_generation)throw Failure(Code::capacity,"operation epoch exhausted");
-  plan={};plan.options=options;plan.options.expected_generation=root_.generation;plan.options.expected_root=root_.digest;plan.generation=root_.generation;plan.source_root=root_.digest;plan.source_base=root_.base;plan.next_operation_epoch=base_.operation_epoch+(options.expire_operation_receipts?1:0);plan.accounted_bytes_before=usage();plan.canonical_transactions_removed=root_.generation-base_.anchor.generation;
-  if(!valid_layout(options.target_index_layout))throw Failure(Code::invalid,"unknown target index layout");
-  const auto target_layout=options.target_index_layout==IndexLayout::automatic?index_layout_:options.target_index_layout;
-  std::uint64_t row_bytes=0,index_bytes=0,largest_node=4096,rows=0;
-  std::uint64_t base_page_files=0,base_page_rows=0,base_page_wire=0;
-  compacted_rows(options.expire_operation_receipts,[&](const auto& row){++rows;const auto type=row.first.front();if(type=='r')++plan.retained_records;if(type=='b')++plan.retained_blobs;if(type=='p')++plan.retained_operations;const auto row_wire=static_cast<std::uint64_t>(pack({row.first,row.second}).size());
-    if(base_page_rows==0||base_page_rows==128||base_page_wire+row_wire>8U*1024U*1024U){
-      ++base_page_files;base_page_rows=0;base_page_wire=0;
-    }
-    ++base_page_rows;base_page_wire+=row_wire;
-    const auto canonical=row_wire+128U;const auto indexed=static_cast<std::uint64_t>(row.first.size()+((type=='r'||type=='h')?256U:row.second.size())+512U);if(canonical>any_generation-row_bytes||indexed>any_generation-index_bytes)throw Failure(Code::capacity,"compaction size overflow");row_bytes+=canonical;index_bytes+=indexed;largest_node=std::max(largest_node,indexed);},plan.summarized_record_versions,plan.expired_observations);
-  std::uint64_t height=2;for(auto n=rows;n>1;n=(n+1)/2)++height;
-  const auto workspace=std::min<std::uint64_t>(rows,128U)*(height+4U)*largest_node*4U+65536U;
-  if(row_bytes>any_generation-index_bytes||row_bytes+index_bytes>any_generation-workspace)throw Failure(Code::capacity,"compaction working size overflow");
-  plan.required_working_bytes=row_bytes+index_bytes+workspace;
-  if(rows>(any_generation-32U)/2U)throw Failure(Code::capacity,"compaction file-node estimate exhausted");
-  if(working_files){
-    *working_files=target_layout==IndexLayout::packed_pages
-      ?base_page_files+PackedIndex::bulk_file_bound(rows,index_bytes)+32U:rows*2U+32U;
-  }
-  plan.plan_digest=sha256(pack({"ANAIERO-COMPACTION-PLAN/1",options.operation_id,root_.store,number(root_.generation),root_.digest,root_.base,index_root_,number(options.working_budget_bytes),options.expire_operation_receipts?"1":"0",number(plan.next_operation_epoch),number(plan.required_working_bytes),number(plan.retained_records),number(plan.retained_blobs),number(plan.retained_operations),number(plan.summarized_record_versions),number(plan.expired_observations)}));
-  if(options.target_index_layout!=IndexLayout::automatic||target_layout==IndexLayout::packed_pages)
-    plan.plan_digest=sha256(pack({"ANAIERO-COMPACTION-LAYOUT/1",plan.plan_digest,layout_name(target_layout)}));
-}
-Result NativeStore::preview_compaction(const CompactionOptions& options,CompactionPlan& plan){std::lock_guard lock(mutex_);try{const auto stable_options=options;preview_compaction_locked(stable_options,plan);return {};}catch(const Failure& e){if(e.code==Code::corrupt){ready_=false;writable_=false;}return {e.code,e.what()};}catch(const std::exception& e){return {Code::io_error,e.what()};}}
-Result NativeStore::execute_compaction(const CompactionPlan& supplied,CompactionReport& report){
-  std::lock_guard lock(mutex_);bool activated=false,staged=false;report={};
-  CompactionReport sample;
-  const auto finish=[&]{
-    fill_compaction_report(report);
-    report.coexistence_measured=sample.coexistence_measured;
-    report.coexistence_files=sample.coexistence_files;report.coexistence_directories=sample.coexistence_directories;
-    report.coexistence_old_index_files=sample.coexistence_old_index_files;report.coexistence_new_index_files=sample.coexistence_new_index_files;
-  };
-  try{
-    if(!root_.base.empty()&&base_.plan_digest==supplied.plan_digest){
-      const auto target=supplied.options.target_index_layout;
-      if(!valid_layout(target)||(target!=IndexLayout::automatic&&target!=index_layout_))
-        throw Failure(Code::conflict,"completed compaction has a different target index layout");
-      cleanup_compaction();fill_compaction_report(report,true);return {};
-    }
-    CompactionPlan plan;std::uint64_t working_files=0;preview_compaction_locked(supplied.options,plan,&working_files);
-    if(!valid_digest(supplied.plan_digest)||plan.plan_digest!=supplied.plan_digest||plan.source_root!=supplied.source_root||plan.source_base!=supplied.source_base||plan.generation!=supplied.generation||plan.next_operation_epoch!=supplied.next_operation_epoch||plan.accounted_bytes_before!=supplied.accounted_bytes_before||plan.required_working_bytes!=supplied.required_working_bytes||plan.retained_records!=supplied.retained_records||plan.retained_blobs!=supplied.retained_blobs||plan.retained_operations!=supplied.retained_operations||plan.summarized_record_versions!=supplied.summarized_record_versions||plan.expired_observations!=supplied.expired_observations||plan.canonical_transactions_removed!=supplied.canonical_transactions_removed)throw Failure(Code::conflict,"compaction reviewed plan is stale or altered");
-    AuditReport verified_history;audit_locked(verified_history);
-    const auto used=usage();if(plan.required_working_bytes>plan.options.working_budget_bytes||used>options_.maximum_bytes||plan.required_working_bytes>options_.maximum_bytes-used)throw Failure(Code::capacity,"compaction requires declared temporary and total quota headroom");
-    std::error_code space_error;const auto space=fs::space(path_,space_error);if(space_error||space.available<options_.minimum_free_bytes||plan.required_working_bytes>space.available-options_.minimum_free_bytes)throw Failure(Code::capacity,"compaction filesystem working headroom exhausted");
-    // The old index remains live until its replacement is verified. Reserve
-    // one replacement node and up to one bounded page per retained row, plus
-    // manifest, intent and publication files. Bulk construction has no COW spill.
-    require_file_capacity(path_,working_files,options_.minimum_free_file_nodes);
-    directory(path_/"bases");directory(path_/"bases"/"pages");
-    const auto old_index_bytes=index_->load(index_root_).bytes;
-    const auto obsolete_bytes=root_.canonical_bytes-base_.anchor.canonical_bytes+base_.storage_bytes+old_index_bytes;
-    const auto target_layout=plan.options.target_index_layout==IndexLayout::automatic?index_layout_:plan.options.target_index_layout;
-    const auto intent=[&](const Digest& destination){
-      std::vector<std::string> fields{root_.store,plan.plan_digest,root_.base,destination,number(root_.generation),number(base_.anchor.generation+1),number(obsolete_bytes)};
-      if(target_layout==IndexLayout::single_node)return seal("ANAIERO-COMPACTION-INTENT/1",fields);
-      fields.push_back(layout_name(target_layout));return seal("ANAIERO-COMPACTION-INTENT/2",fields);
-    };
-    write_file(path_/"COMPACTION",intent({}));staged=true;
-    CanonicalBase next;next.anchor=root_;next.anchor.base.clear();next.operation_id=plan.options.operation_id;next.plan_digest=plan.plan_digest;next.previous_base=root_.base;next.admitted=last_admitted_unix_s_;next.operation_epoch=plan.next_operation_epoch;next.before_bytes=used;next.removed_transaction_bytes=root_.canonical_bytes-base_.anchor.canonical_bytes;next.removed_index_bytes=old_index_bytes;
-    std::vector<std::string> rows;std::string first,last;std::size_t bytes=0;
-    const auto flush=[&]{if(rows.empty())return;const auto raw=seal("ANAIERO-CANONICAL-BASE-PAGE/1",{root_.store,pack(rows)});if(raw.size()>decode_limit/2)throw Failure(Code::capacity,"canonical snapshot page exceeds decoder");const auto digest=sha256(raw);const auto destination=path_/"bases"/"pages"/digest;if(regular_exists(destination)){if(read_file(destination,decode_limit/2)!=raw)throw Failure(Code::corrupt,"canonical base CAS collision");}else write_file(destination,raw);next.pages.push_back({digest,first,last,static_cast<std::uint64_t>(raw.size()),static_cast<std::uint64_t>(rows.size())});next.storage_bytes+=raw.size();rows.clear();bytes=0;first.clear();last.clear();if(next.pages.size()>100000)throw Failure(Code::capacity,"bounded canonical base manifest exhausted");};
-    compacted_rows(plan.options.expire_operation_receipts,[&](const auto& row){const auto encoded=pack({row.first,row.second});if(!rows.empty()&&(rows.size()==128||bytes+encoded.size()>8U*1024U*1024U))flush();if(first.empty())first=row.first;last=row.first;rows.push_back(encoded);bytes+=encoded.size();++next.counts[static_cast<unsigned char>(row.first.front())];},next.summarized_records,next.expired_observations);flush();
-    auto base_raw=encode_base(next);next.storage_bytes+=base_raw.size();base_raw=encode_base(next);const auto digest=sha256(base_raw);write_file(path_/"bases"/(digest+".base"),base_raw);
-    // Verify all snapshot bytes before the new ROOT can authorize any deletion.
-    auto verified=decode_base(base_raw);if(verified.storage_bytes>plan.required_working_bytes)throw Failure(Code::capacity,"snapshot exceeded admitted working bytes");
-    const auto old_directory=index_directory_;const std::string fresh=old_directory=="nodes-a"?"nodes-b":"nodes-a";const auto target=path_/"index"/fresh;
-    if(fs::is_symlink(target))throw Failure(Code::corrupt,"compaction index directory symlink rejected");
-    std::error_code ec;fs::remove_all(target,ec);if(ec)throw Failure(Code::io_error,"cannot clear compaction index staging");directory(target);
-    auto fresh_index=std::make_unique<SealedIndex>(target,target_layout);Digest fresh_root;
-    fresh_root=build_base_index(*fresh_index,verified,true);
-    inject(FaultPoint::compaction_after_index);
-    if(options_.measure_compaction_files)measure_coexistence(path_,index_->directory(),target,sample);
-    if(verified.storage_bytes+fresh_index->load(fresh_root).bytes>plan.required_working_bytes)throw Failure(Code::capacity,"compaction exceeded admitted working bytes");
-    write_file(path_/"COMPACTION",intent(digest));inject(FaultPoint::compaction_after_base);
-    Root published=root_;published.base=digest;write_file(path_/"ROOT",encode_root(published));root_=published;base_=std::move(verified);base_pages_.clear();for(std::size_t i=0;i<base_.pages.size();++i)base_pages_.emplace(base_.pages[i].digest,i);pending_reclamation_bytes_=obsolete_bytes;activated=true;
-    index_directory_=fresh;index_layout_=target_layout;index_=std::move(fresh_index);index_root_=fresh_root;index_generation_=root_.generation;index_canonical_=root_.digest;
-    inject(FaultPoint::compaction_after_root);save_index();cleanup_compaction();ready_=true;writable_=true;finish();return {};
-  }catch(const Failure& e){if(staged||e.code==Code::corrupt){ready_=false;writable_=false;}if(activated)finish();return {activated?Code::committed_degraded:e.code,e.what()};}catch(const std::exception& e){if(staged){ready_=false;writable_=false;}if(activated)finish();return {activated?Code::committed_degraded:Code::io_error,e.what()};}
-}
-Result NativeStore::resume_compaction(CompactionReport& report){
-  // Rebuilding also handles an interruption after ROOT publication but before
-  // the derived coverage marker. Cleanup is conditional on the canonical base.
-  const auto repaired=repair_index();if(!repaired)return repaired;
-  std::lock_guard lock(mutex_);try{cleanup_compaction();fill_compaction_report(report,true);return {};}catch(const Failure& e){ready_=false;writable_=false;return {e.code,e.what()};}catch(const std::exception& e){ready_=false;writable_=false;return {Code::io_error,e.what()};}
-}
-
 StoredRecord NativeStore::indexed_record(std::string_view locator){
   const auto f=fields(locator,4);if(f.size()!=4||(f[0]!="record/1"&&f[0]!="record/2")||!valid_digest(f[3]))throw Failure(Code::corrupt,"invalid canonical record locator");
   if(f[0]=="record/2"){
@@ -545,56 +196,6 @@ void NativeStore::save_index(){
     fields.push_back(layout_name(index_layout_));
     write_file(path_/index_coverage_name,seal("ANAIERO-INDEX-COVERAGE/4",fields));
   }else write_file(path_/index_coverage_name,seal("ANAIERO-INDEX-COVERAGE/3",fields));
-}
-void NativeStore::load_index(){
-  const bool current=regular_exists(path_/index_coverage_name);
-  const bool legacy=!current&&legacy_index_exists(path_);
-  if(!current&&!legacy){
-    index_generation_=0;index_root_.clear();index_canonical_.clear();index_directory_="nodes-a";
-    index_layout_=options_.index_layout==IndexLayout::packed_pages?IndexLayout::packed_pages:IndexLayout::single_node;
-    // The original writer may have published its first canonical ROOT before
-    // creating any coverage marker. Replay that retained suffix on open.
-  }
-  else {
-    const auto raw=read_file(path_/(current?index_coverage_name:"INDEX"),16384);const auto envelope=fields(raw,3);
-    if(envelope.size()!=3||(envelope[0]!="ANAIERO-INDEX-COVERAGE/2"&&envelope[0]!="ANAIERO-INDEX-COVERAGE/3"&&envelope[0]!="ANAIERO-INDEX-COVERAGE/4"))throw Failure(Code::corrupt,"unsupported index coverage version");
-    const auto f=unseal(raw,envelope[0],7);
-    const bool packed=envelope[0]=="ANAIERO-INDEX-COVERAGE/4";
-    const auto arity=packed?7U:(envelope[0]=="ANAIERO-INDEX-COVERAGE/3"?6U:5U);
-    if(f.size()!=arity||f[0]!=root_.store||(f[1]!="nodes-a"&&f[1]!="nodes-b")||
-       (packed&&f[6]!="native-packed-pages/1"))throw Failure(Code::corrupt,"invalid index store or layout");
-    index_directory_=f[1];index_layout_=packed?IndexLayout::packed_pages:IndexLayout::single_node;
-    if((arity>=6?f[5]:Digest{})!=root_.base)throw Failure(Code::corrupt,"index base identity mismatch");
-    index_generation_=parse_number(f[2]);index_canonical_=f[3];index_root_=f[4];
-    if(index_generation_<base_.anchor.generation||index_generation_>root_.generation||(index_generation_==0&&(!index_root_.empty()||!index_canonical_.empty())))throw Failure(Code::corrupt,"index coverage ahead of canonical root");
-    if(index_generation_!=0){const auto digest=index_generation_==base_.anchor.generation?base_.anchor.digest:transaction(index_generation_).root.digest;if(digest!=index_canonical_)throw Failure(Code::corrupt,"index coverage diverges from canonical history");}
-  }
-  directory(path_/"index"/index_directory_);index_=std::make_unique<SealedIndex>(path_/"index"/index_directory_,index_layout_);
-  if(index_generation_<base_.anchor.generation)throw Failure(Code::corrupt,"index is behind the canonical base");
-  (void)index_->load(index_root_);index_->finish_cleanup(index_root_);
-  if(!current&&!legacy&&index_layout_==IndexLayout::packed_pages)save_index();
-  if(legacy){
-    // Publish the validated derived marker durably before removing its old
-    // spelling. A crash leaves either the original or the preferred new marker;
-    // canonical ROOT/transactions and payloads are never renamed or rewritten.
-    save_index();remove_file(path_/"INDEX");
-  }
-}
-void NativeStore::recover_staging(){
-  // A writer can die before renaming its first STAGING temporary. Its name
-  // is fixed and owned by the native writer; it is never canonical authority.
-  remove_file(path_/"STAGING.tmp");
-  if(!regular_exists(path_/"STAGING"))return;
-  const auto f=unseal(read_file(path_/"STAGING",decode_limit),"ANAIERO-STAGING/1");
-  if(f.size()<3||f[0]!=root_.store)throw Failure(Code::corrupt,"invalid staging owner");
-  const auto generation=parse_number(f[1]);
-  if(generation>root_.generation){
-    if(generation!=root_.generation+1||f[2]!=root_.digest)throw Failure(Code::corrupt,"staging predecessor mismatch");
-    for(std::size_t i=3;i<f.size();++i){if(!valid_digest(f[i]))throw Failure(Code::corrupt,"bad staged blob identity");remove_file(path_/"blobs"/f[i]);remove_file(path_/"blobs"/(f[i]+".tmp"));}
-    remove_file(path_/"transactions"/(number(generation)+".txn"));remove_file(path_/"transactions"/(number(generation)+".txn.tmp"));
-    remove_file(path_/"ROOT.tmp");
-  }else if(generation!=root_.generation)throw Failure(Code::corrupt,"stale staging generation");
-  remove_file(path_/"STAGING");
 }
 template<class Put>
 void emit_index_updates(const Transaction& t,const Put& put){
@@ -625,41 +226,6 @@ void NativeStore::apply_index(const Transaction& t,bool preserve_admission,const
   index_->publish_cleanup(next);
   index_root_=next;index_generation_=t.root.generation;index_canonical_=t.root.digest;
   save_index();index_->finish_cleanup(index_root_);
-}
-void NativeStore::replay_suffix(){
-  while(index_generation_<root_.generation){const auto next=transaction(index_generation_+1);apply_index(next);}
-  if(index_generation_!=root_.generation||index_canonical_!=root_.digest)throw Failure(Code::corrupt,"index does not cover the sealed canonical root");
-}
-void NativeStore::cleanup_inactive_index(){
-  const auto obsolete=path_/"index"/(index_directory_=="nodes-a"?"nodes-b":"nodes-a");
-  std::error_code ec;
-  if(!fs::exists(obsolete,ec)){if(ec)throw Failure(Code::io_error,"cannot inspect obsolete index generation");return;}
-  if(fs::is_symlink(obsolete))throw Failure(Code::corrupt,"obsolete index directory symlink rejected");
-  fs::remove_all(obsolete,ec);if(ec||!os::sync_directory(path_/"index"))throw Failure(Code::io_error,"obsolete index generation cleanup failed");
-}
-void NativeStore::verify_canonical_history(){
-  Digest previous=base_.anchor.digest;std::uint64_t bytes=base_.anchor.canonical_bytes,admitted=base_.admitted;
-  for(const auto& page:base_.pages)(void)base_page(page);
-  for(std::uint64_t generation=base_.anchor.generation+1;generation<=root_.generation;++generation){const auto tx=transaction(generation);if(tx.predecessor!=previous||tx.receipt.admitted_unix_s<admitted)throw Failure(Code::corrupt,"canonical history cannot be repaired by rebuilding an index");previous=tx.root.digest;admitted=tx.receipt.admitted_unix_s;bytes+=fs::file_size(path_/"transactions"/(number(generation)+".txn"));if(bytes!=tx.root.canonical_bytes)throw Failure(Code::corrupt,"canonical history byte accounting mismatch");}
-  if(previous!=root_.digest||bytes!=root_.canonical_bytes)throw Failure(Code::corrupt,"canonical history does not reach the sealed root");
-}
-Result NativeStore::open(){
-  try{
-    if(!valid_layout(options_.index_layout)||options_.maximum_bytes<65536||options_.maximum_batch_bytes==0||options_.maximum_batch_bytes>decode_limit/2||options_.maximum_blob_bytes==0||options_.maximum_records==0||options_.maximum_records>1024||options_.maximum_blobs==0||options_.maximum_blobs>1024||options_.maximum_references>4096||options_.maximum_index_updates==0||options_.maximum_index_updates>1024)return {Code::invalid,"invalid native storage limits"};
-    directory(path_);directory(path_/"transactions");directory(path_/"blobs");directory(path_/"index");
-    (void)regular_exists(path_/"WRITER");if(!writer_.open(path_/"WRITER")||!writer_.lock_exclusive())return {Code::busy,"canonical store already has a writer"};
-    if(!regular_exists(path_/"ROOT")){
-      if(regular_exists(path_/index_coverage_name)||legacy_index_exists(path_)||regular_exists(path_/"STAGING")||!fs::is_empty(path_/"transactions")||!fs::is_empty(path_/"blobs")||(fs::exists(path_/"bases")&&!fs::is_empty(path_/"bases")))throw Failure(Code::corrupt,"canonical root missing from initialized storage");
-      std::random_device random;root_.store=sha256(std::to_string(random())+std::to_string(std::chrono::steady_clock::now().time_since_epoch().count())+path_.string());write_file(path_/"ROOT",encode_root(root_));
-    }else root_=decode_root(read_file(path_/"ROOT",16384));
-    generation_.store(root_.generation);load_base();last_admitted_unix_s_=base_.admitted;
-    if(root_.generation>base_.anchor.generation){const auto t=transaction(root_.generation);if(!same_root_witness(t.root,root_))throw Failure(Code::corrupt,"canonical root/transaction mismatch");last_admitted_unix_s_=t.receipt.admitted_unix_s;}
-    if(regular_exists(path_/"COMPACTION")){const auto pending=compaction_intent(path_/"COMPACTION");pending_reclamation_bytes_=parse_number(pending[6]);}
-    recover_staging();
-    try{load_index();replay_suffix();cleanup_compaction();cleanup_inactive_index();ready_=true;writable_=true;}
-    catch(const Failure&){ready_=false;writable_=false;} // Authoritative data is retained for explicit repair.
-    return {};
-  }catch(const Failure& e){return {e.code,e.what()};}catch(const std::exception& e){return {Code::io_error,e.what()};}
 }
 std::uint64_t NativeStore::usage()const{
   std::uint64_t index_bytes=0;
@@ -863,136 +429,8 @@ Result NativeStore::reclaim_expired_blob(std::string_view digest,std::uint64_t e
     CommitBatch batch;batch.operation_id=qualify_operation_id(base_.operation_epoch,"__storage/reclaim/"+b.digest+'/'+number(b.expired_generation));batch.request_digest=sha256(pack({b.digest,number(b.expired_generation)}));batch.expected_generation=expected;batch.commit_class=CommitClass::maintenance;CommitReceipt receipt;return commit_locked(batch,receipt,digest);
   }catch(const Failure& e){return {e.code,e.what()};}catch(const std::exception& e){return {Code::io_error,e.what()};}
 }
-Result NativeStore::repair_index(){
-  std::lock_guard lock(mutex_);
-  try{
-    // A failed rename/directory flush may have made ROOT visible before the
-    // caller observed completion. Reconcile it before removing staged objects.
-    root_=decode_root(read_file(path_/"ROOT",16384));generation_.store(root_.generation);load_base();last_admitted_unix_s_=base_.admitted;
-    if(root_.generation>base_.anchor.generation){const auto t=transaction(root_.generation);if(!same_root_witness(t.root,root_))throw Failure(Code::corrupt,"repair root witness mismatch");last_admitted_unix_s_=t.receipt.admitted_unix_s;}
-    recover_staging();
-    verify_canonical_history();
-    bool suffix=false;
-    try{load_index();index_->audit(index_root_);suffix=true;}catch(const Failure&){suffix=false;}
-    if(suffix){try{replay_suffix();cleanup_compaction();cleanup_inactive_index();ready_=true;writable_=true;return {};}catch(const Failure&){suffix=false;}}
-    (void)suffix;
-    const auto old_directory=index_directory_;const auto fresh=old_directory=="nodes-a"?"nodes-b":"nodes-a";
-    const auto target=path_/"index"/fresh;
-    if(fs::is_symlink(target))throw Failure(Code::corrupt,"rebuild directory symlink rejected");
-    std::error_code ec;fs::remove_all(target,ec);if(ec)throw Failure(Code::io_error,"cannot clear inactive index generation");directory(target);
-    if(regular_exists(path_/"COMPACTION")){
-      const auto intent=compaction_intent(path_/"COMPACTION");
-      if(!intent[3].empty()&&intent[3]==root_.base)index_layout_=read_layout(intent[7]);
-    }
-    index_directory_=fresh;index_=std::make_unique<SealedIndex>(target,index_layout_);index_root_.clear();index_generation_=0;index_canonical_.clear();
-    // Coverage is advanced after each sealed transaction. A rebuild interrupted
-    // after any published prefix resumes through the same canonical suffix.
-    initialize_index_from_base();save_index();replay_suffix();cleanup_compaction();ready_=true;writable_=true;
-    const auto old=path_/"index"/old_directory;if(old!=target){fs::remove_all(old,ec);if(ec)throw Failure(Code::io_error,"obsolete index generation cleanup failed");}
-    return {};
-  }catch(const Failure& e){ready_=false;writable_=false;return {e.code,e.what()};}catch(const std::exception& e){ready_=false;writable_=false;return {Code::io_error,e.what()};}
-}
-void NativeStore::audit_compacted(AuditReport& report){
-  verify_canonical_history();report={};report.canonical_base_digest=root_.base;report.base_pages=base_.pages.size();report.summarized_generations=base_.anchor.generation;report.summarized_record_versions=base_.summarized_records;report.expired_observations=base_.expired_observations;report.records=base_.counts['h'];
-  std::array<std::uint64_t,256> base_counts{};
-  for(const auto& page:base_.pages)for(const auto& row:base_page(page)){++base_counts[static_cast<unsigned char>(row.first.front())];if(row.first.front()=='r'||row.first.front()=='h'){const auto r=decode_record(row.second);if(r.generation>base_.anchor.generation||row.first!=(row.first.front()=='r'?record_key(r.record.kind,r.record.key):history_key(r)))throw Failure(Code::corrupt,"canonical base record witness mismatch");++report.canonical_records_read;}}
-  if(base_counts!=base_.counts||base_counts['r']!=base_.anchor.records||base_counts['h']!=base_counts['r']||base_counts['b']!=base_.anchor.blobs||base_counts['v']!=base_.anchor.blobs)throw Failure(Code::corrupt,"canonical base coverage mismatch");
-  std::uint64_t claims=base_.counts['o'],events=base_.counts['x'],tips=base_.counts['t'],operations=base_.counts['p'];
-  for(std::uint64_t g=base_.anchor.generation+1;g<=root_.generation;++g){const auto t=transaction(g);++report.generations;++operations;report.records+=t.records.size();report.canonical_records_read+=t.records.size()+t.observations.size()+t.events.size();claims+=t.observations.size();events+=t.events.size();for(const auto& c:t.observations)if(c.sequence==1)++tips;}
-  const auto before=index_->stats.nodes_read;index_->audit(index_root_);
-  std::array<std::uint64_t,256> counts{};std::array<std::uint64_t,5> expected_references{},indexed_references{};
-  const auto fingerprint=[](auto& aggregate,std::string_view digest,std::uint64_t count){if(!valid_digest(digest))throw Failure(Code::corrupt,"invalid reference fingerprint identity");aggregate[0]+=count;for(std::size_t i=0;i<4;++i)aggregate[i+1]+=parse_number(digest.substr(i*16,16))*count;};
-  std::size_t page_number=0;std::vector<std::pair<std::string,std::string>> cached_rows;std::size_t cached_number=base_.pages.size();
-  const auto baseline=[&](const auto& row){while(page_number<base_.pages.size()&&base_.pages[page_number].last<row.first)++page_number;if(page_number==base_.pages.size()||row.first<base_.pages[page_number].first)return false;if(cached_number!=page_number){cached_rows=base_page(base_.pages[page_number]);cached_number=page_number;}const auto found=std::lower_bound(cached_rows.begin(),cached_rows.end(),row.first,[](const auto& item,const auto& wanted){return item.first<wanted;});return found!=cached_rows.end()&&found->first==row.first&&derived_base_value(base_.pages[page_number],static_cast<std::size_t>(found-cached_rows.begin()),*found)==row.second;};
-  IndexCursor all(*index_,index_root_,"");std::pair<std::string,std::string> row;
-  while(all.next(row)){
-    const auto type=row.first.front();++counts[static_cast<unsigned char>(type)];const bool from_base=baseline(row);
-    if(type=='r'||type=='h'){const auto r=indexed_record(row.second);if(row.first!=(type=='r'?record_key(r.record.kind,r.record.key):history_key(r)))throw Failure(Code::corrupt,"record index has no canonical key");if(!from_base&&r.generation<=base_.anchor.generation)throw Failure(Code::corrupt,"record index differs from canonical base");if(type=='r'&&!r.record.tombstone)for(const auto& ref:r.record.references)fingerprint(expected_references,ref,1);}
-    else if(type=='p'){const auto receipt=decode_receipt(row.second);if(row.first!="p"+receipt.operation_id)throw Failure(Code::corrupt,"operation index key mismatch");if(!from_base){if(receipt.generation<=base_.anchor.generation||encode_receipt(transaction(receipt.generation).receipt)!=row.second)throw Failure(Code::corrupt,"operation index lacks retained canonical witness");}}
-    else if(type=='o'||type=='t'||type=='q'){const auto f=fields(row.second,2);if(f.size()!=2)throw Failure(Code::corrupt,"bad observation/floor index");const auto c=decode_claim(f[1]);if(row.first!=(type=='o'?observation_key(c):std::string(1,type)+observation_prefix(c.source_uid,c.epoch)))throw Failure(Code::corrupt,"observation/floor key mismatch");if(type=='q'&&!from_base)throw Failure(Code::corrupt,"unwitnessed observation expiry floor");if(!from_base){const auto generation=parse_number(f[0]);if(generation<=base_.anchor.generation)throw Failure(Code::corrupt,"observation index differs from canonical base");const auto t=transaction(generation);bool match=false;for(const auto& claim:t.observations)if(encode_claim(claim)==f[1])match=true;if(!match)throw Failure(Code::corrupt,"observation index lacks retained canonical witness");}}
-    else if(type=='e'||type=='x'){const auto e=decode_event(row.second);if(row.first!=(type=='e'?"e"+event_tuple(e.event.key):exact_event_key(e.event)))throw Failure(Code::corrupt,"event index key mismatch");if(!from_base){if(e.generation<=base_.anchor.generation)throw Failure(Code::corrupt,"event index differs from canonical base");const auto t=transaction(e.generation);if(e.position>=t.events.size()||encode_event(t.events[static_cast<std::size_t>(e.position)])!=row.second)throw Failure(Code::corrupt,"event index lacks retained canonical witness");}}
-    else if(type=='b'){
-      const auto b=decode_blob(row.second);if(row.first!="b"+b.digest)throw Failure(Code::corrupt,"blob index key mismatch");++report.blobs;
-      if(!from_base){
-        if(b.created_generation<=base_.anchor.generation){std::string raw;if(!base_value(row.first,raw))throw Failure(Code::corrupt,"blob has no canonical base creation witness");const auto original=decode_blob(raw);if(original.ordinal!=b.ordinal||original.bytes!=b.bytes||original.references!=b.references||original.created_generation!=b.created_generation||(original.expired_generation!=0&&original.expired_generation!=b.expired_generation)||(!original.present&&b.present))throw Failure(Code::corrupt,"blob lifecycle differs from canonical base");}
-        else {const auto creation=transaction(b.created_generation);bool found=false;for(const auto& candidate:creation.blobs)if(candidate.digest==b.digest&&candidate.ordinal==b.ordinal&&candidate.bytes==b.bytes&&candidate.references==b.references&&candidate.expired_generation==0&&candidate.present)found=true;if(!found)throw Failure(Code::corrupt,"blob lacks canonical creation witness");}
-        if(b.expired_generation>base_.anchor.generation){const auto expiry=transaction(b.expired_generation);bool found=false;for(const auto& candidate:expiry.blobs)if(candidate.digest==b.digest&&candidate.expired_generation==b.expired_generation)found=true;if(!found)throw Failure(Code::corrupt,"blob lacks canonical expiry witness");}
-      }
-      if(b.expired_generation!=0){++report.expired_blobs;continue;}
-      for(const auto& ref:b.references)fingerprint(expected_references,ref,1);
-      const auto raw=read_file(path_/"blobs"/b.digest,options_.maximum_blob_bytes);if(raw.size()!=b.bytes||sha256(raw)!=b.digest)throw Failure(Code::corrupt,"retained blob digest mismatch");
-    }
-    else if(type=='f'){const auto f=fields(row.second,2);if(f.size()!=2)throw Failure(Code::corrupt,"bad reference index");if(!from_base){const auto generation=parse_number(f[0]);if(generation<=base_.anchor.generation)throw Failure(Code::corrupt,"reference differs from canonical base");const auto t=transaction(generation);bool found=false;for(const auto& ref:t.references)if(row.first=="f"+ref.first&&f[1]==number(ref.second))found=true;if(!found)throw Failure(Code::corrupt,"reference lacks canonical witness");}fingerprint(indexed_references,std::string_view(row.first).substr(1),parse_number(f[1]));}
-    else if(type=='v'){BlobInfo b;if(!blob(row.second,b)||row.first!="v"+number(b.ordinal))throw Failure(Code::corrupt,"blob inventory mismatch");}
-    else throw Failure(Code::corrupt,"unknown compacted index entry type");
-  }
-  if(counts['r']!=root_.records||counts['h']!=report.records||counts['p']!=operations||counts['o']!=claims||counts['t']!=tips||counts['q']!=base_.counts['q']||counts['x']!=events||counts['b']!=root_.blobs||counts['v']!=root_.blobs||expected_references!=indexed_references)throw Failure(Code::corrupt,"compacted index coverage/reference mismatch");
-  for(const auto& family:std::array<std::pair<std::string,std::string>,3>{{{"h","r"},{"o","t"},{"x","e"}}}){
-    IndexCursor history(*index_,index_root_,family.first),current(*index_,index_root_,family.second);std::pair<std::string,std::string> item,actual;std::string group,latest_value;std::uint64_t revision=0,generation=0,position=0;
-    const auto finish=[&]{if(group.empty())return;if(!current.next(actual)||actual.first!=group)throw Failure(Code::corrupt,"current index differs from compacted history");if(family.first=="h"){const auto a=indexed_record(actual.second),b=indexed_record(latest_value);if(a.digest!=b.digest||a.generation!=b.generation||a.revision!=b.revision)throw Failure(Code::corrupt,"latest record differs from compacted history");}else if(actual.second!=latest_value)throw Failure(Code::corrupt,"latest source/event differs from compacted history");};
-    while(history.next(item)){
-      std::string key;std::uint64_t next_revision=0,next_generation=0,next_position=0;
-      if(family.first=="h"){const auto r=indexed_record(item.second);key=record_key(r.record.kind,r.record.key);next_revision=r.revision;next_generation=r.generation;}
-      else if(family.first=="o"){const auto f=fields(item.second,2);const auto c=decode_claim(f[1]);key="t"+observation_prefix(c.source_uid,c.epoch);next_revision=c.sequence;next_generation=parse_number(f[0]);}
-      else {const auto e=decode_event(item.second);key="e"+event_tuple(e.event.key);next_generation=e.generation;next_position=e.position;}
-      if(key!=group){finish();group=key;latest_value.clear();revision=0;generation=0;position=0;if(family.first=="h"){std::string original;if(base_value(key,original))revision=indexed_record(original).revision-1;}else if(family.first=="o"){bool found=false;const auto floor=value("q"+key.substr(1),found);if(found){const auto f=fields(floor,2);revision=decode_claim(f[1]).sequence-1;}}}
-      if(family.first!="x"){if(next_revision!=revision+1||next_generation<generation||(family.first=="h"&&next_generation==generation))throw Failure(Code::corrupt,"compacted history has a gap/reversal");revision=next_revision;generation=next_generation;latest_value=item.second;}
-      else if(latest_value.empty()||next_generation>generation||(next_generation==generation&&next_position>position)){generation=next_generation;position=next_position;latest_value=item.second;}
-    }
-    finish();if(current.next(actual))throw Failure(Code::corrupt,"current index has an unwitnessed compacted identity");
-  }
-  report.index_nodes_read=index_->stats.nodes_read-before;
-}
-
-void NativeStore::audit_locked(AuditReport& report){
-  if(!root_.base.empty()){audit_compacted(report);return;}
-  report={};Digest previous;std::uint64_t canonical_bytes=0,claims=0,events=0,tips=0,admitted=0;
-  for(std::uint64_t g=1;g<=root_.generation;++g){const auto t=transaction(g);++report.generations;report.records+=t.records.size();report.canonical_records_read+=t.records.size()+t.observations.size()+t.events.size();claims+=t.observations.size();events+=t.events.size();for(const auto& c:t.observations)if(c.sequence==1)++tips;if(t.predecessor!=previous||t.receipt.admitted_unix_s<admitted)throw Failure(Code::corrupt,"historical canonical predecessor/admission order mismatch");admitted=t.receipt.admitted_unix_s;previous=t.root.digest;canonical_bytes+=fs::file_size(path_/"transactions"/(number(g)+".txn"));if(t.root.canonical_bytes!=canonical_bytes)throw Failure(Code::corrupt,"canonical byte accounting mismatch");}
-  if(previous!=root_.digest||canonical_bytes!=root_.canonical_bytes)throw Failure(Code::corrupt,"canonical audit root mismatch");
-  const auto before=index_->stats.nodes_read;index_->audit(index_root_);
-  std::array<std::uint64_t,256> counts{};
-  std::array<std::uint64_t,5> expected_references{},indexed_references{};
-  const auto reference_fingerprint=[](std::array<std::uint64_t,5>& aggregate,std::string_view digest,std::uint64_t count){if(!valid_digest(digest))throw Failure(Code::corrupt,"invalid reference fingerprint identity");aggregate[0]+=count;for(std::size_t i=0;i<4;++i)aggregate[i+1]+=parse_number(digest.substr(i*16,16))*count;};
-  std::vector<std::pair<std::string,std::string>> rows;bool more=true;std::string after;
-  // Each index entry points to a bounded canonical transaction. This validates
-  // historical and latest indexes without scanning history per observation.
-  while(more){index_->scan(index_root_,"",after,128,rows,more);for(const auto& row:rows){after=row.first;const auto type=row.first.front();++counts[static_cast<unsigned char>(type)];
-    if(type=='r'||type=='h'){const auto r=indexed_record(row.second);if(row.first!=(type=='r'?record_key(r.record.kind,r.record.key):history_key(r)))throw Failure(Code::corrupt,"record index has no matching canonical key");if(type=='r'&&!r.record.tombstone)for(const auto& ref:r.record.references)reference_fingerprint(expected_references,ref,1);}
-    else if(type=='p'){const auto receipt=decode_receipt(row.second);const auto t=transaction(receipt.generation);if(encode_receipt(t.receipt)!=encode_receipt(receipt)||row.first!="p"+receipt.operation_id)throw Failure(Code::corrupt,"operation index has no canonical witness");}
-    else if(type=='o'||type=='t'){const auto f=fields(row.second,2);if(f.size()!=2)throw Failure(Code::corrupt,"bad observation index");const auto claim=decode_claim(f[1]);if(row.first!=(type=='o'?observation_key(claim):"t"+observation_prefix(claim.source_uid,claim.epoch)))throw Failure(Code::corrupt,"observation index key mismatch");const auto t=transaction(parse_number(f[0]));bool match=false;for(const auto& c:t.observations)if(encode_claim(c)==f[1]){match=true;break;}if(!match)throw Failure(Code::corrupt,"observation index has no canonical witness");}
-    else if(type=='e'||type=='x'){const auto e=decode_event(row.second);const auto t=transaction(e.generation);if(row.first!=(type=='e'?"e"+event_tuple(e.event.key):exact_event_key(e.event))||e.position>=t.events.size()||encode_event(t.events[static_cast<std::size_t>(e.position)])!=row.second)throw Failure(Code::corrupt,"event index has no canonical witness");}
-    else if(type=='b'){
-      const auto b=decode_blob(row.second);if(row.first!="b"+b.digest)throw Failure(Code::corrupt,"blob index key mismatch");++report.blobs;
-      const auto creation=transaction(b.created_generation);bool created=false;for(const auto& candidate:creation.blobs)if(candidate.digest==b.digest&&candidate.ordinal==b.ordinal&&candidate.bytes==b.bytes&&candidate.references==b.references&&candidate.expired_generation==0&&candidate.present){created=true;break;}if(!created)throw Failure(Code::corrupt,"blob has no canonical creation witness");
-      if(b.expired_generation!=0){++report.expired_blobs;const auto expiry=transaction(b.expired_generation);bool expired=false;for(const auto& candidate:expiry.blobs)if(candidate.digest==b.digest&&candidate.expired_generation==b.expired_generation){expired=true;break;}if(!expired)throw Failure(Code::corrupt,"blob has no canonical expiry witness");continue;}
-      for(const auto& ref:b.references)reference_fingerprint(expected_references,ref,1);
-      const auto raw=read_file(path_/"blobs"/b.digest,options_.maximum_blob_bytes);if(raw.size()!=b.bytes||sha256(raw)!=b.digest)throw Failure(Code::corrupt,"historical audit blob digest mismatch");
-    }
-    else if(type=='f'){const auto f=fields(row.second,2);if(f.size()!=2)throw Failure(Code::corrupt,"bad reference index");const auto t=transaction(parse_number(f[0]));bool match=false;for(const auto& ref:t.references)if(row.first=="f"+ref.first&&f[1]==number(ref.second)){match=true;break;}if(!match)throw Failure(Code::corrupt,"reference index has no canonical witness");reference_fingerprint(indexed_references,std::string_view(row.first).substr(1),parse_number(f[1]));}
-    else if(type=='v'){BlobInfo b;if(!blob(row.second,b)||row.first!="v"+number(b.ordinal))throw Failure(Code::corrupt,"blob inventory index mismatch");}
-    else throw Failure(Code::corrupt,"unknown index entry type");
-  }}
-  if(counts['r']!=root_.records||counts['h']!=report.records||counts['p']!=root_.generation||counts['o']!=claims||counts['t']!=tips||counts['x']!=events||counts['b']!=root_.blobs||counts['v']!=root_.blobs||expected_references!=indexed_references)throw Failure(Code::corrupt,"index coverage/reference aggregate mismatch");
-  // Merge the ordered immutable occurrence histories with current directories.
-  // Only two fixed-size pages and one group accumulator are resident, even for
-  // fully retired identities. No audit observation triggers a historical scan.
-  for(const auto& family:std::array<std::pair<std::string,std::string>,3>{{{"h","r"},{"o","t"},{"x","e"}}}){
-    IndexCursor history(*index_,index_root_,family.first),current(*index_,index_root_,family.second);std::pair<std::string,std::string> row,actual;std::string group,latest_value;std::uint64_t revision=0,generation=0,position=0;
-    const auto finish=[&]{if(group.empty())return;if(!current.next(actual)||actual.first!=group||actual.second!=latest_value)throw Failure(Code::corrupt,"current index differs from ordered canonical history");};
-    while(history.next(row)){
-      std::string key;std::uint64_t next_revision=0,next_generation=0,next_position=0;
-      if(family.first=="h"){const auto r=indexed_record(row.second);key=record_key(r.record.kind,r.record.key);next_revision=r.revision;next_generation=r.generation;}
-      else if(family.first=="o"){const auto f=fields(row.second,2);const auto c=decode_claim(f[1]);key="t"+observation_prefix(c.source_uid,c.epoch);next_revision=c.sequence;next_generation=parse_number(f[0]);}
-      else {const auto e=decode_event(row.second);key="e"+event_tuple(e.event.key);next_generation=e.generation;next_position=e.position;}
-      if(key!=group){finish();group=key;latest_value.clear();revision=0;generation=0;position=0;}
-      if(family.first!="x"){if(next_revision!=revision+1||next_generation<generation||(family.first=="h"&&next_generation==generation))throw Failure(Code::corrupt,"record/source history revision gap or reversal");revision=next_revision;generation=next_generation;latest_value=row.second;}
-      else if(latest_value.empty()||next_generation>generation||(next_generation==generation&&next_position>position)){generation=next_generation;position=next_position;latest_value=row.second;}
-    }
-    finish();if(current.next(actual))throw Failure(Code::corrupt,"current index contains an unwitnessed identity");
-  }
-  report.index_nodes_read=index_->stats.nodes_read-before;
-}
-Result NativeStore::audit(AuditReport& report){return read([&]{audit_locked(report);});}
+#include "native_store_compaction_impl.inc"
+#include "native_store_recovery_impl.inc"
 }
 
 namespace anaiero::sdk::evidence {

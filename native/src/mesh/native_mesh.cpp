@@ -1,4 +1,5 @@
 #include "anaiero/sdk/native_mesh.hpp"
+#include "native_mesh_protocol.hpp"
 #include "anaiero/infrastructure/native_tls.hpp"
 #include <algorithm>
 #include <atomic>
@@ -18,6 +19,8 @@ namespace anaiero::sdk::mesh {
 namespace tls=::anaiero::mesh::tls;
 using TransportCode=::anaiero::mesh::TransportCode;
 namespace {
+using protocol::response;using protocol::remote_error;
+using protocol::hex;using protocol::unhex;
 constexpr std::string_view ready="CEVMESH/2 READY\n";
 std::uint64_t now(){return static_cast<std::uint64_t>(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());}
 Result fail(Code code,std::string text){return {code,std::move(text)};}
@@ -36,12 +39,6 @@ Result write(tls::Connection& connection,std::string_view value,std::uint32_t ti
 Result read(tls::Connection& connection,Bytes& value,std::uint32_t timeout){
   std::vector<std::byte> frame;const auto result=connection.read_frame(frame,timeout);
   value.assign(reinterpret_cast<const char*>(frame.data()),frame.size());return transport(result);
-}
-Bytes response(const Result& result){return pack({"error",number(static_cast<std::uint32_t>(result.code)),result.message});}
-Result remote_error(const std::vector<std::string>& fields){
-  std::uint64_t code=0;if(fields.size()!=3||fields[0]!="error"||!integer(fields[1],code)||code>static_cast<std::uint32_t>(Code::deadline))
-    return fail(Code::corrupt,"invalid canonical mesh control response");
-  return {static_cast<Code>(code),fields[2]};
 }
 Result fields(tls::Connection& connection,std::vector<std::string>& output,std::uint32_t timeout){
   Bytes value;if(auto result=read(connection,value,timeout);!result)return result;
@@ -63,12 +60,6 @@ Result execute(host::IStoreTaskExecutor& executor,host::StoreTask task){
 }
 bool permanently_blocked(Code code){return code==Code::unauthorized||code==Code::expired||code==Code::conflict||code==Code::corrupt||
   code==Code::history_expired||code==Code::rebootstrap_required||code==Code::archive_required||code==Code::archive_unavailable||code==Code::unsupported;}
-std::string hex(std::string_view value){static constexpr char alphabet[]="0123456789abcdef";std::string out;out.reserve(value.size()*2);for(unsigned char c:value){out.push_back(alphabet[c>>4]);out.push_back(alphabet[c&15]);}return out;}
-bool unhex(std::string_view value,Bytes& out){
-  out.clear();if(value.size()%2)return false;
-  auto nibble=[](char c)->int{return c>='0'&&c<='9'?c-'0':c>='a'&&c<='f'?c-'a'+10:-1;};
-  for(std::size_t i=0;i<value.size();i+=2){const auto high=nibble(value[i]),low=nibble(value[i+1]);if(high<0||low<0)return false;out.push_back(static_cast<char>(high*16+low));}return true;
-}
 Result hello(tls::Connection& connection,tls::Context& context,const NativeSubscriberOptions& options,Session& session,host::IStoreTaskExecutor& executor){
   if(auto result=transport(connection.connect(context,{options.address,options.port},options.server_certificate_sha256,options.connect_timeout_ms));!result)return result;
   Bytes banner;if(auto result=read(connection,banner,options.io_timeout_ms);!result)return result;
@@ -322,36 +313,6 @@ void NativeServer::stop()noexcept {
   {std::lock_guard lock(value.mutex);value.started=false;value.view.running=false;}
 }
 
-Result read_native_server_options(std::string_view path,NativeServerOptions& options){
-  if(path.empty()||path.size()>4096||path.find('\0')!=std::string_view::npos)return fail(Code::invalid,"invalid mesh configuration path");
-  const std::filesystem::path native_path(std::u8string(reinterpret_cast<const char8_t*>(path.data()),path.size()));
-  std::ifstream file(native_path,std::ios::binary);if(!file)return fail(Code::io_error,"cannot open mesh configuration");
-  std::string line;if(!std::getline(file,line))return fail(Code::invalid,"empty mesh configuration");
-  if(!line.empty()&&line.back()=='\r')line.pop_back();
-  if(line!="ANAIEROMESH/2")return fail(Code::invalid,"mesh configuration needs ANAIEROMESH/2");
-  std::set<std::string> seen;NativeServerOptions result;std::size_t total=line.size();
-  while(std::getline(file,line)){
-    total+=line.size();if(total>32768||line.find('\0')!=std::string::npos)return fail(Code::capacity,"mesh configuration exceeds bounds");
-    if(!line.empty()&&line.back()=='\r')line.pop_back();
-    if(line.empty()||line[0]=='#')continue;
-    const auto separator=line.find('=');if(separator==std::string::npos)return fail(Code::invalid,"mesh setting must be key=value");
-    const auto key=line.substr(0,separator),text=line.substr(separator+1);if(!seen.insert(key).second)return fail(Code::invalid,"duplicate mesh setting");
-    if(key=="certificate")result.credentials.certificate_file=text;
-    else if(key=="private_key")result.credentials.private_key_file=text;
-    else if(key=="authority")result.credentials.authority_file=text;
-    else if(key=="address")result.address=text;
-    else {std::uint64_t value=0;if(!integer(text,value))return fail(Code::invalid,"invalid numeric mesh setting");
-      if(key=="port"&&value<=65535)result.port=static_cast<std::uint16_t>(value);
-      else if(key=="clients"&&value<=32)result.maximum_clients=static_cast<std::size_t>(value);
-      else if(key=="handshakes"&&value<=16)result.maximum_handshakes=static_cast<std::size_t>(value);
-      else if(key=="handshake_timeout_ms"&&value<=60000)result.handshake_timeout_ms=static_cast<std::uint32_t>(value);
-      else if(key=="io_timeout_ms"&&value<=60000)result.io_timeout_ms=static_cast<std::uint32_t>(value);
-      else return fail(Code::invalid,"unknown or out-of-range mesh setting");
-    }
-  }
-  if(file.bad())return fail(Code::io_error,"mesh configuration read failed");
-  options=std::move(result);return {};
-}
 static Result administer_store(evidence::ICommitStore& store,std::string_view command,Bytes& output){
   output.clear();if(command.empty()||command.size()>4090||command.find('\0')!=std::string_view::npos)return fail(Code::invalid,"invalid bounded mesh administration request");
   std::istringstream input{std::string(command)};input.imbue(std::locale::classic());std::vector<std::string> words;

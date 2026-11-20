@@ -1,4 +1,5 @@
 #include "records.hpp"
+#include "source_authority_evidence.hpp"
 #include <map>
 #include <utility>
 
@@ -302,41 +303,10 @@ Result Service::snapshot(Snapshot& out) const {
 Result Service::source(const SourceRef& ref,Source& out) const {ev::StoredRecord record;return impl_->source(ref,out,record);}
 
 Result Service::source_authority(std::string_view uid,SourceAuthority& out) const {
-  out={};if(!valid_token(uid,256))return failure(Code::invalid,"invalid source authority UID");
-  ev::StoredRecord stored;if(auto result=impl_->store.latest("lifecycle.ownership",sha256(uid),stored);!result)return result;
-  std::vector<std::string> fields;
-  if(stored.record.tombstone||!unpack(stored.record.payload,fields,5,4096)||fields.size()!=5||fields[0]!="source-authority/1"||
-     fields[1]!=uid||!valid_token(fields[2],256)||!valid_token(fields[3])||(fields[4]!="0"&&fields[4]!="1"))
-    return bad("invalid immutable source authority");
-  out={fields[1],fields[2],fields[3],fields[4]=="0"?SourceAuthorityKind::local:SourceAuthorityKind::relay};return {};
+  return SourceAuthorityEvidenceService(impl_->store).read(uid,out);
 }
 Result Service::stage_source_authority(ev::CommitBatch& batch,const SourceAuthority& authority) {
-  if(!valid_token(authority.uid,256)||!valid_token(authority.owner,256)||!valid_token(authority.clock_domain)||
-     (authority.kind!=SourceAuthorityKind::local&&authority.kind!=SourceAuthorityKind::relay))
-    return failure(Code::invalid,"invalid source authority identity");
-  const auto key=sha256(authority.uid);
-  const auto payload=pack({"source-authority/1",authority.uid,authority.owner,authority.clock_domain,
-    authority.kind==SourceAuthorityKind::local?"0":"1"});
-  const auto staged=std::find_if(batch.records.begin(),batch.records.end(),[&](const auto& record){return record.kind=="lifecycle.ownership"&&record.key==key;});
-  if(staged!=batch.records.end())return !staged->tombstone&&staged->payload==payload?Result{}:
-    failure(Code::unauthorized,"one batch cannot change source authority");
-  // Compatibility witnesses predate the common ownership record. Presence is
-  // sufficient to reject a role transfer; no historical payload is re-enrolled.
-  const auto foreign_kind=authority.kind==SourceAuthorityKind::local?"mesh.receive.owner":"lifecycle.fence";
-  ev::StoredRecord foreign;bool foreign_found=false;
-  if(auto result=impl_->read(foreign_kind,key,foreign,foreign_found);!result)return result;
-  if(foreign_found)return failure(Code::unauthorized,"source UID belongs to the other ownership role");
-  guard(batch,foreign_kind,key,foreign);
-  ev::StoredRecord previous;bool found=false;
-  if(auto result=impl_->read("lifecycle.ownership",key,previous,found);!result)return result;
-  if(found){
-    SourceAuthority checked;if(auto result=source_authority(authority.uid,checked);!result)return result;
-    if(checked.owner!=authority.owner||checked.clock_domain!=authority.clock_domain||checked.kind!=authority.kind)
-      return failure(Code::unauthorized,"source UID owner, clock and role are immutable");
-  }
-  guard(batch,"lifecycle.ownership",key,previous);
-  if(!found)put(batch,"lifecycle.ownership",key,payload);
-  return {};
+  return SourceAuthorityEvidenceService(impl_->store).stage(batch,authority);
 }
 
 Result Service::register_engine(const EngineIdentity& identity,std::string owner,std::string operation) {

@@ -4,6 +4,7 @@ add_library(anaiero_qualification STATIC
   src/qualification/profile.cpp src/qualification/native_resources.cpp
   src/qualification/runner.cpp src/qualification/device.cpp src/qualification/mixed_profile.cpp
   src/qualification/mixed_runner.cpp src/qualification/mixed_campaign.cpp
+  src/qualification/mixed_campaign_codec.cpp src/qualification/mixed_campaign_filesystem.cpp
   src/qualification/scale_profile.cpp src/qualification/scale_runner.cpp)
 anaiero_sdk_target(anaiero_qualification)
 target_include_directories(anaiero_qualification PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

@@ -1,4 +1,6 @@
 #include "mixed_internal.hpp"
+#include "mixed_campaign_codec.hpp"
+#include "mixed_campaign_filesystem.hpp"
 #include "native_paths.hpp"
 #include "anaiero/sdk/engine_files.hpp"
 #include "anaiero/sdk/native_session.hpp"
@@ -18,62 +20,10 @@ namespace ev=sdk::evidence;
 namespace host=sdk::host;
 namespace os=christeye::living::durable::os;
 using namespace mixed_detail;
+using campaign::State;using campaign::encode;using campaign::decode;
+using campaign_io::read_file;using campaign_io::lease;using campaign_io::publish_cache;
 constexpr std::string_view state_kind="qualification.campaign",attempt_kind="qualification.attempt";
 constexpr std::uint64_t maximum_attempts=128,maximum_checkpoints=65536;
-struct State {
-  sdk::Digest profile,session,definition,build,device;
-  std::uint64_t attempt=0,serial=0,confirmed_cycles=0,target_cycles=0;
-  std::uint64_t active_ns=0,attempt_ns=0,recovered_cycles=0;
-  bool active=false,complete=false,pressure=false,control_retry=false,quota=false,restart=false,qualified=false;
-  ev::StoredRecord retained;
-};
-bool number(std::string_view bytes,std::uint64_t& value){
-  const auto result=std::from_chars(bytes.data(),bytes.data()+bytes.size(),value);
-  return !bytes.empty()&&result.ec==std::errc{}&&result.ptr==bytes.data()+bytes.size()&&std::to_string(value)==bytes;
-}
-sdk::Bytes encode(const State& s){
-  return sdk::pack({"ANAIERO-MIXED-CAMPAIGN/1",s.profile,s.session,s.definition,s.build,
-    std::to_string(s.attempt),std::to_string(s.serial),std::to_string(s.confirmed_cycles),std::to_string(s.target_cycles),
-    std::to_string(s.active_ns),std::to_string(s.attempt_ns),std::to_string(s.recovered_cycles),
-    s.active?"1":"0",s.complete?"1":"0",s.pressure?"1":"0",s.control_retry?"1":"0",s.quota?"1":"0",s.restart?"1":"0",s.qualified?"1":"0",s.device});
-}
-sdk::Result decode(const ev::StoredRecord& retained,State& state){
-  std::vector<std::string> f;
-  if(retained.record.tombstone||!sdk::unpack(retained.record.payload,f,20,16384)||f.size()!=20||f[0]!="ANAIERO-MIXED-CAMPAIGN/1")
-    return {sdk::Code::corrupt,"campaign state is malformed"};
-  State s;s.profile=f[1];s.session=f[2];s.definition=f[3];s.build=f[4];s.device=f[19];
-  if(!sdk::valid_digest(s.profile)||!sdk::valid_digest(s.session)||!sdk::valid_digest(s.definition)||!sdk::valid_digest(s.build)||(!s.device.empty()&&!sdk::valid_digest(s.device)))
-    return {sdk::Code::corrupt,"campaign identity is malformed"};
-  std::uint64_t* values[]={&s.attempt,&s.serial,&s.confirmed_cycles,&s.target_cycles,&s.active_ns,&s.attempt_ns,&s.recovered_cycles};
-  for(std::size_t i=0;i<7;++i)if(!number(f[i+5],*values[i]))return {sdk::Code::corrupt,"campaign integer is noncanonical"};
-  bool* flags[]={&s.active,&s.complete,&s.pressure,&s.control_retry,&s.quota,&s.restart,&s.qualified};
-  for(std::size_t i=0;i<7;++i){if(f[i+12]!="0"&&f[i+12]!="1")return {sdk::Code::corrupt,"campaign flag is malformed"};*flags[i]=f[i+12]=="1";}
-  if(s.attempt>maximum_attempts||s.serial>maximum_checkpoints||s.confirmed_cycles>s.target_cycles||s.target_cycles>10000||
-     s.attempt_ns>s.active_ns||(s.complete&&s.active)||(s.qualified&&(!s.complete||s.attempt!=1))||s.active_ns>maximum_attempts*14ULL*24*60*60*1000000000ULL)
-    return {sdk::Code::corrupt,"campaign state exceeds declared bounds"};
-  s.retained=retained;state=std::move(s);return {};
-}
-sdk::Result read_file(const fs::path& path,std::size_t maximum,sdk::Bytes& bytes){
-  std::error_code error;
-  if(!fs::is_regular_file(fs::symlink_status(path,error))||error)return {sdk::Code::invalid,"campaign input is not a regular file: "+utf8(path)};
-  const auto size=fs::file_size(path,error);
-  if(error||size>maximum)return {sdk::Code::capacity,"campaign input exceeds its byte bound"};
-  std::ifstream input(path,std::ios::binary);if(!input)return {sdk::Code::io_error,"cannot read campaign input"};
-  bytes.assign(static_cast<std::size_t>(size),'\0');
-  if((size&&!input.read(bytes.data(),static_cast<std::streamsize>(size)))||input.peek()!=std::char_traits<char>::eof()||input.bad())
-    return {sdk::Code::corrupt,"campaign input changed during bounded read"};
-  return {};
-}
-sdk::Result lease(const fs::path& directory,os::File& lock){
-  std::error_code error;
-  if(!fs::is_directory(fs::symlink_status(directory,error))||error)return {sdk::Code::invalid,"campaign directory must be an existing regular directory"};
-  const auto path=directory/"campaign.lock";const auto status=fs::symlink_status(path,error);
-  if(error&&error!=std::errc::no_such_file_or_directory)return {sdk::Code::io_error,"cannot inspect campaign writer lock"};
-  if(fs::exists(status)&&!fs::is_regular_file(status))return {sdk::Code::conflict,"campaign writer lock is not a regular file"};
-  if(!lock.open(path))return {sdk::Code::io_error,"cannot open campaign writer lock"};
-  if(!lock.lock_exclusive())return {sdk::Code::busy,"campaign already has an active writer; status is a cached checkpoint"};
-  return {};
-}
 void restore_flags(const State& state,MixedReport& report){
   report.campaign=true;report.campaign_attempt=state.attempt;report.campaign_interruptions=state.attempt?state.attempt-1:0;
   report.recovered_cycles=state.recovered_cycles;report.active_ns_lower_bound=state.active_ns;
@@ -89,12 +39,6 @@ std::string status_json(const State& state,const MixedReport& report,std::string
     <<"\",\"attempt\":"<<state.attempt<<",\"checkpoint\":"<<state.serial<<",\"confirmed_cycles\":"<<state.confirmed_cycles
     <<",\"target_cycles\":"<<state.target_cycles<<",\"generation\":"<<receipt.generation<<",\"root_sha256\":\""<<receipt.root_digest
     <<"\",\"active_ns_lower_bound\":"<<state.active_ns<<",\"report\":"<<mixed_report_json(report)<<"}\n";return out.str();
-}
-sdk::Result publish_cache(const fs::path& directory,std::string_view bytes){
-  std::error_code error;const auto path=directory/"status.json";const auto status=fs::symlink_status(path,error);
-  if(error&&error!=std::errc::no_such_file_or_directory)return {sdk::Code::io_error,"cannot inspect campaign status cache"};
-  if(fs::exists(status)&&!fs::is_regular_file(status))return {sdk::Code::conflict,"campaign status cache is not a regular file"};
-  return os::atomic_write(path,bytes)?sdk::Result{}:sdk::Result{sdk::Code::io_error,"cannot publish campaign status cache; canonical progress remains retained"};
 }
 sdk::Result save(ev::ICommitStore& store,const fs::path& directory,State& state,MixedReport& report,
     std::string_view status,std::uint64_t attempt_elapsed_ns=0){

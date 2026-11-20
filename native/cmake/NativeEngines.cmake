@@ -4,6 +4,8 @@
 file(GLOB_RECURSE anaiero_builtin_inputs CONFIGURE_DEPENDS
   "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/*.inc"
+  "${CMAKE_CURRENT_SOURCE_DIR}/examples/*.inc"
   "${CMAKE_CURRENT_SOURCE_DIR}/examples/modular_session_cli.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/examples/modular_host_cli.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/examples/modular_mesh_cli.cpp"
@@ -70,7 +72,7 @@ install(TARGETS anaiero_engines anaiero_engine_cell anaiero_engine_colony anaier
 add_library(anaiero_session_runner STATIC src/session/session_runner.cpp)
 anaiero_sdk_target(anaiero_session_runner)
 target_link_libraries(anaiero_session_runner PUBLIC anaiero_runtime anaiero_evidence)
-add_library(anaiero_experiment_history STATIC src/session/experiment_history.cpp)
+add_library(anaiero_experiment_history STATIC src/session/experiment_history.cpp src/session/experiment_history_codec.cpp src/session/experiment_evidence.cpp)
 anaiero_sdk_target(anaiero_experiment_history)
 target_link_libraries(anaiero_experiment_history PUBLIC anaiero_runtime anaiero_evidence anaiero_experiments)
 add_library(anaiero_engine_files STATIC src/engine_adapters/native_configurations.cpp src/engine_adapters/native_artifact.cpp)
@@ -91,7 +93,7 @@ if(CE_WIND_BUILD_TESTS)
   include(${CMAKE_CURRENT_LIST_DIR}/ModularSessionTests.cmake)
 endif()
 
-add_executable(ce_modular_session examples/modular_session_cli.cpp)
+add_executable(ce_modular_session examples/modular_session_cli.cpp examples/modular_session_io.cpp)
 anaiero_sdk_target(ce_modular_session)
 target_link_libraries(ce_modular_session PRIVATE anaiero_engine_files anaiero_session_runner
   anaiero_lifecycle anaiero_storage_native anaiero_experiments anaiero_experiment_history Threads::Threads)
