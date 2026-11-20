@@ -1,9 +1,11 @@
 #include "mixed_campaign_filesystem.hpp"
 #include "native_paths.hpp"
+#include "mixed_internal.hpp"
 #include <filesystem>
 #include <fstream>
 namespace anaiero::qualification::campaign_io {
 namespace fs=std::filesystem;
+using mixed_detail::utf8;
 namespace os=christeye::living::durable::os;
 sdk::Result read_file(const fs::path& path,std::size_t maximum,sdk::Bytes& bytes){
   std::error_code error;
