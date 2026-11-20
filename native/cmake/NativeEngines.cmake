@@ -91,7 +91,7 @@ if(CE_WIND_BUILD_TESTS)
   include(${CMAKE_CURRENT_LIST_DIR}/ModularSessionTests.cmake)
 endif()
 
-add_executable(ce_modular_session examples/modular_session_cli.cpp)
+add_executable(ce_modular_session examples/modular_session_cli.cpp examples/modular_session_io.cpp)
 anaiero_sdk_target(ce_modular_session)
 target_link_libraries(ce_modular_session PRIVATE anaiero_engine_files anaiero_session_runner
   anaiero_lifecycle anaiero_storage_native anaiero_experiments anaiero_experiment_history Threads::Threads)
