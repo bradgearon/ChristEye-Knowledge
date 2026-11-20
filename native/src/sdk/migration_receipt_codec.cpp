@@ -1,4 +1,5 @@
 #include "anaiero/sdk/migration_receipt_codec.hpp"
+#include <utility>
 
 namespace anaiero::sdk {
 Bytes encode_migration_receipt(const MigrationReceipt& receipt) {
