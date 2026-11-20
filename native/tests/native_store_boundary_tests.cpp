@@ -51,8 +51,10 @@ int main(int argc,char** argv){
   storage::recovery::cleanup_inactive_index(root,"nodes-a");
   REQUIRE(!fs::exists(root/"index"/"nodes-b"));
   REQUIRE(fs::is_directory(root/"index"/"nodes-a"));
-  storage::fsops::measure_coexistence(root,root/"index"/"nodes-a",root/"index"/"nodes-b",
-    *([]()->sdk::evidence::CompactionReport*{static sdk::evidence::CompactionReport report;return &report;})());
+  sdk::evidence::CompactionReport report;
+  storage::fsops::measure_coexistence(root,root/"index"/"nodes-a",root/"index"/"nodes-b",report);
+  REQUIRE(report.coexistence_measured);
+  REQUIRE(report.coexistence_old_index_files==0&&report.coexistence_new_index_files==0);
   fs::remove_all(root);
   std::cout<<"native storage boundary recovery passed\n";
   return 0;
