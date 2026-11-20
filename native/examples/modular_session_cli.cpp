@@ -2,6 +2,7 @@
 #include "anaiero/sdk/native_session.hpp"
 #include "anaiero/sdk/engine_files.hpp"
 #include "anaiero/sdk/evidence.hpp"
+#include "anaiero/sdk/migration_receipts.hpp"
 #include "anaiero/sdk/experiments.hpp"
 #include "anaiero/sdk/experiment_history.hpp"
 #include "anaiero/sdk/lifecycle.hpp"
@@ -880,14 +881,9 @@ s::Result execute(int argc,char** argv){
   if(command=="status"&&argc==3){return app.status();
   }
   if(command=="migration-status"&&argc==4) {
-    ev::StoredRecord audit;
-    if(auto r=app.store->latest("sdk.engine-migration",argv[3],audit);!r)return r;
-    std::vector<std::string> fields;s::MigrationPlan plan;
-    if(audit.record.tombstone||!s::unpack(audit.record.payload,fields,3)||
-       fields.size()!=3||fields[0]!="engine-migration-receipt/1"||
-       !s::valid_digest(fields[2])||!s::decode_migration_plan(fields[1],plan)||
-       audit.record.references!=std::vector<s::Digest>{plan.source_checkpoint_sha256,plan.target_checkpoint_sha256})
-      return {s::Code::corrupt,"invalid retained migration receipt"};
+    ev::StoredMigrationReceipt audit;
+    if(auto r=ev::read_migration_receipt(*app.store,argv[3],audit);!r)return r;
+    const auto& plan=audit.receipt.plan;
     std::cout<<"{\"migration\":\"committed\",\"instance\":"<<json(plan.identity.instance_id)
       <<",\"operation\":"<<json(plan.request.operation_id)
       <<",\"source_schema\":"<<json(plan.request.source_schema)
