@@ -4,22 +4,25 @@ option(CE_WIND_BUILD_TESTS "Build native WindBus codec/scheduler tests" ON)
 option(ANAIERO_CONTROLLER_ONLY "Build the native session controller without demo/legacy CLIs" OFF)
 option(ANAIERO_ENABLE_MESH "Build the optional OpenSSL 3 native authenticated mesh" OFF)
 
-# Core header-only C++20 link targets; optional host adapters are declared below.
+# Legacy header graph remains explicit while installed SDK modules below enforce
+# compiled boundaries. No SDK target exposes this include tree transitively.
+add_library(anaiero_legacy_compatibility INTERFACE)
+target_include_directories(anaiero_legacy_compatibility INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_compile_features(anaiero_legacy_compatibility INTERFACE cxx_std_20)
 add_library(anaiero_models INTERFACE)
-add_library(anaiero_contracts INTERFACE)
+add_library(anaiero_legacy_contracts INTERFACE)
 add_library(anaiero_domain INTERFACE)
 add_library(anaiero_simulators INTERFACE)
 add_library(anaiero_infrastructure INTERFACE)
 add_library(anaiero_application INTERFACE)
-foreach(tgt anaiero_models anaiero_contracts anaiero_domain anaiero_simulators
+foreach(tgt anaiero_models anaiero_legacy_contracts anaiero_domain anaiero_simulators
             anaiero_infrastructure anaiero_application)
-  target_include_directories(${tgt} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-  target_compile_features(${tgt} INTERFACE cxx_std_20)
+  target_link_libraries(${tgt} INTERFACE anaiero_legacy_compatibility)
 endforeach()
-target_link_libraries(anaiero_contracts INTERFACE anaiero_models)
-target_link_libraries(anaiero_domain INTERFACE anaiero_contracts)
+target_link_libraries(anaiero_legacy_contracts INTERFACE anaiero_models)
+target_link_libraries(anaiero_domain INTERFACE anaiero_legacy_contracts)
 target_link_libraries(anaiero_simulators INTERFACE anaiero_domain)
-target_link_libraries(anaiero_infrastructure INTERFACE anaiero_contracts)
+target_link_libraries(anaiero_infrastructure INTERFACE anaiero_legacy_contracts)
 target_link_libraries(anaiero_application INTERFACE anaiero_domain anaiero_simulators
   anaiero_infrastructure)
 
@@ -27,6 +30,11 @@ add_library(ce_wind_core INTERFACE)
 target_include_directories(ce_wind_core INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_compile_features(ce_wind_core INTERFACE cxx_std_20)
 target_link_libraries(ce_wind_core INTERFACE anaiero_application)
+
+if(CE_WIND_BUILD_TESTS)
+  enable_testing()
+endif()
+include(cmake/NativeModules.cmake)
 
 if(ANAIERO_CONTROLLER_ONLY)
   find_package(Threads REQUIRED)

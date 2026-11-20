@@ -8,12 +8,18 @@ The native Windows/Linux research runtime has integrated sessions, durable
 evidence, isolated digital experiments, supervised scientific providers and
 authenticated evidence replication. Its current engineering priorities are:
 
-1. Establish compiled modules, a public SDK and registered engine capabilities.
-2. Integrate canonical state/evidence transitions and verified historical indexes.
-3. Execute recoverable VLM plans and engine-owned SW5/SIM3 change paths.
-4. Complete source, peer, subscription, archive and retention lifecycles.
-5. Deliver bounded continuous evidence mesh operation.
-6. Qualify native packages, compatibility, failure recovery and sustained workloads.
+[CE-SW-38](software/CE-SW-38_compiled_runtime_and_lifecycle.md) implements the
+first four architecture batches: compiled SDK/capabilities, canonical indexed
+evidence, real VLM and supported SW5/SIM3 execution/change paths, and lifecycle/
+retention/quarantine. Payload reclamation and finite quotas are implemented;
+historical journal-prefix pruning remains a separate qualified extension.
+
+The next priorities are:
+
+1. **M5:** continuous native evidence mesh delivery using the new commit/index/
+   lifecycle services, with bounded fairness, replay and rebootstrap.
+2. **M6:** native package/API compatibility, failure recovery, measured workload
+   profiles and sustained resource/deployment qualification.
 
 See the [native implementation checkpoint](software/native_implementation_status.md)
 for completed capabilities and the

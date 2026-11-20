@@ -50,6 +50,28 @@ struct Progress {
   std::int64_t learning_proxy = 0;
   std::int64_t neurite_proxy = 0;
 };
+inline void write_progress_json(std::ostream& out,const Progress& e){
+  out << "{\"origin\":\"SIMULATED_UNCALIBRATED\",\"event\":\"CE.PLAN.PROGRESS/1\""
+      << ",\"stage\":\"" << e.stage_id << "\",\"task_id\":" << e.task_id
+      << ",\"tick\":" << e.tick << ",\"elapsed\":" << e.elapsed
+      << ",\"duration\":" << e.duration << ",\"weight\":" << e.weight
+      << ",\"x\":" << e.x << ",\"y\":" << e.y
+      << ",\"completed\":" << (e.completed ? "true":"false")
+      << ",\"state_hash\":\"" << v::hex64(e.machine_state) << "\""
+      << ",\"receipt_sha256\":\"" << e.receipt_hash << "\""
+      << ",\"plan_sha256\":\"" << e.plan_hash << "\""
+      << ",\"base_sha256\":\"" << e.base_hash << "\""
+      << ",\"crystal_sha256\":\"" << e.crystal_hash << "\""
+      << ",\"learning_sha256\":\"" << e.learning_hash << "\""
+      << ",\"rna_sha256\":\"" << e.rna_hash << "\""
+      << ",\"support_sha256\":\"" << e.support_hash << "\""
+      << ",\"visual_sha256\":\"" << e.visual_hash << "\""
+      << ",\"support_field_proxy\":" << e.support_field_proxy
+      << ",\"rna_field_proxy\":" << e.rna_field_proxy
+      << ",\"learning_proxy\":" << e.learning_proxy
+      << ",\"neurite_proxy\":" << e.neurite_proxy << "}\n";
+}
+
 enum class Error : std::uint8_t {
   ok, malformed, duplicate_id, capacity, missing_reference, bad_role,
   invalid_path, asset_missing, asset_hash_mismatch, plan_hash_mismatch,
@@ -108,6 +130,9 @@ inline bool rooted_file(const std::filesystem::path& root, std::string_view rela
   result = target;
   return true;
 }
+
+// Retained immutable inputs for execution after the original filesystem tree is gone.
+struct ArtifactBytes { std::string relative_path, bytes; };
 
 class Plan {
   std::string name_, base_sha_;
@@ -193,6 +218,26 @@ public:
         return Error::malformed;
     }
     if (used_bindings.size()!=bindings_.size()) return Error::missing_reference;
+    return Error::ok;
+  }
+  Error verify_assets(const std::vector<ArtifactBytes>& assets) const {
+    if (assets.size()!=artifacts_.size()) return Error::asset_missing;
+    std::set<std::string> seen;
+    for (const auto& retained : assets) {
+      if (!valid_file_path(retained.relative_path) ||
+          !seen.insert(retained.relative_path).second) return Error::invalid_path;
+      if (retained.bytes.size()>kMaxArtifactBytes) return Error::capacity;
+    }
+    for (const auto& a : artifacts_) {
+      const ArtifactBytes* retained=nullptr;
+      for (const auto& candidate : assets)
+        if (candidate.relative_path==a.relative_path) retained=&candidate;
+      if (!retained) return Error::asset_missing;
+      if (sha256_hex(retained->bytes)!=a.sha256) return Error::asset_hash_mismatch;
+      const auto header=role_header(a.role);
+      if (!header.empty() && !std::string_view(retained->bytes).starts_with(header))
+        return Error::bad_role;
+    }
     return Error::ok;
   }
   Error verify_assets(const std::filesystem::path& root) const {
@@ -318,11 +363,20 @@ public:
   void subscribe(Handler f, void* context) noexcept { callback_=f;callback_context_=context; }
   Error initialize(const Plan& plan, const p::ProcessMachine& base,
                    const std::filesystem::path& asset_root) {
+    return initialize_checked(plan,base,plan.verify_assets(asset_root));
+  }
+  Error initialize(const Plan& plan, const p::ProcessMachine& base,
+                   const std::vector<ArtifactBytes>& assets) {
+    return initialize_checked(plan,base,plan.verify_assets(assets));
+  }
+private:
+  Error initialize_checked(const Plan& plan, const p::ProcessMachine& base,
+                           Error assets) {
     // A failed re-enrolment must not leave a stale, executable previous plan.
     plan_=nullptr; active_=false; position_=0; progress_.clear();
     if (auto r=plan.validate();r!=Error::ok) return r;
     if (machine_sha256(base)!=plan.base_sha()) return Error::base_mismatch;
-    if (auto r=plan.verify_assets(asset_root);r!=Error::ok) return r;
+    if (assets!=Error::ok) return assets;
     for (const auto& stage : plan.stages()) {
       const p::Definition* def=nullptr;
       for (const auto& item : base.definitions())
@@ -350,6 +404,7 @@ public:
     position_=0;active_=false;progress_.clear();
     return Error::ok;
   }
+public:
   Error step() {
     if (!plan_) return Error::malformed;
     if (finished()) return Error::finished;

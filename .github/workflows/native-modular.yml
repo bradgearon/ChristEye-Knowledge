@@ -1,0 +1,50 @@
+name: Anaiero Modular Runtime and Evidence Lifecycle
+on:
+  push:
+    paths: ['native/**', 'examples/runtime/**', 'tools/sdk-reference/**', '.github/workflows/native-modular.yml']
+  pull_request:
+    paths: ['native/**', 'examples/runtime/**', 'tools/sdk-reference/**', '.github/workflows/native-modular.yml']
+permissions:
+  contents: read
+jobs:
+  native-modular:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2022]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure native runtime and regression contracts
+        run: cmake -S native -B build/modular -DCE_WIND_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_DISABLE_FIND_PACKAGE_Python3=TRUE
+      - name: Build complete native distribution and installed SDK fixtures
+        run: cmake --build build/modular --config Release --parallel 3
+      - name: Verify modules, evidence, lifecycle, operator flow and existing behavior
+        env:
+          ANAIERO_REQUIRE_IPC: '1'
+        run: ctest --test-dir build/modular -C Release --output-on-failure --no-tests=error --timeout 600
+      - name: Configure controller without tests or Python discovery
+        run: cmake -S native -B build/controller -DANAIERO_CONTROLLER_ONLY=ON -DCE_WIND_BUILD_TESTS=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_DISABLE_FIND_PACKAGE_Python3=TRUE
+      - name: Build controller profile
+        run: cmake --build build/controller --config Release --parallel 3
+      - name: Preserve native verification logs and module manifests
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: modular-native-${{ matrix.os }}
+          path: |
+            build/modular/Testing/Temporary/*.log
+            build/modular/anaiero-builtin-manifest*.txt
+          if-no-files-found: ignore
+  sdk-reference:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install optional documentation parser
+        run: python -m pip install -r tools/sdk-reference/requirements.txt
+      - name: Verify exact installed SDK reference
+        run: python tools/sdk-reference/generate_reference.py --check

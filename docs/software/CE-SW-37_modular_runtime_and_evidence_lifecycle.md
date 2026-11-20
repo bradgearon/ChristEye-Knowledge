@@ -1,12 +1,20 @@
 ---
 title: "CE-SW-37 — Modular Runtime, Durable Execution and Evidence Lifecycle"
 date: "2026-11-18"
-status: "Proposed architecture and implementation plan; not an implemented capability"
+status: "Target architecture; M1–M4 implemented in CE-SW-38 within its declared profile; M5/M6 pending"
 reviewed_native_commit: "c5a4e8a04616c76decab52d237de53a3f3b09f23"
 related: "CE-SW-09, CE-SW-12, CE-SW-19, CE-SW-27, CE-SW-31–36, ADR-001, ADR-002"
 ---
 
 # CE-SW-37: Modular runtime and complete evidence lifecycle
+
+**Implementation checkpoint:** [CE-SW-38](CE-SW-38_compiled_runtime_and_lifecycle.md)
+implements M1–M4. Its native sealed AVL index replaces the recommended SQLite
+adapter. Legacy evidence migration preserves old bytes without claiming live
+state conversion. Retention reclaims payloads under finite quotas and reserved
+maintenance headroom; canonical journal-prefix pruning remains disabled pending
+its authority-summary and restore proof. M5/M6 remain the next delivery gates.
+The design below preserves the broader target and its acceptance conditions.
 
 ## 1. Decision and scope
 
@@ -416,7 +424,12 @@ stream tip. Index rebuild is bounded, resumable and observable.
 
 ### Native index backend
 
-**Recommended first adapter: a pinned, qualified SQLite build**, linked as a
+**Implemented first adapter:** CE-SW-38 uses a sealed native AVL index behind
+these ports, with bounded canonical locators, verified coverage and repair.
+The following SQLite recommendation records the original alternative; it is not
+a runtime dependency or an implemented adapter in CE-SW-38.
+
+**Original recommended first adapter: a pinned, qualified SQLite build**, linked as a
 native implementation detail behind the index/catalog ports. Its C amalgamation
 can embed in C/C++ without auxiliary build scripts.
 [SQLite compilation documentation](https://www.sqlite.org/howtocompile.html)
@@ -782,6 +795,7 @@ sustained deployment evidence.
 | M5 | Continuous mesh service | Async handshake/admission; commit-triggered subscriptions; byte/work fairness; identity/artifact/rebootstrap lifecycle; multi-peer native integration | Bounded slow-peer behavior, correct revocation order, explicit replay expiry and accurate ACKs |
 | M6 | Qualified native release | Reproducible profiles/packages; SDK/API/protocol compatibility; full crash/restore matrix; soak/resource measurements; published release evidence and limits | Both native platforms meet the declared operating envelope; unsupported envelopes are explicit |
 
+M1–M4 are implemented in CE-SW-38 within its stated native profile.
 M1 establishes the contract boundary. M2 establishes the commit/index foundation.
 M3 and M4 can proceed in parallel after those foundations; M5 requires M4.
 M6 collects release evidence while each earlier batch already carries its own

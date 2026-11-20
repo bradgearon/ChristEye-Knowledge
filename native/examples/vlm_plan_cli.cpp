@@ -12,30 +12,9 @@ namespace v = christeye::living::vlm;
 static int fail(std::string_view action, unsigned code){
   std::cerr << action << " failed: " << code << '\n';return 1;
 }
-static void progress_json(std::ostream& out,const pl::Progress& e){
-  out << "{\"origin\":\"SIMULATED_UNCALIBRATED\",\"event\":\"CE.PLAN.PROGRESS/1\""
-      << ",\"stage\":\"" << e.stage_id << "\",\"task_id\":" << e.task_id
-      << ",\"tick\":" << e.tick << ",\"elapsed\":" << e.elapsed
-      << ",\"duration\":" << e.duration << ",\"weight\":" << e.weight
-      << ",\"x\":" << e.x << ",\"y\":" << e.y
-      << ",\"completed\":" << (e.completed ? "true":"false")
-      << ",\"state_hash\":\"" << v::hex64(e.machine_state) << "\""
-      << ",\"receipt_sha256\":\"" << e.receipt_hash << "\""
-      << ",\"plan_sha256\":\"" << e.plan_hash << "\""
-      << ",\"base_sha256\":\"" << e.base_hash << "\""
-      << ",\"crystal_sha256\":\"" << e.crystal_hash << "\""
-      << ",\"learning_sha256\":\"" << e.learning_hash << "\""
-      << ",\"rna_sha256\":\"" << e.rna_hash << "\""
-      << ",\"support_sha256\":\"" << e.support_hash << "\""
-      << ",\"visual_sha256\":\"" << e.visual_hash << "\""
-      << ",\"support_field_proxy\":" << e.support_field_proxy
-      << ",\"rna_field_proxy\":" << e.rna_field_proxy
-      << ",\"learning_proxy\":" << e.learning_proxy
-      << ",\"neurite_proxy\":" << e.neurite_proxy << "}\n";
-}
 static void on_event(void* ptr,const pl::Progress& e) noexcept {
   auto& out=*static_cast<std::ostream*>(ptr);
-  progress_json(out,e); // host diagnostic sink, not a realtime audio callback
+  pl::write_progress_json(out,e); // host diagnostic sink, not a realtime audio callback
 }
 int main(int argc,char**argv){
   if(argc<3){std::cerr<<"Commands: ce_vlm_plan basehash <base.avlm> | "

@@ -3,6 +3,10 @@ on:
   push:
     paths:
       - 'native/include/anaiero/**'
+      - 'native/sdk/**'
+      - 'native/src/**'
+      - 'native/cmake/**'
+      - 'native/CMakeLists.txt'
       - 'tests/test_native_architecture.py'
       - '.github/workflows/native-architecture.yml'
       - 'docs/software/CE-SW-20_anaiero_v0015_cpp_architecture_pass.md'
@@ -11,6 +15,10 @@ on:
   pull_request:
     paths:
       - 'native/include/anaiero/**'
+      - 'native/sdk/**'
+      - 'native/src/**'
+      - 'native/cmake/**'
+      - 'native/CMakeLists.txt'
       - 'tests/test_native_architecture.py'
       - '.github/workflows/native-architecture.yml'
       - 'docs/software/CE-SW-20_anaiero_v0015_cpp_architecture_pass.md'
