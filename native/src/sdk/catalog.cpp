@@ -12,7 +12,7 @@ bool schemas(const std::vector<std::string>& values,bool required=true) {
   return true;
 }
 bool has(const std::vector<std::string>& v,std::string_view s) {return std::find(v.begin(),v.end(),s)!=v.end();}
-class OwnedEngine final:public IEngine,public ITrialCapability,public IChangeCapability {
+class OwnedEngine final:public IEngine,public ITrialCapability,public IChangeCapability,public IMigrationCapability {
   // Owner (and any native image) outlives the engine and its virtual destructor.
   std::shared_ptr<IEngineFactory> owner_;
   std::unique_ptr<IEngine> inner_;
@@ -25,6 +25,13 @@ public:
   Result restore(const EngineState& s)override{return inner_->restore(s);}
   ITrialCapability* trials()noexcept override{return inner_->trials()?this:nullptr;}
   IChangeCapability* changes()noexcept override{return inner_->changes()?this:nullptr;}
+  IMigrationCapability* migrations()noexcept override{return inner_->migrations()?this:nullptr;}
+  std::string_view implementation_sha256()const noexcept override {
+    auto* capability=inner_->migrations();return capability?capability->implementation_sha256():std::string_view{};
+  }
+  Result prepare_migration(const MigrationRequest& r,PreparedTransition& t)override {
+    auto* capability=inner_->migrations();return capability?capability->prepare_migration(r,t):Result{Code::unsupported,"migration unavailable"};
+  }
   void request_cancel()noexcept override{inner_->request_cancel();}
   Result fork(std::unique_ptr<IEngine>& out)const override{
     auto* capability=inner_->trials();if(!capability)return {Code::unsupported,"isolated trials unavailable"};

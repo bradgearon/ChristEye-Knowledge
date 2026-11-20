@@ -27,6 +27,25 @@ struct StepRequest {
   std::uint64_t expected_revision=0;
   Envelope input;
 };
+// A migration changes a checkpoint schema under one pinned engine identity.
+// It does not authorize replacing the native module or reinterpret old metrics.
+struct MigrationRequest {
+  std::string operation_id;
+  std::uint64_t expected_revision=0;
+  std::string source_schema,target_schema;
+  Digest implementation_sha256;
+  Envelope parameters{"anaiero.migration-parameters/1",{}};
+};
+struct MigrationPlan {
+  EngineIdentity identity;
+  MigrationRequest request;
+  Digest source_checkpoint_sha256,target_checkpoint_sha256;
+};
+Bytes encode_migration_request(const MigrationRequest&);
+Result decode_migration_request(std::string_view,MigrationRequest&);
+Bytes encode_migration_plan(const MigrationPlan&);
+Result decode_migration_plan(std::string_view,MigrationPlan&);
+Digest migration_request_digest(const EngineIdentity&,const MigrationRequest&);
 struct PreparedTransition {
   EngineIdentity identity;
   std::string operation_id,request_sha256,expected_state_sha256;
@@ -39,6 +58,13 @@ class IEngine;
 struct ITrialCapability {
   virtual ~ITrialCapability()=default;
   virtual Result fork(std::unique_ptr<IEngine>& isolated) const=0;
+};
+struct IMigrationCapability {
+  virtual ~IMigrationCapability()=default;
+  // Digest of the actual migration implementation, not a caller assertion.
+  virtual std::string_view implementation_sha256() const noexcept=0;
+  // Pure preparation; no authoritative changes or durable side effects.
+  virtual Result prepare_migration(const MigrationRequest&,PreparedTransition&)=0;
 };
 struct IChangeCapability {
   virtual ~IChangeCapability()=default;
@@ -55,6 +81,7 @@ public:
   virtual Result restore(const EngineState& committed)=0;
   virtual ITrialCapability* trials() noexcept { return nullptr; }
   virtual IChangeCapability* changes() noexcept { return nullptr; }
+  virtual IMigrationCapability* migrations() noexcept { return nullptr; }
   virtual void request_cancel() noexcept {}
 };
 struct EngineDescriptor {

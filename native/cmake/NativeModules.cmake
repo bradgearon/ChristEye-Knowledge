@@ -17,7 +17,7 @@ function(anaiero_sdk_target target)
   endif()
 endfunction()
 
-add_library(anaiero_contracts STATIC src/sdk/contracts.cpp)
+add_library(anaiero_contracts STATIC src/sdk/contracts.cpp src/sdk/migration.cpp)
 anaiero_sdk_target(anaiero_contracts)
 add_library(anaiero_catalog STATIC src/sdk/catalog.cpp)
 anaiero_sdk_target(anaiero_catalog)

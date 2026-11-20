@@ -35,6 +35,10 @@ public:
   Result pump();
   Result step(std::string_view instance_id,const StepRequest&,bool change=false);
   Result control(std::string_view instance_id,std::string operation_id,Phase phase);
+  // Review and activate a versioned checkpoint transformation on the session owner.
+  // The engine must be paused; an accepted transition preserves its tick/identity.
+  Result review_migration(std::string_view instance_id,const MigrationRequest&,MigrationPlan&);
+  Result apply_migration(std::string_view instance_id,const MigrationPlan&);
   Result remove_retired(std::string_view instance_id);
   Result scheduling_admission(std::string_view instance_id,bool& eligible) const;
   bool busy() const noexcept;
