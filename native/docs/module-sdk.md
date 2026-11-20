@@ -218,3 +218,30 @@ ABI rejection, process deadline termination and checkpoint reconstruction.
 They are deterministic engineering checks. Sustained resource qualification,
 continuous authenticated mesh scheduling and empirical scientific validation
 have their own gates and are not implied by passing this SDK suite.
+
+## Versioned checkpoint migrations (CE-SW-43)
+
+An engine may optionally implement `IMigrationCapability` and return it through `IEngine::migrations()`.
+This is for **state-bearing checkpoint schema changes within an unchanged engine/module identity**.
+It is intentionally separate from ordinary `IChangeCapability` and from package selection.
+
+1. Declare both source and target checkpoint schemas in the registered `EngineDescriptor`.
+2. Implement `implementation_sha256()` to return a stable digest of the migration code, and
+   `prepare_migration()` to calculate a deterministic staged `PreparedTransition`.
+3. Pause the engine under the session owner. Build a `MigrationRequest` with the exact expected revision,
+   source/target schemas, implementation digest, typed parameters and unique operation ID.
+4. Call `SessionService::review_migration(instance,request,plan)`, then
+   `SessionService::apply_migration(instance,plan)`. The latter recomputes the candidate and checks
+   both checkpoint digests before one canonical guarded commit. Previous and new checkpoint blobs
+   remain referenced by the indexed `sdk.engine-migration` receipt.
+5. Resume normal engine work after a successful migration, or recover the canonical store before retrying
+   the **same** operation ID if the commit result is uncertain.
+
+Migrations must preserve the paused phase, configuration, source identity, and logical tick. The
+engine's normal `restore()` and `install()` must accept both checkpoint representations during
+the migration transition. Past metrics are not rewritten and the Projector is not an authority.
+
+A source-to-target schema conversion is **not** an engine binary hot swap, publisher signature,
+semantic validation of learned ability, or a general downgrade mechanism. For implementation
+and an executable v1→v2 example see
+[CE-SW-43](../../docs/software/CE-SW-43_versioned_engine_checkpoint_evolution.md).
