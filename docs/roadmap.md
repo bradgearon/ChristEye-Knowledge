@@ -8,17 +8,22 @@ The native Windows/Linux research runtime has integrated sessions, durable
 evidence, isolated digital experiments, supervised scientific providers and
 authenticated evidence replication. Its current engineering priorities are:
 
-1. Execute existing CEVPLAN programs as recoverable native-session workloads.
-2. Qualify sustained storage, source/epoch retirement and measured recovery.
-3. Add recoverable SIM3 policy application.
-4. Qualify scientific input programs, isolated trials and external references.
-5. Expand continuous evidence mesh operation after lifecycle qualification.
+1. Establish compiled modules, a public SDK and registered engine capabilities.
+2. Integrate canonical state/evidence transitions and verified historical indexes.
+3. Execute recoverable VLM plans and engine-owned SW5/SIM3 change paths.
+4. Complete source, peer, subscription, archive and retention lifecycles.
+5. Deliver bounded continuous evidence mesh operation.
+6. Qualify native packages, compatibility, failure recovery and sustained workloads.
 
 See the [native implementation checkpoint](software/native_implementation_status.md)
 for completed capabilities and the
 [readiness assessment and development plan](software/native_development_plan.md)
-for ratings, evidence, dependencies and completion gates. Native software
-progress does not itself satisfy the scientific or physical phase gates below.
+for ratings, evidence, dependencies and completion gates.
+[CE-SW-37](software/CE-SW-37_modular_runtime_and_evidence_lifecycle.md) defines
+the target architecture and six delivery batches. Scientific input/model and
+external-reference qualification remains a separate workstream. Native
+software progress does not itself satisfy the scientific or physical phase
+gates below.
 
 ## Scientific and physical phases
 

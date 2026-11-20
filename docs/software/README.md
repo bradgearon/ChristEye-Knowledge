@@ -12,6 +12,22 @@ Start with the [implementation checkpoint](native_implementation_status.md)
 for what runs and the [readiness assessment and development plan](native_development_plan.md)
 for ratings, priorities and completion gates.
 
+### Engine names
+
+| Historical code | Descriptive name | Meaning |
+|---|---|---|
+| SW5 | Cell Behavior Engine | Individual synthetic cells, state, candidate connections and input responses |
+| SIM3 | Multi-Colony Engine | Synthetic colonies, resources, inter-colony links and scheduled processes |
+| CEVLM/2 + CEVPLAN/1 | Virtual Machine and Plan Engine | Existing symbolic machine/process interpreter and staged programs |
+| Scientific provider | Numerical Model Engine | Pinned numerical models such as passive voltage and scalar concentration |
+
+These are different model/execution families. Historical codes remain aliases
+in existing formats. VLM plans already execute standalone; the shared-session
+binding is planned. The complete explanation and architecture are in
+[CE-SW-37](CE-SW-37_modular_runtime_and_evidence_lifecycle.md).
+
+### Implemented integrations
+
 | Integrated capability | Current specification |
 |---|---|
 | Mixed native sessions, restart, operations and local control | [CE-SW-31](CE-SW-31_integrated_native_sessions.md) |
@@ -34,6 +50,16 @@ Use the [native build instructions](../../native/README.md),
 [scientific examples](../../examples/scientific/README.md) and
 [mesh guide](../../examples/mesh/README.md). A successful build does not
 install an OS service; see the [deployment examples](../../deployment/native/README.md).
+
+## Target architecture
+
+[CE-SW-37 — Modular runtime, durable execution and evidence lifecycle](CE-SW-37_modular_runtime_and_evidence_lifecycle.md)
+is the proposed architecture for the next implementation batches. It specifies
+compiled public/private modules, registered capabilities, recoverable state/
+evidence transactions, verified indexes, complete lifecycle/retention rules,
+continuous mesh scheduling and native qualification gates. Its M1–M6 sequence
+is reflected in the development plan. These targets are separate from the
+implemented integrations above.
 
 ## Historical specifications and increment records
 

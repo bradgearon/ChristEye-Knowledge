@@ -8,6 +8,12 @@ the 2026-11-17 assessment, commit-pinned evidence, priority order and completion
 gates. This checkpoint describes implemented behavior; the plan describes
 future capabilities.
 
+The [CE-SW-37 architecture proposal](CE-SW-37_modular_runtime_and_evidence_lifecycle.md)
+extends that plan with compiled module boundaries, registered engine
+capabilities, a canonical commit/index protocol, complete identity/retention
+lifecycles and continuous-mesh qualification. It is planned work; CE-SW-36
+remains the current implemented batch.
+
 ## Standing delivery preference
 
 The user requests roughly **5× the previous incremental scope per changeset**.
@@ -142,30 +148,29 @@ numerical envelope, and 160 identical restored continuation samples.
 The detailed scope, dependencies and acceptance gates are maintained in the
 [development plan](native_development_plan.md#revised-delivery-order):
 
-1. **Replayable executable digital plans:** bind the existing CEVPLAN/CEVLM2
-   interpreter as a finite native-session workload, with retained artifacts,
-   durable mid-stage continuation, typed progress and isolated replay
-   qualification. Preserve actual VLM semantics; do not translate them into
-   SW5 proxy inputs.
-2. **Sustained evidence lifecycle:** direct historical/receipt indexes,
-   persisted source/epoch retirement, reference-aware archive policy,
-   capacity/lag views and measured Windows/Linux workloads. Complete this
-   before substantially expanding live mesh fan-out.
-3. **Recoverable SIM3 policy application:** configuration-plus-state
-   checkpoint identity, supported link/teaching changes, crash-safe apply and
-   measured outcomes with explicit reversal rules for links and one-shot
-   teaching. Keep apply disabled until these gates pass.
-4. **Qualified scientific programs:** typed physical-time inputs, isolated
-   provider trials, domain-specific quantity meaning and independently
-   reviewed external-reference extraction before scientific live optimization.
-5. **Continuous evidence mesh:** bounded live subscriptions, lag recovery,
-   broader declared scopes, original-author signatures where required and
-   deployment key lifecycle, building on the operational qualification above.
+1. **M1 — Compiled modules and registered capabilities:** public/private
+   targets, engine-owned bindings, typed schemas, module admission and an
+   installed SDK. Prove a separately built engine works without core edits.
+2. **M2 — Canonical transitions and indexed evidence:** durable state/evidence
+   commitment, bounded asynchronous storage, verified index coverage,
+   compatibility migration and crash/complexity qualification.
+3. **M3 — Complete execution and change paths:** real finite CEVPLAN/CEVLM2
+   execution, retained-artifact recovery, engine-owned SW5 trial/change
+   semantics and coherent SIM3 configuration/state application.
+4. **M4 — Complete lifecycle and retention:** source/peer/subscription state,
+   versioned active checkpoints, historical catalogs, leases, archive policy,
+   quotas and explicit replay/bootstrap boundaries.
+5. **M5 — Continuous evidence mesh:** commit-triggered delivery, byte/work
+   fairness, bounded handshake/artifact work and identity/rebootstrap behavior.
+6. **M6 — Qualified native release:** package/API compatibility, both-platform
+   crash/restore evidence, measured operating profiles and sustained soak runs.
 
 Each item is a substantial capability batch with services, adapters, operator
-wiring, failure tests and both-platform evidence. The next batch's concrete
-example is the existing three-stage CEVPLAN running beside another engine,
-resuming mid-stage and matching the standalone executor's output and receipts.
+wiring, failure tests and both-platform evidence. The next batch proves an
+installed public SDK and independent engine integration. The three-stage
+CEVPLAN session/restart/replay workflow remains the concrete M3 execution gate.
+Scientific model/reference qualification remains a separate evidence
+workstream; architectural completion does not establish biological validity.
 
 The Projector stays observational. Optimization stays independent. Native
 Windows and native Linux remain first-class, with all domain decisions in

@@ -7,8 +7,15 @@
 **Purpose:** assess implemented native software, identify the next usable
 capabilities, and make their completion criteria explicit.
 
+**Architecture amendment — 2026-11-18:** [CE-SW-37](CE-SW-37_modular_runtime_and_evidence_lifecycle.md)
+now defines the complete module, capability, commit/index, lifecycle and
+continuous-mesh architecture. Its M1–M6 sequence below supersedes the earlier
+five-item delivery order. The ratings and CI evidence remain pinned to the
+implemented baseline; the new architecture is a proposal.
+
 Use the [implementation checkpoint](native_implementation_status.md) for what
-currently runs. This document owns the forward development order. Historical
+currently runs. This document tracks CE-SW-37's forward order and retains the
+readiness evidence and detailed capability subplans. Historical
 CE-SW specifications retain the scope and limitations of their original
 increments; their old TODOs are not the current backlog. The
 [project phase roadmap](../roadmap.md) separately records scientific and
@@ -151,10 +158,11 @@ The principal [CMake layer targets](../../native/CMakeLists.txt) are still
 bindings, and extension callbacks are trusted synchronous observers under a
 nonblocking/nonreentrant contract.
 
-Keep the lifecycle interface narrow. Extract stable host implementations into
-compiled modules when an independent consumer or measured build problem
-justifies the boundary. A dynamic plugin ABI, callback sandbox and universal
-model abstraction are not prerequisites for the next plan capability.
+Keep the lifecycle interface narrow. CE-SW-37 now makes compiled modules and
+an installed-SDK consumer the first implementation batch. Its native module
+ABI is scoped to trusted installed extensions; it does not require a universal
+model abstraction or claim an in-process callback sandbox. Built-in static
+modules retain the compact standard deployment.
 
 ## Revised delivery order
 
@@ -163,18 +171,25 @@ capability, including services, adapters, operator wiring, failure tests,
 native Windows/Linux verification and documentation. Internal commits may be
 reviewed separately. These are proposed capabilities, not implemented features.
 
-| Priority | Batch | Usable result | Dependency |
+| Order | Architecture batch | Usable result | Dependency |
 |---|---|---|---|
-| 1 | A — Replayable executable digital plans | Run an existing CEVPLAN as a finite native-session workload, resume mid-stage and qualify its isolated replay | Current session, operation and evidence foundation |
-| 2 | B — Sustained evidence lifecycle and measured recovery | Operate through source churn, retained history, slow peers and maintenance within declared bounds | Current segmented storage and evidence contracts; can proceed alongside A |
-| 3 | C — Recoverable SIM3 policy application | Apply supported digital SIM3 policy changes and evaluate their outcomes with configuration/state recovery | Existing SIM3 evaluator plus a new configuration/state checkpoint contract; longer runs need B |
-| 4 | D — Qualified scientific programs and isolated trials | Execute physical-time input programs, compare pinned providers and qualify declared external references | Typed program/quantity contracts; independently available reference evidence |
-| 5 | E — Continuous evidence mesh operation | Sustain bounded live subscriptions with lag recovery and deployment identity lifecycle | B; broader scientific scopes also depend on D |
+| M1 | Compiled modules and registered capabilities | Installed public SDK, private implementations and independently added engines using typed capability bindings | Current native implementation |
+| M2 | Canonical transitions and indexed evidence | One recoverable commit/root contract, asynchronous storage and verified historical indexes | M1 contracts |
+| M3 | Complete engine execution and change paths | Finite durable VLM plans and engine-owned SW5/SIM3 trial/change paths with configuration/state recovery | M1 and M2 |
+| M4 | Source, peer, subscription and retention lifecycle | Reusable active capacity, versioned checkpoints, archive policy, leases and explicit replay floors | M1 and M2; can proceed alongside M3 |
+| M5 | Continuous mesh service | Event-driven live delivery, byte/work fairness, identity/artifact lifecycle and rebootstrap | M2 and M4 |
+| M6 | Qualified native release | Reproducible packages, compatibility proof, failure matrix and sustained resource/recovery evidence | Integration of preceding batches |
 
-The principal changes from the previous checkpoint are to make operational
-lifecycle a named second priority, separate SIM3 apply from plan import, move
-direct receipt indexing ahead of mesh expansion, and require explicit input
-semantics and isolated trials before scientific live optimization.
+See [CE-SW-37's delivery sequence](CE-SW-37_modular_runtime_and_evidence_lifecycle.md#14-delivery-sequence)
+for approximately five related increments per batch and exact closure gates.
+The next implementation changeset is M1, with an external SDK consumer and
+independently built engine as the proof of actual isolation and extensibility.
+
+The detailed A–E capability plans below are retained as subplans: A (VLM) and
+C (SIM3 changes) map to M3; B maps to M2/M4/M6; E maps to M5. D remains a
+separate scientific reference/model qualification workstream that uses the
+new contracts. Scientific input meaning, isolated trials and independent
+reference evidence remain prerequisites for scientific live application.
 
 ## Batch A — Replayable executable digital plans
 
