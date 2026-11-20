@@ -5,6 +5,24 @@ namespace anaiero::sdk::experiment_evidence {
 namespace {
 Result corrupt(std::string why){return {Code::corrupt,std::move(why)};}
 }
+Result object(evidence::ICommitStore& store,std::string_view kind,std::string_view key,evidence::StoredRecord& record,Bytes& bytes){
+  if(auto r=store.latest(kind,key,record);!r)return r;
+  if(record.record.tombstone)return {Code::history_expired,"experiment roots were released"};
+  if(!valid_digest(record.record.payload))return corrupt("experiment object address");
+  return store.get_blob(record.record.payload,bytes);
+}
+Result publish(evidence::ICommitStore& store,std::string_view kind,std::string_view id,std::string operation,Bytes bytes,
+               std::vector<Digest> references,std::vector<evidence::RecordGuard> guards){
+  if(bytes.empty()||bytes.size()>8U*1024U*1024U)return {Code::capacity,"recorded experiment object exceeds canonical encoding or 8 MiB bound"};
+  evidence::CommitBatch batch;batch.operation_id=std::move(operation);const auto digest=sha256(bytes);batch.request_digest=digest;
+  batch.blobs.push_back({digest,std::move(bytes),std::move(references)});
+  batch.guards=std::move(guards);batch.guards.push_back({std::string(kind),std::string(id),0,{}});
+  batch.records.push_back({std::string(kind),std::string(id),digest,{digest},false});
+  evidence::CommitReceipt receipt;return store.commit(batch,receipt);
+}
+std::string operation_id(std::string_view prefix,std::string_view identifier){
+  return std::string(prefix)+sha256(identifier);
+}
 Result canonical_engine(evidence::ICommitStore& store,std::string_view instance,
                         evidence::StoredRecord& record,EngineIdentity& identity,
                         EngineState& state,PreparedTransition& transition,std::vector<Digest>& references){

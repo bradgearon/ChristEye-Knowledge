@@ -11,27 +11,11 @@ using history_codec::bad;using history_codec::strategy_bytes;using history_codec
 using history_codec::spec_bytes;using history_codec::spec_read;
 using history_codec::result_bytes;using history_codec::result_read;
 using history_codec::review_bytes;using history_codec::review_read;
-Result object(ev::ICommitStore& store,std::string_view kind,std::string_view key,ev::StoredRecord& record,Bytes& bytes){
-  if(auto r=store.latest(kind,key,record);!r)return r;
-  if(record.record.tombstone)return {Code::history_expired,"experiment roots were released"};
-  if(!valid_digest(record.record.payload))return bad("experiment object address");
-  return store.get_blob(record.record.payload,bytes);
-}
-Result publish(ev::ICommitStore& store,std::string_view kind,std::string_view id,std::string operation,Bytes bytes,
-               std::vector<Digest> references,std::vector<ev::RecordGuard> guards={}){
-  if(bytes.empty()||bytes.size()>8U*1024U*1024U)return {Code::capacity,"recorded experiment object exceeds canonical encoding or 8 MiB bound"};
-  ev::CommitBatch batch;batch.operation_id=std::move(operation);const auto digest=sha256(bytes);batch.request_digest=digest;
-  batch.blobs.push_back({digest,std::move(bytes),std::move(references)});
-  batch.guards=std::move(guards);batch.guards.push_back({std::string(kind),std::string(id),0,{}});
-  batch.records.push_back({std::string(kind),std::string(id),digest,{digest},false});
-  ev::CommitReceipt receipt;return store.commit(batch,receipt);
-}
+using experiment_evidence::object;using experiment_evidence::publish;
 Result read_intent(ev::ICommitStore& store,std::string_view id,RecordedExperiment& value,ev::StoredRecord& record){
-  Bytes bytes;std::vector<std::string> f;
-  if(auto r=object(store,intent_kind,id,record,bytes);!r)return r;
-  if(!unpack(bytes,f,4)||f.size()!=4||f[0]!="recorded-experiment/1"||!spec_read(f[1],value.specification)||
-     value.specification.id!=id||!decode_checkpoint(f[2],value.source,value.source_state)||!strategy_read(f[3],value.strategy))return bad("recorded experiment intent");
-  return {};
+  Bytes bytes;
+  if(auto r=experiment_evidence::object(store,intent_kind,id,record,bytes);!r)return r;
+  return history_codec::read_intent(bytes,id,value);
 }
 }
 Result ExperimentHistoryService::load(std::string_view id,RecordedExperiment& output){
@@ -72,10 +56,10 @@ Result ExperimentHistoryService::select(IEngine& source,const ExperimentSpecific
   RecordedExperiment frozen;ev::StoredRecord intent;auto found=read_intent(store_,checked.id,frozen,intent);
   if(found.code==Code::not_found){
     ev::StoredRecord engine_record;EngineIdentity identity;EngineState state;PreparedTransition transition;std::vector<Digest> refs;
-    if(auto r=canonical_engine(store_,source.identity().instance_id,engine_record,identity,state,transition,refs);!r)return r;
+    if(auto r=experiment_evidence::canonical_engine(store_,source.identity().instance_id,engine_record,identity,state,transition,refs);!r)return r;
     if(identity!=source.identity()||state!=source.state())return {Code::conflict,"trial source differs from its canonical checkpoint"};
-    const auto intent_bytes=pack({"recorded-experiment/1",spec_bytes(checked),encode_checkpoint(identity,state),strategy_bytes(strategy_id)});
-    if(auto r=publish(store_,intent_kind,checked.id,"experiment-intent-"+sha256(checked.id),intent_bytes,std::move(refs),
+    const auto intent_bytes=history_codec::encode_intent(checked,identity,state,strategy_id);
+    if(auto r=publish(store_,intent_kind,checked.id,experiment_evidence::operation_id("experiment-intent-",checked.id),intent_bytes,std::move(refs),
       {{"sdk.engine",identity.instance_id,engine_record.revision,engine_record.digest}});!r)return r;
     found=read_intent(store_,checked.id,frozen,intent);
   }
@@ -89,7 +73,7 @@ Result ExperimentHistoryService::select(IEngine& source,const ExperimentSpecific
   ExperimentRequest request{checked.id,frozen.source_state.revision,state_digest(frozen.source_state),checked.inputs,checked.candidates};
   ExperimentResult result;
   if(auto r=ExperimentService{}.select(*isolated,request,strategy,result);!r)return r;
-  if(auto r=publish(store_,result_kind,checked.id,"experiment-result-"+sha256(checked.id),result_bytes(result),{intent.record.payload},
+  if(auto r=publish(store_,result_kind,checked.id,experiment_evidence::operation_id("experiment-result-",checked.id),result_bytes(result),{intent.record.payload},
       {{std::string(intent_kind),checked.id,intent.revision,intent.digest}});!r)return r;
   frozen.result=std::move(result);frozen.completed=true;output=std::move(frozen);return {};
 }

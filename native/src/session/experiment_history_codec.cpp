@@ -97,4 +97,18 @@ Result review_read(std::string_view bytes,std::string_view operation,OutcomeRevi
   value.meets_selected_score=f[3]=="1";value.exact_selected_state=f[4]=="1";
   value.expected_state_sha256=f[5];value.observed_state_sha256=f[6];value.observed_receipt_tip=f[7];return {};
 }
+Bytes encode_intent(const ExperimentSpecification& spec,const EngineIdentity& identity,
+                    const EngineState& state,const ScoreStrategyIdentity& strategy){
+  return pack({"recorded-experiment/1",spec_bytes(spec),encode_checkpoint(identity,state),strategy_bytes(strategy)});
+}
+Result read_intent(std::string_view bytes,std::string_view expected_id,RecordedExperiment& value){
+  std::vector<std::string> fields;
+  if(!unpack(bytes,fields,4)||fields.size()!=4||fields[0]!="recorded-experiment/1"||
+     !spec_read(fields[1],value.specification)||value.specification.id!=expected_id||
+     !decode_checkpoint(fields[2],value.source,value.source_state)||
+     !strategy_read(fields[3],value.strategy))
+    return bad("recorded experiment intent");
+  return {};
+}
+
 }

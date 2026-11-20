@@ -17,4 +17,6 @@ Bytes result_bytes(const ExperimentResult&);
 Result result_read(std::string_view,ExperimentResult&);
 Bytes review_bytes(const OutcomeReview&,std::string_view);
 Result review_read(std::string_view,std::string_view,OutcomeReview&);
+Bytes encode_intent(const ExperimentSpecification&,const EngineIdentity&,const EngineState&,const ScoreStrategyIdentity&);
+Result read_intent(std::string_view,std::string_view expected_id,RecordedExperiment&);
 }
