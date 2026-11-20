@@ -148,10 +148,20 @@ struct SessionService::Impl {
     if(committed.code==Code::committed_degraded){degraded=true;error=committed.message;return committed;}
     return {};
   }
-  Result submit(std::size_t index,PreparedTransition transition,bool asynchronous) {
+  Result submit(std::size_t index,PreparedTransition transition,bool asynchronous,const MigrationPlan* migration=nullptr) {
     auto projected=projection.can_apply(transition);if(!projected)return projected;
     evidence::CommitBatch batch;evidence::Record latest;
     auto built=batch_for(transition,entries[index],batch,latest);if(!built)return built;
+    if(migration) {
+      const auto prior=checkpoint_digest(entries[index].identity,entries[index].committed_state);
+      const auto next=checkpoint_digest(transition.identity,transition.target);
+      const auto encoded=encode_migration_plan(*migration);
+      if(encoded.empty()||prior!=migration->source_checkpoint_sha256||
+         next!=migration->target_checkpoint_sha256)return {Code::conflict,"migration state or review witness changed"};
+      const auto audit=pack({"engine-migration-receipt/1",encoded,sha256(encode_transition(transition))});
+      batch.guards.push_back({"sdk.engine-migration",migration->request.operation_id,0,{}});
+      batch.records.push_back({"sdk.engine-migration",migration->request.operation_id,audit,{prior,next},false});
+    }
     Pending work{index,std::move(transition),std::move(latest),0};
     if(asynchronous&&queue) {
       auto accepted=queue->submit(std::move(batch),work.ticket);if(!accepted)return accepted;
@@ -194,6 +204,52 @@ struct SessionService::Impl {
       return submit(index,std::move(transition),asynchronous);
     }catch(const std::exception& problem){return {Code::io_error,std::string("prepare failed: ")+problem.what()};}
     catch(...){return {Code::io_error,"prepare failed"};}
+  }
+  Result prepare_migration(std::string_view id,const MigrationRequest& request,
+                           PreparedTransition& output,MigrationPlan& plan) {
+    if(auto admission=admitted();!admission)return admission;
+    const auto index=locate(id);
+    if(index==entries.size())return {Code::not_found,"unknown active engine"};
+    auto& entry=entries[index];auto& engine=*entry.engine;
+    if(auto canonical=canonical_state(entry);!canonical)return canonical;
+    const auto encoded=encode_migration_request(request);
+    if(encoded.empty())return {Code::invalid,"invalid migration request"};
+    const auto before=entry.committed_state;
+    if(request.expected_revision!=before.revision)return {Code::conflict,"migration review is stale"};
+    if(before.phase!=Phase::paused)return {Code::conflict,"pause engine before a state migration"};
+    if(before.checkpoint.schema!=request.source_schema)return {Code::conflict,"source checkpoint schema changed"};
+    const auto* descriptor=catalog.find(entry.identity.type_id);
+    if(!descriptor||!detail::has_schema(descriptor->checkpoint_schemas,request.target_schema))
+      return {Code::unsupported,"target checkpoint schema is not registered"};
+    if(request.parameters.payload.size()>descriptor->limits.max_payload_bytes)
+      return {Code::capacity,"migration parameters exceed module bound"};
+    auto* capability=engine.migrations();
+    if(!capability||capability->implementation_sha256()!=request.implementation_sha256)
+      return {Code::unsupported,"pinned migration implementation unavailable"};
+    const StepRequest pseudo{request.operation_id,request.expected_revision,
+      {"anaiero.engine-migration/1",encoded}};
+    PreparedTransition transition;
+    try {
+      auto prepared=capability->prepare_migration(request,transition);
+      if(engine.state()!=before||engine.identity()!=entry.identity) {
+        auto restored=canonical_state(entry);
+        if(!restored)return restored;
+        return {Code::corrupt,"migration preparation mutated the committed engine"};
+      }
+      if(!prepared)return prepared;
+      if(auto valid=detail::validate_transition(entry.identity,before,pseudo,transition,descriptor,true);!valid)
+        return valid;
+      if(transition.target.tick!=before.tick||transition.target.phase!=Phase::paused||
+         transition.target.configuration!=before.configuration||
+         transition.target.checkpoint.schema!=request.target_schema||
+         !transition.observations.empty()||!transition.receipts.empty())
+        return {Code::corrupt,"migration changed time, configuration, phase or emitted unreviewed effects"};
+      plan={entry.identity,request,checkpoint_digest(entry.identity,before),
+        checkpoint_digest(entry.identity,transition.target)};
+      if(encode_migration_plan(plan).empty())return {Code::corrupt,"migration review witness invalid"};
+      output=std::move(transition);return {};
+    }catch(const std::exception& e){return {Code::io_error,std::string("migration preparation failed: ")+e.what()};}
+    catch(...){return {Code::io_error,"migration preparation failed"};}
   }
 };
 SessionService::SessionService(EngineModuleCatalog& catalog,evidence::ICommitStore& store,ProjectionService& projection,
@@ -350,6 +406,43 @@ Result SessionService::control(std::string_view id,std::string operation,Phase p
   transition.request_sha256=request;transition.expected_state_sha256=state_digest(before);transition.expected_revision=before.revision;
   transition.target=before;transition.target.phase=phase;++transition.target.revision;
   return impl_->submit(index,std::move(transition),false);
+}
+Result SessionService::review_migration(std::string_view id,const MigrationRequest& request,MigrationPlan& plan) {
+  if(impl_->in_call)return {Code::busy,"session owner is not reentrant"};
+  Impl::Guard guard(impl_->in_call);PreparedTransition transition;
+  return impl_->prepare_migration(id,request,transition,plan);
+}
+Result SessionService::apply_migration(std::string_view id,const MigrationPlan& plan) {
+  if(impl_->in_call)return {Code::busy,"session owner is not reentrant"};
+  Impl::Guard guard(impl_->in_call);
+  if(auto admission=impl_->admitted();!admission)return admission;
+  if(plan.identity.instance_id!=id||encode_migration_plan(plan).empty())
+    return {Code::invalid,"invalid pinned migration plan"};
+  bool duplicate=false;
+  auto prior=impl_->duplicate(plan.request.operation_id,
+    migration_request_digest(plan.identity,plan.request),duplicate);
+  if(!prior)return prior;
+  if(duplicate) {
+    evidence::StoredRecord audit;
+    auto read=impl_->store.latest("sdk.engine-migration",plan.request.operation_id,audit);
+    if(!read)return read;
+    std::vector<std::string> fields;
+    if(audit.record.tombstone||!unpack(audit.record.payload,fields,3)||
+       fields.size()!=3||fields[0]!="engine-migration-receipt/1"||
+       fields[1]!=encode_migration_plan(plan)||!valid_digest(fields[2]))
+      return {Code::conflict,"operation was accepted with a different migration review"};
+    return {};
+  }
+  PreparedTransition transition;MigrationPlan reviewed;
+  if(auto checked=impl_->prepare_migration(id,plan.request,transition,reviewed);!checked)return checked;
+  if(encode_migration_plan(reviewed)!=encode_migration_plan(plan))
+    return {Code::conflict,"migration plan is stale or transformation changed"};
+  const auto index=impl_->locate(id);
+  const auto* descriptor=impl_->catalog.find(plan.identity.type_id);
+  if(!descriptor||descriptor->limits.max_receipts==0)return {Code::capacity,"migration receipt capacity unavailable"};
+  transition.receipts.push_back({"anaiero.engine-migration-receipt/1",
+    pack({plan.request.implementation_sha256,plan.source_checkpoint_sha256,plan.target_checkpoint_sha256})});
+  return impl_->submit(index,std::move(transition),false,&plan);
 }
 Result SessionService::remove_retired(std::string_view id) {
   if(impl_->in_call)return {Code::busy,"session owner is not reentrant"};
