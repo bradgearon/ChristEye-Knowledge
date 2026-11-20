@@ -1,12 +1,12 @@
 # CE-SW-43 — Versioned engine checkpoint evolution (initial implementation)
 
-**Status:** Native SDK review/activate code plus an executable integration fixture on branch feature/anaiero-versioned-engine-evolution. This branch is stacked on PR #53. It is **not yet** a complete state-bearing binary hot-upgrade.
+**Status:** Native SDK review/activate code, an actual Cell Behavior v1→v2 migrator, review/activate/status CLI commands, and executable integration fixtures on branch feature/anaiero-versioned-engine-evolution. This branch is stacked on PR #53. It is **not yet** a complete state-bearing binary hot-upgrade.
 
 ## What is implemented
 
 A compiled native engine may advertise an optional IMigrationCapability. The session owner reviews a **real checkpoint schema conversion** and activates it through the existing canonical commit authority. An indexed sdk.engine-migration record protects the old and new checkpoint blob digests.
 
-The initial contract deliberately holds the engine/module identity, behavior identity, source epoch, configuration, tick, and paused phase unchanged. It does not reinterpret past observations or silently rewrite lifecycle identities.
+Cell Behavior now accepts a legacy CEVCELLSTATE/1 payload or a new CEVCELLSTATE/2 payload that wraps the same bounded world bytes with a SHA-256 integrity check. New steps preserve whichever format was committed. No biological behavior is altered by the wrapper. The initial contract deliberately holds the engine/module identity, behavior identity, source epoch, configuration, tick, and paused phase unchanged. It does not reinterpret past observations or silently rewrite lifecycle identities.
 
 - MigrationRequest pins operation ID, expected revision, source/target schema, migration implementation SHA-256, and typed parameters.
 - IMigrationCapability publishes its implementation digest and prepares a staged transition without authoritative I/O.
@@ -17,6 +17,25 @@ The initial contract deliberately holds the engine/module identity, behavior ide
 
 The implementation digest is an exact *byte identity claim*, not an independently authenticated publisher signature or scientific-validity proof.
 
+## Native session operator workflow
+
+Use the existing canonical session store and the central anaiero executable.
+For a Cell Behavior instance called source-cells, first finish the session's
+pending cycle and pause that engine. Then review and activate a pinned plan:
+
+    anaiero session pause STORE source-cells pause-cells-01
+    anaiero session migration-review STORE source-cells migrate-cells-01 CEVCELLSTATE/2 reviews/cells-migration.plan
+    anaiero session migration-activate STORE source-cells reviews/cells-migration.plan
+    anaiero session migration-status STORE migrate-cells-01
+    anaiero session resume STORE source-cells resume-cells-01
+
+The plan output location must be a new artifact path with an existing parent
+directory. Review is read-only with respect to the engine state; activation
+rechecks the pinned before and after digests and old state revision. Exact
+accepted retries use the same operation ID and preserved plan bytes.
+This is a **stopped/paused-session checkpoint conversion**, not a live
+native-binary replacement. The host writer lock prevents a competing owner.
+
 ## Reproduce the functional integration fixture
 
 From repository root, with native Windows/Linux C++20 toolchain:
@@ -25,14 +44,14 @@ From repository root, with native Windows/Linux C++20 toolchain:
     cmake --build build/native --config Release --target anaiero_engine_migration_tests
     ctest --test-dir build/native -C Release -R '^anaiero_engine_migration$' --output-on-failure
 
-The fixture creates a synthetic SDK counter, trains and pauses it, reviews a counter.checkpoint/1 to counter.checkpoint/2 transformation, rejects stale/tampered requests, commits the update, replays the exact operation ID, resumes learning, and recovers the updated state from canonical storage. It exercises an interrupted pre-ROOT migration and exact retry. This is functional verification, not endurance qualification.
+The SDK fixture creates a synthetic SDK counter, trains and pauses it, reviews a counter.checkpoint/1 to counter.checkpoint/2 transformation, rejects stale/tampered requests, commits the update, replays the exact operation ID, resumes learning, and recovers the updated state from canonical storage. It exercises an interrupted pre-ROOT migration and exact retry. The existing modular engine tests additionally convert a Cell Behavior checkpoint to the new schema, reject a damaged integrity tag, restore it, and continue cell behavior. This is functional verification, not endurance qualification.
 
 ## Follow-on CE-SW-43 increments
 
-1. Add a declared migrator to a production engine, beyond the synthetic SDK fixture.
-2. Add native operator review/activate commands and host ownership/admission for paused sessions.
-3. Add a deployment-level semantic migration capable of changing module/build identity, with complete scheduled/lifecycle identity updates and explicit compatibility checks.
-4. Implement declared reverse transformations or protected pre-migration restoration. An incompatible rollback must refuse; it cannot discard post-upgrade accepted work.
+1. Add deployment-level semantic migration capable of changing module/build identity, with complete scheduled/lifecycle identity updates and explicit compatibility checks.
+2. Implement declared reverse transformations or protected pre-migration restoration. An incompatible rollback must refuse; it cannot discard post-upgrade accepted work.
+3. Generalize production migration parameters and compatibility version negotiation for other engine families. Retain the explicit reviewed bounds and immutable plans.
+4. Add an integration test for the operator command invoking the production Cell Behavior migration on an actual persistent modular session.
 
 ## Restrictions
 
