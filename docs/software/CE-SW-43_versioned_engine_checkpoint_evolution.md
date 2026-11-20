@@ -71,3 +71,19 @@ The runtime service only requests typed evidence operations, and
 The current records are not XML; therefore pugixml is intentionally not a
 dependency for this path. XML support, if needed, should be an optional
 infrastructure serializer, not a service or canonical storage dependency.
+
+## Canonical integrity service boundary
+
+Following the codec extraction, CE-SW-43 now delegates the migration's
+hash/witness/receipt lifecycle to `MigrationEvidenceService` and the ordinary
+engine's checkpoint/commit/registration hashes to `SessionEvidenceService`.
+`runtime.cpp` no longer directly invokes `sha256`, `pack` or `unpack`,
+constructs checkpoint digests, or stages migration receipts.
+
+The runtime still decides eligibility, engine pause/revision semantics,
+transition admission, source lifecycle, and post-commit projection. Evidence
+services calculate integrity witnesses and stage typed records. The existing
+`sdk.engine`, `sdk.metric`, `sdk.engine-migration`, checkpoint and
+transition binary schemas are unchanged. Exact replay and tamper rejection
+have focused fixture assertions; passing native Windows/Linux CI is still
+required before merging the draft PR.
