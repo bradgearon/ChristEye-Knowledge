@@ -1,4 +1,4 @@
-add_library(anaiero_lifecycle STATIC src/lifecycle/lifecycle.cpp)
+add_library(anaiero_lifecycle STATIC src/lifecycle/lifecycle.cpp src/lifecycle/source_authority_evidence.cpp)
 target_link_libraries(anaiero_lifecycle PUBLIC anaiero_contracts anaiero_evidence)
 anaiero_sdk_target(anaiero_lifecycle)
 # The domain library only sees installed SDK headers. Native archive files,
