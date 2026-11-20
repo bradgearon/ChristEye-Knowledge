@@ -99,3 +99,18 @@ removing responsibility mixing does not close one of those gaps.
 Similarly, the large legacy `native_session_service.hpp` is not automatically
 bad architecture because of its byte count; its model-change orchestration
 requires a separate service-ownership review before splitting it.
+
+## Build identity and execution boundary
+
+Native `NativeEngines.cmake` now includes the extracted `.inc` files under
+`native/src` and `native/examples` in its immutable build-identity manifest.
+Without this, a change in an included method body could have bypassed the
+existing exact source/build witness. This preserves the original *purpose* of
+the pinned build identity while accounting for the newly separated sources.
+
+The stage-reconciliation adapter now receives `root_generation` separately
+from the decoded staged generation; it does not compare the staged generation
+against itself. The focused recovery test exercises this exact distinction.
+
+The PR remains a draft until the Windows/Linux native CI jobs and the full
+affected conformance suite succeed on the final head.
