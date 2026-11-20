@@ -5,6 +5,6 @@
 
 namespace anaiero::storage::recovery {
 void recover_staging(const fs::path&,std::string_view store_id,
-                     std::uint64_t generation,const Digest& root_digest);
+                     std::uint64_t root_generation,const Digest& root_digest);
 void cleanup_inactive_index(const fs::path&,std::string_view active_directory);
 }
