@@ -21,7 +21,7 @@ bool number(std::string_view text,std::uint64_t& value){
   return !text.empty()&&r.ec==std::errc{}&&r.ptr==text.data()+text.size();
 }
 }
-bool read_file(const fs::path& path,std::string& bytes,std::size_t maximum=8U*1024U*1024U){
+bool read_file(const fs::path& path,std::string& bytes,std::size_t maximum){
   std::error_code error;
   if(fs::is_symlink(path,error)||error)return false;
   const auto size=fs::file_size(path,error);
