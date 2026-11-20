@@ -1,5 +1,6 @@
 #include "native_mesh_protocol.hpp"
 #include <charconv>
+#include <utility>
 namespace anaiero::sdk::mesh::protocol {
 namespace {
 Result fail(Code code,std::string why){return {code,std::move(why)};}
