@@ -12,7 +12,7 @@ endif()
 
 if(ANAIERO_ENABLE_MESH AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/mesh/native_mesh.cpp)
   find_package(OpenSSL 3.0 REQUIRED COMPONENTS SSL Crypto)
-  add_library(anaiero_mesh_native STATIC src/mesh/native_mesh.cpp)
+  add_library(anaiero_mesh_native STATIC src/mesh/native_mesh.cpp src/mesh/native_mesh_protocol.cpp src/mesh/native_mesh_configuration.cpp)
   anaiero_sdk_target(anaiero_mesh_native)
   target_include_directories(anaiero_mesh_native PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
   target_link_libraries(anaiero_mesh_native PUBLIC anaiero_mesh_service PRIVATE OpenSSL::SSL OpenSSL::Crypto Threads::Threads)
