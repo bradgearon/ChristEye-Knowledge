@@ -61,7 +61,7 @@ struct ITrialCapability {
 };
 struct IMigrationCapability {
   virtual ~IMigrationCapability()=default;
-  // Digest of the actual migration implementation, not a caller assertion.
+  // Module-declared migration algorithm fingerprint; not a publisher signature or byte attestation.
   virtual std::string_view implementation_sha256() const noexcept=0;
   // Pure preparation; no authoritative changes or durable side effects.
   virtual Result prepare_migration(const MigrationRequest&,PreparedTransition&)=0;
