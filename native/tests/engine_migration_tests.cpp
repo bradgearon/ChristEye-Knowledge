@@ -2,6 +2,8 @@
 #include "anaiero/sdk/catalog.hpp"
 #include "anaiero/sdk/runtime.hpp"
 #include "anaiero/sdk/evidence.hpp"
+#include "anaiero/sdk/migration_receipts.hpp"
+#include "anaiero/sdk/session_record_codec.hpp"
 #include <charconv>
 #include <filesystem>
 #include <iostream>
@@ -158,6 +160,33 @@ int main(int argc,char** argv) {
   auto reused=plan;reused.request.parameters.payload="changed";
   CHECK(runtime.apply_migration("learner",reused).code==s::Code::conflict);
   ev::StoredRecord audit;CHECK(store->latest("sdk.engine-migration","upgrade-learner",audit));
+  ev::StoredMigrationReceipt typed_audit;
+  CHECK(ev::read_migration_receipt(*store,"upgrade-learner",typed_audit));
+  CHECK(typed_audit.generation==audit.generation);
+  CHECK(s::encode_migration_plan(typed_audit.receipt.plan)==encoded);
+  CHECK(s::encode_migration_receipt(typed_audit.receipt)==audit.record.payload);
+  s::MigrationReceipt receipt_decoded;
+  CHECK(s::decode_migration_receipt(audit.record.payload,receipt_decoded));
+  CHECK(s::decode_migration_receipt(audit.record.payload+"x",receipt_decoded).code==s::Code::corrupt);
+  CHECK(s::encode_migration_receipt({plan,""}).empty());
+  s::SessionEngineRecord source_record{plan.identity,plan.source_checkpoint_sha256,plan.target_checkpoint_sha256};
+  const auto source_wire=s::encode_session_engine_record(source_record);
+  CHECK(source_wire==s::pack({"session-engine/1",s::encode_identity(plan.identity),
+    plan.source_checkpoint_sha256,plan.target_checkpoint_sha256}));
+  s::SessionEngineRecord engine_decoded;
+  CHECK(s::decode_session_engine_record(source_wire,engine_decoded));
+  CHECK(engine_decoded.identity==plan.identity);
+  CHECK(engine_decoded.checkpoint_sha256==plan.source_checkpoint_sha256);
+  CHECK(s::decode_session_engine_record(source_wire+"x",engine_decoded).code==s::Code::corrupt);
+  s::SessionMetricRecord metric_record{plan.identity,
+    {"counter.observation/1","count","dimensionless_count","count",3,0},2};
+  const auto metric_wire=s::encode_session_metric_record(metric_record);
+  CHECK(metric_wire==s::pack({"session-metric/1",s::encode_identity(plan.identity),
+    s::encode_observation(metric_record.observation),"2"}));
+  s::SessionMetricRecord metric_decoded;
+  CHECK(s::decode_session_metric_record(metric_wire,metric_decoded));
+  CHECK(metric_decoded.revision==2&&metric_decoded.observation.value==3);
+  CHECK(s::decode_session_metric_record(metric_wire+"x",metric_decoded).code==s::Code::corrupt);
   CHECK(audit.record.references.size()==2);
   CHECK(audit.record.references[0]==plan.source_checkpoint_sha256);
   CHECK(audit.record.references[1]==plan.target_checkpoint_sha256);
